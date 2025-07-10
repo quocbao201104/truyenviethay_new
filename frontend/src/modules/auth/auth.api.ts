@@ -28,7 +28,8 @@ export interface LoginResponse {
 
 // Đăng nhập
 export async function login(data: LoginPayload): Promise<LoginResponse> {
-  const res = await axios.post<LoginResponse>("/auth/dang-nhap", data);
+  // THÊM TIỀN TỐ '/api/' VÀO ĐÂY
+  const res = await axios.post<LoginResponse>("/api/auth/dang-nhap", data);
   return res.data;
 }
 
@@ -44,12 +45,14 @@ export interface RegisterPayload {
 
 // Đăng ký
 export async function register(data: RegisterPayload): Promise<any> {
-  const res = await axios.post("/auth/dang-ky", data);
+  // THÊM TIỀN TỐ '/api/' VÀO ĐÂY
+  const res = await axios.post("/api/auth/dang-ky", data);
   return res.data;
 }
 
 // Lấy thông tin người dùng từ token
 export async function getMe(): Promise<User> {
-  const res = await axios.get<User>("/auth/me");
+  // THÊM TIỀN TỐ '/api/' VÀO ĐÂY
+  const res = await axios.get<User>("/api/auth/me");
   return res.data;
 }

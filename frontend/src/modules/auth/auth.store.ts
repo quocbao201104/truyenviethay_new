@@ -1,4 +1,4 @@
-// auth.store.ts
+// frontend/src/modules/auth/auth.store.ts
 import { defineStore } from "pinia";
 import { AxiosError } from "axios";
 import * as authApi from "./auth.api";
@@ -8,6 +8,7 @@ import type {
   LoginResponse,
   RegisterPayload,
 } from "./auth.api";
+import { useToast } from "vue-toastification"; // Import useToast
 
 interface AuthState {
   token: string | null;
@@ -26,27 +27,34 @@ export const useAuthStore = defineStore("auth", {
 
   actions: {
     async login(loginData: LoginPayload): Promise<LoginResponse> {
+      const toast = useToast(); // Khởi tạo toast instance
       try {
         const response = await authApi.login(loginData);
         this.setToken(response.token);
         this.setUser(response.user);
+        toast.success("Đăng nhập thành công!"); // Hiển thị toast thành công
         return response;
       } catch (error: unknown) {
         const err = error as AxiosError<{ message?: string }>;
+        const errorMessage = err.response?.data?.message || err.message || "Tài khoản hoặc mật khẩu không đúng.";
+        toast.error(errorMessage); // Hiển thị toast lỗi
         throw {
-          message:
-            err.response?.data?.message || err.message || "Đăng nhập thất bại",
+          message: errorMessage,
           raw: err,
         };
       }
     },
 
     async register(data: RegisterPayload): Promise<void> {
+      const toast = useToast(); // Khởi tạo toast instance
       try {
         await authApi.register(data);
+        toast.success("Đăng ký thành công!"); // Hiển thị toast thành công cho đăng ký
       } catch (error: unknown) {
         const err = error as AxiosError<{ message?: string }>;
-        throw err.response?.data || { message: "Lỗi không xác định" };
+        const errorMessage = err.response?.data?.message || err.message || "Đăng ký thất bại";
+        toast.error(errorMessage); // Hiển thị toast lỗi cho đăng ký
+        throw err.response?.data || { message: errorMessage };
       }
     },
 
@@ -66,6 +74,8 @@ export const useAuthStore = defineStore("auth", {
     logout() {
       this.setToken(null);
       this.setUser(null);
+      const toast = useToast();
+      toast.info("Bạn đã đăng xuất."); // Thông báo khi đăng xuất
     },
 
     // Khởi tạo store khi reload app

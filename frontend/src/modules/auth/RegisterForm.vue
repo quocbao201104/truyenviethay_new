@@ -88,22 +88,20 @@
     </div>
     <span class="loi" v-if="termsError">{{ termsError }}</span>
     
-    <p class="loi" v-if="errorMessage">{{ errorMessage }}</p>
-
     <button type="submit" class="login-btn ripple">Đăng Ký Ngay</button>
   </form>
 </template>
 
 <script setup>
-// SCRIPT CỦA BẠN - GIỮ NGUYÊN HOÀN TOÀN
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "./auth.store";
 import BaseInput from "@/components/common/BaseInput.vue";
+// Không cần defineEmits(["submit-success", "submit-error"]); nữa
 
 const router = useRouter();
 const authStore = useAuthStore();
-const emit = defineEmits(["submit-success", "submit-error"]);
+// Loại bỏ emit vì RegisterForm sẽ tự xử lý việc gọi store và chuyển hướng
 
 const fullName = ref("");
 const username = ref("");
@@ -128,7 +126,7 @@ const passwordError = ref("");
 const confirmPasswordError = ref("");
 const captchaError = ref("");
 const termsError = ref("");
-const errorMessage = ref("");
+// Loại bỏ errorMessage vì thông báo lỗi sẽ do toast xử lý
 
 const captchaCode = ref(generateCaptcha());
 function generateCaptcha() {
@@ -152,7 +150,7 @@ const validateForm = () => {
   confirmPasswordError.value = "";
   captchaError.value = "";
   termsError.value = "";
-  errorMessage.value = "";
+  // errorMessage.value = ""; // Loại bỏ dòng này
 
   if (!fullName.value) {
     fullNameError.value = "Nhập họ và tên";
@@ -216,11 +214,16 @@ const handleRegister = async () => {
       email: email.value,
       phone: phone.value,
       password: password.value,
-      gender: "other",
+      gender: "other", // Giả định giới tính mặc định là "other"
     });
-    emit("submit-success", "Đăng ký thành công! Đang chuyển đến trang đăng nhập...");
+    // Sau khi đăng ký thành công, auth.store đã hiển thị toast.
+    // Giờ chúng ta chuyển hướng về trang đăng nhập.
+    setTimeout(() => {
+      router.push("/dang-nhap");
+    }, 1500); // Chuyển hướng sau 1.5 giây để người dùng kịp thấy toast
   } catch (err) {
-    emit("submit-error", err?.response?.data?.message || "Đăng ký thất bại, vui lòng thử lại.");
+    // auth.store đã hiển thị toast lỗi, chỉ cần log lỗi ra console để debug
+    console.error("Lỗi đăng ký:", err);
   }
 };
 </script>

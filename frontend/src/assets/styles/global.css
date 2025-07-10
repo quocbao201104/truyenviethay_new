@@ -146,3 +146,96 @@ select:focus {
   background: var(--gray-dark);
   border-radius: 8px;
 }
+/* frontend/src/assets/styles/global.css */
+
+/* --- Tùy chỉnh vị trí tổng thể (dịch xuống) --- */
+.Vue-Toastification__container.top-right {
+  top: 60px !important; 
+  right: 20px !important;
+}
+
+/* --- Tùy chỉnh chung cho tất cả các toast --- */
+.Vue-Toastification__toast {
+  background-color: #2a2d3a !important; 
+  color: #ffffff !important; 
+  border-radius: 8px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+  padding: 12px 20px !important;
+  font-size: 0.95rem !important;
+  display: flex !important; 
+  align-items: center !important;
+  min-height: auto !important;
+
+  max-width: 380px;
+}
+
+/* Đảm bảo nội dung toast (message) cũng nằm trên một hàng */
+.Vue-Toastification__toast-body {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis;
+}
+
+/* Tùy chỉnh icon */
+.Vue-Toastification__icon {
+  flex-shrink: 0;
+  margin-right: 10px; 
+  font-size: 1.2rem !important;
+}
+
+/* --- Tùy chỉnh màu sắc và icon cụ thể --- */
+
+/* Thành công (Màu xanh lá) */
+.Vue-Toastification__toast--success {
+  border-left: 5px solid #4caf50 !important; /* Viền xanh lá */
+}
+.Vue-Toastification__toast--success .Vue-Toastification__icon {
+  color: #4caf50 !important; /* Icon xanh lá */
+}
+
+/* Lỗi (Màu đỏ) */
+.Vue-Toastification__toast--error {
+  border-left: 5px solid #f44336 !important; /* Viền đỏ */
+}
+.Vue-Toastification__toast--error .Vue-Toastification__icon {
+  color: #f44336 !important; /* Icon đỏ */
+}
+
+/* Thông tin (Màu xanh dương) */
+.Vue-Toastification__toast--info {
+  border-left: 5px solid #2196f3 !important; /* Viền xanh dương */
+}
+.Vue-Toastification__toast--info .Vue-Toastification__icon {
+  color: #2196f3 !important; /* Icon xanh dương */
+}
+
+
+
+/* Tùy chỉnh progress bar */
+.Vue-Toastification__progress-bar {
+  background-color: rgba(76, 175, 80, 0.7) !important;
+  height: 3px !important;
+}
+/* Progress bar lỗi */
+.Vue-Toastification__toast--error .Vue-Toastification__progress-bar {
+  background-color: rgba(244, 67, 54, 0.7) !important;
+}
+/* Progress bar thông tin */
+.Vue-Toastification__toast--info .Vue-Toastification__progress-bar {
+  background-color: rgba(33, 150, 243, 0.7) !important;
+}
+
+
+/* Tùy chỉnh nút đóng */
+.Vue-Toastification__close-button {
+  color: #ccc !important;
+  opacity: 0.7 !important;
+  margin-left: 10px !important; 
+}
+.Vue-Toastification__close-button:hover {
+  color: #fff !important;
+  opacity: 1 !important;
+}

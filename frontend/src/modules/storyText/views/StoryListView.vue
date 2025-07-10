@@ -1,5 +1,5 @@
 <template>
-    <AppHeader />
+  <AppHeader />
   <div class="story-list-container">
 
     <h1 class="page-title">📚 Danh sách truyện</h1>
