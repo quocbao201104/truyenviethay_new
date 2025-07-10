@@ -2,12 +2,9 @@
   <div class="dangnhap-container">
     <AppHeader />
     <main class="main-content">
-      <!-- Buộc render lại LoginForm khi cần -->
       <LoginForm
         :key="formKey"
         @submit-login="handleApiLogin"
-        :server-error="serverError"
-        :success-message="successMessage"
       />
     </main>
   </div>
@@ -27,35 +24,31 @@ export default {
     LoginForm,
   },
   setup() {
-    const serverError = ref("");
-    const successMessage = ref("");
+    // Không cần ref serverError và successMessage ở đây nữa
     const router = useRouter();
     const authStore = useAuthStore();
-    const formKey = ref(0);
+    const formKey = ref(0); // Vẫn giữ formKey nếu bạn muốn buộc render lại form
 
     const handleApiLogin = async (loginData) => {
-      serverError.value = "";
-      successMessage.value = "";
-
+      // Không cần reset serverError và successMessage ở đây nữa
       try {
         await authStore.login(loginData);
-        successMessage.value = "Đăng nhập thành công!";
-        formKey.value += 1;
+        // Toast message đã được xử lý trong auth.store.ts
+        formKey.value += 1; // Cập nhật key để reset form nếu cần
 
         setTimeout(() => {
           router.push("/truyen-chu");
         }, 1500);
       } catch (error) {
+        // Lỗi đã được xử lý bằng toast trong auth.store.ts
+        // Chỉ console.error để debug nếu cần
         console.error("Lỗi khi đăng nhập:", error);
-        serverError.value =
-          error.message || "Tài khoản hoặc mật khẩu không đúng.";
-        formKey.value += 1;
+        formKey.value += 1; // Cập nhật key để reset form nếu cần
       }
     };
 
     return {
-      serverError,
-      successMessage,
+      // Không cần trả về serverError và successMessage nữa
       handleApiLogin,
       formKey,
     };
@@ -64,6 +57,7 @@ export default {
 </script>
 
 <style scoped>
+/* Giữ nguyên CSS cũ */
 .dangnhap-container {
   display: flex;
   flex-direction: column;

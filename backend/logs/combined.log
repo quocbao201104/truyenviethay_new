@@ -2162,3 +2162,158 @@
 [2025-07-10 16:59:34] info: POST /api/auth/dang-nhap
 [2025-07-10 17:01:18] info: POST /api/auth/dang-nhap
 [2025-07-10 17:02:57] info: POST /api/auth/dang-nhap
+[2025-07-10 17:03:31] info: Server is running on http://localhost:3000
+[2025-07-10 17:03:37] info: POST /api/auth/dang-nhap
+[2025-07-10 17:04:17] info: POST /api/auth/dang-nhap
+[2025-07-10 17:04:18] info: GET /api/api/truyen?page=1
+[2025-07-10 17:04:18] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:05:41] info: GET /api/api/truyen?page=1
+[2025-07-10 17:05:41] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:27:37] info: POST /api/auth/dang-ky
+[2025-07-10 17:29:22] info: GET /api/api/truyen?page=1
+[2025-07-10 17:29:22] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:30:01] info: GET /api/api/truyen?page=1
+[2025-07-10 17:30:01] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:31:36] info: GET /api/api/truyen?page=1
+[2025-07-10 17:31:36] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:31:53] info: GET /api/api/truyen?page=1
+[2025-07-10 17:31:53] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:32:23] info: GET /api/api/truyen?page=1
+[2025-07-10 17:32:23] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:32:33] info: GET /api/api/truyen?page=1
+[2025-07-10 17:32:33] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:32:39] info: POST /api/auth/dang-nhap
+[2025-07-10 17:32:46] info: POST /api/auth/dang-nhap
+[2025-07-10 17:32:47] info: GET /api/api/truyen?page=1
+[2025-07-10 17:32:47] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:36:22] info: GET /favicon.ico
+[2025-07-10 17:36:22] warn: 404 Not Found: GET /favicon.ico
+[2025-07-10 17:40:14] info: POST /api/auth/dang-nhap
+[2025-07-10 17:40:16] info: GET /api/api/truyen?page=1
+[2025-07-10 17:40:16] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:41:08] info: GET /api/api/truyen?page=1
+[2025-07-10 17:41:08] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:41:39] info: GET /api/api/truyen?page=1
+[2025-07-10 17:41:39] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:41:45] info: GET /api/api/truyen?page=1
+[2025-07-10 17:41:45] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-11 03:36:27] info: Server is running on http://localhost:3000
+[2025-07-11 03:36:36] info: GET /api/api/truyen?page=1
+[2025-07-11 03:36:36] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-11 03:48:20] info: POST /api/auth/dang-nhap
+[2025-07-11 03:48:25] info: POST /api/auth/dang-nhap
+[2025-07-11 03:49:07] info: POST /api/auth/dang-nhap
+[2025-07-11 03:56:47] info: POST /api/auth/dang-nhap
+[2025-07-11 03:57:09] info: POST /api/auth/dang-nhap
+[2025-07-11 03:57:20] info: POST /api/auth/dang-nhap
+[2025-07-11 03:57:27] info: POST /api/auth/dang-nhap
+[2025-07-11 03:57:29] info: GET /api/api/truyen?page=1
+[2025-07-11 03:57:29] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-11 03:59:11] info: POST /api/auth/dang-nhap
+[2025-07-11 04:00:43] info: GET /api/auth/me
+[2025-07-11 04:00:48] info: POST /api/auth/dang-nhap
+[2025-07-11 04:07:03] info: POST /api/auth/dang-ky
+[2025-07-11 04:07:53] info: POST /api/auth/dang-nhap
+[2025-07-11 04:08:01] info: POST /api/auth/dang-nhap
+[2025-07-11 04:09:19] info: POST /api/auth/dang-nhap
+[2025-07-11 04:12:04] info: POST /api/auth/dang-nhap
+[2025-07-11 04:12:11] info: POST /api/auth/dang-nhap
+[2025-07-11 04:12:13] info: POST /api/auth/dang-nhap
+[2025-07-11 04:13:12] info: POST /api/auth/dang-nhap
+[2025-07-11 04:13:27] info: POST /api/auth/dang-nhap
+[2025-07-11 04:13:29] info: GET /api/api/truyen?page=1
+[2025-07-11 04:13:29] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-11 04:14:13] info: POST /api/auth/dang-nhap
+[2025-07-11 04:14:15] info: GET /api/api/truyen?page=1
+[2025-07-11 04:14:15] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-11 04:14:29] info: GET /api/api/truyen?page=1
+[2025-07-11 04:14:29] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-11 04:14:34] info: POST /api/auth/dang-nhap
+[2025-07-11 04:15:19] info: POST /api/auth/dang-nhap
+[2025-07-11 04:16:21] info: POST /api/auth/dang-nhap
+[2025-07-11 04:16:29] info: POST /api/auth/dang-nhap
+[2025-07-11 04:16:35] info: POST /api/auth/dang-nhap
+[2025-07-11 04:16:40] info: POST /api/auth/dang-nhap
+[2025-07-11 04:16:42] info: GET /api/api/truyen?page=1
+[2025-07-11 04:16:42] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-11 04:31:11] info: GET /api/api/truyen?page=1
+[2025-07-11 04:31:11] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-11 04:34:13] info: Server is running on http://localhost:3000
+[2025-07-11 04:39:36] info: GET /api/api/truyen?page=1
+[2025-07-11 04:39:36] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-11 04:39:38] info: GET /api/api/truyen?page=1
+[2025-07-11 04:39:38] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-11 04:39:41] info: GET /api/api/truyen?page=1
+[2025-07-11 04:39:41] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-11 04:39:46] info: GET /api/the-loai
+[2025-07-11 04:39:46] warn: 404 Not Found: GET /api/the-loai
+[2025-07-11 04:40:19] info: GET /api/the-loai
+[2025-07-11 04:40:19] warn: 404 Not Found: GET /api/the-loai
+[2025-07-11 04:40:22] info: GET /api/the-loai
+[2025-07-11 04:40:22] warn: 404 Not Found: GET /api/the-loai
+[2025-07-11 04:42:28] info: GET /api/the-loai
+[2025-07-11 04:42:28] warn: 404 Not Found: GET /api/the-loai
+[2025-07-11 04:42:39] info: GET /api/the-loai
+[2025-07-11 04:42:39] warn: 404 Not Found: GET /api/the-loai
+[2025-07-11 04:42:57] info: GET /api/the-loai
+[2025-07-11 04:42:57] warn: 404 Not Found: GET /api/the-loai
+[2025-07-11 04:43:00] info: GET /api/api/the-loai
+[2025-07-11 04:43:00] warn: 404 Not Found: GET /api/api/the-loai
+[2025-07-11 04:44:12] info: GET /api/api/the-loai
+[2025-07-11 04:44:12] warn: 404 Not Found: GET /api/api/the-loai
+[2025-07-11 04:44:24] info: Server is running on http://localhost:3000
+[2025-07-11 04:44:29] info: GET /api/api/the-loai
+[2025-07-11 04:44:29] warn: 404 Not Found: GET /api/api/the-loai
+[2025-07-11 04:44:49] info: GET /api/api/the-loai
+[2025-07-11 04:44:49] warn: 404 Not Found: GET /api/api/the-loai
+[2025-07-11 04:45:15] info: GET /api/api/the-loai
+[2025-07-11 04:45:15] warn: 404 Not Found: GET /api/api/the-loai
+[2025-07-11 04:45:18] info: GET /api/api/theloai
+[2025-07-11 04:45:18] warn: 404 Not Found: GET /api/api/theloai
+[2025-07-11 04:45:34] info: GET /api/api/theloai
+[2025-07-11 04:45:34] warn: 404 Not Found: GET /api/api/theloai
+[2025-07-11 04:45:57] info: GET /api/api/theloai
+[2025-07-11 04:45:57] warn: 404 Not Found: GET /api/api/theloai
+[2025-07-11 04:45:59] info: GET /api/api/theloai
+[2025-07-11 04:45:59] warn: 404 Not Found: GET /api/api/theloai
+[2025-07-11 04:46:19] info: GET /api/api/theloai
+[2025-07-11 04:46:19] warn: 404 Not Found: GET /api/api/theloai
+[2025-07-11 04:46:34] info: GET /api/theloai/
+[2025-07-11 04:46:34] info: GET /favicon.ico
+[2025-07-11 04:46:34] warn: 404 Not Found: GET /favicon.ico
+[2025-07-11 04:46:53] info: GET /api/api/theloai/
+[2025-07-11 04:46:53] warn: 404 Not Found: GET /api/api/theloai/
+[2025-07-11 04:47:20] info: POST /api/auth/dang-nhap
+[2025-07-11 04:47:22] info: GET /api/api/truyen?page=1
+[2025-07-11 04:47:22] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-11 04:47:29] info: GET /api/auth/me
+[2025-07-11 04:47:29] info: GET /api/api/theloai/
+[2025-07-11 04:47:29] warn: 404 Not Found: GET /api/api/theloai/
+[2025-07-11 04:47:48] info: GET /api/api/theloai/
+[2025-07-11 04:47:48] warn: 404 Not Found: GET /api/api/theloai/
+[2025-07-11 04:47:57] info: GET /api/api/theloai/
+[2025-07-11 04:47:57] warn: 404 Not Found: GET /api/api/theloai/
+[2025-07-11 04:49:02] info: GET /api/api/theloai/
+[2025-07-11 04:49:02] warn: 404 Not Found: GET /api/api/theloai/
+[2025-07-11 04:49:23] info: GET /api/theloai/
+[2025-07-11 04:49:28] info: GET /api/theloai/
+[2025-07-11 04:51:40] info: GET /api/theloai/
+[2025-07-11 04:51:46] info: POST /auth/dang-nhap
+[2025-07-11 04:51:46] warn: 404 Not Found: POST /auth/dang-nhap
+[2025-07-11 04:51:49] info: GET /api/truyen?page=1
+[2025-07-11 04:51:54] info: GET /api/theloai/
+[2025-07-11 04:52:03] info: POST /auth/dang-nhap
+[2025-07-11 04:52:03] warn: 404 Not Found: POST /auth/dang-nhap
+[2025-07-11 04:52:24] info: GET /api/theloai/
+[2025-07-11 04:53:26] info: POST /auth/dang-ky
+[2025-07-11 04:53:26] warn: 404 Not Found: POST /auth/dang-ky
+[2025-07-11 04:54:49] info: Server is running on http://localhost:3000
+[2025-07-11 04:54:52] info: POST /api/auth/dang-nhap
+[2025-07-11 04:54:58] info: POST /api/auth/dang-nhap
+[2025-07-11 04:55:04] info: POST /api/auth/dang-nhap
+[2025-07-11 04:55:06] info: GET /api/truyen?page=1
+[2025-07-11 04:55:07] info: GET /api/theloai/
+[2025-07-11 05:07:58] info: GET /api/auth/me
+[2025-07-11 05:07:58] info: GET /api/theloai/
+[2025-07-11 05:08:47] info: GET /api/auth/me
+[2025-07-11 05:08:47] info: GET /api/theloai/

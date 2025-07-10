@@ -1,10 +1,7 @@
-<!-- frontend/src/components/AppHeader.vue -->
 <template>
   <header class="header">
     <div class="header-content">
-      <!-- Bên trái: Logo và Tìm kiếm -->
       <div class="header-left">
-        <!-- Logo -->
         <router-link to="/truyen-chu" class="logo-link">
           <img
             src="@/assets/images/logo.png"
@@ -13,7 +10,6 @@
           />
         </router-link>
 
-        <!-- Thanh tìm kiếm -->
         <div class="search-bar">
           <i class="fas fa-magnifying-glass search-icon"></i>
           <input
@@ -24,7 +20,6 @@
             @focus="showSuggestions = true"
             @blur="showSuggestions = false"
           />
-          <!-- Gợi ý tìm kiếm -->
           <div v-if="showSuggestions && searchQuery" class="search-suggestions">
             <div class="suggestion-item">Ngôn Tình</div>
             <div class="suggestion-item">Kiếm Hiệp</div>
@@ -33,39 +28,10 @@
         </div>
       </div>
 
-      <!-- Bên phải: Menu và Đăng nhập -->
       <div class="header-right">
-        <!-- Menu điều hướng -->
         <nav class="nav-menu">
-          <!-- Dropdown Thể loại -->
-          <div class="dropdown">
-            <span class="nav-link dropdown-toggle" @click="toggleGenreDropdown">
-              Thể loại
-              <i
-                class="fas fa-caret-down genre-toggle-icon"
-                :class="{ rotate: showGenreDropdown }"
-              ></i>
-            </span>
-            <div v-if="showGenreDropdown" class="dropdown-menu">
-              <router-link to="/the-loai/ngontinh" class="dropdown-item"
-                >Ngôn Tình</router-link
-              >
-              <router-link to="/the-loai/kiemhiep" class="dropdown-item"
-                >Kiếm Hiệp</router-link
-              >
-              <router-link to="/the-loai/kinhdi" class="dropdown-item"
-                >Kinh Dị</router-link
-              >
-              <router-link to="/the-loai/khoahocvientuong" class="dropdown-item"
-                >Khoa Học Viễn Tưởng</router-link
-              >
-              <router-link to="/the-loai/dammy" class="dropdown-item"
-                >Đam Mỹ</router-link
-              >
-            </div>
-          </div>
+          <router-link to="/the-loai" class="nav-link">Thể loại</router-link>
 
-          <!-- Các liên kết khác -->
           <router-link to="/xep-hang" class="nav-link">Xếp Hạng</router-link>
           <router-link to="/duyet-tim" class="nav-link">Duyệt Tìm</router-link>
           <router-link to="/truyen-viet" class="nav-link"
@@ -76,12 +42,9 @@
           >
         </nav>
 
-        <!-- Dấu phân cách -->
         <span class="separator">|</span>
 
-        <!-- Kiểm tra trạng thái đăng nhập -->
         <div v-if="isLoggedIn" class="user-menu">
-          <!-- Avatar và nút tam giác -->
           <div class="avatar-wrapper" @click="toggleDropdown">
             <img
               :src="avatarUrl"
@@ -95,7 +58,6 @@
             ></i>
           </div>
 
-          <!-- Dropdown thông tin người dùng -->
           <div v-if="showDropdown" class="user-dropdown">
             <div class="user-greeting">
               <img :src="avatarUrl" alt="User Avatar" class="greeting-avatar" />
@@ -119,7 +81,6 @@
           </div>
         </div>
 
-        <!-- Nút Đăng nhập nếu chưa đăng nhập -->
         <router-link v-else to="/dang-nhap" class="login-button">
           <i class="fas fa-user login-icon"></i>
           Đăng nhập
@@ -134,7 +95,6 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/modules/auth/auth.store";
 
-// BƯỚC 1: Import ảnh fallback từ thư mục assets
 import defaultAvatar from '@/assets/images/default-avatar.jpg';
 
 export default {
@@ -143,7 +103,7 @@ export default {
     const router = useRouter();
     const authStore = useAuthStore();
     const showDropdown = ref(false);
-    const showGenreDropdown = ref(false);
+    // showGenreDropdown không còn cần thiết
     const searchQuery = ref("");
     const showSuggestions = ref(false);
 
@@ -157,29 +117,20 @@ export default {
       () => authStore.user?.full_name || "Người dùng"
     );
 
-    // BƯỚC 2: Cập nhật lại computed property 'avatarUrl'
     const avatarUrl = computed(() => {
       const userAvatar = authStore.user?.avatar;
-      // Kiểm tra nếu có avatar và không phải là đường dẫn mặc định rỗng/giả
       if (userAvatar && userAvatar !== '/uploads_img/avatar/default-avatar.jpg') {
-        // Trả về URL đầy đủ đến server backend cho avatar của người dùng
         return `http://localhost:3000${userAvatar}`;
       }
-      // Nếu không, trả về ảnh default đã được import
       return defaultAvatar;
     });
 
-    // BƯỚC 3: Cập nhật lại hàm xử lý lỗi
     const handleAvatarError = (event) => {
       console.error("Failed to load user avatar, using local fallback.");
-      // Gán trực tiếp ảnh đã import, đảm bảo luôn hoạt động
       event.target.src = defaultAvatar;
     };
 
-    const toggleGenreDropdown = () => {
-      showGenreDropdown.value = !showGenreDropdown.value;
-    };
-
+    // toggleGenreDropdown không còn cần thiết
     const toggleDropdown = () => {
       showDropdown.value = !showDropdown.value;
     };
@@ -197,8 +148,8 @@ export default {
       avatarUrl,
       showDropdown,
       toggleDropdown,
-      showGenreDropdown,
-      toggleGenreDropdown,
+      // showGenreDropdown không còn cần thiết
+      // toggleGenreDropdown không còn cần thiết
       handleLogout,
       searchQuery,
       showSuggestions,
@@ -407,53 +358,9 @@ export default {
   width: 100%;
 }
 
-/* Dropdown Thể loại */
-.dropdown {
-  position: relative;
-}
+/* Các style liên quan đến dropdown Thể loại đã bị xóa */
+/* .dropdown, .dropdown-toggle, .genre-toggle-icon, .dropdown-menu, .dropdown-item, .dropdown-divider không còn được sử dụng */
 
-.dropdown-toggle {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.genre-toggle-icon {
-  font-size: 0.8rem;
-  transition: transform 0.3s ease;
-}
-
-.genre-toggle-icon.rotate {
-  transform: rotate(180deg);
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: #333;
-  border-radius: 5px;
-  padding: 10px 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  z-index: 100;
-  animation: slideDown 0.3s ease-out;
-}
-
-.dropdown-item {
-  display: block;
-  padding: 8px 20px;
-  color: #ffffff;
-  text-decoration: none;
-  font-size: 0.8rem;
-  white-space: nowrap;
-  transition: background 0.3s ease;
-}
-
-.dropdown-item:hover {
-  background: #444;
-  color: #ffd700;
-}
 
 /* Dấu phân cách */
 .separator {

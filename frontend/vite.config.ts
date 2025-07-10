@@ -1,3 +1,4 @@
+// frontend/vite.config.ts
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import path from "path";
@@ -15,21 +16,93 @@ export default defineConfig({
       "/api/auth": {
         target: "http://localhost:3000",
         changeOrigin: true,
-        rewrite: (pathStr) => pathStr.replace(/^\/api\/auth/, "/api/auth"),
+        // rewrite: (pathStr) => pathStr, // Giữ nguyên đường dẫn
       },
 
-      // Proxy cho stories (thêm phần này)
+      // Proxy cho stories
       "/api/truyen": {
         target: "http://localhost:3000",
         changeOrigin: true,
-        rewrite: (pathStr) => pathStr.replace(/^\/api\/truyen/, "/api/truyen"),
+        // rewrite: (pathStr) => pathStr, // Giữ nguyên đường dẫn
       },
 
-      // Nếu muốn catch all /api/* thì dùng:
-      // "/api": {
-      //   target: "http://localhost:3000",
-      //   changeOrigin: true,
-      // }
+      // Proxy cho category
+      "/api/theloai": { // Match '/api/theloai' và '/api/theloai/'
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr, // Giữ nguyên đường dẫn
+      },
+      "/api/chuong": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
+      "/api/upload-truyen": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
+      "/api/upload-files": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
+      "/api/history": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
+      "/api/comments": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
+      "/api/follow": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
+      "/api/like": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
+      // user level
+      "/api/levels": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
+      "/api/levels/history": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
+      "/api/points": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
+      "/api/tasks": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
+      "/api/rewards": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
+      "/api/user-rewards": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
+      "/api/ratings": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        // rewrite: (pathStr) => pathStr,
+      },
     },
   },
   build: {

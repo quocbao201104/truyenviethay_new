@@ -3,16 +3,17 @@ const db = require("../config/db");
 
 const TheLoaiModel = {
   getAll: async () => {
-    const [rows] = await db.query(`SELECT * FROM theloai_new`);
+    // Đã thêm thumbnail_url vào câu SELECT
+    const [rows] = await db.query(`SELECT id_theloai, ten_theloai, thumbnail_url FROM theloai_new`);
     return rows;
   },
   // Lấy thể loại theo truyện
   getByStoryId: async (storyId) => {
     const [rows] = await db.query(
-      `SELECT t.id_theloai, t.ten_theloai 
-         FROM truyen_theloai tt 
-         JOIN theloai_new t ON tt.theloai_id = t.id_theloai 
-         WHERE tt.truyen_id = ?`,
+      `SELECT t.id_theloai, t.ten_theloai
+           FROM truyen_theloai tt
+           JOIN theloai_new t ON tt.theloai_id = t.id_theloai
+           WHERE tt.truyen_id = ?`,
       [storyId]
     );
     return rows;

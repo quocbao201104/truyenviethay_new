@@ -4,35 +4,20 @@
     <h2 class="form-title">Đăng Nhập</h2>
 
     <form @submit.prevent="handleLogin">
-      <div v-if="serverError" class="loi">{{ serverError }}</div>
-      <div v-if="successMessage" class="thanh-cong">{{ successMessage }}</div>
-
       <div class="nhomForm">
-        <BaseInput
-          v-model="formData.username"
-          label="Email hoặc Username"
-          type="text"
-          iconClass="fas fa-id-badge"
-        />
+        <BaseInput v-model="formData.username" label="Email hoặc Username" type="text" iconClass="fas fa-id-badge" />
         <span class="loi-nho" v-if="errors.username">{{
           errors.username
         }}</span>
       </div>
 
       <div class="nhomForm">
-        <BaseInput
-          v-model="formData.password"
-          label="Mật khẩu"
-          :type="passwordFieldType"
-          iconClass="fas fa-lock"
-        >
+        <BaseInput v-model="formData.password" label="Mật khẩu" :type="passwordFieldType" iconClass="fas fa-lock">
           <button type="button" class="toggle-password" @click="togglePassword">
-            <i
-              :class="[
-                'fas',
-                passwordFieldType === 'password' ? 'fa-eye-slash' : 'fa-eye',
-              ]"
-            ></i>
+            <i :class="[
+              'fas',
+              passwordFieldType === 'password' ? 'fa-eye-slash' : 'fa-eye',
+            ]"></i>
           </button>
         </BaseInput>
         <span class="loi-nho" v-if="errors.password">{{
@@ -42,11 +27,7 @@
 
       <div class="nhomForm forgot-password">
         <div class="remember-me">
-          <input
-            type="checkbox"
-            id="remember-me"
-            v-model="formData.rememberMe"
-          />
+          <input type="checkbox" id="remember-me" v-model="formData.rememberMe" />
           <label for="remember-me">Ghi nhớ mật khẩu</label>
         </div>
         <router-link to="/quen-mat-khau">Quên mật khẩu?</router-link>
@@ -78,10 +59,8 @@ import { ref, reactive } from "vue";
 import BaseInput from "@/components/common/BaseInput.vue";
 import { defineProps, defineEmits } from "vue";
 
-const props = defineProps({
-  serverError: String,
-  successMessage: String,
-});
+// Loại bỏ props serverError và successMessage
+const props = defineProps({});
 
 const emit = defineEmits(["submit-login"]);
 
@@ -138,6 +117,7 @@ const handleLogin = () => {
   display: block;
   transition: transform 0.3s ease;
 }
+
 .login-logo:hover {
   transform: scale(1.1);
 }
@@ -164,9 +144,11 @@ const handleLogin = () => {
   cursor: pointer;
   color: #4caf50;
 }
+
 .toggle-password i {
   font-size: 1rem;
 }
+
 .toggle-password:hover {
   color: #388e3c;
 }
@@ -177,19 +159,23 @@ const handleLogin = () => {
   align-items: center;
   font-size: 0.9rem;
 }
+
 .remember-me {
   display: flex;
   align-items: center;
   gap: 6px;
   color: #cccccc;
 }
+
 .remember-me input[type="checkbox"] {
   accent-color: #4caf50;
 }
+
 .forgot-password a {
   color: #4caf50;
   text-decoration: none;
 }
+
 .forgot-password a:hover {
   text-decoration: underline;
   color: #388e3c;
@@ -207,6 +193,7 @@ const handleLogin = () => {
   cursor: pointer;
   transition: all 0.3s ease;
 }
+
 .login-btn:hover {
   background: linear-gradient(90deg, #388e3c, #4caf50);
   transform: translateY(-2px);
@@ -218,12 +205,14 @@ const handleLogin = () => {
   text-align: center;
   color: #cccccc;
 }
+
 .social-buttons {
   display: flex;
   gap: 15px;
   justify-content: center;
   margin-top: 10px;
 }
+
 .social-btn {
   flex-grow: 1;
   padding: 10px;
@@ -238,6 +227,7 @@ const handleLogin = () => {
   cursor: pointer;
   transition: all 0.3s ease;
 }
+
 .social-btn:hover {
   background: #4caf50;
   color: #1a1a1a;
@@ -248,30 +238,35 @@ const handleLogin = () => {
   margin-top: 20px;
   color: #cccccc;
 }
+
 .login-link a {
   color: #4caf50;
   font-weight: 500;
   text-decoration: none;
 }
+
 .login-link a:hover {
   text-decoration: underline;
   color: #388e3c;
 }
 
+/* Các class .loi và .thanh-cong không còn được sử dụng trực tiếp trong template này */
 .loi {
-  color: #d32f2f; 
+  color: #d32f2f;
   font-size: 0.8rem;
   margin-top: 4px;
   margin-bottom: 15px;
   display: block;
   text-align: center;
 }
+
 .loi-nho {
   color: #ff5252;
   font-size: 0.8rem;
   display: block;
   margin-top: 5px;
 }
+
 .thanh-cong {
   color: #4caf50;
   font-size: 0.9rem;
@@ -286,6 +281,7 @@ const handleLogin = () => {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -296,6 +292,7 @@ const handleLogin = () => {
   position: relative;
   overflow: hidden;
 }
+
 .ripple::after {
   content: "";
   position: absolute;
@@ -309,11 +306,13 @@ const handleLogin = () => {
   transform: scale(1) translate(-50%, -50%);
   transform-origin: 50% 50%;
 }
+
 @keyframes rippleEffect {
   0% {
     transform: scale(0);
     opacity: 1;
   }
+
   100% {
     transform: scale(30);
     opacity: 0;

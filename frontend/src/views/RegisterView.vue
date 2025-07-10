@@ -8,19 +8,7 @@
         </router-link>
         <h2 class="form-title">Đăng Ký Tài Khoản</h2>
 
-        <RegisterForm
-          :key="formKey"
-          @submit-success="handleRegisterSuccess"
-          @submit-error="handleRegisterError"
-        />
-
-        <p v-if="successMessage" class="success-message">
-          {{ successMessage }}
-        </p>
-        <p v-if="serverError" class="error-message">
-          {{ serverError }}
-        </p>
-
+        <RegisterForm :key="formKey" />
         <div class="social-login">
           <p>Hoặc đăng ký bằng:</p>
           <div class="social-buttons">
@@ -42,32 +30,27 @@
 </template>
 
 <script setup>
-// SCRIPT CỦA BẠN - GIỮ NGUYÊN HOÀN TOÀN
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import AppHeader from "@/components/layout/AppHeader.vue";
 import RegisterForm from "@/modules/auth/RegisterForm.vue";
+// Không cần import useAuthStore hay useAppToast ở đây vì logic hiển thị toast đã ở trong store
 
 const router = useRouter();
 const formKey = ref(0);
-const successMessage = ref("");
-const serverError = ref("");
+// Không cần ref successMessage và serverError ở đây nữa
 
-const handleRegisterSuccess = (msg) => {
-  successMessage.value = msg;
-  serverError.value = "";
-  formKey.value++; // reset lại form
+// Các hàm handleRegisterSuccess và handleRegisterError không còn cần thiết
+// vì việc hiển thị thông báo đã được auth.store xử lý.
+// Chúng ta chỉ cần chuyển hướng người dùng sau khi đăng ký thành công
+// (logic chuyển hướng này nên được đặt ở nơi gọi RegisterForm hoặc sau khi RegisterForm hoàn thành submit).
+// Trong trường hợp này, RegisterForm sẽ gọi authStore.register(), và authStore sẽ hiển thị toast.
+// Việc chuyển hướng về trang đăng nhập có thể được xử lý trực tiếp trong handleRegister của RegisterForm
+// hoặc thông qua một sự kiện sau khi gọi authStore thành công nếu bạn muốn RegisterView kiểm soát.
 
-  setTimeout(() => {
-    router.push("/dang-nhap");
-  }, 1500);
-};
-
-const handleRegisterError = (msg) => {
-  serverError.value = msg;
-  successMessage.value = "";
-  formKey.value++;
-};
+// Để giữ RegisterView đơn giản, RegisterForm sẽ xử lý việc gọi store và chuyển hướng.
+// Do đó, các hàm handleRegisterSuccess và handleRegisterError sẽ được loại bỏ hoàn toàn.
+// formKey.value++ vẫn giữ để reset form nếu cần.
 </script>
 
 <style>
@@ -86,7 +69,6 @@ const handleRegisterError = (msg) => {
 
 /* Nội dung chính */
 .main-content {
-  padding: 40px 20px;
   justify-content: center;
   align-items: center;
   flex-grow: 1;
@@ -99,7 +81,7 @@ const handleRegisterError = (msg) => {
   margin: 0 auto;
   padding: 20px;
   background: #1a1d29;
-  border: 2px solid #4caf50; 
+  border: 2px solid #4caf50;
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   animation: slideUp 0.6s ease-out;
@@ -121,7 +103,8 @@ const handleRegisterError = (msg) => {
 .form-title {
   font-size: 2rem;
   font-weight: 600;
-  color: #4caf50; /* Xanh lá */
+  color: #4caf50;
+  /* Xanh lá */
   margin-bottom: 15px;
   text-align: center;
 }
@@ -133,7 +116,8 @@ const handleRegisterError = (msg) => {
 
 /* Dấu * bắt buộc */
 .batBuoc {
-  color: #d32f2f; /* Đỏ */
+  color: #d32f2f;
+  /* Đỏ */
 }
 
 /* Nhóm captcha */
@@ -149,7 +133,8 @@ const handleRegisterError = (msg) => {
 
 .captcha-display {
   padding: 10px;
-  background: #4caf50; /* Nền xanh lá */
+  background: #4caf50;
+  /* Nền xanh lá */
   border-radius: 8px;
   font-family: "Courier New", monospace;
   font-size: 1rem;
@@ -158,14 +143,16 @@ const handleRegisterError = (msg) => {
   letter-spacing: 2px;
   user-select: none;
   cursor: pointer;
-  height: 44px; /* Cho chiều cao bằng input */
+  height: 44px;
+  /* Cho chiều cao bằng input */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .captcha-display:hover {
-  background: #388e3c; /* Xanh lá đậm hơn khi hover */
+  background: #388e3c;
+  /* Xanh lá đậm hơn khi hover */
 }
 
 .refresh-icon {
@@ -179,23 +166,27 @@ const handleRegisterError = (msg) => {
   align-items: center;
   gap: 6px;
   font-size: 0.9rem;
-  color: #cccccc; /* Xám nhạt */
+  color: #cccccc;
+  /* Xám nhạt */
   justify-content: center;
   margin-bottom: 15px;
 }
 
 .terms-group input[type="checkbox"] {
   margin: 0;
-  accent-color: #4caf50; /* Checkbox xanh lá */
+  accent-color: #4caf50;
+  /* Checkbox xanh lá */
 }
 
 .terms-group a {
-  color: #4caf50; /* Xanh lá */
+  color: #4caf50;
+  /* Xanh lá */
   text-decoration: none;
 }
 
 .terms-group a:hover {
-  color: #388e3c; /* Xanh lá đậm hơn khi hover */
+  color: #388e3c;
+  /* Xanh lá đậm hơn khi hover */
   text-decoration: underline;
 }
 
@@ -205,10 +196,12 @@ const handleRegisterError = (msg) => {
   margin: 0 auto;
   display: block;
   padding: 12px;
-  background: linear-gradient(90deg, #4caf50, #66bb6a); /* Gradient xanh lá */
+  background: linear-gradient(90deg, #4caf50, #66bb6a);
+  /* Gradient xanh lá */
   border: none;
   border-radius: 8px;
-  color: #1a1a1a; /* Chữ đen */
+  color: #1a1a1a;
+  /* Chữ đen */
   font-size: 1.1rem;
   font-weight: 500;
   cursor: pointer;
@@ -229,7 +222,8 @@ const handleRegisterError = (msg) => {
 
 .social-login p {
   font-size: 0.9rem;
-  color: #cccccc; /* Xám nhạt */
+  color: #cccccc;
+  /* Xám nhạt */
   margin-bottom: 10px;
 }
 
@@ -249,55 +243,65 @@ const handleRegisterError = (msg) => {
   justify-content: center;
   gap: 6px;
   background: transparent;
-  border: 1px solid #4caf50; /* Viền xanh lá */
+  border: 1px solid #4caf50;
+  /* Viền xanh lá */
   cursor: pointer;
   transition: all 0.3s ease;
   color: #ffffff;
 }
 
 .social-btn:hover {
-  background: #4caf50; /* Nền xanh lá khi hover */
-  color: #1a1a1a; /* Chữ đen */
+  background: #4caf50;
+  /* Nền xanh lá khi hover */
+  color: #1a1a1a;
+  /* Chữ đen */
 }
 
 /* Liên kết Đăng nhập */
 .login-link {
   text-align: center;
   font-size: 0.9rem;
-  color: #cccccc; /* Xám nhạt */
+  color: #cccccc;
+  /* Xám nhạt */
   margin-top: 15px;
 }
 
 .login-link a {
-  color: #4caf50; /* Xanh lá */
+  color: #4caf50;
+  /* Xanh lá */
   font-weight: 500;
   text-decoration: none;
 }
 
 .login-link a:hover {
-  color: #388e3c; /* Xanh lá đậm hơn khi hover */
+  color: #388e3c;
+  /* Xanh lá đậm hơn khi hover */
   text-decoration: underline;
 }
 
 /* Thông báo lỗi */
 .loi {
-  color: #d32f2f; /* Đỏ cho lỗi */
+  color: #d32f2f;
+  /* Đỏ cho lỗi */
   font-size: 0.8rem;
   margin-top: 4px;
   display: block;
   text-align: center;
 }
 
-.success-message, .error-message {
-    text-align: center;
-    margin-top: 10px;
-    font-weight: 500;
-}
-.success-message {
-    color: #4caf50;
-}
+.success-message,
 .error-message {
-    color: #f44336;
+  text-align: center;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+.success-message {
+  color: #4caf50;
+}
+
+.error-message {
+  color: #f44336;
 }
 
 /* Hiệu ứng slide lên */
@@ -306,6 +310,7 @@ const handleRegisterError = (msg) => {
     opacity: 0;
     transform: translateY(15px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -317,9 +322,11 @@ const handleRegisterError = (msg) => {
   .khuVucForm {
     padding: 15px;
   }
+
   .form-title {
     font-size: 1.8rem;
   }
+
   .captcha-group {
     flex-direction: column;
     gap: 8px;
