@@ -13,6 +13,24 @@ const getAllStories = async (req, res) => {
   }
 };
 
+// Lấy truyện public đã duyệt (dành cho frontend)
+const getPublicStories = async (req, res) => {
+  try {
+    const { page, limit, sort_by, order, keyword } = req.query;
+    const result = await StoryModel.getPublicStories({
+      page,
+      limit,
+      sort_by,
+      order,
+      keyword,
+    });
+    res.json(result);
+  } catch (err) {
+    console.error("Lỗi khi lấy truyện public:", err);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
 // Lấy thông tin truyện theo ID
 const getStoryById = async (req, res) => {
   try {
@@ -211,4 +229,5 @@ module.exports = {
   getStoriesByUserId,
   getMyStories,
   getStoryBySlug,
+  getPublicStories,
 };

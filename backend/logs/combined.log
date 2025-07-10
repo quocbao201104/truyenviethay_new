@@ -2030,3 +2030,129 @@
 [2025-07-09 11:59:53] info: POST /api/auth/dang-nhap
 [2025-07-09 12:10:18] info: POST /api/auth/dang-nhap
 [2025-07-09 12:10:48] info: POST /api/auth/dang-nhap
+[2025-07-09 12:54:13] info: Server is running on http://localhost:3000
+[2025-07-09 12:54:29] info: Server is running on http://localhost:3000
+[2025-07-09 12:55:22] info: POST /api/auth/dang-nhap
+[2025-07-09 12:55:36] info: POST /api/auth/dang-nhap
+[2025-07-09 12:55:56] info: POST /api/auth/dang-nhap
+[2025-07-09 12:57:18] info: POST /api/auth/dang-nhap
+[2025-07-09 13:04:50] info: POST /api/auth/dang-nhap
+[2025-07-09 13:09:25] info: POST /api/auth/dang-nhap
+[2025-07-09 13:09:35] info: POST /api/auth/dang-nhap
+[2025-07-09 13:09:45] info: GET /api/auth/dang-nhap
+[2025-07-09 13:09:45] warn: 404 Not Found: GET /api/auth/dang-nhap
+[2025-07-09 13:09:46] info: GET /favicon.ico
+[2025-07-09 13:09:46] warn: 404 Not Found: GET /favicon.ico
+[2025-07-09 13:11:24] info: GET /api/auth/dang-nhap
+[2025-07-09 13:11:24] warn: 404 Not Found: GET /api/auth/dang-nhap
+[2025-07-09 13:11:52] info: POST /api/auth/dang-nhap
+[2025-07-09 13:12:58] info: POST /api/auth/dang-nhap
+[2025-07-09 13:15:32] info: POST /api/auth/dang-nhap
+[2025-07-09 13:15:53] info: POST /api/auth/dang-nhap
+[2025-07-09 13:16:10] info: POST /api/auth/dang-nhap
+[2025-07-09 13:19:08] info: POST /api/auth/dang-nhap
+[2025-07-09 13:19:11] info: POST /api/auth/dang-nhap
+[2025-07-09 13:19:27] info: POST /api/auth/dang-nhap
+[2025-07-09 13:19:31] info: POST /api/auth/dang-nhap
+[2025-07-09 13:20:45] info: POST /api/auth/dang-nhap
+[2025-07-09 13:20:52] info: POST /api/auth/dang-nhap
+[2025-07-09 13:21:10] info: POST /api/auth/dang-nhap
+[2025-07-09 13:22:42] info: POST /api/auth/dang-nhap
+[2025-07-09 13:22:45] info: POST /api/auth/dang-nhap
+[2025-07-09 13:22:49] info: POST /api/auth/dang-nhap
+[2025-07-09 13:22:49] info: POST /api/auth/dang-nhap
+[2025-07-09 13:22:51] info: GET /api/auth/dang-nhap
+[2025-07-09 13:22:51] warn: 404 Not Found: GET /api/auth/dang-nhap
+[2025-07-09 13:24:57] info: POST /api/auth/dang-nhap
+[2025-07-09 13:25:08] info: POST /api/auth/dang-nhap
+[2025-07-09 13:25:11] info: POST /api/auth/dang-nhap
+[2025-07-09 13:25:56] info: POST /api/auth/dang-nhap
+[2025-07-09 13:25:59] info: POST /api/auth/dang-nhap
+[2025-07-09 13:25:59] info: POST /api/auth/dang-nhap
+[2025-07-09 13:26:04] info: POST /api/auth/dang-nhap
+[2025-07-09 13:34:47] info: POST /api/auth/dang-nhap
+[2025-07-09 13:34:47] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:08] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:09] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:11] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:12] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:12] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:14] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:14] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:15] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:18] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:29] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:37] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:44] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:58] info: POST /api/auth/dang-nhap
+[2025-07-09 13:38:58] info: POST /api/auth/dang-nhap
+[2025-07-09 13:39:12] info: POST /api/auth/dang-nhap
+[2025-07-09 13:39:49] info: POST /api/auth/dang-nhap
+[2025-07-09 13:40:55] info: POST /api/auth/dang-nhap
+[2025-07-09 13:41:12] info: POST /api/auth/dang-nhap
+[2025-07-09 13:41:14] info: POST /api/auth/dang-nhap
+[2025-07-09 13:41:18] info: POST /api/auth/dang-nhap
+[2025-07-09 13:41:21] info: POST /api/auth/dang-nhap
+[2025-07-09 13:42:02] info: POST /api/auth/dang-nhap
+[2025-07-09 13:42:17] info: POST /api/auth/dang-nhap
+[2025-07-09 13:42:18] info: POST /api/auth/dang-nhap
+[2025-07-09 13:47:21] info: POST /api/auth/dang-nhap
+[2025-07-09 13:47:23] info: POST /api/auth/dang-nhap
+[2025-07-09 13:50:50] info: POST /api/auth/dang-nhap
+[2025-07-09 13:50:52] info: POST /api/auth/dang-nhap
+[2025-07-09 13:51:06] info: POST /api/auth/dang-nhap
+[2025-07-09 13:51:45] info: POST /api/auth/dang-nhap
+[2025-07-09 13:51:49] info: POST /api/auth/dang-nhap
+[2025-07-09 13:56:50] info: POST /api/auth/dang-nhap
+[2025-07-09 13:57:15] info: POST /api/auth/dang-nhap
+[2025-07-09 13:57:17] info: POST /api/auth/dang-nhap
+[2025-07-09 13:57:35] info: POST /api/auth/dang-nhap
+[2025-07-09 13:57:44] info: POST /api/auth/dang-nhap
+[2025-07-09 14:05:06] info: POST /api/auth/dang-nhap
+[2025-07-09 14:07:37] info: POST /api/auth/dang-nhap
+[2025-07-09 14:07:48] info: POST /api/auth/dang-nhap
+[2025-07-09 14:07:50] info: POST /api/auth/dang-nhap
+[2025-07-09 14:07:50] info: POST /api/auth/dang-nhap
+[2025-07-09 14:07:50] info: POST /api/auth/dang-nhap
+[2025-07-10 13:30:47] info: Server is running on http://localhost:3000
+[2025-07-10 13:31:06] info: Server is running on http://localhost:3000
+[2025-07-10 13:34:52] info: POST /api/auth/dang-nhap
+[2025-07-10 13:34:54] info: POST /api/auth/dang-nhap
+[2025-07-10 13:39:51] info: GET /api/auth/me
+[2025-07-10 13:39:57] info: POST /api/auth/dang-nhap
+[2025-07-10 13:40:31] info: POST /api/auth/dang-nhap
+[2025-07-10 13:40:48] info: GET /api/auth/me
+[2025-07-10 13:40:57] info: POST /api/auth/dang-nhap
+[2025-07-10 13:41:29] info: GET /api/auth/me
+[2025-07-10 14:40:09] info: POST /api/auth/dang-ky
+[2025-07-10 14:40:46] info: POST /api/auth/dang-nhap
+[2025-07-10 14:41:01] info: GET /api/auth/me
+[2025-07-10 14:57:25] info: POST /api/auth/dang-ky
+[2025-07-10 14:57:47] info: POST /api/auth/dang-nhap
+[2025-07-10 14:59:29] info: GET /api/auth/me
+[2025-07-10 15:58:26] info: Server is running on http://localhost:3000
+[2025-07-10 15:58:28] info: GET /api/truyen/public?page=1&limit=1
+[2025-07-10 15:58:38] info: GET /api/truyen/public?page=1&limit=10
+[2025-07-10 15:59:53] info: GET /api/truyen/public?page=1&limit=10
+[2025-07-10 16:01:24] info: Server is running on http://localhost:3000
+[2025-07-10 16:01:25] info: GET /api/truyen/public?page=1&limit=10
+[2025-07-10 16:02:16] info: GET /api/truyen/public?page=1&limit=2
+[2025-07-10 16:04:00] info: POST /api/auth/dang-nhap
+[2025-07-10 16:04:12] info: POST /api/upload-truyen
+[2025-07-10 16:05:02] info: POST /api/upload-truyen
+[2025-07-10 16:27:59] info: Server is running on http://localhost:3000
+[2025-07-10 16:30:52] info: GET /api/api/truyen?page=1
+[2025-07-10 16:30:52] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 16:31:16] info: GET /api/api/truyen?page=1
+[2025-07-10 16:31:16] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 16:31:29] info: POST /api/auth/dang-nhap
+[2025-07-10 16:31:33] info: GET /api/api/truyen?page=1
+[2025-07-10 16:31:33] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 16:32:38] info: GET /api/auth/me
+[2025-07-10 16:32:43] info: POST /api/auth/dang-nhap
+[2025-07-10 16:32:45] info: GET /api/api/truyen?page=1
+[2025-07-10 16:32:45] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 16:35:24] info: GET /api/api/truyen?page=1
+[2025-07-10 16:35:24] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 16:35:39] info: GET /api/api/truyen?page=1
+[2025-07-10 16:35:39] warn: 404 Not Found: GET /api/api/truyen?page=1

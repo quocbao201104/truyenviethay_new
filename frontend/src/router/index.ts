@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import LoginView from "../views/LoginView.vue";
 import RegisterView from "../views/RegisterView.vue";
+import StoryListView from "@/modules/storyText/views/StoryListView.vue";
 
 // Khai báo kiểu rõ ràng cho routes
 const routes: RouteRecordRaw[] = [
@@ -11,6 +12,11 @@ const routes: RouteRecordRaw[] = [
     path: "/dang-ky",
     name: "Register",
     component: () => import("@/views/RegisterView.vue"),
+  },
+  {
+    path: "/truyen-chu",
+    name: "StoryList",
+    component: StoryListView,
   },
 ];
 

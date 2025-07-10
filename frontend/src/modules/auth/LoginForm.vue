@@ -1,11 +1,12 @@
 <template>
   <div class="khuVucForm">
-    <router-link to="/">
-      <img src="/logo.png" alt="TruyenVietHay Logo" class="login-logo" />
-    </router-link>
+    <router-link to="/"><img src="/logo.png" class="login-logo" /></router-link>
     <h2 class="form-title">Đăng Nhập</h2>
 
     <form @submit.prevent="handleLogin">
+      <div v-if="serverError" class="loi">{{ serverError }}</div>
+      <div v-if="successMessage" class="thanh-cong">{{ successMessage }}</div>
+
       <div class="nhomForm">
         <BaseInput
           v-model="formData.username"
@@ -13,7 +14,9 @@
           type="text"
           iconClass="fas fa-id-badge"
         />
-        <span class="loi-nho" v-if="errors.username">{{ errors.username }}</span>
+        <span class="loi-nho" v-if="errors.username">{{
+          errors.username
+        }}</span>
       </div>
 
       <div class="nhomForm">
@@ -24,15 +27,26 @@
           iconClass="fas fa-lock"
         >
           <button type="button" class="toggle-password" @click="togglePassword">
-            <i :class="['fas', passwordFieldType === 'password' ? 'fa-eye-slash' : 'fa-eye']"></i>
+            <i
+              :class="[
+                'fas',
+                passwordFieldType === 'password' ? 'fa-eye-slash' : 'fa-eye',
+              ]"
+            ></i>
           </button>
         </BaseInput>
-        <span class="loi-nho" v-if="errors.password">{{ errors.password }}</span>
+        <span class="loi-nho" v-if="errors.password">{{
+          errors.password
+        }}</span>
       </div>
 
       <div class="nhomForm forgot-password">
         <div class="remember-me">
-          <input type="checkbox" id="remember-me" v-model="formData.rememberMe" />
+          <input
+            type="checkbox"
+            id="remember-me"
+            v-model="formData.rememberMe"
+          />
           <label for="remember-me">Ghi nhớ mật khẩu</label>
         </div>
         <router-link to="/quen-mat-khau">Quên mật khẩu?</router-link>
@@ -54,71 +68,53 @@
     </div>
 
     <p class="login-link">
-      Chưa có tài khoản?
-      <router-link to="/dang-ky">Đăng ký ngay</router-link>
+      Chưa có tài khoản? <router-link to="/dang-ky">Đăng ký ngay</router-link>
     </p>
   </div>
 </template>
 
-<script>
-import { ref, reactive } from 'vue';
-import BaseInput from '@/components/common/BaseInput.vue';
+<script setup>
+import { ref, reactive } from "vue";
+import BaseInput from "@/components/common/BaseInput.vue";
+import { defineProps, defineEmits } from "vue";
 
-export default {
-  name: 'LoginForm',
-  components: {
-    BaseInput,
-  },
-  // --- THAY ĐỔI 1: Nhận dữ liệu từ component cha qua props ---
-  props: {
-    serverError: {
-      type: String,
-      default: '',
-    },
-    successMessage: {
-      type: String,
-      default: '',
-    },
-  },
-  emits: ['submitLogin'],
-  setup(props, { emit }) {
-    const formData = reactive({
-      username: '',
-      password: '',
-      rememberMe: false,
-    });
+const props = defineProps({
+  serverError: String,
+  successMessage: String,
+});
 
-    const errors = reactive({
-      username: '',
-      password: '',
-    });
+const emit = defineEmits(["submit-login"]);
 
-    const passwordFieldType = ref('password');
+const formData = reactive({
+  username: "",
+  password: "",
+  rememberMe: false,
+});
 
-    const togglePassword = () => {
-      passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
-    };
+const errors = reactive({
+  username: "",
+  password: "",
+});
 
-    const validateForm = () => {
-      errors.username = !formData.username ? 'Vui lòng nhập email hoặc username' : '';
-      errors.password = !formData.password ? 'Vui lòng nhập mật khẩu' : '';
-      return !errors.username && !errors.password;
-    };
+const passwordFieldType = ref("password");
 
-    const handleLogin = () => {
-      if (validateForm()) {
-        emit('submitLogin', { ...formData });
-      }
-    };
+const togglePassword = () => {
+  passwordFieldType.value =
+    passwordFieldType.value === "password" ? "text" : "password";
+};
 
-    return {
-      formData,
-      errors,
-      passwordFieldType,
-      togglePassword,
-      handleLogin,
-    };
-  },
+const validateForm = () => {
+  errors.username = !formData.username
+    ? "Vui lòng nhập email hoặc username"
+    : "";
+  errors.password = !formData.password ? "Vui lòng nhập mật khẩu" : "";
+  return !errors.username && !errors.password;
+};
+
+const handleLogin = () => {
+  if (validateForm()) {
+    emit("submit-login", { ...formData });
+  }
 };
 </script>
 
@@ -129,7 +125,7 @@ export default {
   max-width: 400px;
   margin: 0 auto;
   padding: 30px;
-  border: 1px solid #4CAF50;
+  border: 1px solid #4caf50;
   border-radius: 10px;
   background: #1a1d29;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
@@ -149,7 +145,7 @@ export default {
 .form-title {
   font-size: 2rem;
   font-weight: 600;
-  color: #4CAF50;
+  color: #4caf50;
   margin-bottom: 20px;
   text-align: center;
 }
@@ -166,7 +162,7 @@ export default {
   background: none;
   border: none;
   cursor: pointer;
-  color: #4CAF50;
+  color: #4caf50;
 }
 .toggle-password i {
   font-size: 1rem;
@@ -188,10 +184,10 @@ export default {
   color: #cccccc;
 }
 .remember-me input[type="checkbox"] {
-  accent-color: #4CAF50;
+  accent-color: #4caf50;
 }
 .forgot-password a {
-  color: #4CAF50;
+  color: #4caf50;
   text-decoration: none;
 }
 .forgot-password a:hover {
@@ -202,7 +198,7 @@ export default {
 .login-btn {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(90deg, #4CAF50, #66BB6A);
+  background: linear-gradient(90deg, #4caf50, #66bb6a);
   border: none;
   border-radius: 8px;
   color: #ffffff;
@@ -212,7 +208,7 @@ export default {
   transition: all 0.3s ease;
 }
 .login-btn:hover {
-  background: linear-gradient(90deg, #388e3c, #4CAF50);
+  background: linear-gradient(90deg, #388e3c, #4caf50);
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
 }
@@ -236,14 +232,14 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid #4CAF50;
+  border: 1px solid #4caf50;
   background: transparent;
   color: #ffffff;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 .social-btn:hover {
-  background: #4CAF50;
+  background: #4caf50;
   color: #1a1a1a;
 }
 
@@ -253,7 +249,7 @@ export default {
   color: #cccccc;
 }
 .login-link a {
-  color: #4CAF50;
+  color: #4caf50;
   font-weight: 500;
   text-decoration: none;
 }
@@ -274,7 +270,7 @@ export default {
   margin-top: 5px;
 }
 .thanh-cong {
-  color: #4CAF50;
+  color: #4caf50;
   font-size: 0.9rem;
   font-weight: 500;
 }
@@ -295,7 +291,7 @@ export default {
   overflow: hidden;
 }
 .ripple::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;

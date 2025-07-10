@@ -2,59 +2,53 @@
   <div class="dangnhap-container">
     <AppHeader />
     <main class="main-content">
-      <!-- THAY ĐỔI: Thêm :key="formKey" để buộc component render lại -->
-      <LoginForm 
+      <!-- Buộc render lại LoginForm khi cần -->
+      <LoginForm
         :key="formKey"
-        @submitLogin="handleApiLogin"
-        :serverError="serverError"
-        :successMessage="successMessage"
+        @submit-login="handleApiLogin"
+        :server-error="serverError"
+        :success-message="successMessage"
       />
     </main>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 import AppHeader from "@/components/layout/AppHeader.vue";
 import LoginForm from "@/modules/auth/LoginForm.vue";
-import { useAuthStore } from '@/modules/auth/auth.store';
+import { useAuthStore } from "../modules/auth/auth.store";
 
 export default {
-  name: 'LoginView',
+  name: "LoginView",
   components: {
     AppHeader,
     LoginForm,
   },
   setup() {
-    const serverError = ref('');
-    const successMessage = ref('');
+    const serverError = ref("");
+    const successMessage = ref("");
     const router = useRouter();
     const authStore = useAuthStore();
-    
-    // THAY ĐỔI: Thêm một "key" để điều khiển việc render lại
     const formKey = ref(0);
 
     const handleApiLogin = async (loginData) => {
-      serverError.value = '';
-      successMessage.value = '';
+      serverError.value = "";
+      successMessage.value = "";
 
       try {
         await authStore.login(loginData);
-        
-        successMessage.value = 'Đăng nhập thành công! Đang chuyển hướng...';
-        
-        // Buộc component render lại để hiển thị thông báo thành công
+        successMessage.value = "Đăng nhập thành công! Đang chuyển hướng...";
         formKey.value += 1;
 
         setTimeout(() => {
-          router.push('/');
+          router.push("/truyen-chu");
         }, 1500);
-
       } catch (error) {
-        serverError.value = error.message || "Tài khoản hoặc mật khẩu không đúng.";
-        
-        // Buộc component render lại để hiển thị thông báo lỗi
+        console.error("Lỗi khi đăng nhập:", error);
+        serverError.value =
+          error.message || "Tài khoản hoặc mật khẩu không đúng.";
         formKey.value += 1;
       }
     };
@@ -63,7 +57,7 @@ export default {
       serverError,
       successMessage,
       handleApiLogin,
-      formKey, // Trả về key để template có thể sử dụng
+      formKey,
     };
   },
 };

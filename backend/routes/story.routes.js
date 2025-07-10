@@ -6,6 +6,8 @@ const { validateUpdateStory } = require("../validators/story.validator");
 
 // Lấy tất cả truyện
 router.get("/", storyController.getAllStories);
+// Lấy truyện public đã duyệt (dành cho frontend)
+router.get("/public", storyController.getPublicStories);
 
 // Admin xem truyện theo userId
 router.get(

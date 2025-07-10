@@ -132,7 +132,7 @@
 <script>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/modules/auth/auth.store";
 
 export default {
   name: "AppHeader",

@@ -4,21 +4,20 @@
       :type="type"
       :value="modelValue"
       @input="$emit('update:modelValue', $event.target.value)"
-      placeholder=" " 
+      placeholder=" "
       required
     />
-    <label>
-      <i v-if="iconClass" :class="iconClass"></i> {{ label }}
-    </label>
+    <label> <i v-if="iconClass" :class="iconClass"></i> {{ label }} </label>
     <div class="slot-container">
       <slot></slot>
+      <!-- Ví dụ: toggle eye -->
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'BaseInput',
+  name: "BaseInput",
   props: {
     modelValue: {
       type: String,
@@ -30,15 +29,14 @@ export default {
     },
     type: {
       type: String,
-      default: 'text',
+      default: "text",
     },
     iconClass: {
       type: String,
-      default: '',
+      default: "",
     },
   },
-  emits: ['update:modelValue'],
-  // Không cần `setup()` và `isFocused` nữa
+  emits: ["update:modelValue"],
 };
 </script>
 
@@ -46,12 +44,13 @@ export default {
 .input-group {
   position: relative;
   width: 100%;
+  margin-bottom: 8px;
 }
 
 .input-group input {
   width: 100%;
   padding: 10px 40px 10px 10px;
-  border: 1px solid #4CAF50;
+  border: 1px solid #4caf50;
   border-radius: 8px;
   background: #1a1d29;
   font-size: 1rem;
@@ -80,9 +79,10 @@ export default {
 }
 
 .input-group label i {
-  color: #4CAF50;
+  color: #4caf50;
   font-size: 1rem;
 }
+
 .input-group .slot-container {
   position: absolute;
   top: 0;
@@ -90,14 +90,15 @@ export default {
   height: 100%;
   display: flex;
   align-items: center;
-  z-index: 3; 
+  z-index: 3;
 }
+
 .input-group input:focus + label,
 .input-group input:not(:placeholder-shown) + label {
   top: -1px;
   left: 5px;
   font-size: 0.8rem;
-  color: #4CAF50;
+  color: #4caf50;
   background: #1a1d29;
   padding: 0 5px;
   border-radius: 4px;

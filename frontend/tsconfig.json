@@ -11,8 +11,7 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]
-    },
-    "types": ["vite/client", "vue3-toastify"]
+    }
   },
   "include": [
     "src/**/*.ts",

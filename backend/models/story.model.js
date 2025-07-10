@@ -83,7 +83,7 @@ const StoryModel = {
     );
     return result.affectedRows;
   },
-
+  // Lấy truyện theo trạng thái cho duyệt (Admin)
   getPendingApproval: async () => {
     const [rows] = await db.query(
       `SELECT * FROM truyen_new WHERE trang_thai_kiem_duyet = 'cho_duyet'`
@@ -101,20 +101,61 @@ const StoryModel = {
     );
     return rows;
   },
-
+  // Xóa truyện
   delete: async (id) => {
     const [result] = await db.query(`DELETE FROM truyen_new WHERE id = ?`, [
       id,
     ]);
     return result.affectedRows;
   },
-
+  // Thêm thể loại cho truyện
   addGenresForStory: async (truyenId, theloaiIds) => {
     const values = theloaiIds.map((id) => [truyenId, id]);
     await db.query(
       `INSERT INTO truyen_theloai (truyen_id, theloai_id) VALUES ?`,
       [values]
     );
+  },
+
+  getPublicStories: async ({
+    page = 1,
+    limit = 20,
+    sort_by = "thoi_gian_cap_nhat",
+    order = "DESC",
+    keyword = "",
+  }) => {
+    const offset = (page - 1) * limit;
+    const sortField = ["ten_truyen", "luot_xem", "thoi_gian_cap_nhat"].includes(
+      sort_by
+    )
+      ? sort_by
+      : "thoi_gian_cap_nhat";
+    const sortOrder = order.toUpperCase() === "ASC" ? "ASC" : "DESC";
+
+    const whereClause = `WHERE trang_thai_kiem_duyet = 'duyet' AND ten_truyen LIKE ?`;
+
+    const [data] = await db.query(
+      `SELECT id, ten_truyen, tac_gia, slug, mo_ta, anh_bia, luot_xem, thoi_gian_cap_nhat
+     FROM truyen_new
+     ${whereClause}
+     ORDER BY ${sortField} ${sortOrder}
+     LIMIT ? OFFSET ?`,
+      [`%${keyword}%`, +limit, +offset]
+    );
+
+    const [countResult] = await db.query(
+      `SELECT COUNT(*) AS total FROM truyen_new ${whereClause}`,
+      [`%${keyword}%`]
+    );
+
+    return {
+      data,
+      pagination: {
+        total: countResult[0].total,
+        current_page: +page,
+        total_pages: Math.ceil(countResult[0].total / limit),
+      },
+    };
   },
 };
 
