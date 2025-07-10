@@ -1,5 +1,7 @@
 <template>
+    <AppHeader />
   <div class="story-list-container">
+
     <h1 class="page-title">📚 Danh sách truyện</h1>
 
     <div class="story-grid">
@@ -27,6 +29,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import AppHeader from "@/components/layout/AppHeader.vue";
 import { getAllStories } from "@/modules/storyText/storyText.api";
 import StoryCard from "@/modules/storyText/components/StoryCard.vue";
 
@@ -58,7 +61,6 @@ onMounted(() => {
 
 <style scoped>
 .story-list-container {
-  padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }

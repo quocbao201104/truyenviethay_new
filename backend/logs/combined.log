@@ -2156,3 +2156,9 @@
 [2025-07-10 16:35:24] warn: 404 Not Found: GET /api/api/truyen?page=1
 [2025-07-10 16:35:39] info: GET /api/api/truyen?page=1
 [2025-07-10 16:35:39] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 16:58:37] info: Server is running on http://localhost:3000
+[2025-07-10 16:59:29] info: GET /api/api/truyen?page=1
+[2025-07-10 16:59:29] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 16:59:34] info: POST /api/auth/dang-nhap
+[2025-07-10 17:01:18] info: POST /api/auth/dang-nhap
+[2025-07-10 17:02:57] info: POST /api/auth/dang-nhap

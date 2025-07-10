@@ -39,7 +39,7 @@ export default {
 
       try {
         await authStore.login(loginData);
-        successMessage.value = "Đăng nhập thành công! Đang chuyển hướng...";
+        successMessage.value = "Đăng nhập thành công!";
         formKey.value += 1;
 
         setTimeout(() => {

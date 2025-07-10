@@ -22,6 +22,5 @@ import Footer from "../components/layout/AppFooter.vue";
 .main-content {
   flex: 1;
   background-color: #1a1d29; 
-  padding: 16px;
 }
 </style>
