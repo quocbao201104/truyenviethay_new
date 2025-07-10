@@ -134,61 +134,56 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/modules/auth/auth.store";
 
+// BƯỚC 1: Import ảnh fallback từ thư mục assets
+import defaultAvatar from '@/assets/images/default-avatar.jpg';
+
 export default {
   name: "AppHeader",
   setup() {
     const router = useRouter();
     const authStore = useAuthStore();
     const showDropdown = ref(false);
-    const showGenreDropdown = ref(false); // Trạng thái cho dropdown thể loại
+    const showGenreDropdown = ref(false);
     const searchQuery = ref("");
     const showSuggestions = ref(false);
 
-    // Khởi tạo trạng thái đăng nhập từ authStore
     onMounted(() => {
       authStore.initialize();
-      console.log("Auth Store State:", authStore.token, authStore.user);
     });
 
-    // Kiểm tra trạng thái đăng nhập
     const isLoggedIn = computed(() => !!authStore.token && !!authStore.user);
 
-    // Lấy full_name từ authStore
     const userFullName = computed(
       () => authStore.user?.full_name || "Người dùng"
     );
 
-    // Lấy URL avatar từ authStore, nếu không có thì dùng default
+    // BƯỚC 2: Cập nhật lại computed property 'avatarUrl'
     const avatarUrl = computed(() => {
       const userAvatar = authStore.user?.avatar;
-      console.log("User Avatar from authStore:", userAvatar);
-      if (
-        userAvatar &&
-        userAvatar !== "/uploads_img/avatar/default-avatar.jpg"
-      ) {
+      // Kiểm tra nếu có avatar và không phải là đường dẫn mặc định rỗng/giả
+      if (userAvatar && userAvatar !== '/uploads_img/avatar/default-avatar.jpg') {
+        // Trả về URL đầy đủ đến server backend cho avatar của người dùng
         return `http://localhost:3000${userAvatar}`;
       }
-      return "http://localhost:3000/uploads_img/avatar/default-avatar.jpg";
+      // Nếu không, trả về ảnh default đã được import
+      return defaultAvatar;
     });
 
-    // Xử lý lỗi khi avatar không tải được
+    // BƯỚC 3: Cập nhật lại hàm xử lý lỗi
     const handleAvatarError = (event) => {
-      console.error("Failed to load avatar, using fallback");
-      event.target.src =
-        "http://localhost:3000/uploads_img/avatar/default-avatar.jpg";
+      console.error("Failed to load user avatar, using local fallback.");
+      // Gán trực tiếp ảnh đã import, đảm bảo luôn hoạt động
+      event.target.src = defaultAvatar;
     };
 
-    // Toggle dropdown thể loại
     const toggleGenreDropdown = () => {
       showGenreDropdown.value = !showGenreDropdown.value;
     };
 
-    // Toggle dropdown thông tin người dùng
     const toggleDropdown = () => {
       showDropdown.value = !showDropdown.value;
     };
 
-    // Xử lý đăng xuất
     const handleLogout = () => {
       authStore.logout();
       showDropdown.value = false;

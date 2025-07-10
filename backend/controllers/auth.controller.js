@@ -55,13 +55,13 @@ exports.login = async (req, res) => {
   try {
     const results = await User.findByUsername(username);
     if (results.length === 0) {
-      return res.status(401).json({ message: "Tài khoản không tồn tại" });
+      return res.status(401).json({ message: "Tài khoản hoặc mật khẩu không đúng." });
     }
 
     const user = results[0];
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      return res.status(401).json({ message: "Sai mật khẩu" });
+      return res.status(401).json({ message: "Tài khoản hoặc mật khẩu không đúng." });
     }
 
     // Kiểm tra tài khoản bị ban

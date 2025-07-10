@@ -146,7 +146,7 @@ const handleLogin = () => {
   font-size: 2rem;
   font-weight: 600;
   color: #4caf50;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   text-align: center;
 }
 
@@ -259,9 +259,12 @@ const handleLogin = () => {
 }
 
 .loi {
-  color: #ff5252;
-  font-size: 0.9rem;
-  font-weight: 500;
+  color: #d32f2f; 
+  font-size: 0.8rem;
+  margin-top: 4px;
+  margin-bottom: 15px;
+  display: block;
+  text-align: center;
 }
 .loi-nho {
   color: #ff5252;
@@ -272,7 +275,10 @@ const handleLogin = () => {
 .thanh-cong {
   color: #4caf50;
   font-size: 0.9rem;
-  font-weight: 500;
+  margin-top: 4px;
+  margin-bottom: 15px;
+  display: block;
+  text-align: center;
 }
 
 @keyframes slideUp {

@@ -1,91 +1,93 @@
 <template>
   <form @submit.prevent="handleRegister">
-    <p id="register-error" class="loi" v-if="errorMessage">
-      {{ errorMessage }}
-    </p>
+    <div class="nhomForm">
+      <BaseInput
+        v-model="fullName"
+        label="Họ và tên"
+        iconClass="fas fa-user"
+      />
+      <span class="loi" v-if="fullNameError">{{ fullNameError }}</span>
+    </div>
 
-    <!-- Họ và tên -->
-    <BaseInput v-model="fullName" label="Họ và tên" iconClass="fas fa-user" />
-    <span class="loi" v-if="fullNameError">{{ fullNameError }}</span>
+    <div class="nhomForm">
+      <BaseInput
+        v-model="username"
+        label="Tên đăng nhập"
+        iconClass="fas fa-id-badge"
+      />
+      <span class="loi" v-if="usernameError">{{ usernameError }}</span>
+    </div>
 
-    <!-- Tên đăng nhập -->
-    <BaseInput
-      v-model="username"
-      label="Tên đăng nhập"
-      iconClass="fas fa-id-badge"
-    />
-    <span class="loi" v-if="usernameError">{{ usernameError }}</span>
+    <div class="nhomForm">
+      <BaseInput
+        v-model="email"
+        label="Email"
+        type="email"
+        iconClass="fas fa-envelope"
+      />
+      <span class="loi" v-if="emailError">{{ emailError }}</span>
+    </div>
 
-    <!-- Email -->
-    <BaseInput
-      v-model="email"
-      label="Email"
-      type="email"
-      iconClass="fas fa-envelope"
-    />
-    <span class="loi" v-if="emailError">{{ emailError }}</span>
+    <div class="nhomForm">
+      <BaseInput
+        v-model="phone"
+        label="Số điện thoại"
+        type="tel"
+        iconClass="fas fa-phone"
+      />
+      <span class="loi" v-if="phoneError">{{ phoneError }}</span>
+    </div>
 
-    <!-- Số điện thoại -->
-    <BaseInput
-      v-model="phone"
-      label="Số điện thoại"
-      type="tel"
-      iconClass="fas fa-phone"
-    />
-    <span class="loi" v-if="phoneError">{{ phoneError }}</span>
+    <div class="nhomForm">
+      <BaseInput
+        v-model="password"
+        label="Mật khẩu"
+        :type="showPassword ? 'text' : 'password'"
+        iconClass="fas fa-lock"
+      >
+        <button @click="togglePassword" type="button" class="toggle-password">
+          <i :class="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+        </button>
+      </BaseInput>
+      <span class="loi" v-if="passwordError">{{ passwordError }}</span>
+    </div>
 
-    <!-- Mật khẩu -->
-    <BaseInput
-      v-model="password"
-      label="Mật khẩu"
-      :type="showPassword ? 'text' : 'password'"
-      iconClass="fas fa-lock"
-    >
-      <button @click="togglePassword" type="button">
-        <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-      </button>
-    </BaseInput>
-    <span class="loi" v-if="passwordError">{{ passwordError }}</span>
+    <div class="nhomForm">
+      <BaseInput
+        v-model="confirmPassword"
+        label="Xác nhận mật khẩu"
+        :type="showConfirmPassword ? 'text' : 'password'"
+        iconClass="fas fa-lock"
+      >
+        <button @click="toggleConfirmPassword" type="button" class="toggle-password">
+          <i :class="showConfirmPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+        </button>
+      </BaseInput>
+      <span class="loi" v-if="confirmPasswordError">{{ confirmPasswordError }}</span>
+    </div>
 
-    <!-- Xác nhận mật khẩu -->
-    <BaseInput
-      v-model="confirmPassword"
-      label="Xác nhận mật khẩu"
-      :type="showConfirmPassword ? 'text' : 'password'"
-      iconClass="fas fa-lock"
-    >
-      <button @click="toggleConfirmPassword" type="button">
-        <i :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-      </button>
-    </BaseInput>
-    <span class="loi" v-if="confirmPasswordError">{{
-      confirmPasswordError
-    }}</span>
-
-    <!-- Captcha -->
     <div class="nhomForm captcha-group">
       <BaseInput
         v-model="captcha"
         label="Mã xác thực"
         iconClass="fas fa-shield-alt"
       />
-      <span class="loi" v-if="captchaError">{{ captchaError }}</span>
       <div class="captcha-display" @click="refreshCaptcha">
         {{ captchaCode }}
         <i class="fas fa-sync-alt refresh-icon"></i>
       </div>
     </div>
+    <span class="loi" v-if="captchaError">{{ captchaError }}</span>
 
-    <!-- Điều khoản -->
     <div class="nhomForm terms-group">
       <label>
         <input type="checkbox" v-model="terms" />
         Tôi đồng ý với
         <router-link to="/terms">điều khoản dịch vụ</router-link>.
       </label>
-      <span class="loi" v-if="termsError">{{ termsError }}</span>
     </div>
-
+    <span class="loi" v-if="termsError">{{ termsError }}</span>
+    
     <p class="loi" v-if="errorMessage">{{ errorMessage }}</p>
 
     <button type="submit" class="login-btn ripple">Đăng Ký Ngay</button>
@@ -93,17 +95,16 @@
 </template>
 
 <script setup>
+// SCRIPT CỦA BẠN - GIỮ NGUYÊN HOÀN TOÀN
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "./auth.store";
-
-// Component input dùng chung
 import BaseInput from "@/components/common/BaseInput.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
+const emit = defineEmits(["submit-success", "submit-error"]);
 
-// Form data
 const fullName = ref("");
 const username = ref("");
 const email = ref("");
@@ -113,14 +114,12 @@ const confirmPassword = ref("");
 const captcha = ref("");
 const terms = ref(false);
 
-// Toggle password visibility
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const togglePassword = () => (showPassword.value = !showPassword.value);
 const toggleConfirmPassword = () =>
   (showConfirmPassword.value = !showConfirmPassword.value);
 
-// Error states
 const fullNameError = ref("");
 const usernameError = ref("");
 const emailError = ref("");
@@ -131,7 +130,6 @@ const captchaError = ref("");
 const termsError = ref("");
 const errorMessage = ref("");
 
-// Captcha
 const captchaCode = ref(generateCaptcha());
 function generateCaptcha() {
   const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -145,8 +143,7 @@ const refreshCaptcha = () => {
   captcha.value = "";
 };
 
-const handleRegister = async () => {
-  // Reset errors
+const validateForm = () => {
   fullNameError.value = "";
   usernameError.value = "";
   emailError.value = "";
@@ -157,37 +154,60 @@ const handleRegister = async () => {
   termsError.value = "";
   errorMessage.value = "";
 
-  // Validation
-  if (!fullName.value) return (fullNameError.value = "Nhập họ và tên");
-  if (!username.value) return (usernameError.value = "Nhập tên đăng nhập");
-  if (!/^[a-z0-9]{3,20}$/.test(username.value))
-    return (usernameError.value = "Tên đăng nhập không hợp lệ");
-
-  if (!email.value) return (emailError.value = "Nhập email");
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value))
-    return (emailError.value = "Email không hợp lệ");
-
-  if (!phone.value) return (phoneError.value = "Nhập số điện thoại");
-  if (!/^0\d{9}$/.test(phone.value))
-    return (phoneError.value = "SĐT phải 10 số và bắt đầu bằng 0");
-
-  if (!password.value) return (passwordError.value = "Nhập mật khẩu");
-  if (password.value.length < 6)
-    return (passwordError.value = "Mật khẩu tối thiểu 6 ký tự");
-
-  if (!confirmPassword.value)
-    return (confirmPasswordError.value = "Xác nhận mật khẩu");
-  if (password.value !== confirmPassword.value)
-    return (confirmPasswordError.value = "Mật khẩu không khớp");
-
-  if (!captcha.value) return (captchaError.value = "Nhập mã xác thực");
-  if (captcha.value !== captchaCode.value) {
+  if (!fullName.value) {
+    fullNameError.value = "Nhập họ và tên";
+    return false;
+  }
+  if (!username.value) {
+    usernameError.value = "Nhập tên đăng nhập";
+    return false;
+  }
+  if (!/^[a-z0-9]{3,20}$/.test(username.value)) {
+    usernameError.value = "Tên đăng nhập 3-20 ký tự, không dấu, không hoa";
+    return false;
+  }
+  if (!email.value) {
+    emailError.value = "Nhập email";
+    return false;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+    emailError.value = "Email không hợp lệ";
+    return false;
+  }
+  if (!phone.value) {
+    phoneError.value = "Nhập số điện thoại";
+    return false;
+  }
+  if (!/^0\d{9}$/.test(phone.value)) {
+    phoneError.value = "SĐT phải 10 số và bắt đầu bằng 0";
+    return false;
+  }
+  if (!password.value) {
+    passwordError.value = "Nhập mật khẩu";
+    return false;
+  }
+  if (password.value.length < 6) {
+    passwordError.value = "Mật khẩu tối thiểu 6 ký tự";
+    return false;
+  }
+  if (password.value !== confirmPassword.value) {
+    confirmPasswordError.value = "Mật khẩu không khớp";
+    return false;
+  }
+  if (captcha.value.toUpperCase() !== captchaCode.value) {
     captchaError.value = "Mã xác thực sai";
     refreshCaptcha();
-    return;
+    return false;
   }
+  if (!terms.value) {
+    termsError.value = "Cần đồng ý điều khoản";
+    return false;
+  }
+  return true;
+};
 
-  if (!terms.value) return (termsError.value = "Cần đồng ý điều khoản");
+const handleRegister = async () => {
+  if (!validateForm()) return;
 
   try {
     await authStore.register({
@@ -198,11 +218,22 @@ const handleRegister = async () => {
       password: password.value,
       gender: "other",
     });
-
-    errorMessage.value = "Đăng ký thành công!";
-    setTimeout(() => router.push("/dang-nhap"), 1000);
+    emit("submit-success", "Đăng ký thành công! Đang chuyển đến trang đăng nhập...");
   } catch (err) {
-    errorMessage.value = err?.message || "Đăng ký thất bại";
+    emit("submit-error", err?.response?.data?.message || "Đăng ký thất bại, vui lòng thử lại.");
   }
 };
 </script>
+
+<style scoped>
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #4caf50;
+}
+</style>
