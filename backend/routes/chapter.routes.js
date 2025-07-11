@@ -2,16 +2,15 @@ const express = require("express");
 const router = express.Router();
 const chapterController = require("../controllers/chapter.controller");
 const { authenticateToken, authorizeRoles } = require("../middleware/auth");
-const {
-  validateCreateChapter,
-  validateUpdateChapter,
-} = require("../validators/chapter.validator"); // import validator
+// const {
+// validateCreateChapter,
+// validateUpdateChapter,
+// } = require("../validators/chapter.validator"); // import validator
 
 router.post(
   "/",
   authenticateToken,
   authorizeRoles("author", "admin"), // chỉ tác giả hoặc admin được thêm chương
-  validateCreateChapter,
   chapterController.createChapter
 ); // Tạo chương mới (chỉ admin và tác giả mới được tạo chương)
 
@@ -28,7 +27,6 @@ router.put(
   "/:id",
   authenticateToken,
   authorizeRoles("admin", "author"),
-  validateUpdateChapter,
   chapterController.updateChapter
 ); // Cập nhật chương theo ID (chỉ admin và tác giả mới được cập nhật)
 

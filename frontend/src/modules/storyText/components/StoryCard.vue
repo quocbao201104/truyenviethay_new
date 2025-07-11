@@ -1,6 +1,12 @@
 <template>
   <router-link :to="`/truyen/${story.slug}`" class="story-card">
-    <img :src="getImageUrl(story.anh_bia)" alt="Bìa truyện" class="cover" />
+    <img
+      :src="getImageUrl(story.anh_bia)"
+      alt="Bìa truyện"
+      class="cover"
+      crossorigin="anonymous"
+      @error="handleImageError"
+    />
     <h3>{{ story.ten_truyen }}</h3>
     <p class="author">✍️ {{ story.tac_gia }}</p>
     <p class="desc">{{ story.mo_ta.slice(0, 100) }}...</p>
@@ -14,7 +20,9 @@
 defineProps({ story: Object });
 
 const getImageUrl = (path) =>
-  path.startsWith("http") ? path : `/uploads_img/bia_truyen/${path}`;
+  path.startsWith("http")
+    ? path
+    : `http://localhost:3000/uploads_img/bia_truyen/${path}`;
 
 const formatDate = (dateStr) =>
   new Date(dateStr).toLocaleDateString("vi-VN", {

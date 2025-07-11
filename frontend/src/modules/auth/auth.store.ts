@@ -13,12 +13,14 @@ import { useToast } from "vue-toastification"; // Import useToast
 interface AuthState {
   token: string | null;
   user: User | null;
+  isInitialized: boolean;
 }
 
 export const useAuthStore = defineStore("auth", {
   state: (): AuthState => ({
     token: localStorage.getItem("token") || null,
     user: null,
+    isInitialized: false,
   }),
 
   getters: {
@@ -36,7 +38,10 @@ export const useAuthStore = defineStore("auth", {
         return response;
       } catch (error: unknown) {
         const err = error as AxiosError<{ message?: string }>;
-        const errorMessage = err.response?.data?.message || err.message || "Tài khoản hoặc mật khẩu không đúng.";
+        const errorMessage =
+          err.response?.data?.message ||
+          err.message ||
+          "Tài khoản hoặc mật khẩu không đúng.";
         toast.error(errorMessage); // Hiển thị toast lỗi
         throw {
           message: errorMessage,
@@ -52,7 +57,8 @@ export const useAuthStore = defineStore("auth", {
         toast.success("Đăng ký thành công!"); // Hiển thị toast thành công cho đăng ký
       } catch (error: unknown) {
         const err = error as AxiosError<{ message?: string }>;
-        const errorMessage = err.response?.data?.message || err.message || "Đăng ký thất bại";
+        const errorMessage =
+          err.response?.data?.message || err.message || "Đăng ký thất bại";
         toast.error(errorMessage); // Hiển thị toast lỗi cho đăng ký
         throw err.response?.data || { message: errorMessage };
       }
@@ -89,6 +95,7 @@ export const useAuthStore = defineStore("auth", {
           this.logout(); // Clear token nếu có lỗi
         }
       }
+      this.isInitialized = true;
     },
   },
 });

@@ -13,7 +13,7 @@ const getAllStories = async (req, res) => {
   }
 };
 
-// Lấy truyện public đã duyệt (dành cho frontend)
+// Lấy truyện public đã duyệt
 const getPublicStories = async (req, res) => {
   try {
     const { page, limit, sort_by, order, keyword } = req.query;

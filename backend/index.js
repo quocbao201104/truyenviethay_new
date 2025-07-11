@@ -1,4 +1,5 @@
 const express = require("express");
+const methodOverride = require("method-override");
 const app = express();
 const port = process.env.PORT || 3000;
 require("dotenv").config(); // Load biến môi trường từ file .env
@@ -34,11 +35,29 @@ app.use(compression());
 app.use(xssClean());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
 // Xử lý preflight requests
 app.options("*", cors());
 const publicPath = path.resolve(__dirname, "public");
 app.use(express.static(publicPath));
 console.log("🧭 Static path:", path.join(__dirname, "public"));
+
+// 1. Helmet: nới lỏng CORP
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
+
+// 2. Static image: cho phép truy cập từ FE
+app.use(
+  "/uploads_img",
+  (req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+    next();
+  },
+  express.static(path.join(__dirname, "public/uploads_img"))
+);
 
 // Rate limit
 const limiter = rateLimit({
@@ -64,6 +83,7 @@ app.use("/api/history", require("./routes/history.routes"));
 app.use("/api/comments", require("./routes/comment.routes"));
 app.use("/api/follow", require("./routes/follow.routes"));
 app.use("/api/like", require("./routes/like.routes"));
+app.use("/api/user", require("./routes/user.routes")); // THÊM DÒNG NÀY ĐỂ ĐĂNG KÝ ROUTE USER
 
 // user level
 app.use("/api/levels", require("./routes/userLevel.routes"));

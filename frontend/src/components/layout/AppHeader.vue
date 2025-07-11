@@ -51,7 +51,9 @@
               alt="User Avatar"
               class="user-avatar"
               @error="handleAvatarError"
+              crossorigin="anonymous"
             />
+
             <i
               class="fas fa-caret-down dropdown-toggle-icon"
               :class="{ rotate: showDropdown }"
@@ -60,7 +62,13 @@
 
           <div v-if="showDropdown" class="user-dropdown">
             <div class="user-greeting">
-              <img :src="avatarUrl" alt="User Avatar" class="greeting-avatar" />
+              <img
+                :src="avatarUrl"
+                alt="User Avatar"
+                class="greeting-avatar"
+                @error="handleAvatarError"
+                crossorigin="anonymous"
+              />
               <span>Chào, {{ userFullName }}!</span>
             </div>
             <router-link to="/user/thong-tin-ca-nhan" class="dropdown-item">
@@ -95,8 +103,6 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/modules/auth/auth.store";
 
-import defaultAvatar from '@/assets/images/default-avatar.jpg';
-
 export default {
   name: "AppHeader",
   setup() {
@@ -119,15 +125,25 @@ export default {
 
     const avatarUrl = computed(() => {
       const userAvatar = authStore.user?.avatar;
-      if (userAvatar && userAvatar !== '/uploads_img/avatar/default-avatar.jpg') {
+      // Nếu có avatar BE → dùng luôn
+      if (userAvatar) {
         return `http://localhost:3000${userAvatar}`;
       }
-      return defaultAvatar;
+      // Nếu BE chưa set → fallback ảnh default trên BE
+      return `http://localhost:3000/uploads_img/avatar/default-avatar.jpg`;
     });
 
+    const avatarErrored = ref(false);
+
     const handleAvatarError = (event) => {
-      console.error("Failed to load user avatar, using local fallback.");
-      event.target.src = defaultAvatar;
+      if (!avatarErrored.value) {
+        console.warn("Avatar load failed, switching to fallback.");
+        avatarErrored.value = true;
+        event.target.src =
+          "http://localhost:3000/uploads_img/avatar/default-avatar.jpg";
+      } else {
+        console.error("Fallback avatar also failed. Giving up.");
+      }
     };
 
     // toggleGenreDropdown không còn cần thiết
@@ -360,7 +376,6 @@ export default {
 
 /* Các style liên quan đến dropdown Thể loại đã bị xóa */
 /* .dropdown, .dropdown-toggle, .genre-toggle-icon, .dropdown-menu, .dropdown-item, .dropdown-divider không còn được sử dụng */
-
 
 /* Dấu phân cách */
 .separator {

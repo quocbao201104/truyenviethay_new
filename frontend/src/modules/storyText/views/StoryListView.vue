@@ -1,6 +1,6 @@
 <template>
-  <AppHeader />
   <div class="story-list-container">
+    <AppHeader />
 
     <h1 class="page-title">📚 Danh sách truyện</h1>
 
@@ -24,22 +24,23 @@
         Sau →
       </button>
     </div>
+    <AppFooter />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
-import AppHeader from "@/components/layout/AppHeader.vue";
-import { getAllStories } from "@/modules/storyText/storyText.api";
+import { getPublicStories } from "@/modules/storyText/storyText.api";
 import StoryCard from "@/modules/storyText/components/StoryCard.vue";
-
+import AppHeader from "@/components/layout/AppHeader.vue";
+import AppFooter from "@/components/layout/AppFooter.vue";
 const stories = ref([]);
 const currentPage = ref(1);
 const totalPages = ref(1);
 
 const fetchStories = async (page = 1) => {
   try {
-    const res = await getAllStories({ page });
+    const res = await getPublicStories({ page });
     stories.value = res.data;
     totalPages.value = res.pagination.total_pages;
     currentPage.value = res.pagination.current_page;
@@ -61,7 +62,6 @@ onMounted(() => {
 
 <style scoped>
 .story-list-container {
-  max-width: 1200px;
   margin: 0 auto;
 }
 

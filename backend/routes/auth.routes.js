@@ -4,14 +4,14 @@ const authController = require("../controllers/auth.controller");
 const banUserUntil = require("../controllers/banUntil"); // import hàm ban user
 const upload = require("../middleware/upload_img"); // dùng multer
 const { authenticateToken, authorizeRoles } = require("../middleware/auth");
-const {
-  validateRegister,
-  validateLogin,
-  validateUpdateUser,
-} = require("../validators/auth.validator");
+// const {
+// validateRegister,
+// validateLogin,
+// validateUpdateUser,
+// } = require("../validators/auth.validator");
 
-router.post("/dang-ky", validateRegister, authController.register);
-router.post("/dang-nhap", validateLogin, authController.login);
+router.post("/dang-ky", authController.register);
+router.post("/dang-nhap", authController.login);
 router.get("/me", authenticateToken, authController.getMe);
 
 router.get(
@@ -34,7 +34,6 @@ router.put(
   "/me",
   authenticateToken,
   upload.single("avatar"),
-  validateUpdateUser,
   authController.updateMe
 ); // Cập nhật thông tin người dùng
 
