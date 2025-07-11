@@ -150,6 +150,7 @@ exports.updateMe = async (req, res) => {
   console.log("updateMe Controller: req.body.avatar:", req.body.avatar); // Debug giá trị avatar từ form-data (nếu không phải file)
 
   if (req.file) {
+
     avatarPathToDB = "/uploads_img/avatar/" + req.file.filename;
     console.log("Avatar mới từ upload:", avatarPathToDB);
   } else if (req.body.remove_avatar === "true") {
@@ -163,6 +164,7 @@ exports.updateMe = async (req, res) => {
 
   if (avatarPathToDB !== undefined) {
     updateData.avatar = avatarPathToDB;
+
   }
 
   try {
@@ -171,6 +173,7 @@ exports.updateMe = async (req, res) => {
     if (email !== undefined) updateData.email = email;
     if (phone !== undefined) updateData.phone = phone;
     if (gender !== undefined) updateData.gender = gender;
+
 
     // CHỈ THÊM THUỘC TÍNH `avatar` VÀO `updateData` NẾU CÓ SỰ THAY ĐỔI VỀ AVATAR (file mới HOẶC yêu cầu xóa)
     // Tức là avatarPathToDB đã được gán giá trị (không phải undefined)
@@ -219,6 +222,7 @@ exports.updateMe = async (req, res) => {
     const updatedUserResults = await User.findById(userId); // Sử dụng findById đã được sửa để lấy password
     const updatedUser = updatedUserResults[0];
 
+
     res.json({ message: "Cập nhật thông tin thành công!", user: updatedUser }); // TRẢ VỀ USER MỚI NHẤT
   } catch (err) {
     console.error("Lỗi server khi cập nhật thông tin trong updateMe:", err);
@@ -248,6 +252,7 @@ exports.changePassword = async (req, res) => {
     return res
       .status(400)
       .json({ message: "Vui lòng nhập đầy đủ mật khẩu cũ và mật khẩu mới." });
+
   }
 
   try {
@@ -261,6 +266,7 @@ exports.changePassword = async (req, res) => {
       "changePassword Controller: User found. User password (partial):",
       user.password ? user.password.substring(0, 10) + "..." : "N/A"
     );
+
 
     const isMatch = await bcrypt.compare(old_password, user.password);
     if (!isMatch) {
@@ -279,6 +285,7 @@ exports.changePassword = async (req, res) => {
       return res
         .status(400)
         .json({ message: "Mật khẩu mới không được giống mật khẩu cũ." });
+
     }
 
     const hashed = await bcrypt.hash(new_password, 10);
@@ -296,6 +303,8 @@ exports.changePassword = async (req, res) => {
         message:
           "Không thể cập nhật mật khẩu. Có thể mật khẩu mới giống mật khẩu cũ.",
       });
+    
+    
     }
 
     res.json({ message: "Đổi mật khẩu thành công!" });
@@ -304,6 +313,7 @@ exports.changePassword = async (req, res) => {
       "Lỗi server khi đổi mật khẩu trong changePassword Controller:",
       err
     );
+
     res.status(500).json({
       message: "Lỗi server khi đổi mật khẩu",
       error: err.message,
@@ -313,74 +323,69 @@ exports.changePassword = async (req, res) => {
 
 // Các hàm khác (giữ nguyên)
 exports.getAllUsers = async (req, res) => {
-  try {
-    const users = await User.findAllUsers();
-    res.json({ data: users });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Lỗi lấy danh sách người dùng", error: err.message });
-  }
+    try {
+        const users = await User.findAllUsers();
+        res.json({ data: users });
+    } catch (err) {
+        res.status(500).json({ message: "Lỗi lấy danh sách người dùng", error: err.message });
+    }
 };
 
 exports.getUserById = async (req, res) => {
-  const userId = req.params.id;
+    const userId = req.params.id;
 
-  try {
-    const users = await User.findById(userId);
+    try {
+        const users = await User.findById(userId);
 
-    if (users.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy người dùng" });
+        if (users.length === 0) {
+            return res.status(404).json({ message: "Không tìm thấy người dùng" });
+        }
+
+        const user = users[0];
+        res.json({
+            message: "Thông tin người dùng",
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                full_name: user.full_name,
+                phone: user.phone,
+                avatar: user.avatar,
+                role: user.role,
+                created_at: user.created_at,
+            },
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: "Lỗi khi lấy thông tin người dùng",
+            error: err.message,
+        });
     }
-
-    const user = users[0];
-    res.json({
-      message: "Thông tin người dùng",
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        full_name: user.full_name,
-        phone: user.phone,
-        avatar: user.avatar,
-        role: user.role,
-        created_at: user.created_at,
-      },
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: "Lỗi khi lấy thông tin người dùng",
-      error: err.message,
-    });
-  }
 };
 
 exports.deleteUser = async (req, res) => {
-  const userId = req.params.id;
+    const userId = req.params.id;
 
-  try {
-    const users = await User.findById(userId);
+    try {
+        const users = await User.findById(userId);
 
-    if (users.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "Không tìm thấy người dùng để xóa" });
+        if (users.length === 0) {
+            return res.status(404).json({ message: "Không tìm thấy người dùng để xóa" });
+        }
+
+        const user = users[0];
+
+        if (user.role === "author") {
+            return res.status(400).json({
+                message: "Không thể xóa tài khoản tác giả qua API này. Hệ thống sẽ xử lý riêng.",
+            });
+        }
+
+        const affectedRows = await User.deleteById(userId);
+
+        res.json({ message: "Xóa người dùng thành công!" });
+    } catch (err) {
+        console.error("deleteUser error:", err);
+        res.status(500).json({ message: "Lỗi server khi xóa người dùng" });
     }
-
-    const user = users[0];
-
-    if (user.role === "author") {
-      return res.status(400).json({
-        message:
-          "Không thể xóa tài khoản tác giả qua API này. Hệ thống sẽ xử lý riêng.",
-      });
-    }
-
-    const affectedRows = await User.deleteById(userId);
-
-    res.json({ message: "Xóa người dùng thành công!" });
-  } catch (err) {
-    console.error("deleteUser error:", err);
-    res.status(500).json({ message: "Lỗi server khi xóa người dùng" });
-  }
 };

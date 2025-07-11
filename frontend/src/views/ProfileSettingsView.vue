@@ -26,6 +26,7 @@
                 crossorigin="anonymous"
               />
 
+
               <input
                 type="file"
                 accept="image/jpeg,image/png"
@@ -38,6 +39,7 @@
                 class="avatar-btn"
                 @click="avatarInput?.click()"
               >
+
                 <i class="fas fa-camera"></i> Chọn ảnh
               </button>
             </div>
@@ -56,6 +58,7 @@
             <span v-if="errors.full_name" class="error">{{
               errors.full_name
             }}</span>
+
           </div>
 
           <div class="form-group">
@@ -105,6 +108,7 @@
             <span v-if="errors.current_password" class="error">{{
               errors.current_password
             }}</span>
+
           </div>
           <div class="form-group">
             <label class="form-label">Mật khẩu mới</label>
@@ -118,6 +122,7 @@
             <span v-if="errors.new_password" class="error">{{
               errors.new_password
             }}</span>
+
           </div>
           <div class="form-group">
             <label class="form-label">Xác nhận mật khẩu mới</label>
@@ -131,6 +136,7 @@
             <span v-if="errors.confirm_new_password" class="error">{{
               errors.confirm_new_password
             }}</span>
+
           </div>
 
           <div class="form-group agree-group">
@@ -152,6 +158,7 @@
           >
             <i class="fas fa-save"></i>
             {{ userStore.isUpdatingProfile ? "Đang lưu..." : "Lưu thay đổi" }}
+
           </button>
         </form>
       </section>
@@ -170,6 +177,7 @@ import CustomSelect from "@/components/common/CustomSelect.vue";
 import AppFooter from "@/components/layout/AppFooter.vue";
 import type { UpdateUserPayload, ChangePasswordPayload } from "@/types/user";
 import { useToast } from "vue-toastification";
+
 
 interface FormErrors {
   full_name?: string;
@@ -197,6 +205,7 @@ const form = ref({
   current_password: "",
   new_password: "",
   confirm_new_password: "",
+
   agree: false,
 });
 
@@ -215,6 +224,7 @@ const originalForm = ref<
   email: "",
   phone: "",
   gender: "other",
+
 });
 
 const avatarPreview = ref<string | null>(null);
@@ -253,6 +263,7 @@ onMounted(async () => {
   if (!authStore.token) {
     toast.error("Vui lòng đăng nhập để chỉnh sửa thông tin!");
     router.push("/dang-nhap");
+
     return;
   }
   userStore.fetchUserProfile();
@@ -264,24 +275,27 @@ const avatarUrl = computed(() => {
   if (userAvatar) return `http://localhost:3000${userAvatar}`;
   // fallback ảnh mặc định BE
   return `http://localhost:3000/uploads_img/avatar/default-avatar.jpg`;
+
 });
 
 const handleAvatarError = (event: Event) => {
   const target = event.target as HTMLImageElement;
   target.src = `http://localhost:3000/uploads_img/avatar/default-avatar.jpg`;
-};
+
 
 const handleAvatarChange = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
     if (!["image/jpeg", "image/png"].includes(file.type)) {
       errors.value.avatar = "Chỉ hỗ trợ JPG/PNG";
+
       form.value.avatar = null;
       avatarPreview.value = null;
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       errors.value.avatar = "Ảnh tối đa 5MB";
+
       form.value.avatar = null;
       avatarPreview.value = null;
       return;
@@ -293,6 +307,7 @@ const handleAvatarChange = (event: Event) => {
     form.value.avatar = null;
     avatarPreview.value = null;
     errors.value.avatar = "";
+
   }
 };
 
@@ -305,6 +320,7 @@ const validateForm = (): boolean => {
     isValid = false;
   } else if (form.value.full_name.length > 50) {
     errors.value.full_name = "Họ và tên tối đa 50 ký tự";
+
     isValid = false;
   }
 
@@ -313,6 +329,7 @@ const validateForm = (): boolean => {
     isValid = false;
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
     errors.value.email = "Email không hợp lệ";
+
     isValid = false;
   }
 
@@ -339,6 +356,7 @@ const validateForm = (): boolean => {
       isValid = false;
     } else if (form.value.current_password.length < 6) {
       errors.value.current_password = "Mật khẩu tối thiểu 6 ký tự";
+
       isValid = false;
     }
 
@@ -347,6 +365,7 @@ const validateForm = (): boolean => {
       isValid = false;
     } else if (form.value.new_password.length < 6) {
       errors.value.new_password = "Mật khẩu mới tối thiểu 6 ký tự";
+
       isValid = false;
     }
 
@@ -355,12 +374,14 @@ const validateForm = (): boolean => {
       isValid = false;
     } else if (form.value.confirm_new_password !== form.value.new_password) {
       errors.value.confirm_new_password = "Mật khẩu xác nhận không khớp";
+
       isValid = false;
     }
   }
 
   if (!form.value.agree) {
     errors.value.agree = "Vui lòng đồng ý thay đổi";
+
     isValid = false;
   }
 
@@ -422,6 +443,7 @@ const handleSubmit = async () => {
         // VÀ ảnh hiện tại không phải là default-avatar
         // Thì gửi null để backend xóa ảnh
         updatePayload.avatar = null;
+
       }
       // Nếu avatarPreview vẫn giữ nguyên ảnh cũ và không có file mới, không cần thêm vào payload
 
@@ -440,11 +462,13 @@ const handleSubmit = async () => {
       form.value.current_password = "";
       form.value.new_password = "";
       form.value.confirm_new_password = "";
+
     }
 
     form.value.agree = false;
     // Chuyển hướng về trang profile sau khi cập nhật thành công
     router.push("/user/thong-tin-ca-nhan");
+
   } catch (error: any) {
     // console.error đã có trong userStore actions, không cần log lại đây trừ khi muốn debug đặc biệt
   }
@@ -454,6 +478,7 @@ const handleSubmit = async () => {
 <style scoped>
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Sora:wght@400;600&display=swap");
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css");
+
 
 .settings-page {
   min-height: 100vh;
@@ -519,12 +544,14 @@ const handleSubmit = async () => {
 
 .settings-title {
   font-family: "Sora", sans-serif;
+
   font-size: 2.25rem;
   font-weight: 700;
   color: #a4f9a4;
   margin-bottom: 2rem;
   text-align: center;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+
 }
 
 .settings-form {
@@ -541,6 +568,7 @@ const handleSubmit = async () => {
 
 .form-label {
   font-family: "Manrope", sans-serif;
+
   font-size: 1rem;
   font-weight: 600;
   color: #cccccc;
@@ -553,6 +581,7 @@ const handleSubmit = async () => {
   border-radius: 0.5rem;
   color: #ffffff;
   font-family: "Manrope", sans-serif;
+
   font-size: 1rem;
   outline: none;
   transition: all 0.3s ease;
@@ -599,6 +628,7 @@ const handleSubmit = async () => {
   border: 1px solid #4caf50;
   border-radius: 0.5rem;
   font-family: "Manrope", sans-serif;
+
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -620,6 +650,7 @@ const handleSubmit = async () => {
   align-items: center;
   gap: 0.5rem;
   font-family: "Manrope", sans-serif;
+
   font-size: 0.9rem;
   color: #ffffff;
 }
@@ -633,6 +664,7 @@ const handleSubmit = async () => {
 .error {
   color: #ef4444;
   font-family: "Manrope", sans-serif;
+
   font-size: 0.85rem;
   margin-top: -0.3rem;
 }
@@ -642,6 +674,7 @@ const handleSubmit = async () => {
   background: linear-gradient(90deg, #4caf50, #66bb6a);
   color: #ffffff;
   font-family: "Sora", sans-serif;
+
   font-size: 1rem;
   font-weight: 600;
   border: none;
@@ -658,6 +691,7 @@ const handleSubmit = async () => {
 
 .submit-btn::after {
   content: "";
+
   position: absolute;
   top: 50%;
   left: 50%;
@@ -787,3 +821,4 @@ const handleSubmit = async () => {
   }
 }
 </style>
+

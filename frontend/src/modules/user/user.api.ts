@@ -6,6 +6,7 @@ import type {
   ChangePasswordPayload,
 } from "@/types/user";
 
+
 /**
  * Lấy thông tin chi tiết của người dùng hiện tại.
  * Endpoint: GET /api/user/me
@@ -46,6 +47,7 @@ export async function updateMeApi(data: UpdateUserPayload): Promise<any> {
     },
   });
 
+
   return response.data;
 }
 
@@ -61,3 +63,4 @@ export async function changePasswordApi(
   const response = await axios.put("/api/user/change-password", data);
   return response.data;
 }
+

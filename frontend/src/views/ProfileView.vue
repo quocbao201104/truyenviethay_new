@@ -38,6 +38,7 @@
               <p class="profile-username">
                 @{{ user?.username || "username" }}
               </p>
+
             </div>
           </div>
 
@@ -48,6 +49,7 @@
               <span class="detail-value">{{
                 user?.email || "Không có dữ liệu"
               }}</span>
+
             </div>
             <div class="detail-row">
               <i class="fas fa-phone detail-icon"></i>
@@ -55,6 +57,7 @@
               <span class="detail-value">{{
                 user?.phone || "Không có dữ liệu"
               }}</span>
+
             </div>
             <div class="detail-row">
               <i class="fas fa-venus-mars detail-icon"></i>
@@ -62,6 +65,7 @@
               <span class="detail-value">{{
                 formatGender(user?.gender) || "Không có dữ liệu"
               }}</span>
+
             </div>
             <div class="detail-row">
               <i class="fas fa-calendar-alt detail-icon"></i>
@@ -69,6 +73,7 @@
               <span class="detail-value">{{
                 formatDate(user?.created_at) || "Không có dữ liệu"
               }}</span>
+
             </div>
             <div class="detail-row">
               <i class="fas fa-user-tag detail-icon"></i>
@@ -93,6 +98,7 @@
                     ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
                     : "User"
                 }}
+
               </span>
             </div>
           </div>
@@ -133,6 +139,7 @@
               to="/user/quan-ly-truyen"
               class="profile-nav-tab"
             >
+
               <i class="fas fa-list-check"></i> Quản lý truyện của tôi
             </router-link>
           </div>
@@ -152,6 +159,7 @@ import AppFooter from "@/components/layout/AppFooter.vue";
 
 export default {
   name: "ProfileView",
+
   components: { AppHeader, AppFooter },
   setup() {
     const authStore = useAuthStore();
@@ -179,6 +187,7 @@ export default {
       } else {
         console.warn("Fallback avatar also failed to load. Giving up.");
       }
+
     };
 
     const formatDate = (date) => {
@@ -191,6 +200,7 @@ export default {
         year: "numeric",
         month: "long",
         day: "numeric",
+
       });
     };
 
@@ -202,6 +212,7 @@ export default {
         other: "Khác",
       };
       return genderMap[gender] || "Khác";
+
     };
 
     return {
@@ -224,6 +235,7 @@ export default {
 /* Import Font Awesome for icons */
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css");
 
+
 /* Page wrapper */
 .profile-page {
   min-height: 100vh;
@@ -242,6 +254,7 @@ export default {
 /* Loading/Error Messages */
 .loading-state-message,
 .error-state-message {
+
   text-align: center;
   font-size: 1.2rem;
   padding: 20px;
@@ -287,6 +300,7 @@ export default {
   margin: 0 auto;
   border-radius: 2px;
 }
+
 
 /* Profile card */
 .profile-card {
@@ -340,6 +354,7 @@ export default {
 
 .profile-name {
   font-family: "Sora", sans-serif;
+
   font-size: 2.25rem;
   font-weight: 700;
   color: #ffffff;
@@ -349,6 +364,7 @@ export default {
 
 .profile-username {
   font-family: "Manrope", sans-serif;
+
   font-size: 1.5rem;
   color: #4caf50;
   font-weight: 600;
@@ -386,6 +402,7 @@ export default {
 
 .detail-label {
   font-family: "Manrope", sans-serif;
+
   font-size: 1rem;
   color: #a3a3a3;
   font-weight: 500;
@@ -394,6 +411,7 @@ export default {
 
 .detail-value {
   font-family: "Manrope", sans-serif;
+
   font-size: 1.1rem;
   color: #ffffff;
   font-weight: 500;
@@ -461,6 +479,7 @@ export default {
   background: rgba(76, 175, 80, 0.15);
   color: #4caf50;
   font-family: "Sora", sans-serif;
+
   font-size: 1rem;
   font-weight: 600;
   border-radius: 0.5rem;
@@ -479,6 +498,7 @@ export default {
 
 .profile-nav-tab::after {
   content: "";
+
   position: absolute;
   top: 50%;
   left: 50%;
