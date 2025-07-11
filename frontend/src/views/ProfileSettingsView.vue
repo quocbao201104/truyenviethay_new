@@ -648,48 +648,6 @@ const handleSubmit = async () => {
 }
 
 
-/* Toast Container (đã có trong global) */
-/*
-.toast-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-}
-
-.toast {
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  color: #ffffff;
-  font-family: 'Manrope', sans-serif;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-  cursor: pointer;
-  animation: slide-in 0.3s ease;
-}
-
-.toast.success {
-  background: #4caf50; // Đổi màu toast success
-  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-}
-
-.toast.error {
-  background: #f44336; // Đổi màu toast error
-  box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
-}
-
-@keyframes slide-in {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-*/
-
 @keyframes fade-in {
   from {
     opacity: 0;
