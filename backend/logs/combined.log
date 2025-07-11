@@ -2317,3 +2317,21 @@
 [2025-07-11 05:07:58] info: GET /api/theloai/
 [2025-07-11 05:08:47] info: GET /api/auth/me
 [2025-07-11 05:08:47] info: GET /api/theloai/
+[2025-07-11 12:27:09] info: Server is running on http://localhost:3000
+[2025-07-11 12:27:17] info: GET /api/truyen?page=1
+[2025-07-11 12:27:17] info: GET /api/auth/me
+[2025-07-11 12:27:35] info: POST /api/auth/dang-nhap
+[2025-07-11 12:27:37] info: GET /api/truyen?page=1
+[2025-07-11 12:28:03] info: GET /api/truyen?page=1
+[2025-07-11 12:28:05] info: GET /api/theloai/
+[2025-07-11 12:28:20] info: GET /api/truyen?page=1
+[2025-07-11 12:28:27] info: GET /api/truyen?page=1
+[2025-07-11 12:30:15] info: Server is running on http://localhost:3000
+[2025-07-11 12:30:48] info: GET /api/auth/me
+[2025-07-11 12:30:48] info: GET /api/truyen?page=1
+[2025-07-11 12:30:52] info: GET /api/theloai/
+[2025-07-11 12:31:39] info: GET /api/theloai/
+[2025-07-11 12:31:42] info: GET /api/theloai/
+[2025-07-11 12:31:43] info: GET /api/truyen?page=1
+[2025-07-11 12:31:46] info: GET /api/truyen?page=1
+[2025-07-11 12:31:46] info: GET /api/theloai/
