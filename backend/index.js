@@ -64,6 +64,7 @@ app.use("/api/history", require("./routes/history.routes"));
 app.use("/api/comments", require("./routes/comment.routes"));
 app.use("/api/follow", require("./routes/follow.routes"));
 app.use("/api/like", require("./routes/like.routes"));
+app.use("/api/user", require("./routes/user.routes")); // THÊM DÒNG NÀY ĐỂ ĐĂNG KÝ ROUTE USER
 
 // user level
 app.use("/api/levels", require("./routes/userLevel.routes"));
