@@ -27,7 +27,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { getAllStories } from "@/modules/storyText/storyText.api";
+import { getPublicStories } from "@/modules/storyText/storyText.api"; // ✅ Đúng API
 import StoryCard from "@/modules/storyText/components/StoryCard.vue";
 
 const stories = ref([]);
@@ -36,7 +36,7 @@ const totalPages = ref(1);
 
 const fetchStories = async (page = 1) => {
   try {
-    const res = await getAllStories({ page });
+    const res = await getPublicStories({ page }); // ✅ Đổi từ getAllStories -> getPublicStories
     stories.value = res.data;
     totalPages.value = res.pagination.total_pages;
     currentPage.value = res.pagination.current_page;

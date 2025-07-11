@@ -2156,3 +2156,62 @@
 [2025-07-10 16:35:24] warn: 404 Not Found: GET /api/api/truyen?page=1
 [2025-07-10 16:35:39] info: GET /api/api/truyen?page=1
 [2025-07-10 16:35:39] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:36:58] info: Server is running on http://localhost:3000
+[2025-07-10 17:37:23] info: GET /api/api/truyen?page=1
+[2025-07-10 17:37:23] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:37:26] info: GET /api/api/truyen?page=1
+[2025-07-10 17:37:26] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:37:28] info: GET /api/api/truyen?page=1
+[2025-07-10 17:37:28] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:37:35] info: GET /api/api/truyen?page=1
+[2025-07-10 17:37:35] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:37:35] info: GET /favicon.ico
+[2025-07-10 17:37:35] warn: 404 Not Found: GET /favicon.ico
+[2025-07-10 17:48:54] info: Server is running on http://localhost:3000
+[2025-07-10 17:49:48] info: GET /api/api/truyen?page=1
+[2025-07-10 17:49:48] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:49:52] info: GET /api/api/truyen?page=1
+[2025-07-10 17:49:52] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:49:55] info: GET /api/api/truyen?page=1
+[2025-07-10 17:49:55] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:51:30] info: GET /api/api/truyen?page=1
+[2025-07-10 17:51:30] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:51:30] info: GET /api/api/truyen?page=1
+[2025-07-10 17:51:30] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:51:44] info: GET /api/api/truyen?page=1
+[2025-07-10 17:51:44] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 17:54:34] info: GET /api/api/truyen?page=1
+[2025-07-10 17:54:34] warn: 404 Not Found: GET /api/api/truyen?page=1
+[2025-07-10 18:01:05] info: GET /api/api/truyen/public?page=1
+[2025-07-10 18:01:05] warn: 404 Not Found: GET /api/api/truyen/public?page=1
+[2025-07-10 18:01:08] info: GET /api/api/truyen/public?page=1
+[2025-07-10 18:01:08] warn: 404 Not Found: GET /api/api/truyen/public?page=1
+[2025-07-10 18:01:14] info: GET /api/api/truyen/public?page=1
+[2025-07-10 18:01:14] warn: 404 Not Found: GET /api/api/truyen/public?page=1
+[2025-07-10 18:01:53] info: GET /api/api/truyen/public?page=1
+[2025-07-10 18:01:53] warn: 404 Not Found: GET /api/api/truyen/public?page=1
+[2025-07-10 18:04:20] info: GET /api/truyen/public?page=1
+[2025-07-10 18:04:31] info: GET /api/truyen/public?page=1
+[2025-07-10 18:05:37] info: GET /api/api/truyen/public?page=1
+[2025-07-10 18:05:37] warn: 404 Not Found: GET /api/api/truyen/public?page=1
+[2025-07-10 18:05:44] info: GET /api/api/truyen/public?page=1
+[2025-07-10 18:05:44] warn: 404 Not Found: GET /api/api/truyen/public?page=1
+[2025-07-10 18:06:50] info: GET /api/api/truyen/public?page=1
+[2025-07-10 18:06:50] warn: 404 Not Found: GET /api/api/truyen/public?page=1
+[2025-07-10 18:08:10] info: GET /api/truyen/public?page=1
+[2025-07-10 18:08:21] info: GET /api/truyen/public?page=1
+[2025-07-10 18:08:23] info: GET /api/truyen/public?page=1
+[2025-07-10 18:08:24] info: GET /api/truyen/public?page=1
+[2025-07-10 18:08:25] info: GET /api/truyen/public?page=1
+[2025-07-10 18:08:27] info: GET /api/truyen/public?page=1
+[2025-07-10 18:08:28] info: GET /api/truyen/public?page=1
+[2025-07-10 18:08:29] info: GET /api/truyen/public?page=1
+[2025-07-10 18:08:30] info: GET /api/truyen/public?page=1
+[2025-07-10 18:08:31] info: GET /api/truyen/public?page=1
+[2025-07-10 18:08:31] info: GET /api/truyen/public?page=1
+[2025-07-10 18:08:34] info: GET /api/truyen/public?page=1
+[2025-07-10 18:10:02] info: GET /api/truyen/public?page=1
+[2025-07-11 12:21:35] info: Server is running on http://localhost:3000
+[2025-07-11 12:21:55] info: GET /api/truyen/public?page=1
+[2025-07-11 12:22:07] info: GET /api/truyen/public?page=1
+[2025-07-11 12:22:09] info: GET /api/truyen/public?page=1
