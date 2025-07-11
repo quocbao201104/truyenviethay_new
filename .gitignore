@@ -1,0 +1,46 @@
+# --- Root level (optional)
+.DS_Store
+*.log
+*.env
+*.env.local
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# --- Backend
+/backend/node_modules/
+/backend/dist/
+/backend/logs/
+/backend/public/uploads/    # nếu là file upload runtime
+/backend/.env
+/backend/npm-debug.log*
+/backend/.eslintcache
+/backend/.repl_history
+/backend/.vscode/
+/backend/.idea
+
+# --- Frontend
+/frontend/node_modules/
+/frontend/dist/
+/frontend/dist-ssr/
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.*.local
+/frontend/logs/
+/frontend/*.log
+/frontend/.vscode/
+/frontend/.vscode/*
+!/frontend/.vscode/extensions.json
+/frontend/.idea
+
+# --- VSCode global
+.vscode/*
+!.vscode/extensions.json
+
+# --- OS/IDE junk
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
