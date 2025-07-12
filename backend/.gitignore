@@ -1,0 +1,24 @@
+# Node
+node_modules/
+dist/
+logs/
+npm-debug.log*
+
+# Runtime
+public/uploads/
+.env
+.eslintcache
+.repl_history
+
+# IDE
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+*.log
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
