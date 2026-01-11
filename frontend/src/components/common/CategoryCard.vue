@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
+
 import type { Category } from '@/types/category';
 
 const props = defineProps<{

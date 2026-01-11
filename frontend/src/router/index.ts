@@ -11,7 +11,12 @@ import AdminStoryManagementView from "@/views/admin/AdminStoryManagementView.vue
 import SubmitStoryView from "@/views/SubmitStoryView.vue"; 
 
 import { useAuthStore } from "@/modules/auth/auth.store";
-
+import StoryDetailView from "@/views/StoryDetailView.vue";
+import StoryReader from "@/modules/storyText/views/StoryReader.vue";
+import AuthorChapterManagementView from "@/views/Author/AuthorChapterManagementView.vue";
+import AuthorChapterEditor from "@/views/Author/AuthorChapterEditor.vue";
+import AuthorStoryManagementView from "@/views/Author/AuthorStoryManagementView.vue";
+import AuthorDashboardView from "@/views/AuthorDashboardView.vue";
 const routes: Array<RouteRecordRaw> = [
     { path: "/", name: "Home", component: HomeView },
     { path: "/dang-nhap", name: "Login", component: LoginView },
@@ -37,6 +42,16 @@ const routes: Array<RouteRecordRaw> = [
         props: true,
     },
     {
+        path: "/truyen-chu/:slug",
+        name: "StoryDetail",
+        component: StoryDetailView,
+    },
+    {
+        path: "/chuong/:slug",
+        name: "ChapterRead",
+        component: StoryReader,
+    },
+    {
         path: "/user/thong-tin-ca-nhan",
         name: "Profile",
         component: ProfileView,
@@ -55,6 +70,18 @@ const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true, requiredRole: ["admin"] },
     },
     {
+        path: "/user/quan-ly-truyen",
+        name: "AuthorStoryManagement",
+        component: AuthorStoryManagementView,
+        meta: { requiresAuth: true, role: "author" },
+    },
+    {
+        path: "/user/dashboard",
+        name: "AuthorDashboard",
+        component: AuthorDashboardView,
+        meta: { requiresAuth: true, role: "author" },
+    },
+    {
         path: "/admin/quan-ly-truyen", // New route for Admin Story Management
         name: "AdminManageStories",
         component: AdminStoryManagementView,
@@ -65,6 +92,24 @@ const routes: Array<RouteRecordRaw> = [
         name: "SubmitStory",
         component: SubmitStoryView, 
         meta: { requiresAuth: true, requiredRole: ['author', 'admin'] }, 
+    },
+    {
+        path: "/author/story/:storyId/chapters",
+        name: "AuthorChapterManagement",
+        component: AuthorChapterManagementView,
+        meta: { requiresAuth: true, role: "author" },
+    },
+    {
+        path: "/author/story/:storyId/chapter/add",
+        name: "AuthorAddChapter",
+        component: AuthorChapterEditor,
+        meta: { requiresAuth: true, role: "author" },
+    },
+     {
+        path: "/author/story/:storyId/chapter/:chapterId/edit",
+        name: "AuthorEditChapter",
+        component: AuthorChapterEditor,
+        meta: { requiresAuth: true, role: "author" },
     },
     {
         path: "/:pathMatch(.*)*",

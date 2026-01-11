@@ -2,9 +2,8 @@
   <div class="author-story-management-page"> <AppHeader /> <main class="author-story-management-container">
       <h1 class="page-title">Quản lý truyện của tôi</h1>
 
-      <StoryFiltersSection
+      <AuthorStoryFiltersSection
         :categories="categories"
-        :showAuthorFilter="false"
         @apply-filters="handleApplyFilters"
         @clear-filters="handleClearFilters"
       />
@@ -15,30 +14,30 @@
         </router-link>
       </div>
 
-      <StoryTableSection
-        :stories="storyTextStore.authorStories"
-        :loading="storyTextStore.authorStoriesLoading"
+      <AuthorStoryTableSection
+        :stories="storyStore.authorStories"
+        :loading="storyStore.authorStoriesLoading"
         :sortColumn="currentSortColumn"
         :sortDirection="currentSortDirection"
-        :isAuthorView="true"
         @view-details="handleViewDetails"
         @edit="handleEditStory"
+        @manage-chapters="handleManageChapters"
         @delete="handleDeleteStory"
         @requestSort="handleSortRequest"
       />
 
-      <div v-if="storyTextStore.authorStoriesPagination.total_pages > 1" class="pagination-controls">
+      <div v-if="storyStore.authorStoriesPagination.total_pages > 1" class="pagination-controls">
         <button
-          @click="handlePageChange(storyTextStore.authorStoriesPagination.current_page - 1)"
-          :disabled="storyTextStore.authorStoriesPagination.current_page === 1"
+          @click="handlePageChange(storyStore.authorStoriesPagination.current_page - 1)"
+          :disabled="storyStore.authorStoriesPagination.current_page === 1"
           class="pagination-button"
         >
           <i class="fas fa-chevron-left"></i> Trang trước
         </button>
-        <span>Trang {{ storyTextStore.authorStoriesPagination.current_page }} / {{ storyTextStore.authorStoriesPagination.total_pages }}</span>
+        <span>Trang {{ storyStore.authorStoriesPagination.current_page }} / {{ storyStore.authorStoriesPagination.total_pages }}</span>
         <button
-          @click="handlePageChange(storyTextStore.authorStoriesPagination.current_page + 1)"
-          :disabled="storyTextStore.authorStoriesPagination.current_page === storyTextStore.authorStoriesPagination.total_pages"
+          @click="handlePageChange(storyStore.authorStoriesPagination.current_page + 1)"
+          :disabled="storyStore.authorStoriesPagination.current_page === storyStore.authorStoriesPagination.total_pages"
           class="pagination-button"
         >
           Trang sau <i class="fas fa-chevron-right"></i>
@@ -51,36 +50,36 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
-import { useStoryTextStore } from '@/modules/storyText/storyText.store';
+import { useStoryStore } from '@/modules/storyText/story.store';
 import { useCategoryStore } from '@/modules/category/category.store';
 import { useAuthStore } from '@/modules/auth/auth.store';
-import StoryTableSection from '@/components/admin/StoryTableSection.vue';
-import StoryFiltersSection from '@/components/admin/StoryFiltersSection.vue';
+import AuthorStoryTableSection from '@/components/author/AuthorStoryTableSection.vue';
+import AuthorStoryFiltersSection from '@/components/author/AuthorStoryFiltersSection.vue';
 import { useRouter } from 'vue-router';
 import { useAppToast } from '@/composables/useAppToast';
-import AppHeader from "@/components/layout/AppHeader.vue"; // IMPORT HEADER
-import AppFooter from "@/components/layout/AppFooter.vue"; // IMPORT FOOTER
+import AppHeader from "@/components/layout/AppHeader.vue";
+import AppFooter from "@/components/layout/AppFooter.vue";
 
-const storyTextStore = useStoryTextStore();
+const storyStore = useStoryStore();
 const categoryStore = useCategoryStore();
 const authStore = useAuthStore();
 const router = useRouter();
 const { showSuccessToast, showErrorToast } = useAppToast();
 
-const categories = computed(() => categoryStore.categories);
+const categories = computed(() => categoryStore.categories as any[]);
 
 // Filter and Pagination State
 const currentPage = ref(1);
-const currentLimit = ref(10); // Or whatever default limit you prefer
+const currentLimit = ref(10);
 const currentKeyword = ref('');
 const currentStatus = ref('');
 const currentCategoryId = ref<number | null>(null);
 const currentSortColumn = ref('thoi_gian_cap_nhat');
-const currentSortDirection = ref('desc');
+const currentSortDirection = ref<'asc' | 'desc'>('desc');
 
 // Fetching Data
 const fetchStories = async () => {
-  await storyTextStore.fetchAuthorStories({
+  await storyStore.fetchAuthorStories({
     page: currentPage.value,
     limit: currentLimit.value,
     keyword: currentKeyword.value,
@@ -91,9 +90,9 @@ const fetchStories = async () => {
   });
 };
 
-onMounted(async () => { // Đổi thành async
+onMounted(async () => {
   if (categories.value.length === 0) {
-    await categoryStore.fetchAllCategories(); // SỬA TÊN HÀM TẠI ĐÂY
+    await categoryStore.fetchCategories();
   }
   fetchStories();
 });
@@ -119,7 +118,7 @@ const handleClearFilters = () => {
 };
 
 const handlePageChange = (page: number) => {
-  if (page > 0 && page <= storyTextStore.authorStoriesPagination.total_pages) {
+  if (page > 0 && page <= storyStore.authorStoriesPagination.total_pages) {
     currentPage.value = page;
   }
 };
@@ -132,7 +131,7 @@ const handleSortRequest = ({ column, direction }: { column: string; direction: '
 
 // Handlers for Story Actions
 const handleViewDetails = (storyId: number) => {
-  const story = storyTextStore.authorStories.find(s => s.id === storyId);
+  const story = storyStore.authorStories.find(s => s.id === storyId);
   if (story && story.slug) {
     router.push(`/truyen-chu/${story.slug}`);
   } else {
@@ -140,14 +139,20 @@ const handleViewDetails = (storyId: number) => {
   }
 };
 
+const handleManageChapters = (storyId: number) => {
+    router.push(`/author/story/${storyId}/chapters`);
+};
+
 const handleEditStory = (storyId: number) => {
-  showSuccessToast(`Tính năng chỉnh sửa truyện ID: ${storyId} sẽ được triển khai sau.`);
+  router.push({ name: 'SubmitStory', params: { id: storyId } });
 };
 
 const handleDeleteStory = async (storyId: number) => {
   if (confirm("Bạn có chắc chắn muốn xóa truyện này?")) {
     try {
-      await storyTextStore.deleteStory(storyId);
+      await storyStore.deleteStory(storyId);
+      // Refresh list after delete works because deleteStory updates local state but fetchStories ensures fresh data
+      fetchStories();
     } catch (error) {
       console.error("Lỗi khi xóa truyện:", error);
     }

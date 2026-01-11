@@ -16,10 +16,12 @@ const getAllStories = async (req, res) => {
     const result = await StoryModel.getAll({
       page: parseInt(page),
       limit: parseInt(limit),
-      trang_thai_kiem_duyet,
-      keyword,
-      author_id: parseInt(author_id),
-      category_id: parseInt(category_id),
+       trang_thai_kiem_duyet,
+       keyword,
+       author_id: parseInt(author_id),
+       category_id: parseInt(category_id),
+       sort_by,
+       order,
     });
     res.status(200).json(result);
   } catch (error) {
@@ -184,17 +186,22 @@ const approveOrRejectStory = async (req, res) => {
 
 const getMyStories = async (req, res) => {
   const userId = req.user.id;
-
-  console.log("User ID:", userId);
+  const { page, limit, trang_thai_kiem_duyet, keyword, category_id, sort_by, order } = req.query;
 
   try {
-    const stories = await StoryModel.getByAuthor(userId);
+    const result = await StoryModel.getAll({
+       page: parseInt(page) || 1,
+       limit: parseInt(limit) || 10,
+       trang_thai_kiem_duyet,
+       keyword,
+       author_id: userId, // Enforce author_id from token
+       category_id: parseInt(category_id),
+       // Note: StoryModel.getAll needs to be updated if it doesn't support sort params, 
+       // but typically it defaults to updated_at. 
+       // If you need specific sort, you might need to update getAll too.
+    });
 
-    if (!stories || stories.length === 0) {
-      return res.status(200).json({ message: "Bạn chưa đăng truyện nào." });
-    }
-
-    res.json(stories);
+    res.status(200).json(result);
   } catch (err) {
     console.error("Lỗi khi lấy truyện cá nhân:", err);
     res.status(500).json({ message: "Lỗi server" });

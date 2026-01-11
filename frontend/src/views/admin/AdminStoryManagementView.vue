@@ -14,7 +14,7 @@
 
       <StoryTableSection
         :stories="storyStore.adminStories"
-        :loading="storyStore.adminStoriesLoading"
+        :loading="storyStore.loading"
         @approve="handleApproveStory"
         @reject="handleRejectStory"
         @view-details="handleViewDetails"
@@ -111,11 +111,11 @@ import PaginationSection from '@/components/admin/PaginationSection.vue';
 import BaseModal from '@/components/common/BaseModal.vue';
 import AppHeader from "@/components/layout/AppHeader.vue"; // Import AppHeader
 import AppFooter from "@/components/layout/AppFooter.vue"; // Import AppFooter
-import { useStoryTextStore } from '@/modules/storyText/storyText.store';
+import { useStoryStore } from '@/modules/storyText/story.store';
 import { useCategoryStore } from '@/modules/category/category.store';
 import { useToast } from 'vue-toastification'; 
 
-const storyStore = useStoryTextStore();
+const storyStore = useStoryStore();
 const categoryStore = useCategoryStore();
 const toast = useToast(); 
 
@@ -138,7 +138,7 @@ const fetchStories = () => {
 
 onMounted(async () => {
   fetchStories();
-  await categoryStore.fetchAllCategories();
+  await categoryStore.fetchCategories();
   categories.value = categoryStore.categories;
 });
 

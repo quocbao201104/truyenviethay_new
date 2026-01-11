@@ -38,7 +38,7 @@
             <td class="text-center">{{ story.id }}</td>
             <td class="cover-image-cell">
               <img
-                v-if="getFinalImageUrl(story.anh_bia)"
+                v-if="story.anh_bia && getFinalImageUrl(story.anh_bia)"
                 :src="getFinalImageUrl(story.anh_bia)"
                 alt="Ảnh bìa"
                 class="story-cover-thumb"
@@ -88,6 +88,14 @@
                   >
                     <i class="fas fa-times"></i> Từ chối
                   </button>
+                  <button 
+                    v-if="isAuthorView"
+                    @click="emit('manage-chapters', story.id)"
+                    class="dropdown-item dropdown-item-button chapter-btn-dropdown"
+                    title="Quản lý chương"
+                  >
+                    <i class="fas fa-list"></i> QL Chương
+                  </button>
                   <button @click="emit('view-details', story.id)" class="dropdown-item dropdown-item-button view-details-btn-dropdown" title="Xem chi tiết">
                     <i class="fas fa-eye"></i> Chi tiết
                   </button>
@@ -105,7 +113,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, onMounted, ref, onBeforeUnmount } from 'vue';
+import { onMounted, ref, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -139,13 +147,17 @@ const props = defineProps({
     type: String as () => 'asc' | 'desc',
     default: 'asc',
   },
+  isAuthorView: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const emit = defineEmits(['approve', 'reject', 'view-details', 'delete', 'requestSort']);
+const emit = defineEmits(['approve', 'reject', 'view-details', 'delete', 'requestSort', 'manage-chapters', 'edit']);
 
 const getFinalImageUrl = (imagePath: string | null) => {
   if (!imagePath) {
-    return null;
+    return undefined;
   }
   return `http://localhost:3000/uploads_img/bia_truyen/${imagePath}`;
 };
@@ -154,15 +166,15 @@ const activeDropdownId = ref<number | null>(null);
 
 const vClickOutside = {
   mounted(el: HTMLElement, binding: any) {
-    el.__ClickOutsideHandler__ = (event: MouseEvent) => {
+    (el as any).__ClickOutsideHandler__ = (event: MouseEvent) => {
       if (!(el === event.target || el.contains(event.target as Node))) {
         binding.value(event);
       }
     };
-    document.addEventListener('click', el.__ClickOutsideHandler__);
+    document.addEventListener('click', (el as any).__ClickOutsideHandler__);
   },
   unmounted(el: HTMLElement) {
-    document.removeEventListener('click', el.__ClickOutsideHandler__);
+    document.removeEventListener('click', (el as any).__ClickOutsideHandler__);
   },
 };
 
@@ -563,6 +575,9 @@ th.sortable.sorted-desc i {
 }
 .delete-btn-dropdown {
   color: #ef4444;
+}
+.chapter-btn-dropdown {
+  color: #f59e0b; /* Amber/Orange color */
 }
 
 

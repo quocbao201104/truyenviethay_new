@@ -3,7 +3,7 @@
     <AppHeader />
     <main class="submit-story-container">
       <section class="submit-story-card">
-        <h1 class="submit-story-title">Đăng Truyện Mới</h1>
+        <h1 class="submit-story-title">{{ route.params.id ? 'Cập Nhật Truyện' : 'Đăng Truyện Mới' }}</h1>
         <form @submit.prevent="handleSubmit" class="submit-story-form">
           <StoryBasicInfoForm 
             v-model="story" 
@@ -82,7 +82,7 @@
 
           <button type="submit" class="submit-btn" :disabled="loading">
             <i class="fas fa-upload"></i>
-            {{ loading ? 'Đang gửi...' : 'Gửi Truyện' }}
+            {{ loading ? 'Đang xử lý...' : (route.params.id ? 'Cập Nhật Truyện' : 'Gửi Truyện') }}
           </button>
           <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
         </form>
@@ -96,7 +96,7 @@
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '@/modules/auth/auth.store';
 import { useToast } from 'vue-toastification';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import axios from '@/utils/axios'; 
 
 import AppHeader from '@/components/layout/AppHeader.vue';
@@ -109,6 +109,7 @@ import ChapterContentEditor from '@/components/forms/ChapterContentEditor.vue';
 const authStore = useAuthStore();
 const toast = useToast();
 const router = useRouter();
+const route = useRoute();
 
 const tinymceApiKey = 'uaj7kxz5hqnxtzefohh4ix5gcm41m7bfzxbtg3oglrkv7s4a';
 
@@ -229,6 +230,9 @@ const handleSubmit = async () => {
   loading.value = true;
   errorMessage.value = ''; 
 
+  const isEditMode = !!route.params.id;
+  const storyId = route.params.id; 
+
   const formData = new FormData();
   formData.append('ten_truyen', story.value.ten_truyen);
   formData.append('tac_gia', story.value.tac_gia);
@@ -251,11 +255,16 @@ const handleSubmit = async () => {
   });
 
   try {
-    const response = await axios.post('/api/truyen', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data', 
-      },
-    });
+    let response;
+    if (isEditMode) {
+        response = await axios.put(`/api/truyen/${storyId}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+    } else {
+        response = await axios.post('/api/truyen', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+    }
     
     toast.success(response.data.message);
     router.push({ name: 'Home' }); 
@@ -275,6 +284,41 @@ const handleSubmit = async () => {
 
 onMounted(() => {
   fetchCategories();
+  
+  if (route.params.id) {
+    const fetchStoryDetails = async () => {
+        try {
+            loading.value = true;
+            const res = await axios.get(`/api/truyen/${route.params.id}`);
+            const data = res.data;
+            // Populate form
+            story.value = {
+                ten_truyen: data.ten_truyen || '',
+                tac_gia: data.tac_gia || '',
+                mo_ta: data.mo_ta || '',
+                the_loai_ids: data.genres ? data.genres.map(g => g.id_theloai) : [],
+                trang_thai: data.trang_thai || 'Đang ra',
+                tinh_trang: data.tinh_trang || 'Đang viết',
+                trang_thai_viet: data.trang_thai_viet || 'Bản nháp',
+                link_nguon: data.link_nguon || '',
+                muc_tieu: data.muc_tieu || '',
+                doi_tuong_doc_gia: data.doi_tuong_doc_gia || '',
+                chuong_mau: data.noi_dung_chuong_dau || '', // Adjust based on API structure
+                anh_bia: null, // Keep null to avoid re-upload if not changed
+                user_id: authStore.user?.id,
+            };
+            // Note: Handling existing image preview might require extra UI logic, keeping it simple for now
+            
+        } catch (error) {
+            console.error("Error loading story for edit:", error);
+            toast.error("Không thể tải thông tin truyện.");
+            router.push({ name: 'AuthorStoryManagement' });
+        } finally {
+            loading.value = false;
+        }
+    };
+    fetchStoryDetails();
+  }
 });
 </script>
 

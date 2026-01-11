@@ -9,7 +9,7 @@
         </div>
 
         <div class="categories-wrapper">
-          <div v-if="categoryStore.isCategoriesLoading" class="loading-message">
+          <div v-if="categoryStore.loading" class="loading-message">
             Đang tải các thể loại...
           </div>
 
@@ -19,11 +19,11 @@
 
           <div v-else class="category-grid">
             <CategoryCard
-              v-for="category in categoryStore.getCategoryList"
+              v-for="category in categoryStore.categories"
               :key="category.id_theloai"
               :category="category"
             />
-            <p v-if="categoryStore.getCategoryList.length === 0 && !categoryStore.isCategoriesLoading" class="no-categories-message">
+            <p v-if="categoryStore.categories.length === 0 && !categoryStore.loading" class="no-categories-message">
               Không có thể loại nào được tìm thấy. Vui lòng thử lại sau.
             </p>
           </div>
@@ -58,7 +58,7 @@ import { useCategoryStore } from '@/modules/category/category.store';
 const categoryStore = useCategoryStore();
 
 onMounted(() => {
-  categoryStore.fetchAllCategories();
+  categoryStore.fetchCategories();
 });
 </script>
 

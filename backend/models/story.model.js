@@ -41,6 +41,8 @@ const StoryModel = {
     keyword = "",
     author_id = null,
     category_id = null,
+    sort_by = "thoi_gian_cap_nhat",
+    order = "DESC",
   }) => {
     const offset = (page - 1) * limit;
     let query = `
@@ -98,7 +100,12 @@ const StoryModel = {
       countQuery += ` WHERE ` + whereClauses.join(" AND ");
     }
 
-    query += ` ORDER BY tn.thoi_gian_cap_nhat DESC LIMIT ? OFFSET ?`;
+    const sortField = ["ten_truyen", "luot_xem", "thoi_gian_cap_nhat", "id"].includes(sort_by)
+        ? `tn.${sort_by}`
+        : "tn.thoi_gian_cap_nhat";
+    const sortOrder = order && order.toUpperCase() === "ASC" ? "ASC" : "DESC";
+
+    query += ` ORDER BY ${sortField} ${sortOrder} LIMIT ? OFFSET ?`;
     params.push(+limit, +offset);
 
     const [stories] = await db.query(query, params);

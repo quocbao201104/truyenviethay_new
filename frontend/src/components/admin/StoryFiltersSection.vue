@@ -98,6 +98,7 @@ const statusOptions = ref([
 ]);
 
 const formattedCategories = computed(() => {
+  if (!Array.isArray(props.categories)) return [{ value: null, label: 'Tất cả' }];
   return [{ value: null, label: 'Tất cả' }, ...props.categories.map(cat => ({
     value: cat.id_theloai,
     label: cat.ten_theloai,
