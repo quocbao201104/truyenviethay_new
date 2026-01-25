@@ -1,0 +1,60 @@
+================================================================================
+[ HEADER: LOGO ][ THANH TÌM KIẾM  ][ THỂ LOẠI v ][ BXH v ][TRUYEN HOT] [ AVATAR ] 
+================================================================================
+
+--------------------------------------------------------------------------------
+|  HERO SECTION: TRUYỆN ĐỀ CỬ / HOT (NỔI BẬT NHẤT)                             |
+|  (Dạng Slider/Carousel chạy ngang)                                           |
+|                                                                              |
+|  [ ẢNH BÌA LỚN ]   TÊN TRUYỆN CỰC HOT                                        |
+|                    Tóm tắt ngắn gọn...                                       |
+|                    [NÚT ĐỌC NGAY]                                            |
+--------------------------------------------------------------------------------
+
+================================================================================
+|       CỘT CHÍNH (MAIN CONTENT) - 70%       |     CỘT PHỤ (SIDEBAR) - 30%     |
+================================================================================
+|                                            |                                 |
+|  ### 1. TRUYỆN MỚI CẬP NHẬT (QUAN TRỌNG)   |  ### A. BẢNG XẾP HẠNG (RANKING) |
+|  (Dạng Lưới/Grid - Hiển thị nhiều nhất)    |  [Tab: Ngày | Tuần | Tháng]     |
+|                                            |                                 |
+|  [Ảnh] Tên Truyện A                        |  1. Tên Truyện Hot Nhất...      |
+|        Chương 1052 - 2 phút trước          |  2. Tên Truyện Nhì...           |
+|                                            |  3. Tên Truyện Ba...            |
+|  [Ảnh] Tên Truyện B                        |  4. Tên Truyện...               |
+|        Chương 50 - 5 phút trước            |  5. ...                         |
+|                                            |  6. ...                         |
+|  [Ảnh] Tên Truyện C                        |  7. ...                         |
+|        Chương 12 - 10 phút trước           |  8. ...                         |
+|  ...                                       |  9. ...                         |
+|  ... (Khoảng 12-16 truyện)                 |  10. ...                        |
+|                                            |                                 |
+|  [Nút: Xem tất cả cập nhật >>]             |---------------------------------|
+|                                            |                                 |
+|--------------------------------------------|  ### B. THỂ LOẠI THỊNH HÀNH     |
+|                                            |  (Tags Cloud / Nút bấm)         |
+|  ### 2. TRUYỆN ĐÃ HOÀN THÀNH (FULL)        |                                 |
+|  (Dành cho người thích cày cuốc)           |  [Tiên Hiệp]  [Ngôn Tình]       |
+|  (Dạng trượt ngang - Horizontal Scroll)    |  [Đô Thị]     [Huyền Huyễn]     |
+|                                            |  [Xuyên Không][Hệ Thống]        |
+|  [Ảnh][Ảnh][Ảnh][Ảnh][Ảnh]                 |                                 |
+|   Tên  Tên  Tên  Tên  Tên                  |---------------------------------|
+|   Full Full Full Full Full                 |                                 |
+|                                            |  ### C. QUẢNG CÁO / THÔNG BÁO   |
+|--------------------------------------------|                     |
+|                                            |                                 |
+|  ### 3. ĐÁNH GIÁ CAO (TOP RATED)           |                                 |
+|  (Truyện chất lượng cao/Vote cao)          |                                 |
+|  (Dạng danh sách chi tiết hơn chút)        |                                 |
+|                                            |                                 |
+|  1. [Ảnh nhỏ] Tên Truyện - 4.9/5 sao       |                                 |
+|     Mô tả siêu ngắn...                     |                                 |
+|                                            |                                 |
+|  2. [Ảnh nhỏ] Tên Truyện - 4.8/5 sao       |                                 |
+|     Mô tả siêu ngắn...                     |                                 |
+|                                            |                                 |
+================================================================================
+
+--------------------------------------------------------------------------------
+[ FOOTER: Bản quyền | Liên hệ | Chính sách bảo mật | Social Links ]
+--------------------------------------------------------------------------------

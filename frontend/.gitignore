@@ -1,0 +1,27 @@
+# Node & Vite
+node_modules/
+dist/
+dist-ssr/
+npm-debug.log*
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+!.vscode/extensions.json
+.idea/
+
+# OS junk
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
