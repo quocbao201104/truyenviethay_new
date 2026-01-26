@@ -3,7 +3,7 @@ node_modules/
 dist/
 dist-ssr/
 npm-debug.log*
-
+./agent/
 # Env
 .env
 .env.local

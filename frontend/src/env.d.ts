@@ -1,7 +1,6 @@
 interface ImportMetaEnv {
-  readonly VITE_API_BASE_URL_ROOT: string;
-  // khai báo thêm biến khác nếu có
-  readonly VITE_APP_API_URL: string;
+  readonly VITE_API_API_URL: string;
+  readonly VITE_API_URL: string;
   readonly VITE_APP_IMAGE_URL: string;
 }
 
