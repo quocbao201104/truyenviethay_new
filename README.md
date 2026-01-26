@@ -2,8 +2,7 @@
 
 TruyenVietHay là một ứng dụng web full-stack hiện đại cho phép người dùng đọc, quản lý và chia sẻ các tác phẩm truyện chữ. Hệ thống bao gồm giao diện người dùng thân thiện (Frontend) và hệ thống quản lý dữ liệu mạnh mẽ (Backend), tích hợp lưu trữ đám mây và cơ sở dữ liệu hiệu năng cao.
 
-![Demo Screenshot](https://via.placeholder.com/1200x600?text=TruyenVietHay+Demo)
-
+https://github.com/quocbao201104/TruyenVietHay/issues/1#issue-3857759937
 ## 🚀 Tính Năng Chính
 
 *   **Đọc Truyện**: Giao diện đọc truyện tùy biến, hỗ trợ mục lục, điều hướng chương.
