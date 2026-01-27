@@ -72,7 +72,7 @@ app.use("/api/ratings", require("./routes/rating.routes"));
 app.use("/api/notifications", require("./routes/notification.routes"));
 
 app.get("/", (req, res) => {
-    res.send("Backend is working!");
+    res.send("Server is awake!");
 });
 
 // 404 Handler

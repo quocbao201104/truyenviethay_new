@@ -5,8 +5,6 @@ import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => {
-  // Load env file based on `mode` in the current working directory.
-  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), '');
 
   const target = env.VITE_API_URL || "http://localhost:3000";
@@ -39,17 +37,14 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      host: true, // Cho phép truy cập qua IP
-      port: 5173, // Hoặc cổng em muốn
+      host: true,
+      port: 5173,
       proxy: {
-        // Generic proxy for all /api requests
         "/api": {
           target: target,
           changeOrigin: true,
           secure: false,
-          // rewrite: (pathStr) => pathStr, // Default behavior is sufficient
         },
-        // Uploaded images proxy
         "/uploads_img": {
           target: target,
           changeOrigin: true,
