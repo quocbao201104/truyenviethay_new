@@ -7,6 +7,7 @@ import { ToastPlugin } from "./plugins/toast";
 import vue3GoogleLogin from "vue3-google-login";
 
 import "./assets/styles/global.css";
+import "./assets/styles/avatar-frames.css";
 
 const app = createApp(App);
 

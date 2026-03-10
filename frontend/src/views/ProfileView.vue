@@ -4,13 +4,13 @@
       
       <div v-if="userStore.isProfileLoading" class="loading-spirit-state">
         <i class="fas fa-yin-yang fa-spin text-4xl mb-4 text-emerald-400"></i>
-        <p>Đang cảm ứng tiên cơ đạo hữu...</p>
+        <p></p>
       </div>
 
       <div v-else-if="userStore.profileError" class="error-spirit-state">
         <div class="error-box-aura">
           <i class="fas fa-circle-exclamation text-red-500 text-3xl mb-3"></i>
-          <p>Thiên cơ nhiễu loạn: {{ userStore.getProfileError }}</p>
+          <p>Thiên cơ nhiễu loạn : {{ userStore.getProfileError }}</p>
           <router-link v-if="!userStore.profile && !authStore.token" to="/dang-nhap" class="btn-re-login">
             Khởi động lại tu luyện
           </router-link>
@@ -29,13 +29,21 @@
         <section class="spirit-card-main">
           
           <div class="spirit-header-aura">
-            <div class="avatar-aura-wrapper">
-              <div class="aura-ring animate-spin-slow"></div>
+            <div class="avatar-aura-wrapper" :class="['profile-frame-active', equippedFrameClass]">
+              <span class="aura-ring outer"></span>
+              <span class="aura-ring inner"></span>
               <img
                 :src="avatarUrl"
                 alt="User Avatar"
-                class="avatar-main"
+                class="avatar-main item-img"
                 @error="handleAvatarError"
+                crossorigin="anonymous"
+              />
+              <img
+                v-if="equippedFrameImage"
+                :src="equippedFrameImage"
+                alt="Avatar Frame"
+                class="avatar-frame-overlay equipped-frame"
                 crossorigin="anonymous"
               />
               <div class="status-dot-aura"></div>
@@ -88,7 +96,7 @@
             <div class="detail-crystal highlight-gold">
               <i class="fas fa-crown icon-aura gold"></i>
               <div class="text-group">
-                <span class="label">Thiên Phú Căn Cơ (Vai trò)</span>
+                <span class="label">Thiên Phú(Vai trò)</span>
                 <span class="value uppercase tracking-wider font-black">{{ user?.role || 'User' }}</span>
               </div>
             </div>
@@ -116,7 +124,7 @@
           <div class="spirit-nav-footer">
             <router-link to="/user/cai-dat-thong-tin" class="spirit-nav-pill">
               <i class="fas fa-user-gear"></i>
-              <span>Chỉnh Sửa Hồ Sơ</span>
+              <span>Chỉnh sửa thông tin</span>
             </router-link>
             
             <router-link to="/user/truyen-theo-doi" class="spirit-nav-pill">
@@ -136,7 +144,7 @@
             
             <router-link v-else-if="user?.role === 'user'" to="/user/dang-ky-tac-gia" class="spirit-nav-pill special">
               <i class="fas fa-feather-pointed"></i>
-              <span>Đăng Ký Làm Tác Giả</span>
+              <span>Đăng ký làm tác giả</span>
             </router-link>
 
             <router-link v-if="user?.role === 'author'" to="/user/dashboard" class="spirit-nav-pill special">
@@ -200,13 +208,39 @@ export default {
 
     const user = computed(() => userStore.getUserProfile);
     const avatarUrl = computed(() => getAvatarUrl(user.value?.avatar));
+    const equippedFrameImage = computed(() => user.value?.equipped_frame?.image_url || null);
+    const DEFAULT_PROFILE_FRAME_CLASS = "frame-default-aura";
+    const SUPPORTED_PROFILE_FRAME_CLASSES = [
+      "frame-phoenix-fire",
+      "frame-bang-tinh",
+      "frame-thien-thanh",
+      "frame-nine-tails-purple",
+      "frame-chan-long",
+      "frame-van-kiem",
+      "frame-ma-ton",
+      "frame-bang-long",
+      "frame-thien-co",
+      "frame-that-sac",
+      "frame-thien-nhien",
+      "frame-thanh-loan",
+    ];
+    const equippedFrameClass = computed(() => {
+      const rawClass = (user.value?.equipped_frame?.css_class || "").trim();
+      if (!rawClass) return DEFAULT_PROFILE_FRAME_CLASS;
+
+      const matchedClass = rawClass
+        .split(/\s+/)
+        .find((cssClass) => SUPPORTED_PROFILE_FRAME_CLASSES.includes(cssClass));
+
+      return matchedClass || DEFAULT_PROFILE_FRAME_CLASS;
+    });
 
     const handleAvatarError = (event) => {
       event.target.src = getAvatarUrl(null);
     };
 
     const formatDate = (date) => {
-      if (!date) return "Vô hạn";
+      if (!date) return "VÃ´ háº¡n";
       const d = new Date(date);
       return d.toLocaleDateString("vi-VN", { year: "numeric", month: "long", day: "numeric" });
     };
@@ -218,7 +252,7 @@ export default {
 
     const handleLogout = () => {
       authStore.logout();
-      showSuccessToast("Đạo hữu đã thoát khỏi cõi tiên.");
+      showSuccessToast("Äáº¡o há»¯u Ä‘Ã£ thoÃ¡t khá»i cÃµi tiÃªn.");
       router.push("/");
     };
 
@@ -227,6 +261,8 @@ export default {
       authStore,
       user,
       avatarUrl,
+      equippedFrameImage,
+      equippedFrameClass,
       handleAvatarError,
       formatDate,
       formatGender,
@@ -246,7 +282,7 @@ export default {
 /* ===== CORE THEME XIANXIA ===== */
 .profile-page-xianxia {
   min-height: 100vh;
-  background: #0b0f19; /* Nền tối sâu đồng bộ */
+  background: #0b0f19; 
   color: #cbd5e1;
   font-family: 'Be Vietnam Pro', sans-serif;
   padding-bottom: 80px;
@@ -335,22 +371,164 @@ export default {
   width: 180px;
   height: 180px;
   flex-shrink: 0;
+  --avatar-frame-scale: 1.4;
+  --avatar-frame-offset-x: 0px;
+  --avatar-frame-offset-y: 0px;
+  --aura-primary: 45, 212, 191;
+  --aura-speed: 10s;
+}
+
+.avatar-aura-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(var(--aura-primary), 0.24), transparent 70%);
+  filter: blur(10px);
+  animation: auraBreath 3s ease-in-out infinite;
+  z-index: 0;
 }
 
 .aura-ring {
   position: absolute;
-  inset: -10px;
-  border: 2px dashed rgba(52, 211, 153, 0.3);
   border-radius: 50%;
 }
 
+.aura-ring.outer {
+  inset: -10px;
+  z-index: 4;
+}
+
+.aura-ring.inner {
+  inset: -3px;
+  border: 1px solid rgba(var(--aura-primary), 0.38);
+  z-index: 4;
+}
+
 .avatar-main {
+  position: relative;
+  z-index: 2;
   width: 100%;
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid #34d399;
-  box-shadow: 0 0 30px rgba(52, 211, 153, 0.2);
+  border: 4px solid rgba(var(--aura-primary), 0.95);
+  box-shadow:
+    0 0 0 6px rgba(var(--aura-primary), 0.2),
+    0 0 26px rgba(var(--aura-primary), 0.16);
+}
+
+.avatar-frame-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  transform: translate(var(--avatar-frame-offset-x), var(--avatar-frame-offset-y)) scale(var(--avatar-frame-scale));
+  transform-origin: center;
+  filter: drop-shadow(0 0 18px rgba(251, 191, 36, 0.28));
+  z-index: 3;
+}
+
+.avatar-aura-wrapper.frame-default-aura {
+  --aura-primary: 45, 212, 191;
+  --aura-speed: 10s;
+  --avatar-frame-scale: 1.4;
+}
+
+.avatar-aura-wrapper.frame-phoenix-fire {
+  --aura-primary: 249, 115, 22;
+  --aura-speed: 3.4s;
+  --avatar-frame-scale: 1.76;
+}
+
+.avatar-aura-wrapper.frame-phoenix-fire::after {
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.34), rgba(239, 68, 68, 0.15), transparent 70%);
+  animation: auraBreath 2.2s ease-in-out infinite, flameFlicker 1.5s linear infinite;
+}
+
+.avatar-aura-wrapper.frame-phoenix-fire .aura-ring.outer {
+  border: none;
+  background: conic-gradient(
+    from 0deg,
+    rgba(245, 158, 11, 0.95),
+    rgba(249, 115, 22, 0.95),
+    rgba(239, 68, 68, 0.95),
+    rgba(245, 158, 11, 0.95)
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+}
+
+.avatar-aura-wrapper.frame-phoenix-fire .aura-ring.inner {
+  border-color: rgba(249, 115, 22, 0.55);
+}
+
+.avatar-aura-wrapper.frame-bang-tinh {
+  --aura-primary: 125, 211, 252;
+  --aura-speed: 8s;
+  --avatar-frame-scale: 1.5;
+}
+
+.avatar-aura-wrapper.frame-bang-tinh::after {
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.22), rgba(59, 130, 246, 0.12), transparent 70%);
+}
+
+.avatar-aura-wrapper.frame-bang-tinh .aura-ring.outer {
+  border-style: solid;
+  border-color: rgba(125, 211, 252, 0.62);
+  box-shadow:
+    0 0 8px rgba(125, 211, 252, 0.46),
+    0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+.avatar-aura-wrapper.frame-thien-thanh {
+  --aura-primary: 250, 204, 21;
+  --aura-speed: 6.5s;
+  --avatar-frame-scale: 1.56;
+}
+
+.avatar-aura-wrapper.frame-thien-thanh::after {
+  background: radial-gradient(circle, rgba(250, 204, 21, 0.24), rgba(251, 191, 36, 0.1), transparent 70%);
+}
+
+.avatar-aura-wrapper.frame-thien-thanh .aura-ring.outer {
+  border-style: solid;
+  border-color: rgba(250, 204, 21, 0.62);
+  box-shadow: 0 0 16px rgba(250, 204, 21, 0.34);
+}
+
+.avatar-aura-wrapper.frame-nine-tails-purple {
+  --aura-primary: 192, 132, 252;
+  --aura-speed: 5.8s;
+  --avatar-frame-scale: 1.62;
+}
+
+.avatar-aura-wrapper.frame-nine-tails-purple::after {
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.3), rgba(168, 85, 247, 0.12), transparent 70%);
+}
+
+.avatar-aura-wrapper.frame-nine-tails-purple .aura-ring.outer {
+  border: none;
+  background: conic-gradient(
+    from 0deg,
+    rgba(216, 180, 254, 0.95),
+    rgba(192, 132, 252, 0.95),
+    rgba(168, 85, 247, 0.95),
+    rgba(216, 180, 254, 0.95)
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+}
+
+.avatar-aura-wrapper.frame-nine-tails-purple .aura-ring.inner {
+  border-color: rgba(192, 132, 252, 0.58);
+}
+
+.avatar-aura-wrapper.profile-frame-active {
+  filter: drop-shadow(0 0 22px rgba(255, 255, 255, 0.12));
 }
 
 .status-dot-aura {
@@ -358,6 +536,7 @@ export default {
   width: 24px; height: 24px; background: #10b981;
   border: 4px solid #131b2c; border-radius: 50%;
   box-shadow: 0 0 10px #10b981;
+  z-index: 5;
 }
 
 /* Tái cấu trúc và tinh chỉnh Name Plate - Thanh mảnh hơn */
@@ -434,7 +613,7 @@ export default {
   font-size: 0.95rem; /* username nhỏ hơn */
   color: #64748b;
   font-weight: 600;
-  margin-left: 20px; 
+  margin-left: 20px;
 }
 
 /* Info Grid */
@@ -550,10 +729,10 @@ export default {
 }
 
 /* Animations */
-.animate-spin-slow { animation: spin 10s linear infinite; }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes spiritual-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes auraBreath { 0%,100% { opacity: 0.68; transform: scale(0.98); } 50% { opacity: 1; transform: scale(1.03); } }
+@keyframes flameFlicker { 0%,100% { filter: blur(10px) saturate(1); } 50% { filter: blur(12px) saturate(1.22); } }
 
 /* Responsive */
 @media (max-width: 900px) {
@@ -567,3 +746,5 @@ export default {
   .spirit-nav-pill { width: 100%; justify-content: center; }
 }
 </style>
+
+

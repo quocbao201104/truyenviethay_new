@@ -335,7 +335,7 @@ const openChapterDetail = async (chapter: any) => {
 // Duyệt và Từ chối
 const handleApproveChapter = async (id: number) => {
   if (confirm('Duyệt tầng chương này cho phép đạo hữu vạn giới tiếp cận?')) {
-    await chapterStore.approveChapter(id, 'duyet');
+    await chapterStore.approveChapter(id, 'da_duyet');
     if (currentStoryIdForChapters.value) await chapterStore.fetchAdminChapterList(currentStoryIdForChapters.value);
     if (selectedChapter.value && selectedChapter.value.id === id) isChapterDetailModalOpen.value = false;
   }

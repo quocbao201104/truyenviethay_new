@@ -1,10 +1,7 @@
-// frontend/src/types/user.d.ts
+﻿// frontend/src/types/user.d.ts
 import type { Badge } from './badge';
+import type { AvatarFrame } from './shop';
 
-/**
- * Định nghĩa cấu trúc dữ liệu đầy đủ của một User
- * nhận được từ API backend (ví dụ từ /api/user/me).
- */
 export interface User {
     id: number;
     username: string;
@@ -12,38 +9,29 @@ export interface User {
     full_name: string;
     phone: string;
     avatar: string | null;
-    role: 'user' | 'author' | 'admin'; 
-    gender: 'male' | 'female' | 'other'; 
-    created_at: string; 
-    status: 'active' | 'blocked'; 
+    role: 'user' | 'author' | 'admin';
+    gender: 'male' | 'female' | 'other';
+    created_at: string;
+    status: 'active' | 'blocked';
     ban_until: string | null;
     level_id?: number | null;
     badge?: Badge | null;
+    equipped_frame?: AvatarFrame | null;
 }
 
-/**
- * Payload khi cập nhật thông tin người dùng.
- * Tất cả các trường là optional vì người dùng có thể chỉ cập nhật một phần.
- */
 export interface UpdateUserPayload {
     full_name?: string;
     email?: string;
     phone?: string;
     gender?: 'male' | 'female' | 'other';
-    avatar?: File | string | null; 
+    avatar?: File | string | null;
 }
 
-/**
- * Payload khi thay đổi mật khẩu.
- */
 export interface ChangePasswordPayload {
     old_password: string;
     new_password: string;
 }
 
-/**
- * Định nghĩa cấu trúc phản hồi khi lấy danh sách người dùng cho Admin (có phân trang).
- */
 export interface UserPaginationResponse {
     message: string;
     data: User[];
@@ -61,11 +49,9 @@ export interface UserPaginationResponse {
     };
 }
 
-/**
- * Payload khi gửi đơn đăng ký làm tác giả.
- */
 export interface AuthorApplicationPayload {
     pen_name: string;
     bio: string;
     experience: string;
 }
+

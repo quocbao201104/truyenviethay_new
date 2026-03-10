@@ -1,5 +1,6 @@
-import axios from "@/utils/axios";
+﻿import axios from "@/utils/axios";
 import type { Badge } from '@/types/badge';
+import type { AvatarFrame } from '@/types/shop';
 
 export interface Comment {
     id: number;
@@ -14,6 +15,7 @@ export interface Comment {
     username?: string;
     author_level_id?: number | null;
     author_badge?: Badge | null;
+    author_frame?: AvatarFrame | null;
     replies?: Comment[];
 }
 
@@ -41,3 +43,4 @@ export const deleteComment = async (commentId: number, truyenId?: number): Promi
     });
     return response.data;
 };
+

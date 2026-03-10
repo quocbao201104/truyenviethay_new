@@ -16,6 +16,33 @@
       </div>
     </div>
 
+    <div class="inbox-tabs">
+      <button 
+        @click="switchTab(undefined)" 
+        :class="['tab-btn', { active: store.currentCategory === undefined }]"
+      >
+        Tất Cả
+      </button>
+      <button 
+        @click="switchTab('interaction')" 
+        :class="['tab-btn', { active: store.currentCategory === 'interaction' }]"
+      >
+        Tương Tác
+      </button>
+      <button 
+        @click="switchTab('story')" 
+        :class="['tab-btn', { active: store.currentCategory === 'story' }]"
+      >
+        Truyện Mới
+      </button>
+      <button 
+        @click="switchTab('system')" 
+        :class="['tab-btn', { active: store.currentCategory === 'system' }]"
+      >
+        Hệ Thống
+      </button>
+    </div>
+
     <div v-if="store.loading && store.notifications.length === 0" class="spirit-loading">
       <div class="yin-yang-spinner"></div>
       <p>Đang cảm ứng linh tin...</p>
@@ -63,13 +90,17 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useNotificationStore } from '@/modules/notification/notification.store';
-import { NOTIF_TYPE } from '@/modules/notification/notification.api';
+import { NOTIF_TYPE, CATEGORY_MAP } from '@/modules/notification/notification.api';
 
 const store = useNotificationStore();
 
 onMounted(() => {
   store.fetchNotifications(true);
 });
+
+const switchTab = (category?: string) => {
+  store.fetchNotifications(true, category);
+};
 
 const handleRead = (notif: any) => {
   if (notif.is_read === 0) {
@@ -78,30 +109,30 @@ const handleRead = (notif: any) => {
 };
 
 const getIcon = (type: number) => {
-  switch (type) {
-    case NOTIF_TYPE.APPROVAL: return 'fas fa-gavel';
-    case NOTIF_TYPE.NEW_CHAPTER: return 'fas fa-scroll';
-    case NOTIF_TYPE.SYSTEM: return 'fas fa-bullhorn';
-    default: return 'fas fa-envelope';
-  }
+  if (CATEGORY_MAP.interaction.includes(type as any)) return 'fas fa-comments';
+  if (CATEGORY_MAP.story.includes(type as any)) return 'fas fa-scroll';
+  if (CATEGORY_MAP.system.includes(type as any)) return 'fas fa-bullhorn';
+  return 'fas fa-envelope';
 };
 
 const getTypeName = (type: number) => {
   switch (type) {
-    case NOTIF_TYPE.APPROVAL: return 'Thiên Âm Phán Quyết';
-    case NOTIF_TYPE.NEW_CHAPTER: return 'Linh Thư Biến Động';
-    case NOTIF_TYPE.SYSTEM: return 'Hệ Thống Mật Báo';
+    case NOTIF_TYPE.MENTION: return 'Nhắc Đến';
+    case NOTIF_TYPE.CHAT_REPLY: return 'Phản Hồi Chat';
+    case NOTIF_TYPE.COMMENT_REPLY: return 'Phản Hồi Bình Luận';
+    case NOTIF_TYPE.NEW_CHAPTER: return 'Chương Mới';
+    case NOTIF_TYPE.BOOK_APPROVED: return 'Duyệt Truyện';
+    case NOTIF_TYPE.GIFT_LINH_THACH: return 'Tặng Linh Thạch';
+    case NOTIF_TYPE.MAINTENANCE: return 'Bảo Trì Hệ Thống';
     default: return 'Tin Nhắn';
   }
 };
 
 const getTypeClass = (type: number) => {
-  switch (type) {
-    case NOTIF_TYPE.APPROVAL: return 'type-approval';
-    case NOTIF_TYPE.NEW_CHAPTER: return 'type-new';
-    case NOTIF_TYPE.SYSTEM: return 'type-system';
-    default: return '';
-  }
+  if (CATEGORY_MAP.interaction.includes(type as any)) return 'type-interaction';
+  if (CATEGORY_MAP.story.includes(type as any)) return 'type-story';
+  if (CATEGORY_MAP.system.includes(type as any)) return 'type-system';
+  return '';
 };
 
 const formatDate = (date: string) => {
@@ -205,9 +236,42 @@ const formatDate = (date: string) => {
   border: 1px solid #1e293b;
 }
 
-.notif-icon-box.type-approval { color: #f43f5e; border-color: rgba(244, 63, 94, 0.3); }
-.notif-icon-box.type-new { color: #3b82f6; border-color: rgba(59, 130, 246, 0.3); }
+.notif-icon-box.type-interaction { color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+.notif-icon-box.type-story { color: #3b82f6; border-color: rgba(59, 130, 246, 0.3); }
 .notif-icon-box.type-system { color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
+
+.inbox-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.tab-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+
+.tab-btn:hover {
+  background: rgba(15, 23, 42, 0.8);
+  color: #cbd5e1;
+}
+
+.tab-btn.active {
+  background: #34d399;
+  color: #0b0f19;
+  border-color: #34d399;
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.3);
+}
 
 .notif-content-wrapper {
   flex-grow: 1;

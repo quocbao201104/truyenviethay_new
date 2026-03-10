@@ -21,11 +21,22 @@ import { watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAppToast } from '@/composables/useAppToast';
 import { useAuthStore } from '@/modules/auth/auth.store';
+import { useSocket } from '@/composables/useSocket';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const { connect, disconnect } = useSocket();
 const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast();
+
+// Initialize socket when user is logged in
+watch(() => authStore.isLoggedIn, (isLoggedIn) => {
+  if (isLoggedIn) {
+    connect();
+  } else {
+    disconnect();
+  }
+}, { immediate: true });
 
 watch(() => route.query.toast, (toastType) => {
   if (!toastType) return;

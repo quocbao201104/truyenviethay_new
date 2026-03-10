@@ -6,12 +6,14 @@
       <slot />
     </main>
     <AppFooter />
+    <UnifiedChat />
   </div>
 </template>
 
 <script setup>
 import AppHeader from "@/components/layout/AppHeader.vue";
 import AppFooter from "@/components/layout/AppFooter.vue";
+import UnifiedChat from "@/components/common/UnifiedChat.vue";
 </script>
 
 <style scoped>

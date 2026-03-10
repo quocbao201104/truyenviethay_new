@@ -42,8 +42,10 @@
               class="story-cover-main"
               @error="handleImageError"
             >
-            <div class="status-sigil-detail" :class="statusClass">
-               {{ formatStatus(story.trang_thai) }}
+            <div :class="['status-sigil-detail', statusClass]">
+              <i v-if="statusClass === 'status-completed'" class="fas fa-circle-check"></i>
+              <i v-else class="fas fa-atom animate-spin-slow"></i>
+              <span class="sigil-text">{{ formatStatus(story.trang_thai) }}</span>
             </div>
           </div>
 
@@ -107,7 +109,16 @@
               <button @click="handleToggleLike" class="btn-like" :class="{ 'liked': isLiked }">
                 <span>{{ isLiked ? 'Đã Thích' : 'Thích' }}</span>
               </button>
-            </div>
+
+      <button 
+        v-if="story.user_id" 
+        @click="chatStore.joinAuthorRoom(story.user_id, story.tac_gia || 'Động Phủ')" 
+        class="btn-author-chat"
+      >
+        <i class="fas fa-comment-dots"></i>
+        <span>Group</span>
+      </button>
+    </div>
 
             <!-- Rating Input (Định Phẩm) -->
             <div class="rating-input-box">
@@ -197,6 +208,7 @@
       </section>
 
     </main>
+
   </div>
 </template>
 
@@ -208,6 +220,7 @@ import { useChapterStore } from '@/modules/storyText/chapter/chapter.store';
 import { useFavoriteStore } from '@/modules/favorite/favorite.store'; 
 import { useRatingStore } from '@/modules/rating/rating.store';
 import { useHistoryStore } from '@/modules/history/history.store';
+import { useChatStore } from '@/modules/chat/chat.store';
 import CommentList from '@/modules/comment/CommentList.vue';
 import SkeletonLoader from '@/components/common/SkeletonLoader.vue';
 import { incrementViewCount } from "@/modules/storyText/story.service";
@@ -219,6 +232,7 @@ const chapterStore = useChapterStore();
 const favoriteStore = useFavoriteStore();
 const ratingStore = useRatingStore();
 const historyStore = useHistoryStore();
+const chatStore = useChatStore();
 
 const hoverRating = ref(0);
 const userRating = computed(() => ratingStore.userRating);
@@ -315,15 +329,18 @@ const formatDate = (d?: string | null) => {
 
 const handleImageError = (e: Event) => { (e.target as HTMLImageElement).src = '/img/default-cover.png'; };
 
-const formatStatus = (s: string) => {
-  const map: any = { 'dang_ra': 'Đang Ra', 'hoan_thanh': 'Viên Mãn', 'suspended': 'Tạm Ngưng' };
-  return map[s] || 'Đang Ra';
+const formatStatus = (status: string) => {
+  if (!status) return 'Đang Ra';
+  const s = status.toLowerCase().trim();
+  if (s === 'hoan_thanh' || s.includes('hoàn thành')) return 'Viên Mãn';
+  return 'Đang Ra';
 };
 
 const statusClass = computed(() => {
-  if (!story.value) return '';
-  const s = story.value.trang_thai;
-  return s === 'hoan_thanh' ? 'completed' : (s === 'dang_ra' ? 'ongoing' : 'suspended');
+  if (!story.value) return 'status-on-going';
+  const s = story.value.trang_thai.toLowerCase().trim();
+  if (s === 'hoan_thanh' || s.includes('hoàn thành')) return 'status-completed';
+  return 'status-on-going';
 });
 
 let lastFetchSlug = '';
@@ -431,18 +448,44 @@ watch(() => route.params.slug, () => { if (route.name === 'StoryDetail') fetchDa
   object-fit: cover;
 }
 
+/* CẢNH GIỚI TAG (Status Sigil - Lệnh Bài) */
 .status-sigil-detail {
   position: absolute;
-  top: 10px; left: 10px;
+  top: 10px;
+  left: 10px;
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: 6px 14px 14px 6px;
   font-size: 0.65rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #fff;
+  letter-spacing: 0.5px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
-.status-sigil-detail.completed { background: #10b981; }
-.status-sigil-detail.ongoing { background: #3b82f6; }
+
+/* Viên Mãn - Ngọc Bích */
+.status-completed { 
+  background: rgba(16, 185, 129, 0.15); 
+  border: 1px solid rgba(16, 185, 129, 0.5); 
+  color: #34d399;
+  text-shadow: 0 0 5px rgba(52, 211, 153, 0.4);
+}
+
+/* Đang Ra - Băng Lam */
+.status-on-going { 
+  background: rgba(59, 130, 246, 0.15); 
+  border: 1px solid rgba(59, 130, 246, 0.5); 
+  color: #60a5fa;
+  text-shadow: 0 0 5px rgba(96, 165, 250, 0.4);
+}
+
+
+.animate-spin-slow { animation: spin 8s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 /* Thông tin chính */
 .info-content { flex: 1; }
@@ -549,6 +592,28 @@ watch(() => route.params.slug, () => { if (route.name === 'StoryDetail') fetchDa
 }
 .btn-like.liked { background: #3b82f6; color: #fff; border-color: #3b82f6; }
 .btn-like:hover:not(.liked) { background: #334155; }
+
+.btn-author-chat {
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.btn-author-chat:hover {
+  background: #34d399;
+  color: #0b0f19;
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
+  transform: translateY(-2px);
+}
 
 /* RATING INPUT */
 .rating-input-box {

@@ -7,6 +7,7 @@ interface NotificationState {
   loading: boolean;
   page: number;
   hasMore: boolean;
+  currentCategory: string | undefined;
 }
 
 export const useNotificationStore = defineStore('notification', {
@@ -16,21 +17,23 @@ export const useNotificationStore = defineStore('notification', {
     loading: false,
     page: 1,
     hasMore: true,
+    currentCategory: undefined,
   }),
 
   actions: {
-    async fetchNotifications(reset = false) {
+    async fetchNotifications(reset = false, category?: string) {
       if (reset) {
         this.page = 1;
         this.notifications = [];
         this.hasMore = true;
+        this.currentCategory = category;
       }
       
       if (!this.hasMore && !reset) return;
 
       this.loading = true;
       try {
-        const response = await getNotificationsApi(this.page);
+        const response = await getNotificationsApi(this.page, 10, this.currentCategory);
         
         if (reset) {
           this.notifications = response.data;

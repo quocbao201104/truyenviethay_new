@@ -96,35 +96,12 @@
             <span v-if="unreadCount > 0" class="spirit-badge">{{ unreadCount > 99 ? "99+" : unreadCount }}</span>
           </div>
 
-          <div v-if="showNotifications" class="spirit-notif-dropdown" @click.stop>
-            <div class="notif-spirit-header">
-              <h3>Truyền Âm</h3>
-              <button v-if="unreadCount > 0" @click="markAllRead" class="btn-clear-spirit">Viên Mãn</button>
-            </div>
-
-            <div class="notif-spirit-list">
-              <div v-if="notifications.length === 0" class="notif-spirit-empty">
-                <i class="fas fa-comment-slash opacity-20"></i>
-                <p>Chưa có truyền âm</p>
-              </div>
-
-              <div
-                v-else
-                v-for="notif in notifications"
-                :key="notif.id"
-                class="notif-spirit-item"
-                :class="{ 'unread-aura': notif.is_read === 0 }"
-                @click="handleNotificationClick(notif)"
-              >
-                <div class="notif-spirit-icon">
-                   <i class="fas fa-scroll"></i>
-                </div>
-                <div class="notif-spirit-text">
-                  <p v-html="notif.content"></p>
-                  <span class="notif-spirit-time">{{ formatTime(notif.created_at) }}</span>
-                </div>
-              </div>
-            </div>
+          <div v-if="showNotifications" class="spirit-notif-dropdown-wrapper" @click.stop>
+            <NotificationCenter 
+              :unread-count="unreadCount" 
+              @navigation="handleNotificationNavigation"
+              @close="showNotifications = false"
+            />
           </div>
         </div>
 
@@ -199,9 +176,13 @@ import { useNotificationStore } from "@/modules/notification/notification.store"
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { getAvatarUrl, getImageUrl } from "@/config/constants";
+import NotificationCenter from "@/modules/notification/components/NotificationCenter.vue";
 
 export default {
   name: "AppHeader",
+  components: {
+    NotificationCenter
+  },
   setup() {
     const router = useRouter();
     const authStore = useAuthStore();
@@ -306,21 +287,23 @@ export default {
         if (showNotifications.value) showDropdown.value = false;
     };
     
-    const handleNotificationClick = async (notif) => {
-        if (notif.is_read === 0) await notificationStore.markAsRead(notif.id);
-        if (notif.target_id) {
-          showNotifications.value = false;
-          try {
-             const res = await axios.get(`/api/truyen/${notif.target_id}`);
-             if (res.data?.slug) router.push(`/truyen-chu/${res.data.slug}`);
-          } catch (err) {}
-        }
+    const getNotifIcon = (type) => {
+      if ([1, 2, 3].includes(type)) return 'fas fa-comments';
+      if ([11, 12].includes(type)) return 'fas fa-scroll';
+      if ([21, 22].includes(type)) return 'fas fa-bullhorn';
+      return 'fas fa-envelope';
     };
 
-    const markAllRead = () => notificationStore.markAllAsRead();
-    const formatTime = (date) => {
-        try { return formatDistanceToNow(new Date(date), { addSuffix: true, locale: vi }); }
-        catch (e) { return 'Vừa xong'; }
+    const handleNotificationNavigation = async (notif) => {
+        showNotifications.value = false;
+        if (notif.target_id) {
+          try {
+             const res = await axios.get(`/api/truyen/${notif.target_id}`);
+             if (res.data?.data?.slug) router.push(`/truyen-chu/${res.data.data.slug}`);
+          } catch (err) {
+            console.error("Failed to navigate to story:", err);
+          }
+        }
     };
 
     return {
@@ -329,7 +312,7 @@ export default {
       handleSearchInput, handleSearchFocus, handleSearchBarClick, clearSearch,
       closeSuggestions, handleSearchSubmit, getStoryImageUrl, handleImageError, handleAvatarError,
       toggleNotification, showNotifications, notifications, unreadCount,
-      handleNotificationClick, markAllRead, formatTime
+      handleNotificationNavigation, getNotifIcon
     };
   },
 };
@@ -541,159 +524,9 @@ export default {
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
 }
 
-/* Dropdown Container */
-.spirit-notif-dropdown {
-  position: absolute; 
-  top: calc(100% + 15px); 
-  right: 60px; /* Căn chỉnh lại vị trí */
-  width: 380px; 
-  max-width: 90vw; /* Responsive cho mobile */
-  background: #151e32; /* Nền sáng hơn nền tổng thể 1 chút */
-  border: 1px solid #2a3754; /* Viền nổi bật hơn */
-  border-radius: 16px; 
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.7);
-  overflow: hidden;
-  z-index: 1000;
-  animation: slideInAura 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* Header Thông Báo */
-.notif-spirit-header {
-  padding: 16px 20px; 
-  background: #1a233a; /* Phân biệt màu header */
-  border-bottom: 1px solid #2a3754;
-  display: flex; 
-  justify-content: space-between;
-  align-items: center;
-}
-
-.notif-spirit-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #f8fafc;
-}
-
-.btn-clear-spirit {
-  background: transparent;
-  border: none;
-  color: #34d399;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.btn-clear-spirit:hover {
-  color: #10b981;
-  text-decoration: underline;
-}
-
-/* Danh Sách Thông Báo */
-.notif-spirit-list {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-/* Custom Scrollbar cho list thông báo */
-.notif-spirit-list::-webkit-scrollbar {
-  width: 6px;
-}
-.notif-spirit-list::-webkit-scrollbar-thumb {
-  background: #2a3754;
-  border-radius: 10px;
-}
-
-/* Trạng thái trống */
-.notif-spirit-empty {
-  padding: 40px 20px;
-  text-align: center;
-  color: #64748b;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-.notif-spirit-empty i {
-  font-size: 2.5rem;
-  opacity: 0.5;
-}
-
-/* Từng Item Thông Báo */
-.notif-spirit-item {
-  display: flex; 
-  gap: 15px; 
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04); 
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.notif-spirit-item:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-/* Đã đọc (Mờ hơn) */
-.notif-spirit-item {
-  opacity: 0.7;
-}
-
-/* CHƯA ĐỌC (Nổi bật) */
-.notif-spirit-item.unread-aura { 
-  opacity: 1;
-  background: rgba(52, 211, 153, 0.05); /* Nền xanh nhẹ */
-  border-left: 3px solid #34d399; /* Vạch xanh chỉ báo */
-}
-
-/* Icon trong Item */
-.notif-spirit-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: #94a3b8;
-  font-size: 1.1rem;
-}
-.unread-aura .notif-spirit-icon {
-  background: rgba(52, 211, 153, 0.15);
-  color: #34d399;
-}
-
-/* Nội dung Text */
-.notif-spirit-text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.notif-spirit-text p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #cbd5e1;
-  line-height: 1.4;
-  /* Tránh chữ quá dài làm vỡ layout */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.unread-aura .notif-spirit-text p {
-  color: #f8fafc;
-  font-weight: 500;
-}
-
-.notif-spirit-time {
-  font-size: 0.75rem;
-  color: #64748b;
-  font-weight: 500;
-}
-.unread-aura .notif-spirit-time {
-  color: #34d399;
+/* Dropdown Wrapper for Notification Center */
+.spirit-notif-dropdown-wrapper {
+  position: relative; /* Let NotificationCenter handle its own absolute positioning */
 }
 
 /* User Menu */

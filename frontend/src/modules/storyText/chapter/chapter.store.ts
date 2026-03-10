@@ -184,7 +184,7 @@ export const useChapterStore = defineStore("chapter", () => {
         }
     };
 
-    const approveChapter = async (id: number, action: 'duyet' | 'tu_choi', reason?: string) => {
+    const approveChapter = async (id: number, action: 'da_duyet' | 'tu_choi', reason?: string) => {
         loading.value = true;
         try {
             const res = await approveOrRejectChapterApi(id, action, reason);

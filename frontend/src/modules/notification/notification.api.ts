@@ -1,10 +1,20 @@
 import axios from "@/utils/axios";
 
-// Notification type constants (matches backend NOTIF_TYPE)
+// Notification type constants (matches constants/notification.constants.js)
 export const NOTIF_TYPE = {
-  SYSTEM: 1,
-  NEW_CHAPTER: 2,
-  APPROVAL: 3,
+  MENTION: 1,
+  CHAT_REPLY: 2,
+  COMMENT_REPLY: 3,
+  NEW_CHAPTER: 11,
+  BOOK_APPROVED: 12,
+  GIFT_LINH_THACH: 21,
+  MAINTENANCE: 22
+} as const;
+
+export const CATEGORY_MAP = {
+  interaction: [1, 2, 3],
+  story: [11, 12],
+  system: [21, 22]
 } as const;
 
 export interface Notification {
@@ -29,9 +39,9 @@ export interface NotificationResponse {
   unreadCount: number;
 }
 
-export const getNotificationsApi = async (page = 1, limit = 10): Promise<NotificationResponse> => {
+export const getNotificationsApi = async (page = 1, limit = 10, category?: string): Promise<NotificationResponse> => {
   const response = await axios.get('/api/notifications', {
-    params: { page, limit }
+    params: { page, limit, category }
   });
   return response.data;
 };

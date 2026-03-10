@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="comment-section">
     <h3 class="section-title">Bình Luận ({{ comments.length }})</h3>
 
@@ -48,19 +48,27 @@
       <div v-for="comment in comments" :key="comment.id" class="fb-comment">
 
         <!-- Avatar -->
-        <div class="fb-avatar">
-          <img
-            :src="getAvatarUrl(comment.author_avatar)"
-            :alt="comment.author_name"
-            class="avatar-img"
-            @error="onAvatarError"
-          />
+        <div class="fb-avatar-shell" :class="comment.author_frame?.css_class || ''">
+          <div class="fb-avatar">
+            <img
+              :src="getAvatarUrl(comment.author_avatar)"
+              :alt="comment.author_name"
+              class="avatar-img"
+              @error="onAvatarError"
+            />
+            <img
+              v-if="comment.author_frame?.image_url"
+              :src="comment.author_frame.image_url"
+              :alt="comment.author_frame.name"
+              class="avatar-frame-overlay"
+            />
+          </div>
         </div>
 
         <!-- Body -->
         <div class="fb-body">
           <!-- Bubble -->
-          <div class="fb-bubble">
+          <div :class="['fb-bubble', comment.author_frame?.css_class || '', { 'has-frame': !!comment.author_frame }]">
             <div
               class="author-nameplate"
               :data-rarity="comment.author_badge?.rarity || 'none'"
@@ -83,10 +91,9 @@
             </button>
           </div>
 
-          <!-- Meta: time · reply -->
           <div class="fb-meta">
             <span class="meta-time">{{ formatDate(comment.created_at) }}</span>
-            <span class="meta-sep">·</span>
+            <span class="meta-sep"></span>
             <button @click="toggleReply(comment.id)" class="meta-btn">Trả lời</button>
           </div>
 
@@ -105,23 +112,31 @@
             <!-- Replies list (expanded) -->
             <div v-else class="fb-replies">
               <div v-for="reply in comment.replies" :key="reply.id" class="fb-reply">
-                <div class="fb-avatar sm">
-                  <img
-                    :src="getAvatarUrl(reply.author_avatar)"
-                    :alt="reply.author_name"
-                    class="avatar-img sm"
-                    @error="onAvatarError"
-                  />
+                <div class="fb-avatar-shell sm" :class="reply.author_frame?.css_class || ''">
+                  <div class="fb-avatar sm">
+                    <img
+                      :src="getAvatarUrl(reply.author_avatar)"
+                      :alt="reply.author_name"
+                      class="avatar-img sm"
+                      @error="onAvatarError"
+                    />
+                    <img
+                      v-if="reply.author_frame?.image_url"
+                      :src="reply.author_frame.image_url"
+                      :alt="reply.author_frame.name"
+                      class="avatar-frame-overlay sm"
+                    />
+                  </div>
                 </div>
                 <div class="fb-body">
-                  <div class="fb-bubble">
+                  <div :class="['fb-bubble', reply.author_frame?.css_class || '', { 'has-frame': !!reply.author_frame }]">
                     <div
                       class="author-nameplate"
                       :data-rarity="reply.author_badge?.rarity || 'none'"
                       :style="{ '--plate-color': reply.author_badge?.color || '#555e6b' }"
                     >
                       <span class="plate-shine"></span>
-                      <span class="comment-author">{{ reply.author_name || 'Ẩn danh' }}</span>
+                      <span class="comment-author">{{ reply.author_name || 'ẩn danh' }}</span>
                       <UserBadge :badge="reply.author_badge" size="sm" />
                     </div>
                     <p class="comment-text">{{ reply.content }}</p>
@@ -134,7 +149,7 @@
                   </div>
                   <div class="fb-meta">
                     <span class="meta-time">{{ formatDate(reply.created_at) }}</span>
-                    <span class="meta-sep">·</span>
+                    <span class="meta-sep"></span>
                     <button @click="toggleReply(comment.id)" class="meta-btn">Trả lời</button>
                   </div>
                 </div>
@@ -297,7 +312,6 @@ const onAvatarError = (e: Event) => {
 </script>
 
 <style scoped>
-/* ── Biến cục bộ & Nền tảng ──────────────────────────────────────────────────── */
 .comment-section {
   --aura-primary: #34d399;
   --aura-bg: #0b0f19;
@@ -322,7 +336,6 @@ const onAvatarError = (e: Event) => {
   text-shadow: 0 0 10px rgba(52, 211, 153, 0.3);
 }
 
-/* ── Truyền Âm Phù (Comment Form) ───────────────────────────────────────────── */
 .comment-form, .reply-form { margin-bottom: 1.5rem; }
 
 .form-row, .reply-form {
@@ -364,7 +377,7 @@ const onAvatarError = (e: Event) => {
   margin-top: 0.5rem;
 }
 
-/* Nút bấm tụ linh */
+/* NÃºt báº¥m tá»¥ linh */
 .btn-submit {
   padding: 0.4rem 1.2rem;
   background: linear-gradient(135deg, #10b981, #34d399);
@@ -396,14 +409,12 @@ const onAvatarError = (e: Event) => {
 }
 .btn-cancel:hover { background: rgba(244, 63, 94, 0.1); border-color: #f43f5e; color: #f43f5e; }
 
-/* ── States ─────────────────────────────────────────────────────────────────── */
 .loading-state, .error-state, .empty-state {
   text-align: center; padding: 3rem 1rem; color: #64748b; font-style: italic;
   background: var(--bubble-bg); border-radius: 16px; border: 1px dashed #334155;
 }
 .error-state { color: #f43f5e; border-color: rgba(244, 63, 94, 0.3); }
 
-/* ── Danh sách bình luận ────────────────────────────────────────────────────── */
 .comments-list { display: flex; flex-direction: column; gap: 1.5rem; }
 
 .fb-comment {
@@ -415,7 +426,43 @@ const onAvatarError = (e: Event) => {
 
 .fb-body { flex: 1; min-width: 0; }
 
-/* ── Avatar Thần Thức ───────────────────────────────────────────────────────── */
+.fb-avatar-shell {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  --avatar-frame-scale: 1.32;
+}
+
+.fb-avatar-shell.sm {
+  width: 32px;
+  height: 32px;
+}
+
+.fb-avatar {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-frame-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  transform: scale(var(--avatar-frame-scale));
+  transform-origin: center;
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.24));
+}
+
+.avatar-frame-overlay.sm {
+  width: 100%;
+  height: 100%;
+}
+
 .avatar-img {
   width: 42px; height: 42px;
   border-radius: 50%;
@@ -428,7 +475,6 @@ const onAvatarError = (e: Event) => {
 .avatar-img.form-av-img { border-color: var(--aura-primary); }
 .avatar-img.sm { width: 32px; height: 32px; }
 
-/* ── Khí Tràng Bình Luận (Bubble) ───────────────────────────────────────────── */
 .fb-bubble {
   display: inline-block;
   position: relative;
@@ -443,6 +489,9 @@ const onAvatarError = (e: Event) => {
   transition: border-color 0.3s, transform 0.2s;
 }
 .fb-bubble:hover { border-color: var(--border-light); }
+.fb-bubble.has-frame {
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.12), 0 10px 24px rgba(0,0,0,0.18);
+}
 
 .comment-text {
   color: #e2e8f0;
@@ -453,7 +502,7 @@ const onAvatarError = (e: Event) => {
   word-break: break-word;
 }
 
-/* Nút xóa thần tốc */
+/* NÃºt xÃ³a tháº§n tá»‘c */
 .btn-delete {
   position: absolute;
   top: 8px; right: 8px;
@@ -472,7 +521,6 @@ const onAvatarError = (e: Event) => {
 .fb-bubble:hover .btn-delete { opacity: 1; transform: scale(1); }
 .btn-delete:hover { background: #f43f5e; color: #fff; }
 
-/* ── Thanh trạng thái (Meta) ────────────────────────────────────────────────── */
 .fb-meta {
   display: flex;
   align-items: center;
@@ -494,10 +542,8 @@ const onAvatarError = (e: Event) => {
 }
 .meta-btn:hover { color: var(--aura-primary); text-shadow: 0 0 5px rgba(52, 211, 153, 0.4); }
 
-/* ── Linh Mạch (Replies Section) ────────────────────────────────────────────── */
 .fb-replies-wrap { margin-top: 1rem; position: relative; }
 
-/* Nút mở rộng mượt mà */
 .btn-expand-replies, .btn-collapse-replies {
   display: inline-flex;
   align-items: center;
@@ -523,10 +569,10 @@ const onAvatarError = (e: Event) => {
   flex-direction: column;
   gap: 1rem;
   position: relative;
-  padding-left: 2rem; /* Tạo không gian cho đường kẻ cong */
+  padding-left: 2rem; /* Táº¡o khÃ´ng gian cho Ä‘Æ°á»ng káº» cong */
 }
 
-/* Đường kẻ cong (Curved Thread Line) nối từ avatar cha xuống các con */
+/* ÄÆ°á»ng káº» cong (Curved Thread Line) ná»‘i tá»« avatar cha xuá»‘ng cÃ¡c con */
 .fb-replies::before {
   content: "";
   position: absolute;
@@ -548,7 +594,6 @@ const onAvatarError = (e: Event) => {
   animation: fadeIn 0.3s ease-out forwards;
 }
 
-/* ── Pill Nameplate (Khung Tên Tác Giả) ─────────────────────────────────────── */
 .author-nameplate {
   --plate-color: #64748b; 
   display: inline-flex;
@@ -572,7 +617,7 @@ const onAvatarError = (e: Event) => {
   text-shadow: 0 0 8px color-mix(in srgb, var(--plate-color) 80%, transparent);
 }
 
-/* Hiệu ứng Shine cho Badge xịn */
+/* Hiá»‡u á»©ng Shine cho Badge xá»‹n */
 .plate-shine {
   position: absolute; inset: 0;
   background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.2) 50%, transparent 65%);
@@ -583,6 +628,77 @@ const onAvatarError = (e: Event) => {
   animation: plate-shine 3s ease-in-out infinite;
 }
 
+
+.fb-avatar-shell.frame-phoenix-fire {
+  --avatar-frame-scale: 1.72;
+}
+
+.fb-avatar-shell.frame-bang-tinh {
+  --avatar-frame-scale: 1.22;
+}
+
+.fb-avatar-shell.frame-thien-thanh {
+  --avatar-frame-scale: 1.24;
+}
+
+.fb-avatar-shell.frame-phoenix-fire .avatar-frame-overlay,
+.fb-bubble.frame-phoenix-fire {
+  filter: drop-shadow(0 0 10px rgba(251, 146, 60, 0.5));
+}
+
+.fb-bubble.frame-phoenix-fire {
+  background:
+    radial-gradient(circle at top left, rgba(251, 191, 36, 0.22), transparent 38%),
+    linear-gradient(135deg, rgba(74, 29, 18, 0.92), rgba(124, 45, 18, 0.88), rgba(67, 20, 7, 0.94));
+  border-color: rgba(251, 146, 60, 0.42);
+  box-shadow: 0 0 24px rgba(249, 115, 22, 0.18), inset 0 0 20px rgba(255, 237, 213, 0.04);
+  animation: phoenixCommentPulse 3s ease-in-out infinite;
+}
+
+.fb-avatar-shell.frame-phoenix-fire::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 113, 133, 0.18), transparent 70%);
+  filter: blur(7px);
+  pointer-events: none;
+  animation: phoenixHalo 3s ease-in-out infinite;
+}
+
+.fb-bubble.frame-bang-tinh {
+  background:
+    radial-gradient(circle at top left, rgba(186, 230, 253, 0.22), transparent 36%),
+    linear-gradient(135deg, rgba(8, 47, 73, 0.92), rgba(15, 61, 94, 0.88), rgba(23, 37, 84, 0.94));
+  border-color: rgba(125, 211, 252, 0.32);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+}
+
+.fb-bubble.frame-thien-thanh {
+  background:
+    radial-gradient(circle at top left, rgba(216, 180, 254, 0.24), transparent 40%),
+    linear-gradient(135deg, rgba(49, 46, 129, 0.92), rgba(76, 29, 149, 0.88), rgba(30, 27, 75, 0.94));
+  border-color: rgba(196, 181, 253, 0.34);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.16);
+}
+
+@keyframes phoenixCommentPulse {
+  0%, 100% {
+    box-shadow: 0 0 18px rgba(249, 115, 22, 0.14), inset 0 0 18px rgba(255, 237, 213, 0.03);
+    transform: translateY(0);
+  }
+  50% {
+    box-shadow: 0 0 26px rgba(249, 115, 22, 0.28), inset 0 0 24px rgba(254, 215, 170, 0.07);
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes phoenixHalo {
+  0%, 100% { opacity: 0.35; transform: scale(0.96); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
 @keyframes plate-shine { 0% { transform: translateX(-160%); } 30%, 100% { transform: translateX(160%); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
+

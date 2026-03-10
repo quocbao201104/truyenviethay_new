@@ -1,94 +1,107 @@
 import { ref, computed } from 'vue';
 import axios from '@/utils/axios';
 import { useAppToast } from './useAppToast';
+import { useUserStore } from '@/modules/user/user.store';
+import type { InventoryItem, ShopItem } from '@/types/shop';
 
 export function useGamification() {
   const { showSuccessToast, showErrorToast } = useAppToast();
-  
-  const userPoints    = ref<any>(null);
-  const currentLevel  = ref<any>(null);
-  const tasks         = ref<any[]>([]);
-  const rewards       = ref<any[]>([]);
-  const userRewards   = ref<any[]>([]);
-  const mailbox       = ref<any[]>([]);   // Quà trong hộp thư (status='unlocked')
-  const badges        = ref<any[]>([]);   // Huy hiệu trong túi đồ
-  const userCurrency  = ref(0);
-  const loading       = ref(false);
+  const userStore = useUserStore();
 
-  // ── Points & Level ────────────────────────────────────────
+  const userPoints = ref<any>(null);
+  const currentLevel = ref<any>(null);
+  const tasks = ref<any[]>([]);
+  const rewards = ref<any[]>([]);
+  const userRewards = ref<any[]>([]);
+  const mailbox = ref<any[]>([]);
+  const badges = ref<any[]>([]);
+  const shopItems = ref<ShopItem[]>([]);
+  const inventoryItems = ref<InventoryItem[]>([]);
+  const shopTransactions = ref<any[]>([]);
+  const userCurrency = ref(0);
+  const loading = ref(false);
+
   const fetchUserPoints = async (userId: number) => {
     try {
       const res = await axios.get(`/api/points/${userId}`);
       userPoints.value = res.data.data;
-    } catch (e) { console.error('fetchUserPoints:', e); }
+    } catch (e) {
+      console.error('fetchUserPoints:', e);
+    }
   };
 
   const fetchCurrentLevel = async (userId: number) => {
     try {
       const res = await axios.get(`/api/levels/history/${userId}?limit=1`);
       if (res.data.data?.length > 0) currentLevel.value = res.data.data[0];
-    } catch (e) { console.error('fetchCurrentLevel:', e); }
+    } catch (e) {
+      console.error('fetchCurrentLevel:', e);
+    }
   };
 
-  const upgradeLevel = async (userId: number) => { // Thêm userId vào đây
-  loading.value = true;
-  try {
-    const res = await axios.post('/api/levels/history/upgrade');
-    showSuccessToast(res.data.message || 'Thăng cấp thành công!');
-    
-    // Sử dụng luôn userId truyền vào thay vì đợi data từ res
-    if (userId) {
-      await Promise.all([
-        fetchUserPoints(userId),
-        fetchCurrentLevel(userId),
-        fetchMailbox(),
-        fetchInventoryBadges(),
-        fetchUserCurrency()
-      ]);
-    }
-    return res.data;
-  } catch (e: any) {
-    showErrorToast(e.response?.data?.message || 'Lỗi khi thăng cấp');
-    throw e;
-  } finally {
-    loading.value = false;
-  }
-};
+  const upgradeLevel = async (userId: number) => {
+    loading.value = true;
+    try {
+      const res = await axios.post('/api/levels/history/upgrade');
+      showSuccessToast(res.data.message || 'Thang cap thanh cong!');
 
-  // ── Tasks ─────────────────────────────────────────────────
+      if (userId) {
+        await Promise.all([
+          fetchUserPoints(userId),
+          fetchCurrentLevel(userId),
+          fetchMailbox(),
+          fetchInventoryBadges(),
+          fetchInventoryItems(),
+          fetchUserCurrency(),
+          userStore.fetchUserProfile(),
+        ]);
+      }
+      return res.data;
+    } catch (e: any) {
+      showErrorToast(e.response?.data?.message || 'Loi khi thang cap');
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const fetchTasks = async () => {
     loading.value = true;
     try {
       const res = await axios.get('/api/tasks');
       tasks.value = res.data.data || [];
-    } catch (e) { tasks.value = []; }
-    finally { loading.value = false; }
+    } catch (e) {
+      tasks.value = [];
+    } finally {
+      loading.value = false;
+    }
   };
 
   const completeTask = async (taskId: number) => {
     try {
       await axios.post('/api/tasks/complete', { task_id: taskId });
-      showSuccessToast('Hoàn thành nhiệm vụ! +Điểm');
+      showSuccessToast('Hoan thanh nhiem vu! +Diem');
       await fetchTasks();
     } catch (e: any) {
-      showErrorToast(e.response?.data?.message || 'Lỗi hoàn thành nhiệm vụ');
+      showErrorToast(e.response?.data?.message || 'Loi hoan thanh nhiem vu');
       throw e;
     }
   };
 
-  // ── Reward Catalog ────────────────────────────────────────
   const fetchRewards = async (page = 1, limit = 10) => {
     loading.value = true;
     try {
       const res = await axios.get(`/api/rewards?page=${page}&limit=${limit}`);
       rewards.value = res.data.data || [];
       return res.data.pagination;
-    } catch (e) { rewards.value = []; return null; }
-    finally { loading.value = false; }
+    } catch (e) {
+      rewards.value = [];
+      return null;
+    } finally {
+      loading.value = false;
+    }
   };
 
-  // ── Hộp Thư (Mailbox) ─────────────────────────────────────
-  /** Lấy danh sách quà đang chờ trong hộp thư của user */
   const fetchMailbox = async () => {
     try {
       const res = await axios.get('/api/user-rewards/mailbox');
@@ -99,47 +112,127 @@ export function useGamification() {
     }
   };
 
-  /** User bấm nhận 1 món quà cụ thể từ hộp thư (theo userRewardId) */
   const claimFromMailbox = async (userRewardId: number) => {
     try {
       const res = await axios.post('/api/user-rewards/claim', { userRewardId });
-      showSuccessToast(res.data.message || 'Nhận quà thành công!');
-      // Refresh hộp thư, tủ đồ và tiền tệ sau khi nhận
-      await Promise.all([fetchMailbox(), fetchInventoryBadges(), fetchUserCurrency()]);
+      showSuccessToast(res.data.message || 'Nhan qua thanh cong!');
+      await Promise.all([
+        fetchMailbox(),
+        fetchInventoryBadges(),
+        fetchInventoryItems(),
+        fetchUserCurrency(),
+        userStore.fetchUserProfile(),
+      ]);
       return res.data.data;
     } catch (e: any) {
-      showErrorToast(e.response?.data?.message || 'Lỗi khi nhận quà');
+      showErrorToast(e.response?.data?.message || 'Loi khi nhan qua');
       throw e;
     }
   };
 
-  // ── Inventory / Túi Đồ ────────────────────────────────────
-  /** Lấy danh sách huy hiệu đang sở hữu trong túi đồ */
   const fetchInventoryBadges = async () => {
     try {
       const res = await axios.get('/api/inventory/badges');
       badges.value = res.data.data || [];
-    } catch (e) { console.error('fetchInventoryBadges:', e); badges.value = []; }
+    } catch (e) {
+      console.error('fetchInventoryBadges:', e);
+      badges.value = [];
+    }
   };
 
-  /** Đeo huy hiệu được chọn */
   const equipBadge = async (rewardId: number) => {
     try {
       await axios.post('/api/inventory/equip', { rewardId });
-      showSuccessToast('Đeo huy hiệu thành công!');
-      await fetchInventoryBadges(); // Refresh túi đồ
+      showSuccessToast('Deo huy hieu thanh cong!');
+      await Promise.all([fetchInventoryBadges(), userStore.fetchUserProfile()]);
     } catch (e: any) {
-      showErrorToast(e.response?.data?.message || 'Lỗi khi đeo huy hiệu');
+      showErrorToast(e.response?.data?.message || 'Loi khi deo huy hieu');
       throw e;
     }
   };
 
-  // ── Currency / Linh Thạch ─────────────────────────────────
+  const fetchShopItems = async (itemType?: string) => {
+    try {
+      const res = await axios.get('/api/shop/items', { params: itemType ? { itemType } : {} });
+      shopItems.value = res.data.data || [];
+      return shopItems.value;
+    } catch (e) {
+      console.error('fetchShopItems:', e);
+      shopItems.value = [];
+      return [];
+    }
+  };
+
+  const buyShopItem = async (itemId: number, quantity = 1) => {
+    try {
+      const res = await axios.post('/api/shop/buy', { itemId, quantity });
+      showSuccessToast(res.data.message || 'Mua vat pham thanh cong!');
+      await Promise.all([
+        fetchInventoryItems(),
+        fetchUserCurrency(),
+        fetchShopTransactions(),
+        userStore.fetchUserProfile(),
+      ]);
+      return res.data.data;
+    } catch (e: any) {
+      showErrorToast(e.response?.data?.message || 'Loi khi mua vat pham');
+      throw e;
+    }
+  };
+
+  const fetchInventoryItems = async (itemType?: string, includeExpired = false) => {
+    try {
+      const params: Record<string, string> = {};
+      if (itemType) params.itemType = itemType;
+      if (includeExpired) params.includeExpired = 'true';
+      const res = await axios.get('/api/inventory/items', { params });
+      inventoryItems.value = res.data.data || [];
+      return inventoryItems.value;
+    } catch (e) {
+      console.error('fetchInventoryItems:', e);
+      inventoryItems.value = [];
+      return [];
+    }
+  };
+
+  const equipInventoryItem = async (inventoryId: number) => {
+    try {
+      const res = await axios.post('/api/inventory/equip-item', { inventoryId });
+      showSuccessToast(res.data.message || 'Trang bi vat pham thanh cong!');
+      
+      const userId = userStore.profile?.id;
+      const tasks = [fetchInventoryItems(), userStore.fetchUserProfile()];
+      if (res.data.data?.consumed && userId) {
+        tasks.push(fetchUserPoints(userId));
+      }
+      
+      await Promise.all(tasks);
+      return res.data.data;
+    } catch (e: any) {
+      showErrorToast(e.response?.data?.message || 'Loi khi trang bi vat pham');
+      throw e;
+    }
+  };
+
+  const fetchShopTransactions = async (limit = 20) => {
+    try {
+      const res = await axios.get('/api/shop/transactions', { params: { limit } });
+      shopTransactions.value = res.data.data || [];
+      return shopTransactions.value;
+    } catch (e) {
+      console.error('fetchShopTransactions:', e);
+      shopTransactions.value = [];
+      return [];
+    }
+  };
+
   const fetchUserCurrency = async () => {
     try {
       const res = await axios.get('/api/currency/balance');
       userCurrency.value = res.data.data?.balance ?? 0;
-    } catch (e) { console.error('fetchUserCurrency:', e); }
+    } catch (e) {
+      console.error('fetchUserCurrency:', e);
+    }
   };
 
   const levelProgress = computed(() => {
@@ -150,23 +243,35 @@ export function useGamification() {
   });
 
   return {
-    // State
-    userPoints, currentLevel, tasks, rewards,
-    userRewards, mailbox, badges, userCurrency, loading,
+    userPoints,
+    currentLevel,
+    tasks,
+    rewards,
+    userRewards,
+    mailbox,
+    badges,
+    shopItems,
+    inventoryItems,
+    shopTransactions,
+    userCurrency,
+    loading,
     levelProgress,
-    // Points & Level
-    fetchUserPoints, fetchCurrentLevel, upgradeLevel,
-    // Tasks
-    fetchTasks, completeTask,
-    // Catalog rewards
+    fetchUserPoints,
+    fetchCurrentLevel,
+    upgradeLevel,
+    fetchTasks,
+    completeTask,
     fetchRewards,
-    // Hộp thư
-    fetchMailbox, claimFromMailbox,
-    // Túi đồ
-    fetchInventoryBadges, equipBadge,
-    // Currency
+    fetchMailbox,
+    claimFromMailbox,
+    fetchInventoryBadges,
+    equipBadge,
+    fetchShopItems,
+    buyShopItem,
+    fetchInventoryItems,
+    equipInventoryItem,
+    fetchShopTransactions,
     fetchUserCurrency,
   };
 }
-
 

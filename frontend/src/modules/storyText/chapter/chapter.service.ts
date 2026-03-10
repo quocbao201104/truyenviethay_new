@@ -66,7 +66,7 @@ export const deleteChapter = async (id: number): Promise<void> => {
   await axios.delete(`/api/chuong/${id}`);
 };
 
-export const approveOrRejectChapter = async (id: number, action: 'duyet' | 'tu_choi', reason?: string): Promise<any> => {
+export const approveOrRejectChapter = async (id: number, action: 'da_duyet' | 'tu_choi', reason?: string): Promise<any> => {
   const response = await axios.put(`/api/chuong/${id}/duyet-chuong`, { action, reason });
   return response.data;
 };
