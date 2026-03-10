@@ -1,390 +1,142 @@
-# 📚 TruyenVietHay — Nền Tảng Đọc Truyện Online
+﻿# 📚 TruyenVietHay — Nền tảng đọc truyện chữ full-stack
 
-[![Frontend](https://img.shields.io/badge/Frontend-Vercel-black?logo=vercel)](https://truyen-viet-hay.vercel.app)
-[![Backend](https://img.shields.io/badge/Backend-Render-46E3B7?logo=render)](https://truyenviethay-backend-zjfg.onrender.com)
-[![Database](https://img.shields.io/badge/Database-Aiven%20MySQL-FF6054?logo=mysql)](https://aiven.io)
-[![Vue 3](https://img.shields.io/badge/Vue-3.x-42b883?logo=vue.js)](https://vuejs.org)
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js)](https://nodejs.org)
+<p align="center">
+  <img src="frontend/src/assets/images/logo.png" alt="TruyenVietHay logo" width="220">
+</p>
 
-TruyenVietHay là ứng dụng web full-stack hiện đại cho phép người dùng đọc, quản lý và chia sẻ các tác phẩm truyện chữ tiếng Việt. Hệ thống bao gồm giao diện đọc truyện thân thiện, quản lý nội dung cho tác giả, hệ thống gamification và bảng quản trị cho admin.
+<p align="center">
+  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue-3.x-42b883?logo=vue.js" alt="Vue 3"></a>
+  <a href="https://vitejs.dev"><img src="https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite" alt="Vite"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js" alt="Node.js"></a>
+  <a href="https://expressjs.com"><img src="https://img.shields.io/badge/Express-4.x-000000?logo=express" alt="Express"></a>
+  <a href="https://socket.io"><img src="https://img.shields.io/badge/Socket.io-4.x-010101?logo=socket.io" alt="Socket.io"></a>
+  <a href="https://www.mysql.com/"><img src="https://img.shields.io/badge/MySQL-8%2B-4479A1?logo=mysql" alt="MySQL"></a>
+  <a href="https://opensource.org/licenses/ISC"><img src="https://img.shields.io/badge/License-ISC-4c1.svg" alt="License ISC"></a>
+</p>
 
----
-
-## 🌐 Demo
+> TruyenVietHay là nền tảng đọc truyện chữ full-stack tích hợp hệ thống gamification, tu tiên, thương hội và tương tác thời gian thực.
 
 | Môi trường | URL |
-|---|---|
-| Frontend (Production) | [truyen-viet-hay.vercel.app](https://truyen-viet-hay.vercel.app) |
-| Backend API | [truyenviethay-backend-zjfg.onrender.com](https://truyenviethay-backend-zjfg.onrender.com) |
+| --- | --- |
+| Frontend (Production) | [https://truyen-viet-hay.vercel.app](https://truyen-viet-hay.vercel.app) |
+| Backend API | [https://truyenviethay-backend-zjfg.onrender.com](https://truyenviethay-backend-zjfg.onrender.com) |
 
 ---
 
-## 🚀 Tính Năng Chính
+## 🚀 Tính Năng Nổi Bật
 
-### 👤 Người Dùng
-- **Đăng ký / Đăng nhập** — JWT-based auth, hỗ trợ đăng nhập Google OAuth
-- **Hồ sơ cá nhân** — Cập nhật avatar, thông tin cá nhân
-- **Lịch sử đọc** — Theo dõi truyện đã đọc và vị trí chương
-- **Theo dõi truyện** — Nhận thông báo khi có chương mới
-- **Đánh giá & Bình luận** — Rating sao, bình luận từng chương
+### 📖 Trải Nghiệm Đọc Truyện
+- **Đọc truyện tối ưu:** Giao diện mượt mà, lưu lịch sử, đánh dấu chương, tiếp tục đọc nhanh.
+- **Tìm kiếm thông minh:** Lọc theo thể loại, trạng thái, và sắp xếp theo độ hot/mới cập nhật.
+- **Tương tác:** Đánh giá, bình luận và theo dõi những bộ truyện yêu thích.
 
-### 📖 Đọc Truyện
-- Giao diện đọc tùy chỉnh (font, cỡ chữ)
-- Điều hướng chương trước/sau
-- Mục lục chương đầy đủ
-- Đếm lượt xem & hot score tự động
+### 🎮 Gamification & Tu Tiên
+- **Cảnh giới tu luyện:** Tích lũy EXP để đột phá cảnh giới (Phàm Nhân -> Luyện Khí -> ...). Mỗi cảnh giới có thời hạn thọ nguyên.
+- **Hệ thống Nhiệm vụ:** Danh sách nhiệm vụ hằng ngày để nhận thưởng linh thạch và EXP.
+- **Hệ thống Thư tín:** Nhận quà tặng và thông báo hệ thống trực tiếp trong Mailbox.
+- **Huy hiệu (Badges):** Thu thập và trang bị các danh hiệu độc đáo thể hiện đẳng cấp.
 
-### ✍️ Tác Giả
-- Upload và quản lý truyện của mình
-- Đăng chương mới, chỉnh sửa nội dung
-- Xem thống kê lượt xem, theo dõi
-- Truyện cần được admin duyệt trước khi public
+### 🏪 Vạn Giới Thương Hội (Shop) & Túi Đồ
+- **Thương Hội:** Sử dụng linh thạch để mua sắm vật phẩm:
+    - **Pháp Bảo:** Khung avatar lộng lẫy.
+    - **Kỳ Vật:** Các huy hiệu quý hiếm.
+    - **Vật Phẩm:** Đan dược tăng EXP (ví dụ: Đan Dược +1000 EXP).
+- **Túi Đồ (Inventory):** Quản lý vật phẩm đã sở hữu, trang bị khung avatar, huy hiệu hoặc sử dụng đan dược.
 
-### 🛡️ Quản Trị (Admin)
-- Duyệt / từ chối truyện và chương
-- Quản lý người dùng, phân quyền
-- Xem cache monitoring (hot stories, top monthly)
-- Gửi thông báo hệ thống
-
-### 🎮 Gamification
-- **Điểm EXP & Cấp độ** — Tự động lên cấp khi hoàn thành hoạt động
-- **Huy hiệu cấp độ** — Badge hiển thị bên cạnh username
-- **Nhiệm vụ hàng ngày** — Đọc chương, cập nhật profile, v.v.
-- **Linh Thạch (Currency)** — Tiêu tệ nội tệ để mua vật phẩm
-- **Cửa hàng & Kho đồ** — Đổi thưởng, quản lý vật phẩm
-
-### ⚡ Hiệu Năng
-- **Cache Layer** (`node-cache`) — Giảm tải DB cho BXH, truyện hot
-- **Fulltext Search** — Tìm kiếm nhanh theo tên/tác giả
-- **Connection Pooling** (40 connections) — Xử lý đồng thời cao
-- **Rate Limiting** — Bảo vệ API khỏi spam
-- **PWA** — Hỗ trợ Progressive Web App, offline-ready
+### 💬 Tương Tác Thời Gian Thực
+- **World Chat:** Kênh chat chung liên thông toàn giới, hiển thị khung avatar và màu sắc sặc sỡ theo cấp độ.
+- **Thông báo Real-time:** Nhận thông báo tức thì khi có chương mới hoặc sự kiện.
 
 ---
 
-## 🛠 Tech Stack
+## 🛠️ Công Nghệ Sử Dụng
 
-### Frontend
-| Công nghệ | Phiên bản | Mục đích |
-|---|---|---|
-| **Vue 3** | 3.x | Core framework (Composition API) |
-| **TypeScript** | 5.x | Type safety |
-| **Vite** | 6.x | Build tool & dev server |
-| **Pinia** | 2.x | State management |
-| **Vue Router** | 4.x | Client-side routing |
-| **Axios** | 1.x | HTTP client |
-| **Vanilla CSS** | — | Styling (không dùng Tailwind) |
-| **Swiper** | — | Slider/carousel |
-| **FontAwesome** | 6.x | Icons |
-| **date-fns** | — | Format thời gian |
-| **vite-plugin-pwa** | — | PWA support |
-
-### Backend
-| Công nghệ | Phiên bản | Mục đích |
-|---|---|---|
-| **Node.js** | 18+ | Runtime |
-| **Express.js** | 4.x | Web framework |
-| **mysql2** | 3.x | MySQL driver + Connection Pool |
-| **JWT** | — | Authentication |
-| **Helmet** | — | HTTP security headers |
-| **CORS** | — | Cross-origin resource sharing |
-| **xss-clean** | — | XSS protection |
-| **express-rate-limit** | — | Rate limiting |
-| **node-cache** | — | In-memory caching |
-| **Cloudinary** | — | Image/media storage |
-| **multer** | — | File upload middleware |
-| **compression** | — | Gzip response |
-| **winston** | — | Logging |
-
-### Infrastructure
-| Thành phần | Dịch vụ |
-|---|---|
-| Frontend Hosting | [Vercel](https://vercel.com) |
-| Backend Hosting | [Render](https://render.com) |
-| Database | [Aiven MySQL](https://aiven.io) |
-| Media Storage | [Cloudinary](https://cloudinary.com) |
+- **Frontend:**
+    - **Framework:** Vue 3 (Composition API) + TypeScript.
+    - **Build Tool:** Vite.
+    - **State Management:** Pinia.
+    - **UI/UX:** Tailwind CSS, CSS Modules, Framer Motion (concept), Swiper, ApexCharts.
+    - **Real-time:** Socket.io client.
+- **Backend:**
+    - **Runtime:** Node.js 18+.
+    - **Framework:** Express.js.
+    - **Real-time:** Socket.io.
+    - **Security:** JWT, Google OAuth, Helmet, CORS, Rate Limiting.
+- **Lưu trữ & Hạ tầng:**
+    - **Database:** MySQL 8+ (với hệ thống Index tối ưu).
+    - **Caching:** Redis (Upstash) cho socket state & pub/sub.
+    - **Media:** Cloudinary lưu trữ ảnh bìa truyện và avatar.
+    - **Deployment:** Vercel (Frontend), Render (Backend).
 
 ---
 
-## 📂 Cấu Trúc Thư Mục
+## 📦 Cấu Trúc Thư Mục
 
-```
+```text
 truyenviethay_new/
-├── backend/
-│   ├── config/
-│   │   ├── db.js                  # MySQL connection pool (Aiven)
-│   │   └── cloudinary.js          # Cloudinary setup
-│   ├── controllers/               # Business logic handlers
-│   │   ├── auth.controller.js
-│   │   ├── story.controller.js
-│   │   ├── chapter.controller.js
-│   │   ├── comment.controller.js
-│   │   ├── follow.controller.js
-│   │   ├── notification.controller.js
-│   │   ├── rating.controller.js
-│   │   ├── badge.controller.js
-│   │   ├── userLevel.controller.js
-│   │   ├── userPoint.controller.js
-│   │   ├── userTask.controller.js
-│   │   └── ...
-│   ├── middleware/
-│   │   ├── auth.js                # JWT authenticate & authorize
-│   │   ├── upload_img.js          # Multer + Cloudinary upload
-│   │   ├── errorHandler.js        # Global error middleware
-│   │   └── validate.js
-│   ├── models/                    # Raw SQL query functions
-│   │   ├── story.model.js
-│   │   ├── chapter.model.js
-│   │   ├── comment.model.js
-│   │   ├── follow.model.js
-│   │   ├── rating.model.js
-│   │   ├── levelBadge.model.js
-│   │   └── ...
-│   ├── routes/                    # Express routers
-│   │   ├── story.routes.js
-│   │   ├── chapter.routes.js
-│   │   ├── auth.routes.js
-│   │   ├── notification.routes.js
-│   │   ├── badge.routes.js
-│   │   └── ...
-│   ├── services/                  # Complex business logic
-│   │   ├── notification.services.js
-│   │   ├── story.services.js
-│   │   └── ...
-│   ├── utils/
-│   │   ├── cache.js               # node-cache wrapper (getOrSet)
-│   │   ├── logger.js              # Winston logger
-│   │   ├── slugify.js             # Tạo slug từ tên truyện
-│   │   └── sanitize.js            # XSS sanitizer
-│   ├── migrations/                # SQL migration scripts
-│   └── index.js                   # Entry point
-│
-├── frontend/
-│   ├── public/                    # Static assets
-│   ├── src/
-│   │   ├── assets/                # Images, fonts
-│   │   ├── components/
-│   │   │   ├── layout/            # AppHeader, AppFooter
-│   │   │   └── ui/                # Shared UI components
-│   │   ├── modules/               # Feature modules (co-located)
-│   │   │   ├── auth/              # auth.store.ts, auth.api.ts
-│   │   │   ├── notification/      # notification.store.ts, notification.api.ts
-│   │   │   ├── story/
-│   │   │   ├── chapter/
-│   │   │   ├── user/
-│   │   │   └── ...
-│   │   ├── views/                 # Page-level components
-│   │   ├── composables/           # Reusable Vue composables
-│   │   ├── config/
-│   │   │   └── constants.ts       # API base URL, image helpers
-│   │   ├── router/                # Vue Router config
-│   │   ├── utils/
-│   │   │   └── axios.ts           # Axios instance với interceptors
-│   │   └── main.ts
-│   ├── vercel.json                # SPA routing fix cho Vercel
-│   └── vite.config.ts
-│
-├── screenshots/                   # App screenshots
-└── README.md
+├─ backend/
+│  ├─ config/          # Cấu hình DB, Cloudinary, Socket, Redis
+│  ├─ controllers/     # Xử lý logic nghiệp vụ cho từng module
+│  ├─ models/          # Lớp tương tác DB (MySQL Query Builder)
+│  ├─ services/        # Business logic tập trung (Gamification, Shop, Chat)
+│  ├─ routes/          # Định nghĩa API endpoints
+│  ├─ migrations/      # Các script SQL cập nhật cấu trúc DB
+│  ├─ jobs/            # Cron jobs xử lý định kỳ (Thống kê, Task)
+│  └─ utils/           # Tiện ích bổ trợ (Logger, Auth, Validation)
+├─ frontend/
+│  ├─ src/
+│  │  ├─ modules/      # Module-based architecture (Store + API services)
+│  │  ├─ components/   # UI Components dùng chung
+│  │  ├─ views/        # Các trang chính của ứng dụng
+│  │  ├─ composables/  # Logic dùng chung (useGamification, useSocket)
+│  │  └─ assets/       # Styles, images, icons
+│  └─ vite.config.ts
+└─ README.md
 ```
 
 ---
 
-## 💻 Cài Đặt & Chạy Local
+## 🛠️ Hướng Dẫn Cài Đặt
 
-### Yêu cầu
-- Node.js >= 18.0.0
-- npm >= 9.0.0
-- Git
-- MySQL (local hoặc Aiven cloud)
+### Tiền đề
+- **Node.js** v18 hoặc mới hơn.
+- **MySQL** v8+.
+- **Redis** 
 
-### 1. Clone dự án
-```bash
-git clone https://github.com/quocbao201104/TruyenVietHay.git
-cd TruyenVietHay
-```
+### Các bước thực hiện
 
-### 2. Cấu hình Backend
+1. **Clone dự án:**
+   ```bash
+   git clone https://github.com/quocbao201104/TruyenVietHay.git
+   cd TruyenVietHay
+   ```
 
-```bash
-cd backend
-npm install
-```
+2. **Cấu hình Backend:**
+   ```bash
+   cd backend
+   npm install
+   cp .env.example .env
+   # Chỉnh sửa .env với thông tin DB, JWT, Cloudinary, Redis
+   npm run dev
+   ```
 
-Tạo file `.env` trong thư mục `backend/`:
-```env
-# Server
-PORT=3000
-NODE_ENV=development
-CLIENT_URL=http://localhost:5173
-
-# Database (Aiven MySQL hoặc local)
-DB_HOST=your-db-host
-DB_PORT=3306
-DB_USER=your-db-user
-DB_PASSWORD=your-db-password
-DB_NAME=your-db-name
-
-# Authentication
-JWT_SECRET=your_super_secret_jwt_key_min_32_chars
-
-# Cloudinary (upload ảnh bìa)
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-
-# Google OAuth (tùy chọn)
-GOOGLE_CLIENT_ID=your_google_client_id
-```
-
-Chạy backend:
-```bash
-npm start          # Production
-npm run dev        # Development (nodemon)
-```
-
-Backend chạy tại: `http://localhost:3000`
-
-### 3. Cấu hình Frontend
-
-```bash
-cd ../frontend
-npm install
-```
-
-Tạo file `.env` trong thư mục `frontend/`:
-```env
-VITE_API_URL=http://localhost:3000
-```
-
-Chạy frontend:
-```bash
-npm run dev        # Dev server
-npm run build      # Production build
-npm run preview    # Preview production build
-```
-
-Frontend chạy tại: `http://localhost:5173`
+3. **Cấu hình Frontend:**
+   ```bash
+   cd ../frontend
+   npm install
+   cp .env.example .env
+   # Chỉnh sửa VITE_API_URL trỏ về backend
+   npm run dev
+   ```
 
 ---
 
-## 🔌 API Endpoints
+## 👨‍💻 Tác Giả
 
-### Auth
-| Method | Endpoint | Mô tả | Auth |
-|---|---|---|---|
-| POST | `/api/auth/register` | Đăng ký | — |
-| POST | `/api/auth/login` | Đăng nhập | — |
-| GET | `/api/auth/me` | Lấy thông tin user hiện tại | ✅ |
-
-### Truyện
-| Method | Endpoint | Mô tả | Auth |
-|---|---|---|---|
-| GET | `/api/truyen/public` | Danh sách truyện (có phân trang, filter) | — |
-| GET | `/api/truyen/hot-stories` | Top truyện hot | — |
-| GET | `/api/truyen/top-thang` | Top truyện tháng | — |
-| GET | `/api/truyen/slug/:slug` | Chi tiết truyện theo slug | — |
-| POST | `/api/truyen` | Tạo truyện mới | ✅ Author |
-| PUT | `/api/truyen/:id` | Cập nhật truyện | ✅ Author/Admin |
-| DELETE | `/api/truyen/:id` | Xóa truyện | ✅ Author/Admin |
-| GET | `/api/truyen/truyen-cua-toi` | Truyện của tôi | ✅ Author |
-| GET | `/api/truyen/cho-duyet` | Truyện chờ duyệt | ✅ Admin |
-| PUT | `/api/truyen/:id/duyet-truyen` | Duyệt / từ chối | ✅ Admin |
-
-### Chương
-| Method | Endpoint | Mô tả | Auth |
-|---|---|---|---|
-| GET | `/api/chuong/truyen/:id` | Danh sách chương theo truyện | — |
-| GET | `/api/chuong/:id` | Chi tiết chương | — |
-| POST | `/api/chuong` | Thêm chương mới | ✅ Author |
-| PUT | `/api/chuong/:id` | Sửa chương | ✅ Author |
-| DELETE | `/api/chuong/:id` | Xóa chương | ✅ Author/Admin |
-
-### Người Dùng & Gamification
-| Method | Endpoint | Mô tả | Auth |
-|---|---|---|---|
-| GET | `/api/user/profile` | Hồ sơ cá nhân | ✅ |
-| PUT | `/api/user/profile` | Cập nhật hồ sơ | ✅ |
-| GET | `/api/levels` | Thông tin cấp độ | ✅ |
-| GET | `/api/tasks` | Nhiệm vụ hôm nay | ✅ |
-| GET | `/api/points` | Điểm & lịch sử | ✅ |
-| GET | `/api/currency` | Số dư Linh Thạch | ✅ |
-| GET | `/api/rewards` | Danh sách phần thưởng | ✅ |
-| GET | `/api/badges` | Huy hiệu cấp độ | — |
-
-### Tương Tác
-| Method | Endpoint | Mô tả | Auth |
-|---|---|---|---|
-| GET | `/api/comments` | Bình luận | — |
-| POST | `/api/comments` | Đăng bình luận | ✅ |
-| GET | `/api/follow` | Truyện đang theo dõi | ✅ |
-| POST | `/api/follow` | Theo dõi / bỏ theo dõi | ✅ |
-| GET | `/api/like/:storyId` | Trạng thái yêu thích | ✅ |
-| POST | `/api/like` | Thích / bỏ thích | ✅ |
-| GET | `/api/ratings/:storyId` | Rating truyện | — |
-| POST | `/api/ratings` | Đánh giá | ✅ |
-| GET | `/api/notifications` | Thông báo | ✅ |
-| GET | `/api/history` | Lịch sử đọc | ✅ |
+- **Bảo Dev** — [baodev.indevs.in](https://baodev.indevs.in)
 
 ---
 
-## 🚢 Deploy
-
-### Frontend (Vercel)
-1. Import repo lên Vercel
-2. **Root Directory**: `frontend`
-3. **Build Command**: `npm run build`
-4. **Output Directory**: `dist`
-5. Thêm biến môi trường `VITE_API_URL = https://your-backend.onrender.com`
-
-> File `vercel.json` đã được cấu hình sẵn để hỗ trợ SPA routing (Vue Router history mode).
-
-### Backend (Render)
-1. Tạo **Web Service** mới
-2. **Root Directory**: `backend`
-3. **Build Command**: `npm install`
-4. **Start Command**: `node index.js`
-5. Thêm tất cả biến môi trường từ file `.env` vào Render dashboard
-
----
-
-## 🗃️ Database Schema (Tóm tắt)
-
-| Bảng | Mô tả |
-|---|---|
-| `users_new` | Tài khoản người dùng |
-| `truyen_new` | Thông tin truyện |
-| `chuong` | Chương truyện |
-| `truyen_theloai` | Truyện ↔ Thể loại (nhiều-nhiều) |
-| `theloai` | Danh mục thể loại |
-| `binh_luan` | Bình luận |
-| `theo_doi` | Danh sách theo dõi |
-| `yeu_thich` | Yêu thích truyện |
-| `ratings` | Đánh giá sao |
-| `lich_su_doc` | Lịch sử đọc |
-| `truyen_views` | Lượt xem theo ngày (dùng cho BXH tháng) |
-| `thong_bao` | Thông báo người dùng |
-| `level_badges` | Huy hiệu cấp độ |
-| `user_levels` | Cấp độ người dùng |
-| `user_points` | Điểm EXP |
-| `user_tasks` | Nhiệm vụ đang thực hiện |
-| `tasks` | Định nghĩa nhiệm vụ |
-| `rewards` | Phần thưởng |
-| `user_rewards` | Kho đồ người dùng |
-| `user_currency` | Số dư Linh Thạch |
-
----
-
-## 🔐 Phân Quyền
-
-| Role | Quyền hạn |
-|---|---|
-| `user` | + Đăng nhập, bình luận, theo dõi, đánh giá, nhận thông báo |
-| `author` | + Upload/quản lý truyện và chương của mình |
-| `admin` | + Duyệt nội dung, quản lý người dùng, xem cache |
-
----
-
-## 📄 License
-
-Dự án này được xây dựng cho mục đích học tập và phát triển cá nhân.
+### Phụ lục
+- **Deployment:** Hướng dẫn chi tiết tại [DEPLOY.md](./DEPLOY.md).
+- **API Docs:** Xem chi tiết định nghĩa trong thư mục `backend/routes`.
