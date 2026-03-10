@@ -1,51 +1,89 @@
-// backend/controllers/inventory.controller.js
-const InventoryModel = require("../models/inventory.model");
+﻿const InventoryModel = require("../models/inventory.model");
+const ShopService = require("../services/shop.service");
 
-// ============================================================
-// GET /api/inventory/badges
-// Lấy tất cả huy hiệu mà user đang sở hữu
-// ============================================================
+function getStatusFromMessage(message) {
+  const businessErrors = [
+    "Ban khong so huu huy hieu nay.",
+    "Vat pham nay khong phai huy hieu.",
+    "inventoryId khong hop le.",
+    "Vat pham khong ton tai trong tui do.",
+    "Vat pham da het han su dung.",
+    "Vat pham nay khong the trang bi.",
+  ];
+
+  return businessErrors.includes(message) ? 400 : 500;
+}
+
 exports.getUserBadges = async (req, res) => {
   try {
     const userId = req.user.id;
     const badges = await InventoryModel.getUserBadges(userId);
     res.json({ success: true, data: badges });
-  } catch (err) {
-    console.error("Lỗi lấy danh sách huy hiệu:", err.message);
-    res.status(500).json({ success: false, message: "Không thể lấy danh sách huy hiệu." });
+  } catch (error) {
+    console.error("Inventory badges error:", error.message);
+    res.status(500).json({ success: false, message: "Khong the lay danh sach huy hieu." });
   }
 };
 
-// ============================================================
-// POST /api/inventory/equip-badge
-// User đeo 1 huy hiệu — body: { rewardId: number }
-// ============================================================
 exports.equipBadge = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { rewardId } = req.body;
+    const rewardId = Number(req.body.rewardId);
 
-    // Validate input
-    if (!rewardId || isNaN(Number(rewardId))) {
-      return res.status(400).json({ success: false, message: "rewardId không hợp lệ." });
+    if (!rewardId || Number.isNaN(rewardId)) {
+      return res.status(400).json({ success: false, message: "rewardId khong hop le." });
     }
 
-    const result = await InventoryModel.equipBadge(userId, Number(rewardId));
+    const result = await InventoryModel.equipBadge(userId, rewardId);
 
     res.json({
       success: true,
-      message: "Đeo huy hiệu thành công!",
+      message: "Deo huy hieu thanh cong.",
       data: result,
     });
-  } catch (err) {
-    // Các lỗi nghiệp vụ (không sở hữu, không phải badge) trả về 400
-    const isBusinessError = [
-      "Bạn không sở hữu huy hiệu này.",
-      "Vật phẩm này không phải huy hiệu (badge).",
-    ].includes(err.message);
-
-    const status = isBusinessError ? 400 : 500;
-    console.error("Lỗi equip badge:", err.message);
-    res.status(status).json({ success: false, message: err.message });
+  } catch (error) {
+    const status = getStatusFromMessage(error.message);
+    console.error("Inventory equip badge error:", error.message);
+    res.status(status).json({ success: false, message: error.message });
   }
 };
+
+exports.getMyShopInventory = async (req, res) => {
+  try {
+    const rows = await ShopService.getUserInventory(req.user.id, {
+      itemType: req.query.itemType || null,
+      includeExpired: req.query.includeExpired === "true",
+    });
+
+    const equippedFrame = rows.find((item) => item.item_type === "avatar_frame" && item.is_equipped) || null;
+
+    res.json({
+      success: true,
+      data: rows,
+      equipped_frame: equippedFrame,
+    });
+  } catch (error) {
+    console.error("Inventory shop items error:", error.message);
+    res.status(500).json({ success: false, message: "Khong the lay tui do shop." });
+  }
+};
+
+exports.equipShopItem = async (req, res) => {
+  try {
+    const result = await ShopService.equipInventoryItem({
+      userId: req.user.id,
+      inventoryId: req.body.inventoryId,
+    });
+
+    res.json({
+      success: true,
+      message: "Trang bi vat pham thanh cong.",
+      data: result,
+    });
+  } catch (error) {
+    const status = getStatusFromMessage(error.message);
+    console.error("Inventory equip item error:", error.message);
+    res.status(status).json({ success: false, message: error.message });
+  }
+};
+

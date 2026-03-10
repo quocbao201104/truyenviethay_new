@@ -31,9 +31,9 @@ router.post('/reject-author', authenticateToken, authorizeRoles('admin'), author
  */
 
 // GET /admin/cache/stats - View cache statistics
-router.get('/cache/stats', (req, res) => {
+router.get('/cache/stats', async (req, res) => {
   try {
-    const stats = getStats();
+    const stats = await getStats();
     res.json({
       success: true,
       cacheStats: stats,
@@ -50,9 +50,9 @@ router.get('/cache/stats', (req, res) => {
 });
 
 // POST /admin/cache/flush - Clear entire cache
-router.post('/cache/flush', (req, res) => {
+router.post('/cache/flush', async (req, res) => {
   try {
-    invalidate(); // No pattern = flush all
+    await invalidate(); // No pattern = flush all
     res.json({
       success: true,
       message: 'Cache cleared successfully',
@@ -67,9 +67,9 @@ router.post('/cache/flush', (req, res) => {
 });
 
 // GET /admin/cache/view-tracking-stats - View tracking buffer stats (debug)
-router.get('/cache/view-tracking-stats', (req, res) => {
+router.get('/cache/view-tracking-stats', async (req, res) => {
   try {
-    const stats = viewTrackingService.getStats();
+    const stats = await viewTrackingService.getStats();
     res.json({
       success: true,
       viewTracking: stats,
@@ -84,7 +84,7 @@ router.get('/cache/view-tracking-stats', (req, res) => {
 });
 
 // POST /admin/cache/invalidate - Invalidate specific cache pattern
-router.post('/cache/invalidate', (req, res) => {
+router.post('/cache/invalidate', async (req, res) => {
   try {
     const { pattern } = req.body;
     
@@ -95,7 +95,7 @@ router.post('/cache/invalidate', (req, res) => {
       });
     }
 
-    invalidate(pattern);
+    await invalidate(pattern);
     res.json({
       success: true,
       message: `Cache keys matching "${pattern}" invalidated`,

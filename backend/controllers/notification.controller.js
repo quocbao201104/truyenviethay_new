@@ -4,27 +4,36 @@ const NotificationController = {
   // Get notifications for the logged-in user
   getNotifications: async (req, res) => {
     try {
+      const { CATEGORY_MAP } = require("../constants/notification.constants");
       const userId = req.user.id;
+      const { category } = req.query; // e.g., 'interaction'
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
       const offset = (page - 1) * limit;
 
-      const [notifications] = await db.query(
-        `SELECT id, user_id, content, is_read, type, target_id, created_at
-         FROM thong_bao 
-         WHERE user_id = ? 
-         ORDER BY created_at DESC 
-         LIMIT ? OFFSET ?`,
-        [userId, limit, offset]
-      );
+      let typeFilter = "";
+      if (category && CATEGORY_MAP[category]) {
+        const types = CATEGORY_MAP[category].join(",");
+        typeFilter = `AND type IN (${types})`;
+      }
+
+      const query = `
+        SELECT id, user_id, content, is_read, type, target_id, created_at
+        FROM thong_bao 
+        WHERE user_id = ? ${typeFilter}
+        ORDER BY created_at DESC 
+        LIMIT ? OFFSET ?
+      `;
+
+      const [notifications] = await db.query(query, [userId, limit, offset]);
 
       const [countResult] = await db.query(
-        `SELECT COUNT(*) as total FROM thong_bao WHERE user_id = ?`,
+        `SELECT COUNT(*) as total FROM thong_bao WHERE user_id = ? ${typeFilter}`,
         [userId]
       );
       
       const [unreadResult] = await db.query(
-        `SELECT COUNT(*) as unread FROM thong_bao WHERE user_id = ? AND is_read = 0`,
+        `SELECT COUNT(*) as unread FROM thong_bao WHERE user_id = ? AND is_read = 0 ${typeFilter}`,
         [userId]
       );
 

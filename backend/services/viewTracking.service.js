@@ -9,49 +9,38 @@
  * Dùng node-cache riêng cho view tracking, tách khỏi cache chung.
  */
 
-const NodeCache = require("node-cache");
+const redis = require("../utils/redis");
+const logger = require("../utils/logger");
 
 // =============================================================================
-// CẤU HÌNH NODE-CACHE CHO VIEW TRACKING
+// CONFIGURATION FOR VIEW TRACKING
 // =============================================================================
 
-/** TTL chống spam: 30 phút = 1800 giây cho CHAPTER */
+/** TTL anti-spam: 30 minutes = 1800 seconds for CHAPTER */
 const VIEW_SPAM_TTL_SECONDS = 30 * 60;
 
-/** TTL chống spam: 24 giờ = 86400 giây cho NOVEL (Unique View) */
+/** TTL anti-spam: 24 hours = 86400 seconds for NOVEL (Unique View) */
 const NOVEL_VIEW_COOLDOWN_SECONDS = 24 * 60 * 60;
 
-/**
- * Cache riêng cho View Tracking
- * - stdTTL: không set default TTL cho toàn bộ; mỗi key tự set TTL
- * - checkperiod: 120s - dọn key hết hạn mỗi 2 phút
- * - useClones: false - hiệu năng tốt hơn
- */
-const viewCache = new NodeCache({
-  stdTTL: 0, // TTL được set thủ công cho từng loại key
-  checkperiod: 120,
-  useClones: false,
-});
+/** Prefix for all view tracking keys in Redis */
+const REDIS_PREFIX = "view:";
 
-/** Prefix cho key chống spam (viewed:user_123:chapter_456 hoặc viewed:ip_1.2.3.4:chapter_456) */
-const SPAM_KEY_PREFIX = "viewed:";
+/** Prefix for anti-spam keys */
+const SPAM_KEY_PREFIX = `${REDIS_PREFIX}spam:`;
 
-/** Prefix cho key chống spam novel (viewed_novel:user_123:novel_456) */
-const NOVEL_SPAM_KEY_PREFIX = "viewed_novel:";
+/** Prefix for novel anti-spam keys */
+const NOVEL_SPAM_KEY_PREFIX = `${REDIS_PREFIX}spam_novel:`;
 
-/** Prefix cho bộ đếm view buffer (novel_1, chapter_456) */
-const NOVEL_VIEW_PREFIX = "novel:";
-const CHAPTER_VIEW_PREFIX = "chapter:";
+/** Prefix for view count buffers */
+const NOVEL_VIEW_PREFIX = `${REDIS_PREFIX}novel:`;
+const CHAPTER_VIEW_PREFIX = `${REDIS_PREFIX}chapter:`;
 
 // =============================================================================
-// CHỐNG SPAM VIEW (RATE LIMITING VỚI TTL)
+// ANTI-SPAM (RATE LIMITING WITH TTL)
 // =============================================================================
 
 /**
- * Tạo định danh user: ưu tiên UserID nếu đăng nhập, fallback sang IP
- * Lưu ý: Nếu app chạy sau reverse proxy, cần app.set('trust proxy', 1) để req.ip chính xác
- * @param {object} req - Express request
- * @returns {string} - "user_123" hoặc "ip_1.2.3.4"
+ * Identify user: UserID if logged in, otherwise IP
  */
 function getViewerIdentifier(req) {
   if (req.user && req.user.id) {
@@ -68,98 +57,84 @@ function getViewerIdentifier(req) {
 }
 
 /**
- * Kiểm tra user đã xem chương này trong TTL chưa
- * @param {string} viewerId - "user_123" hoặc "ip_1.2.3.4"
- * @param {number} chapterId - ID chương
- * @returns {boolean} - true nếu đã xem (spam), false nếu hợp lệ
+ * Check if user viewed this chapter recently
  */
-function hasViewedRecently(viewerId, chapterId) {
+async function hasViewedRecently(viewerId, chapterId) {
   const key = `${SPAM_KEY_PREFIX}${viewerId}:chapter_${chapterId}`;
-  return viewCache.get(key) !== undefined;
+  const exists = await redis.exists(key);
+  return exists === 1;
 }
 
 /**
- * Đánh dấu user đã xem chương (set TTL 30 phút)
- * @param {string} viewerId
- * @param {number} chapterId
+ * Mark chapter as viewed (30m TTL)
  */
-function markAsViewed(viewerId, chapterId) {
+async function markAsViewed(viewerId, chapterId) {
   const key = `${SPAM_KEY_PREFIX}${viewerId}:chapter_${chapterId}`;
-  viewCache.set(key, 1, VIEW_SPAM_TTL_SECONDS);
+  await redis.set(key, 1, 'EX', VIEW_SPAM_TTL_SECONDS);
 }
 
 /**
- * Kiểm tra user đã xem truyện này trong 24h chưa
+ * Check if user viewed this novel recently
  */
-function hasViewedNovelRecently(viewerId, novelId) {
+async function hasViewedNovelRecently(viewerId, novelId) {
   const key = `${NOVEL_SPAM_KEY_PREFIX}${viewerId}:novel_${novelId}`;
-  return viewCache.get(key) !== undefined;
+  const exists = await redis.exists(key);
+  return exists === 1;
 }
 
 /**
- * Đánh dấu user đã xem truyện (set TTL 24h)
+ * Mark novel as viewed (24h TTL)
  */
-function markNovelAsViewed(viewerId, novelId) {
+async function markNovelAsViewed(viewerId, novelId) {
   const key = `${NOVEL_SPAM_KEY_PREFIX}${viewerId}:novel_${novelId}`;
-  viewCache.set(key, 1, NOVEL_VIEW_COOLDOWN_SECONDS);
+  await redis.set(key, 1, 'EX', NOVEL_VIEW_COOLDOWN_SECONDS);
 }
 
 // =============================================================================
-// GHI NHẬN VIEW VÀO CACHE (BUFFER)
+// VIEW RECORDING (BUFFER)
 // =============================================================================
 
 /**
- * Tăng bộ đếm view trong cache (atomic)
- * @param {number} novelId - ID truyện
- * @param {number} chapterId - ID chương
+ * Increment view counts in Redis (atomic)
  */
-function incrementViewCounts(novelId, chapterId, shouldIncrementNovel = true) {
+async function incrementViewCounts(novelId, chapterId, shouldIncrementNovel = true) {
   const novelKey = `${NOVEL_VIEW_PREFIX}${novelId}`;
   const chapterKey = `${CHAPTER_VIEW_PREFIX}${chapterId}`;
 
-  const chapterCount = viewCache.get(chapterKey) || 0;
-  viewCache.set(chapterKey, chapterCount + 1);
+  await redis.incr(chapterKey);
 
   if (shouldIncrementNovel) {
-    const novelCount = viewCache.get(novelKey) || 0;
-    viewCache.set(novelKey, novelCount + 1);
+    await redis.incr(novelKey);
   }
 }
 
 // =============================================================================
-// LUỒNG CHÍNH: GHI NHẬN 1 LƯỢT XEM HỢP LỆ
+// MAIN FLOW: RECORD VALID VIEW
 // =============================================================================
 
 /**
- * Xử lý 1 lượt xem chương từ API
- * - Kiểm tra spam (đã xem trong 30 phút?)
- * - Nếu hợp lệ: đánh dấu đã xem + tăng buffer
- *
- * @param {object} req - Express request (có req.user nếu đăng nhập)
- * @param {number} novelId - ID truyện
- * @param {number} chapterId - ID chương
- * @returns {object} { counted: boolean, reason?: string }
+ * Process chapter view
  */
-function recordChapterView(req, novelId, chapterId) {
+async function recordChapterView(req, novelId, chapterId) {
   const viewerId = getViewerIdentifier(req);
 
-  // 1. Kiểm tra spam chapter (30 phút)
-  if (hasViewedRecently(viewerId, chapterId)) {
+  // 1. Check chapter spam
+  const alreadyViewedChapter = await hasViewedRecently(viewerId, chapterId);
+  if (alreadyViewedChapter) {
     return { counted: false, reason: "chapter_spam" };
   }
 
-  // 2. Kiểm tra spam novel (24 giờ)
-  const shouldIncrementNovel = !hasViewedNovelRecently(viewerId, novelId);
-  // // 2. Không giới hạn spam 24h cho truyện nữa, mỗi lượt xem chương hợp lệ đều tính cho truyện
-  // const shouldIncrementNovel = true;
+  // 2. Check novel spam
+  const shouldIncrementNovel = !(await hasViewedNovelRecently(viewerId, novelId));
+
   // 3. Mark viewed
-  markAsViewed(viewerId, chapterId);
+  await markAsViewed(viewerId, chapterId);
   if (shouldIncrementNovel) {
-    markNovelAsViewed(viewerId, novelId);
+    await markNovelAsViewed(viewerId, novelId);
   }
 
   // 4. Increment buffer
-  incrementViewCounts(novelId, chapterId, shouldIncrementNovel);
+  await incrementViewCounts(novelId, chapterId, shouldIncrementNovel);
 
   return { 
     counted: true, 
@@ -168,69 +143,67 @@ function recordChapterView(req, novelId, chapterId) {
 }
 
 // =============================================================================
-// LẤY DỮ LIỆU BUFFER ĐỂ BATCH UPDATE (cho Cronjob)
+// SNAPSHOT & RESET (For Cronjob)
 // =============================================================================
 
 /**
- * Lấy toàn bộ bộ đếm view từ cache
- * @returns {{ novels: Map<number, number>, chapters: Map<number, number> }}
+ * Get all view counters from Redis
  */
-function getViewCountsSnapshot() {
+async function getViewCountsSnapshot() {
   const novels = new Map();
   const chapters = new Map();
 
-  const keys = viewCache.keys();
+  const novelKeys = await redis.keys(`${NOVEL_VIEW_PREFIX}*`);
+  const chapterKeys = await redis.keys(`${CHAPTER_VIEW_PREFIX}*`);
 
-  for (const key of keys) {
-    if (key.startsWith(NOVEL_VIEW_PREFIX)) {
-      const id = parseInt(key.replace(NOVEL_VIEW_PREFIX, ""), 10);
-      if (!isNaN(id)) {
-        novels.set(id, viewCache.get(key) || 0);
-      }
-    } else if (key.startsWith(CHAPTER_VIEW_PREFIX)) {
-      const id = parseInt(key.replace(CHAPTER_VIEW_PREFIX, ""), 10);
-      if (!isNaN(id)) {
-        chapters.set(id, viewCache.get(key) || 0);
-      }
+  for (const key of novelKeys) {
+    const id = parseInt(key.replace(NOVEL_VIEW_PREFIX, ""), 10);
+    const val = await redis.get(key);
+    if (!isNaN(id) && val) {
+      novels.set(id, parseInt(val, 10));
     }
-    // Bỏ qua key viewed:... (spam keys - không xóa, để TTL tự hết)
+  }
+
+  for (const key of chapterKeys) {
+    const id = parseInt(key.replace(CHAPTER_VIEW_PREFIX, ""), 10);
+    const val = await redis.get(key);
+    if (!isNaN(id) && val) {
+      chapters.set(id, parseInt(val, 10));
+    }
   }
 
   return { novels, chapters };
 }
 
 /**
- * Reset bộ đếm view sau khi sync DB thành công
- * Chỉ xóa key novel: và chapter:, giữ lại viewed: (spam keys) để TTL tự hết
+ * Reset view counters after successful DB sync
  */
-function resetViewCounts() {
-  const keys = viewCache.keys();
-  let resetCount = 0;
-
-  for (const key of keys) {
-    if (key.startsWith(NOVEL_VIEW_PREFIX) || key.startsWith(CHAPTER_VIEW_PREFIX)) {
-      viewCache.del(key);
-      resetCount++;
-    }
+async function resetViewCounts() {
+  const novelKeys = await redis.keys(`${NOVEL_VIEW_PREFIX}*`);
+  const chapterKeys = await redis.keys(`${CHAPTER_VIEW_PREFIX}*`);
+  
+  const allKeys = [...novelKeys, ...chapterKeys];
+  if (allKeys.length > 0) {
+    await redis.del(...allKeys);
   }
 
-  return resetCount;
+  return allKeys.length;
 }
 
 /**
- * Thống kê debug (số key đang lưu)
+ * Debug statistics
  */
-function getStats() {
-  const keys = viewCache.keys();
-  const novels = keys.filter((k) => k.startsWith(NOVEL_VIEW_PREFIX)).length;
-  const chapters = keys.filter((k) => k.startsWith(CHAPTER_VIEW_PREFIX)).length;
-  const spam = keys.filter((k) => k.startsWith(SPAM_KEY_PREFIX)).length;
+async function getStats() {
+  const novelKeys = await redis.keys(`${NOVEL_VIEW_PREFIX}*`);
+  const chapterKeys = await redis.keys(`${CHAPTER_VIEW_PREFIX}*`);
+  const spamKeys = await redis.keys(`${SPAM_KEY_PREFIX}*`);
+  const novelSpamKeys = await redis.keys(`${NOVEL_SPAM_KEY_PREFIX}*`);
 
   return {
-    totalKeys: keys.length,
-    novelKeys: novels,
-    chapterKeys: chapters,
-    spamKeys: spam,
+    totalKeys: novelKeys.length + chapterKeys.length + spamKeys.length + novelSpamKeys.length,
+    novelKeys: novelKeys.length,
+    chapterKeys: chapterKeys.length,
+    spamKeys: spamKeys.length + novelSpamKeys.length,
   };
 }
 

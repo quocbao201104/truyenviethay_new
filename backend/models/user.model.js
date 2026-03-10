@@ -28,7 +28,10 @@ const UserModel = {
 
     findByUsername: async (username) => {
         const [rows] = await db.query(
-            "SELECT id, username, password, email, full_name, phone, avatar, role, gender, created_at, status, ban_until FROM users_new WHERE username = ?",
+            `SELECT u.id, u.username, u.password, u.email, u.full_name, u.phone, u.avatar, u.role, u.gender, u.created_at, u.status, u.ban_until, up.current_level_id as level_id 
+             FROM users_new u
+             LEFT JOIN user_points up ON u.id = up.user_id
+             WHERE u.username = ?`,
             [username]
         );
         return rows;
@@ -57,10 +60,10 @@ const UserModel = {
 
     findById: async (id) => {
         const [rows] = await db.query(
-            `
-            SELECT id, username, password, email, full_name, phone, avatar, role, gender, created_at, status, ban_until
-            FROM users_new WHERE id = ?
-        `,
+            `SELECT u.id, u.username, u.password, u.email, u.full_name, u.phone, u.avatar, u.role, u.gender, u.created_at, u.status, u.ban_until, up.current_level_id as level_id
+             FROM users_new u
+             LEFT JOIN user_points up ON u.id = up.user_id
+             WHERE u.id = ?`,
             [id]
         );
         return rows;

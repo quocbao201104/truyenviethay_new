@@ -65,7 +65,7 @@ async function buildBadgeMap() {
  * @returns {Promise<Map<number, object>>}
  */
 async function loadBadgeMap() {
-  return getOrSet(CACHE_KEY, CACHE_TTL, buildBadgeMap);
+  return await getOrSet(CACHE_KEY, CACHE_TTL, buildBadgeMap);
 }
 
 /**
@@ -100,8 +100,8 @@ async function enrichUsersWithBadge(users) {
  * Force-invalidate the badge map cache.
  * Call this after any admin create/update/delete on level_badges.
  */
-function adminInvalidateBadgeCache() {
-  invalidate(CACHE_KEY);
+async function adminInvalidateBadgeCache() {
+  await invalidate(CACHE_KEY);
 }
 
 /**

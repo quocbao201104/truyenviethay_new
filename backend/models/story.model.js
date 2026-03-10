@@ -204,7 +204,7 @@ const StoryModel = {
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
-        await connection.query(`DELETE FROM thong_bao WHERE target_id = ? AND type = 2`, [id]);
+        await connection.query(`DELETE FROM thong_bao WHERE target_id = ? AND type IN (11, 12)`, [id]);
         await connection.query(`DELETE FROM truyen_theloai WHERE truyen_id = ?`, [id]);
         await connection.query(`DELETE FROM chuong WHERE truyen_id = ?`, [id]);
         await connection.query(`DELETE FROM theo_doi WHERE truyen_id = ?`, [id]);

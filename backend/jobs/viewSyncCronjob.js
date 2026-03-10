@@ -18,102 +18,71 @@ const logger = require("../utils/logger");
 const CRON_SCHEDULE = "*/1 * * * *"; // Mỗi 1 phút
 
 /**
+ * Batch processor for Map data
+ */
+async function processInBatches(dataMap, batchSize, processFn) {
+  const entries = Array.from(dataMap.entries());
+  for (let i = 0; i < entries.length; i += batchSize) {
+    const batch = entries.slice(i, i + batchSize);
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+      for (const [id, count] of batch) {
+        if (count > 0) {
+          await processFn(connection, id, count);
+        }
+      }
+      await connection.commit();
+    } catch (err) {
+      await connection.rollback();
+      throw err;
+    } finally {
+      connection.release();
+    }
+  }
+}
+
+/**
  * Bulk update lượt xem truyện vào truyen_new
- * @param {Map<number, number>} novelCounts - Map<novelId, count>
  */
 async function bulkUpdateNovelViews(novelCounts) {
-  if (novelCounts.size === 0) return;
-
-  // MySQL không có cách bulk "UPDATE ... SET col = col + ? WHERE id = ?" nhiều dòng 1 lệnh
-  // Sử dụng CASE WHEN hoặc nhiều lệnh. Cách tối ưu: 1 transaction, nhiều UPDATE
-  const connection = await db.getConnection();
-
-  try {
-    await connection.beginTransaction();
-
-    for (const [novelId, count] of novelCounts) {
-      if (count <= 0) continue;
-
-      await connection.query(
-        `UPDATE truyen_new 
-         SET luot_xem = luot_xem + ?,
-             hot_score = (rating * 0.4) + (rating_count * 0.3) + ((luot_xem + ?) * 0.3)
-         WHERE id = ?`,
-        [count, count, novelId]
-      );
-    }
-
-    await connection.commit();
-    logger.info(`[ViewSync] Updated ${novelCounts.size} novels`);
-  } catch (err) {
-    await connection.rollback();
-    throw err;
-  } finally {
-    connection.release();
-  }
+  await processInBatches(novelCounts, 100, async (connection, novelId, count) => {
+    await connection.query(
+      `UPDATE truyen_new 
+       SET luot_xem = luot_xem + ?,
+           hot_score = (rating * 0.4) + (rating_count * 0.3) + ((luot_xem + ?) * 0.3)
+       WHERE id = ?`,
+      [count, count, novelId]
+    );
+  });
+  logger.info(`[ViewSync] Updated ${novelCounts.size} novels`);
 }
 
 /**
  * Cập nhật truyen_views (lượt xem theo ngày) - upsert
- * @param {Map<number, number>} novelCounts
  */
 async function bulkUpdateDailyViews(novelCounts) {
-  if (novelCounts.size === 0) return;
-
-  const connection = await db.getConnection();
-
-  try {
-    await connection.beginTransaction();
-
-    for (const [novelId, count] of novelCounts) {
-      if (count <= 0) continue;
-
-      await connection.query(
-        `INSERT INTO truyen_views (truyen_id, ngay_xem, so_luot_xem) 
-         VALUES (?, CURDATE(), ?) 
-         ON DUPLICATE KEY UPDATE so_luot_xem = so_luot_xem + ?`,
-        [novelId, count, count]
-      );
-    }
-
-    await connection.commit();
-  } catch (err) {
-    await connection.rollback();
-    throw err;
-  } finally {
-    connection.release();
-  }
+  await processInBatches(novelCounts, 100, async (connection, novelId, count) => {
+    await connection.query(
+      `INSERT INTO truyen_views (truyen_id, ngay_xem, so_luot_xem) 
+       VALUES (?, CURDATE(), ?) 
+       ON DUPLICATE KEY UPDATE so_luot_xem = so_luot_xem + ?`,
+      [novelId, count, count]
+    );
+  });
 }
 
 /**
  * Bulk update lượt xem chương vào chuong
- * @param {Map<number, number>} chapterCounts - Map<chapterId, count>
  */
 async function bulkUpdateChapterViews(chapterCounts) {
-  if (chapterCounts.size === 0) return;
-
-  const connection = await db.getConnection();
-
-  try {
-    await connection.beginTransaction();
-
-    for (const [chapterId, count] of chapterCounts) {
-      if (count <= 0) continue;
-
-      await connection.query(
-        `UPDATE chuong SET luot_xem = luot_xem + ? WHERE id = ?`,
-        [count, chapterId]
-      );
-    }
-
-    await connection.commit();
-    logger.info(`[ViewSync] Updated ${chapterCounts.size} chapters`);
-  } catch (err) {
-    await connection.rollback();
-    throw err;
-  } finally {
-    connection.release();
-  }
+  await processInBatches(chapterCounts, 100, async (connection, chapterId, count) => {
+    await connection.query(
+      `UPDATE chuong SET luot_xem = luot_xem + ? WHERE id = ?`,
+      [count, chapterId]
+    );
+  });
+  logger.info(`[ViewSync] Updated ${chapterCounts.size} chapters`);
 }
 
 /**
@@ -121,7 +90,7 @@ async function bulkUpdateChapterViews(chapterCounts) {
  * Chỉ reset cache khi TẤT CẢ update thành công
  */
 async function runViewSync() {
-  const { novels, chapters } = viewTrackingService.getViewCountsSnapshot();
+  const { novels, chapters } = await viewTrackingService.getViewCountsSnapshot();
 
   const novelCount = [...novels.values()].reduce((a, b) => a + b, 0);
   const chapterCount = [...chapters.values()].reduce((a, b) => a + b, 0);
@@ -143,7 +112,7 @@ async function runViewSync() {
     await bulkUpdateChapterViews(chapters);
 
     // 4. CHỈ reset buffer khi mọi thứ thành công - tránh mất dữ liệu
-    const resetCount = viewTrackingService.resetViewCounts();
+    const resetCount = await viewTrackingService.resetViewCounts();
     logger.info(`[ViewSync] Success. Reset ${resetCount} keys in cache`);
   } catch (err) {
     // KHÔNG reset cache - dữ liệu sẽ được sync ở lần chạy tiếp theo

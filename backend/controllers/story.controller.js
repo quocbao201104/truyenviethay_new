@@ -116,7 +116,7 @@ const updateStory = async (req, res) => {
     mo_ta, 
     trang_thai,
     link_nguon,
-    doi_tuong_doc_gia,
+    age_rating,
     delete_cover_image 
   } = req.body;
 
@@ -164,7 +164,7 @@ const updateStory = async (req, res) => {
 
     // Add remaining fields
     updatedData.link_nguon = link_nguon || null;
-    updatedData.doi_tuong_doc_gia = doi_tuong_doc_gia || null;
+    updatedData.age_rating = age_rating || 1;
 
     // console.log("Updating story data:", updatedData); // Removed for production
 

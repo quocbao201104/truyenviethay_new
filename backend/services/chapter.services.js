@@ -1,5 +1,5 @@
 const notificationService = require("./notification.services");
-const { NOTIF_TYPE, NOTIF_TEMPLATE } = require("./notification.services");
+const { NOTIFY_TYPES, NOTIF_TEMPLATE } = require("./notification.services");
 const db = require("../config/db");
 const StoryModel = require("../models/story.model");
 const ChapterModel = require("../models/chapter.model");
@@ -45,7 +45,7 @@ const approveChapter = async (chapter_id, action, reason) => {
       await ChapterModel.updateChuongMoiNhat(truyen_id);
     }
 
-    // Gửi thông báo cho tác giả (type: APPROVAL, target: story)
+    // Gửi thông báo cho tác giả (type: BOOK_APPROVED, target: story)
     let contentForAuthor = action === "duyet"
       ? NOTIF_TEMPLATE.CHAPTER_APPROVED_AUTHOR(ten_truyen)
       : NOTIF_TEMPLATE.CHAPTER_REJECTED_AUTHOR(ten_truyen);
@@ -57,7 +57,7 @@ const approveChapter = async (chapter_id, action, reason) => {
     await notificationService.sendNotification(
       user_id,
       contentForAuthor,
-      NOTIF_TYPE.APPROVAL,
+      NOTIFY_TYPES.BOOK_APPROVED,
       truyen_id
     );
 

@@ -230,7 +230,7 @@ const incrementChapterView = async (req, res) => {
 
     // Chỉ tracking cho chương đã duyệt
     if (chapter.trang_thai === "da_duyet") {
-      const result = viewTrackingService.recordChapterView(req, chapter.truyen_id, chapter.id);
+      const result = await viewTrackingService.recordChapterView(req, chapter.truyen_id, chapter.id);
       return res.json({ 
         message: "Ghi nhận linh khí (view) thành công.", 
         counted: result.counted,

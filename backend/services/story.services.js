@@ -1,5 +1,4 @@
 const notificationService = require("./notification.services");
-const { NOTIF_TYPE } = require("./notification.services");
 const db = require("../config/db");
 
 // Duyệt truyện và gửi thông báo cho tác giả

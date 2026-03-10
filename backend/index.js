@@ -5,13 +5,21 @@ const app = express();
 const port = process.env.PORT || 3000;
     require("./config/db"); // Keep for side-effect (DB connection logging) but remove unused 'db' variable
 
-    // View Tracking: Cronjob sync view counts từ node-cache sang MySQL mỗi 5 phút
+    // View Tracking: Cronjob sync view counts tá»« node-cache sang MySQL má»—i 5 phÃºt
     const { startViewSyncCron } = require("./jobs/viewSyncCronjob");
     startViewSyncCron();
 
-    // Daily Stats: Cronjob aggregate daily_stats (views, comments) cuối mỗi ngày
+    // Daily Stats: Cronjob aggregate daily_stats (views, comments) cuá»‘i má»—i ngÃ y
     const { startDailyStatsCron } = require("./jobs/dailyStatsCronjob");
     startDailyStatsCron();
+
+    // Notification Cleanup: Tá»± Ä‘á»™ng dá»n dáº¹p thÃ´ng bÃ¡o cÅ© má»—i tuáº§n
+    const { startNotificationCleanupCron } = require("./jobs/notificationCleanupCronjob");
+    startNotificationCleanupCron();
+
+    // Notification Worker: Xá»­ lÃ½ thÃ´ng bÃ¡o hÃ ng loáº¡t tá»« Redis Queue
+    const { startNotificationWorker } = require("./services/notification.services");
+    startNotificationWorker();
     const path = require("path");
 
     const cors = require("cors");
@@ -89,6 +97,8 @@ const port = process.env.PORT || 3000;
     app.use("/api/inventory", require("./routes/inventory.routes")); // User Inventory (Badges, Items)
     app.use("/api/author", require("./routes/author.routes"));      // Author Dashboard
     app.use("/api/admin", require("./routes/admin.cache.routes"));  // Admin Dashboard + Cache monitoring
+    app.use("/api/chat", require("./routes/chat.routes"));          // Real-time Chat System
+    app.use("/api/shop", require("./routes/shop.routes"));          // Merchant Guild Shop
 
     app.get("/", (req, res) => {
         res.send("Server is awake!");
@@ -103,6 +113,16 @@ const port = process.env.PORT || 3000;
     // Error Middleware
     app.use(errorMiddleware);
 
-    app.listen(port, () => {
+    // Socket.io Integration
+    const http = require("http");
+    const server = http.createServer(app);
+    const { initSocket } = require("./config/socket");
+    
+    // Initialize Socket.io
+    initSocket(server);
+
+    server.listen(port, () => {
         logger.info(`Server is running on http://localhost:${port}`);
     });
+
+

@@ -2,7 +2,7 @@ const slugify = require("../utils/slugify");
 const StoryModel = require("../models/story.model");
 const ChapterModel = require("../models/chapter.model");
 const notificationService = require("../services/notification.services");
-const { NOTIF_TYPE, NOTIF_TEMPLATE } = require("../services/notification.services");
+const { NOTIFY_TYPES, NOTIF_TEMPLATE } = require("../services/notification.services");
 const { sanitizeFields } = require("../utils/sanitize");
 
 const uploadStory = async (req, res) => {
@@ -88,7 +88,7 @@ const uploadStory = async (req, res) => {
       mo_ta: data.mo_ta,
       trang_thai: data.trang_thai || "dang_ra",
       link_nguon: data.link_nguon || null,
-      doi_tuong_doc_gia: data.doi_tuong_doc_gia || null,
+      age_rating: data.age_rating || 1,
       thoi_gian_tao: now,
       thoi_gian_cap_nhat: now,
       anh_bia,
@@ -112,7 +112,7 @@ const uploadStory = async (req, res) => {
         const adminContent = NOTIF_TEMPLATE.STORY_PENDING_REVIEW(data.ten_truyen, data.tac_gia);
         await notificationService.sendNotificationToAdmins(
           adminContent,
-          NOTIF_TYPE.APPROVAL,
+          NOTIFY_TYPES.BOOK_APPROVED,
           storyId
         );
       } catch (notifyErr) {
