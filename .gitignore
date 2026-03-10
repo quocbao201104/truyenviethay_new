@@ -12,7 +12,7 @@ pnpm-debug.log*
 /backend/node_modules/
 /backend/dist/
 /backend/logs/
-/backend/public/uploads/    # nếu là file upload runtime
+/backend/public/uploads/ 
 /backend/.env
 /backend/npm-debug.log*
 /backend/.eslintcache
