@@ -1,5 +1,4 @@
 const userRewardService = require("../services/userReward.service");
-const { claimReward } = require("../models/reward.model");
 const { successResponse, errorResponse } = require("../utils/apiResponse");
 const db = require("../config/db");
 
@@ -118,8 +117,11 @@ const claimRewardFromBody = async (req, res) => {
       return errorResponse(res, "userRewardId không hợp lệ", 400);
     }
 
-    const result = await claimReward(userId, Number(userRewardId));
-    return successResponse(res, result, result.message);
+    const result = await userRewardService.claimRewardInstance({
+      userId,
+      userRewardId: Number(userRewardId),
+    });
+    return successResponse(res, result, result.message || "Nhận quà thành công");
   } catch (err) {
     const isClient = [
       "Quà không tồn tại hoặc đã được nhận rồi.",

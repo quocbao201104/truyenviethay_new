@@ -133,12 +133,19 @@ const getChapterBySlug = async (req, res) => {
     if (req.user && req.user.id) {
          try {
             const taskService = require("../services/task.service");
-            // Trigger "Read Chapter" tasks.
-            // Using "Đọc chương đầu tiên" as the key task name from seeds.
-            // Note: This matches the seed data task_name.
-            await taskService.completeTaskByName(req.user.id, "Đọc chương đầu tiên");
-            // Trigger "Read Story" (Infinite) task
-            await taskService.completeTaskByName(req.user.id, "Đọc truyện");
+            const userId = req.user.id;
+            const readStoryEvent = {
+                eventType: "read_chapter",
+                eventRef: `story:${chapter.truyen_id}:chapter:${chapter.id}`,
+            };
+            await taskService.completeTaskByName(userId, "Đọc truyện", readStoryEvent);
+            if (chapter.so_chuong === 1) {
+              const firstChapterEvent = {
+                eventType: "read_first_chapter",
+                eventRef: `story:${chapter.truyen_id}:first`,
+              };
+              await taskService.completeTaskByName(userId, "Đọc chương đầu tiên", firstChapterEvent);
+            }
          } catch (e) {
              console.error("AutoTask Error:", e.message);
          }

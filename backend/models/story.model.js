@@ -1,5 +1,7 @@
 const db = require("../config/db");
-const { getOrSet } = require("../utils/cache");
+const { getOrSet, invalidate } = require("../utils/cache");
+
+const STORY_LIST_CACHE_TTL = 180; // 3 phút
 
 const StoryModel = {
   create: async (storyData) => {
@@ -121,11 +123,12 @@ const StoryModel = {
       pagination: {
         total: countResult[0].total,
         current_page: +page,
-        total_pages: Math.ceil(countResult[0].total / limit),
+        total_pages: Math.ceil(countResult[0].total / limit) || 1,
+        limit: +limit,
       },
     };
   },
-  
+
   getById: async (id) => {
     // Lấy tất cả các cột từ truyen_new và noi_dung_chuong_mau từ bảng chuong
     const [rows] = await db.query(
@@ -228,7 +231,47 @@ const StoryModel = {
     );
   },
 
-  getPublicStories: async ({
+  /**
+   * Invalidate story list caches (hot, topMonthly, latest, new, topRated)
+   * Gọi khi story update/approval/ create
+   */
+  invalidateStoryListCache: async () => {
+    await invalidate("hotStories");
+    await invalidate("topMonthly");
+    await invalidate("storyList");
+    await invalidate("topRated");
+  },
+
+  getPublicStories: async (opts = {}) => {
+    const {
+      page = 1,
+      limit = 20,
+      sort_by = "thoi_gian_cap_nhat",
+      order = "DESC",
+      keyword = "",
+      category_ids = null,
+      trang_thai = "",
+      min_views = null,
+      max_views = null,
+      min_chapters = null,
+      max_chapters = null,
+    } = opts;
+    const safePage = Math.max(1, parseInt(page, 10) || 1);
+    const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+    const hasFilters = !!(keyword?.trim() || category_ids || trang_thai || min_views != null || max_views != null || min_chapters != null || max_chapters != null);
+    const cacheable = !hasFilters && safePage === 1;
+    const cacheKey = cacheable ? `storyList:${sort_by}:${order}:${safeLimit}` : null;
+
+    if (cacheKey) {
+      const cached = await getOrSet(cacheKey, STORY_LIST_CACHE_TTL, () =>
+        StoryModel._getPublicStoriesCore(opts)
+      );
+      return cached;
+    }
+    return StoryModel._getPublicStoriesCore(opts);
+  },
+
+  _getPublicStoriesCore: async ({
     page = 1,
     limit = 20,
     sort_by = "thoi_gian_cap_nhat",
@@ -241,12 +284,11 @@ const StoryModel = {
     min_chapters = null,
     max_chapters = null,
   }) => {
-    const offset = (page - 1) * limit;
-    const sortField = ["ten_truyen", "luot_xem", "thoi_gian_cap_nhat"].includes(
-      sort_by
-    )
-      ? `tn.${sort_by}` // Alias tn for truyen_new
-      : "tn.thoi_gian_cap_nhat";
+    const safePage = Math.max(1, parseInt(page, 10) || 1);
+    const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+    const offset = (safePage - 1) * safeLimit;
+    const allowedSort = ["ten_truyen", "luot_xem", "thoi_gian_cap_nhat", "hot_score", "thoi_gian_tao"];
+    const sortField = allowedSort.includes(sort_by) ? `tn.${sort_by}` : "tn.thoi_gian_cap_nhat";
     const sortOrder = order.toUpperCase() === "ASC" ? "ASC" : "DESC";
 
     let selectQuery = `SELECT tn.id, tn.ten_truyen, tn.tac_gia, tn.slug, tn.mo_ta, tn.anh_bia, tn.luot_xem, tn.thoi_gian_cap_nhat, tn.trang_thai,
@@ -336,7 +378,7 @@ if (ids.length > 0) {
 
     // Execute Data Query
     // We need to keep a separate params array for the data query because count query might differ (no offset/limit)
-    const dataParams = [...params, +limit, +offset];
+    const dataParams = [...params, safeLimit, offset];
     
     const [data] = await db.query(query, dataParams);
 
@@ -402,8 +444,9 @@ if (ids.length > 0) {
       data,
       pagination: {
         total: countResult[0]?.total || 0,
-        current_page: +page,
-        total_pages: Math.ceil((countResult[0]?.total || 0) / limit),
+        current_page: safePage,
+        total_pages: Math.ceil((countResult[0]?.total || 0) / safeLimit) || 1,
+        limit: safeLimit,
       },
     };
   },
@@ -430,13 +473,14 @@ if (ids.length > 0) {
   },
 
   getTopMonthlyStories: async (limit = 10) => {
-    const cacheKey = `topMonthly:${limit}`;
-    
-    return getOrSet(
+    const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
+    const cacheKey = `topMonthly:${safeLimit}`;
+
+    const rows = await getOrSet(
       cacheKey,
       600,
       async () => {
-        const [rows] = await db.query(
+        const [r] = await db.query(
           `SELECT tn.*, IFNULL(SUM(tv.so_luot_xem), 0) as luot_xem_thang
            FROM truyen_new tn
            JOIN truyen_views tv ON tn.id = tv.truyen_id
@@ -445,21 +489,30 @@ if (ids.length > 0) {
            GROUP BY tn.id
            ORDER BY luot_xem_thang DESC
            LIMIT ?`,
-          [parseInt(limit)]
+          [safeLimit]
         );
-        return rows;
+        return r;
       }
     );
+    return {
+      data: rows,
+      pagination: {
+        current_page: 1,
+        total_pages: rows.length > 0 ? 1 : 0,
+        total: rows.length,
+        limit: safeLimit,
+      },
+    };
   },
 
-  // Lấy truyện hot nhất theo hot_score (dùng cho Banner/HeroGrid)
   getHotStories: async (limit = 5) => {
-    const cacheKey = `hotStories:${limit}`;
-    return getOrSet(
+    const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 5));
+    const cacheKey = `hotStories:${safeLimit}`;
+    const rows = await getOrSet(
       cacheKey,
-      300, // 5 phút cache
+      300,
       async () => {
-        const [rows] = await db.query(
+        const [r] = await db.query(
           `SELECT id, ten_truyen, slug, anh_bia, tac_gia, mo_ta,
                   luot_xem, luot_thich, luot_theo_doi, rating, rating_count, hot_score,
                   so_luong_chuong, so_luong_chuong AS so_chuong, chuong_moi
@@ -467,11 +520,20 @@ if (ids.length > 0) {
            WHERE trang_thai_kiem_duyet = 'duyet'
            ORDER BY hot_score DESC
            LIMIT ?`,
-          [parseInt(limit)]
+          [safeLimit]
         );
-        return rows;
+        return r;
       }
     );
+    return {
+      data: rows,
+      pagination: {
+        current_page: 1,
+        total_pages: rows.length > 0 ? 1 : 0,
+        total: rows.length,
+        limit: safeLimit,
+      },
+    };
   },
 };
 

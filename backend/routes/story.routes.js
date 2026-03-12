@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const storyController = require("../controllers/story.controller");
 const uploadStoryController = require("../controllers/up_story.controller.js");
-const { authenticateToken, authorizeRoles } = require("../middleware/auth");
+const { authenticateToken, authorizeRoles, optionalAuthenticateToken } = require("../middleware/auth");
 const upload = require("../middleware/upload_img"); 
 
 // Lấy tất cả truyện
@@ -32,11 +32,11 @@ router.get(
   storyController.getMyStories
 );
 
-// Lấy truyện theo ID
-router.get("/:id", storyController.getStoryById);
+// Lấy truyện theo ID (optional auth → is_followed, last_read_chuong_id khi đăng nhập)
+router.get("/:id", optionalAuthenticateToken, storyController.getStoryById);
 
 // Lấy truyện theo slug (cho frontend)
-router.get("/slug/:slug", storyController.getStoryBySlug);
+router.get("/slug/:slug", optionalAuthenticateToken, storyController.getStoryBySlug);
 
 // Cập nhật truyện
 router.put(

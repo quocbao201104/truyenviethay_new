@@ -1,7 +1,7 @@
 const UserLevelHistory = require("../models/userLevelHistory.model");
 const UserLevel = require("../models/userLevels.model");
 const UserPoints = require("../models/userPoint.model");
-const { triggerLevelUpRewards } = require("../models/reward.model");
+const { triggerLevelUpRewards } = require("./userReward.service");
 
 const getHistoryByUserId = async (userId, pagination = {}) => {
   try {
@@ -205,6 +205,11 @@ const autoUpgrade = async (user_id) => {
     await connection.commit();
     connection.release(); // Giải phóng connection sau khi commit
 
+    try {
+      const ChatProfileService = require("./chatProfile.service");
+      ChatProfileService.invalidateProfile(user_id).catch(() => {});
+    } catch (e) {}
+
     // --- Gửi quà vào Hộp Thư (Inbox) ---
     // Thực hiện SAU khi commit để không block transaction lên cấp
     // Quà sẽ có status='pending', user cần vào hộp thư để nhận thủ công
@@ -229,84 +234,100 @@ const autoUpgrade = async (user_id) => {
   } catch (error) {
     await connection.rollback();
     connection.release();
+    require("../utils/logger").warn("[Level] autoUpgrade rollback", { user_id, error: error.message });
     throw error;
   }
 };
 
+/**
+ * Idempotent bootstrap: ensure user has a level. Concurrency-safe via row lock.
+ */
 const ensureUserLevel = async (userId) => {
-    // Check if user has level history
-    const currentLevelId = await UserLevelHistory.getCurrentLevelOfUser(userId);
-    if (currentLevelId) {
-        // Even if level exists, ensure rewards are triggered (idempotent fix for missing initial rewards)
-        try {
-            await triggerLevelUpRewards(userId, currentLevelId);
-        } catch (e) {
-            console.error(`[EnsureRewards] Failed for existing user ${userId}:`, e.message);
-        }
-        return currentLevelId;
-    }
-
-    // No history, find default based on role
     const db = require("../config/db");
-    const [users] = await db.execute("SELECT role FROM users_new WHERE id = ?", [userId]); // Note: users_new based on previous debug
-    
-    // Fallback if user not found (shouldn't happen)
-    if (users.length === 0) return 1; 
+    const connection = await db.getConnection();
 
-    const userRole = users[0].role;
-
-    // Find lowest level for this role
-    const [levels] = await db.execute(
-        "SELECT level_id, lifespan FROM user_levels WHERE type = ? ORDER BY required_points ASC, level_id ASC LIMIT 1",
-        [userRole]
-    );
-
-    let defaultLevelId = 1; 
-    let type = userRole || 'user';
-    let lifespan = 365;
-
-    if (levels.length > 0) {
-        defaultLevelId = levels[0].level_id;
-        type = levels[0].type;
-        lifespan = levels[0].lifespan || 365;
-        
-        // Similarly fetch total lifespan = SUM(lifespan) up to this point
-        try {
-            const [lifespanRows] = await db.execute(
-                "SELECT SUM(COALESCE(lifespan, 0)) as total_lifespan FROM user_levels WHERE required_points <= ?",
-                [levels[0].required_points]
-            );
-            if (lifespanRows.length > 0 && lifespanRows[0].total_lifespan !== null) {
-                lifespan = parseInt(lifespanRows[0].total_lifespan);
-            }
-        } catch (e) {}
-        if (lifespan <= 0) lifespan = 365;
-    } else {
-        // Fallback: if 'author' has no levels defined, maybe fallback to 'user' levels? 
-        // Or just hardcode 1.
-        console.warn(`No levels defined for role ${userRole}, defaulting to 1`);
-    }
-
-    // Create history record
-    const now = new Date();
-    // end_date = now + T_max
-    const end_date = new Date(now.getTime() + lifespan * 24 * 60 * 60 * 1000);
-
-    await UserLevelHistory.create({
-        user_id: userId,
-        level_id: defaultLevelId,
-        start_date: now,
-        end_date: end_date
-    });
-
-    // TRIGGER REWARDS for the initial level
     try {
-        await triggerLevelUpRewards(userId, defaultLevelId);
-    } catch (e) {
-        console.error(`[InitialLevel] Failed to trigger rewards for user ${userId}:`, e.message);
-    }
+        await connection.beginTransaction();
 
-    return defaultLevelId;
+        // Lock user row to serialize concurrent bootstrap (prevents duplicate starter records)
+        const [users] = await connection.execute(
+            "SELECT id, role FROM users_new WHERE id = ? FOR UPDATE",
+            [userId]
+        );
+        if (users.length === 0) {
+            await connection.rollback();
+            return 1;
+        }
+
+        // Double-check: another request may have just created history
+        const [existing] = await connection.execute(
+            "SELECT level_id FROM user_levels_history WHERE user_id = ? ORDER BY start_date DESC LIMIT 1",
+            [userId]
+        );
+        if (existing.length > 0) {
+            await connection.commit();
+            const currentLevelId = existing[0].level_id;
+            try {
+                await triggerLevelUpRewards(userId, currentLevelId);
+            } catch (e) {
+                console.error(`[EnsureRewards] Failed for existing user ${userId}:`, e.message);
+            }
+            return currentLevelId;
+        }
+
+        const userRole = users[0].role;
+        const [levels] = await connection.execute(
+            "SELECT level_id, type, lifespan, required_points FROM user_levels WHERE type = ? ORDER BY required_points ASC, level_id ASC LIMIT 1",
+            [userRole]
+        );
+
+        let defaultLevelId = 1;
+        let lifespan = 365;
+
+        if (levels.length > 0) {
+            defaultLevelId = levels[0].level_id;
+            lifespan = levels[0].lifespan || 365;
+            try {
+                const [lifespanRows] = await connection.execute(
+                    "SELECT SUM(COALESCE(lifespan, 0)) as total_lifespan FROM user_levels WHERE required_points <= ?",
+                    [levels[0].required_points]
+                );
+                if (lifespanRows.length > 0 && lifespanRows[0].total_lifespan != null) {
+                    lifespan = parseInt(lifespanRows[0].total_lifespan);
+                }
+            } catch (e) {}
+            if (lifespan <= 0) lifespan = 365;
+        } else {
+            console.warn(`No levels defined for role ${userRole}, defaulting to level 1`);
+        }
+
+        const now = new Date();
+        const end_date = new Date(now.getTime() + lifespan * 24 * 60 * 60 * 1000);
+
+        await connection.execute(
+            "INSERT INTO user_levels_history (user_id, level_id, start_date, end_date) VALUES (?, ?, ?, ?)",
+            [userId, defaultLevelId, now, end_date]
+        );
+
+        await connection.commit();
+
+        try {
+            await triggerLevelUpRewards(userId, defaultLevelId);
+        } catch (e) {
+            console.error(`[InitialLevel] Failed to trigger rewards for user ${userId}:`, e.message);
+        }
+        try {
+            const ChatProfileService = require("./chatProfile.service");
+            ChatProfileService.invalidateProfile(userId).catch(() => {});
+        } catch (e) {}
+        return defaultLevelId;
+    } catch (error) {
+        await connection.rollback();
+        require("../utils/logger").warn("[Level] ensureUserLevel rollback", { userId, error: error.message });
+        throw error;
+    } finally {
+        connection.release();
+    }
 };
 
 module.exports = {

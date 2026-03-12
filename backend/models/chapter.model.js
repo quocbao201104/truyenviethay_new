@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const StoryModel = require("./story.model");
 
 // Tối ưu hàm cập nhật: Lấy dữ liệu 1 lần rồi update
 const updateChuongMoiNhat = async (truyen_id) => {
@@ -171,8 +172,7 @@ const ChapterModel = {
 
       if (result.affectedRows > 0) {
         await connection.query("UPDATE truyen_new SET thoi_gian_cap_nhat = NOW() WHERE id = ?", [truyen_id]);
-        
-        // Gọi hàm update count bên trong transaction này luôn
+        if (StoryModel.invalidateStoryListCache) await StoryModel.invalidateStoryListCache();
         // Lưu ý: Cần viết lại hàm updateChuongMoiNhat để nhận connection nếu muốn tối ưu tuyệt đối
         await updateChuongMoiNhat(truyen_id); 
       }

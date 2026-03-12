@@ -1,6 +1,8 @@
 const StoryModel = require("../models/story.model");
 const TheLoaiModel = require("../models/category.model");
 const storyService = require("../services/story.services");
+const followModel = require("../models/follow.model");
+const readingStateModel = require("../models/readingState.model");
 const generateSlug = require("../utils/slugify"); 
 const db = require("../config/db"); // Import DB connection 
 
@@ -70,18 +72,25 @@ const getPublicStories = async (req, res) => {
   }
 };
 
+const attachUserContext = async (story, userId) => {
+  if (!userId) return;
+  const [rows] = await followModel.isFollowing(userId, story.id);
+  const readingState = await readingStateModel.getByUserAndStory(userId, story.id);
+  story.is_followed = (rows?.length || 0) > 0;
+  story.last_read_chuong_id = readingState?.last_read_chuong_id ?? null;
+};
+
 const getStoryById = async (req, res) => {
   try {
     const storyId = req.params.id;
-    // Gọi StoryModel.getById để lấy thông tin chi tiết truyện và chương mẫu
-    const story = await StoryModel.getById(storyId); 
+    const story = await StoryModel.getById(storyId);
 
     if (!story) {
       return res.status(404).json({ message: "Không tìm thấy truyện" });
     }
 
-    // Attach genres
     story.genres = await TheLoaiModel.getByStoryId(storyId);
+    if (req.user?.id) await attachUserContext(story, req.user.id);
 
     res.status(200).json(story);
   } catch (error) {
@@ -99,8 +108,8 @@ const getStoryBySlug = async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy truyện" });
     }
 
-    // Attach genres
     story.genres = await TheLoaiModel.getByStoryId(story.id);
+    if (req.user?.id) await attachUserContext(story, req.user.id);
 
     res.json(story);
   } catch (error) {
@@ -188,6 +197,7 @@ const updateStory = async (req, res) => {
     }
     
     if (affectedRows > 0) {
+      await StoryModel.invalidateStoryListCache?.();
       return res.status(200).json({ message: "Cập nhật truyện thành công" });
     } else {
       return res
@@ -248,6 +258,7 @@ const approveOrRejectStory = async (req, res) => {
 
   try {
     const result = await storyService.approveStory(storyId, action);
+    await StoryModel.invalidateStoryListCache?.();
     res.json(result);
   } catch (error) {
     console.error("Error in approveOrRejectStory:", error);
@@ -327,9 +338,9 @@ const incrementViewCount = async (req, res) => {
 
 const getTopMonthlyStories = async (req, res) => {
   try {
-    const limit = req.query.limit || 10;
-    const stories = await StoryModel.getTopMonthlyStories(limit);
-    res.json(stories);
+    const limit = req.query.limit;
+    const result = await StoryModel.getTopMonthlyStories(limit);
+    res.json({ success: true, data: result.data, pagination: result.pagination });
   } catch (error) {
     console.error("getTopMonthlyStories error:", error);
     res.status(500).json({ message: "Lỗi server khi lấy top tháng" });
@@ -338,9 +349,9 @@ const getTopMonthlyStories = async (req, res) => {
 
 const getHotStories = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 5;
-    const stories = await StoryModel.getHotStories(limit);
-    res.json(stories);
+    const limit = req.query.limit;
+    const result = await StoryModel.getHotStories(limit);
+    res.json({ success: true, data: result.data, pagination: result.pagination });
   } catch (error) {
     console.error("getHotStories error:", error);
     res.status(500).json({ message: "Lỗi server khi lấy hot stories" });

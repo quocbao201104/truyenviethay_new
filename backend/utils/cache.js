@@ -12,6 +12,7 @@ const logger = require('./logger');
  */
 const DEFAULT_TTL = 300;
 const CACHE_PREFIX = 'app:';
+const LOG_CACHE = process.env.LOG_CACHE_HIT_MISS === '1' || process.env.CACHE_DEBUG === '1';
 
 /**
  * Get data from cache or fetch and store
@@ -28,18 +29,17 @@ const getOrSet = async (key, ttl = DEFAULT_TTL, fetchFn) => {
     // Try to get from Redis
     const cached = await redis.get(fullKey);
     if (cached) {
-      // logger.info(`✅ Cache HIT: ${fullKey}`);
+      if (LOG_CACHE) logger.info(`Cache HIT: ${fullKey}`);
       return JSON.parse(cached);
     }
 
-    // Cache miss - fetch fresh data
-    // logger.info(`❌ Cache MISS: ${fullKey} - Fetching fresh data...`);
+    if (LOG_CACHE) logger.info(`Cache MISS: ${fullKey}`);
     const data = await fetchFn();
     
     // Store in Redis with TTL
     if (data !== undefined && data !== null) {
       await redis.set(fullKey, JSON.stringify(data), 'EX', ttl);
-      // logger.info(`💾 Cached: ${fullKey} (TTL: ${ttl}s)`);
+      if (LOG_CACHE) logger.info(`Cached: ${fullKey} (TTL: ${ttl}s)`);
     }
     
     return data;

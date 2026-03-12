@@ -1,35 +1,44 @@
 // services/follow.service.js
 
 const followModel = require("../models/follow.model");
-const { formatTimeAgo } = require("../utils/time"); 
+const readingStateModel = require("../models/readingState.model");
+const formatTimeAgo = require("../utils/time"); 
+
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 100;
+const clampLimit = (val) => Math.min(MAX_LIMIT, Math.max(1, parseInt(val, 10) || DEFAULT_LIMIT));
 
 // Lấy danh sách truyện theo dõi với phân trang
-exports.getFollowedStories = async (userId, page = 1, limit = 10) => {
-  const offset = (page - 1) * limit;
+exports.getFollowedStories = async (userId, page = 1, limit = DEFAULT_LIMIT) => {
+  const safeLimit = clampLimit(limit);
+  const safePage = Math.max(1, parseInt(page, 10) || 1);
+  const offset = (safePage - 1) * safeLimit;
 
-  // Lấy danh sách truyện đã theo dõi
-  const [stories] = await followModel.getFollowedStories(userId, offset, limit);
-
-  // Lấy tổng số truyện đã theo dõi
+  const [stories] = await followModel.getFollowedStories(userId, offset, safeLimit);
   const [totalFollowCount] = await followModel.getFollowCount(userId);
+  const total = totalFollowCount[0].count;
+  const totalPages = Math.ceil(total / safeLimit) || 1;
 
-  console.log(`[Follow Service] userId: ${userId}, page: ${page}, limit: ${limit}`);
-  console.log(`[Follow Service] Stories found: ${stories.length}, Total: ${totalFollowCount[0].count}`);
+  const truyenIds = stories.map((s) => s.id);
+  const readingStates = await readingStateModel.getByUserAndStories(userId, truyenIds);
+  const rsMap = new Map(readingStates.map((r) => [r.truyen_id, r]));
 
-  // Xử lý thông tin chương mới nhất và thời gian
-  const result = stories.map((story) => {
-    const lastUpdate = story.chuong_moi_nhat_so_chuong
-      ? formatTimeAgo(story.chuong_moi_nhat_so_chuong)
+  const data = stories.map((story) => {
+    const lastUpdate = story.thoi_gian_cap_nhat
+      ? formatTimeAgo(story.thoi_gian_cap_nhat)
       : "Chưa có chương";
-    return {
-      ...story,
-      lastUpdate,
-    };
+    const rs = rsMap.get(story.id);
+    return { ...story, lastUpdate, is_followed: true, last_read_chuong_id: rs?.last_read_chuong_id ?? null };
   });
 
   return {
-    stories: result,
-    totalCount: totalFollowCount[0].count,
+    data,
+    pagination: {
+      current_page: safePage,
+      total_pages: totalPages,
+      total,
+      limit: safeLimit,
+    },
   };
 };
 

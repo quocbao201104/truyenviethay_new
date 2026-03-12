@@ -3,12 +3,14 @@ const historyService = require("../services/history.services");
 exports.getReadingHistory = async (req, res) => {
   try {
     const userId = req.user.id;
-    const page = parseInt(req.query.page) || 1;
-    const result = await historyService.getReadingHistory(userId, page);
+    const page = req.query.page;
+    const limit = req.query.limit;
+    const result = await historyService.getReadingHistory(userId, page, limit);
 
     res.json({
       success: true,
-      ...result,
+      data: result.data,
+      pagination: result.pagination,
     });
   } catch (error) {
     console.error(error);

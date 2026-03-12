@@ -1,17 +1,68 @@
 const db = require("../config/db");
-const UserReward = require("../models/userReward.model"); 
 const UserCurrency = require("../models/userCurrency.model");
-const UserLevelHistory = require("./userLevelHistory.service"); // For ensuring user level
+const UserLevelHistory = require("./userLevelHistory.service");
+const { REWARD_STATUS, REWARD_SOURCE } = require("../constants/rewardContract");
+const { INVENTORY_SOURCE } = require("../constants/inventoryContract");
+const mailboxService = require("./mailbox.services");
+const { MAIL_TYPE } = require("../constants/mailboxContract");
+const logger = require("../utils/logger");
+
+/**
+ * Gửi quà vào hộp thư khi user lên cấp (gọi từ userLevelHistory.service)
+ */
+const triggerLevelUpRewards = async (userId, newLevel) => {
+    const [levelRewards] = await db.query(
+        `SELECT lr.reward_id, lr.quantity, r.reward_type, r.metadata
+         FROM level_rewards lr
+         JOIN rewards r ON lr.reward_id = r.reward_id
+         WHERE lr.level_id = ?`,
+        [newLevel]
+    );
+    if (!levelRewards || levelRewards.length === 0) return [];
+
+    const results = [];
+    for (const r of levelRewards) {
+        // Idempotency: Each level reward for a user has a unique dedupe_key
+        const dedupeKey = `level_up:${userId}:${newLevel}:${r.reward_id}`;
+        const userRewardId = await grantReward({
+            userId,
+            rewardId: r.reward_id,
+            source: REWARD_SOURCE.LEVEL,
+            sourceRef: newLevel,
+            dedupeKey: dedupeKey,
+            metadata: { level: newLevel }
+        });
+        
+        if (userRewardId) {
+            results.push({ reward_id: r.reward_id, reward_type: r.reward_type, quantity: r.quantity || 1 });
+        }
+    }
+    
+    return results;
+};
 
 /**
  * Grant a reward (Internal/Admin/System Trigger)
  */
-const grantReward = async ({ userId, rewardId, source, metadata = {} }, connection = null) => {
+const grantReward = async ({ userId, rewardId, source, sourceRef = null, dedupeKey = null, templateCode = null, metadata = {} }, connection = null) => {
     const conn = connection || await db.getConnection();
     const shouldRelease = !connection;
 
     try {
         if (!connection) await conn.beginTransaction();
+
+        // 1. Check Dedupe Key before everything (Fast exit)
+        if (dedupeKey) {
+            const [existing] = await conn.execute(
+                "SELECT id FROM user_rewards WHERE dedupe_key = ?",
+                [dedupeKey]
+            );
+            if (existing.length > 0) {
+                console.log(`[GrantReward] Duplicate grant blocked by dedupe_key: ${dedupeKey}`);
+                if (!connection) await conn.commit();
+                return null;
+            }
+        }
 
         const [rewards] = await conn.execute("SELECT * FROM rewards WHERE reward_id = ?", [rewardId]);
         if (rewards.length === 0) throw new Error(`Reward ID ${rewardId} does not exist`);
@@ -26,11 +77,11 @@ const grantReward = async ({ userId, rewardId, source, metadata = {} }, connecti
 
         if (!reward.is_repeatable) {
             const [existing] = await conn.execute(
-                "SELECT id FROM user_rewards WHERE user_id = ? AND reward_id = ? AND status != 'expired'",
-                [userId, rewardId]
+                "SELECT id FROM user_rewards WHERE user_id = ? AND reward_id = ? AND status != ?",
+                [userId, rewardId, REWARD_STATUS.EXPIRED]
             );
             if (existing.length > 0) {
-                console.log(`[GrantReward] User ${userId} already has reward ${rewardId}`);
+                console.log(`[GrantReward] User ${userId} already has non-repeatable reward ${rewardId}`);
                 if (!connection) await conn.commit();
                 return null; 
             }
@@ -41,24 +92,66 @@ const grantReward = async ({ userId, rewardId, source, metadata = {} }, connecti
             expiredAt = new Date(Date.now() + reward.duration_hours * 3600000);
         }
 
-        // Default 'unlocked' so user knows they have it, unless pure currency/exp which we might auto-consume?
-        // sticking to 'unlocked' for now.
-        const initialStatus = 'unlocked'; 
+        const initialStatus = REWARD_STATUS.UNLOCKED; 
 
+        // INSERT logic: use IGNORE if dedupeKey exists to prevent race condition errors, 
+        // but we already checked above for better logging.
         const [result] = await conn.execute(
             `INSERT INTO user_rewards 
-            (user_id, reward_id, status, source, earned_at, metadata, expired_at) 
-            VALUES (?, ?, ?, ?, NOW(), ?, ?)`,
-            [userId, rewardId, initialStatus, source, JSON.stringify(metadata), expiredAt]
+            (user_id, reward_id, quantity, status, source, source_ref, dedupe_key, template_code, earned_at, metadata, expired_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)`,
+            [
+                userId, 
+                rewardId, 
+                reward.quantity || 1, 
+                initialStatus, 
+                source, 
+                sourceRef, 
+                dedupeKey, 
+                templateCode, 
+                JSON.stringify(metadata), 
+                expiredAt
+            ]
         );
 
         const userRewardId = result.insertId;
+
+        // --- DUAL RUN: Sync to New Mailbox System ---
+        try {
+            const dedupeKeyMail = dedupeKey ? `mail_sync:${dedupeKey}` : `mail_sync_ur:${userRewardId}`;
+            await mailboxService.sendMail({
+                userId,
+                subject: `Quà tặng: ${reward.reward_name || 'Phần thưởng mới'}`,
+                body: `Bạn vừa nhận được 1 phần quà: ${reward.reward_name || 'Vật phẩm'} x ${reward.quantity || 1}`,
+                source,
+                sourceRef,
+                mailType: MAIL_TYPE.REWARD,
+                attachments: [
+                    { type: 'reward', rewardId: rewardId, quantity: reward.quantity || 1 }
+                ],
+                expiresInHours: reward.duration_hours,
+                dedupeKey: dedupeKeyMail
+            }, conn);
+        } catch (dualErr) {
+            // We don't want to fail the main transaction if mailbox sync fails, 
+            // unless we want strict consistency. For now, just log.
+            logger.error("[Reward] Dual-run mailbox sync failed", { userRewardId, error: dualErr.message });
+        }
+        // --------------------------------------------
 
         if (!connection) await conn.commit();
         return userRewardId;
 
     } catch (error) {
-        if (!connection) await conn.rollback();
+        if (!connection) {
+            await conn.rollback();
+            logger.warn("[Reward] grantReward rollback", { userId, rewardId, dedupeKey, error: error.message });
+        }
+        // Handle unique constraint violation gracefully if race condition occurs
+        if (error.code === 'ER_DUP_ENTRY' && error.message.includes('idx_user_rewards_dedupe_key')) {
+            console.log(`[GrantReward] Race condition caught: duplicate dedupe_key ${dedupeKey}`);
+            return null;
+        }
         throw error;
     } finally {
         if (shouldRelease) conn.release();
@@ -91,7 +184,7 @@ const buyReward = async ({ userId, rewardId }) => {
         const userRewardId = await grantReward({ 
             userId, 
             rewardId, 
-            source: 'shop', // Special source
+            source: REWARD_SOURCE.SHOP,
             metadata: { bought_price: reward.price } 
         }, connection);
 
@@ -105,6 +198,7 @@ const buyReward = async ({ userId, rewardId }) => {
 
     } catch (error) {
         await connection.rollback();
+        logger.warn("[Reward] buyReward rollback", { userId, rewardId, error: error.message });
         throw error;
     } finally {
         connection.release();
@@ -156,7 +250,7 @@ const claimMilestone = async ({ userId, rewardId }) => {
         const userRewardId = await grantReward({ 
             userId, 
             rewardId, 
-            source: 'level', // It's a level/milestone reward
+            source: REWARD_SOURCE.LEVEL,
             metadata: { claimed_at_level: reward.min_level }
         }, connection);
 
@@ -166,61 +260,96 @@ const claimMilestone = async ({ userId, rewardId }) => {
         return { success: true, userRewardId };
 
     } catch (error) {
-         await connection.rollback();
-         throw error;
+        await connection.rollback();
+        logger.warn("[Reward] claimMilestone rollback", { userId, rewardId, error: error.message });
+        throw error;
     } finally {
-         connection.release();
+        connection.release();
     }
 };
 
 /**
- * Claim/Activate an Instance (User has user_reward record)
+ * Claim/Activate an unlocked reward instance (single entry point)
+ * Route: POST /claim (body: userRewardId) và POST /:userRewardId/claim
  */
 const claimRewardInstance = async ({ userId, userRewardId }) => {
-     // Rename of previous 'claimReward'
-      const connection = await db.getConnection();
+    const connection = await db.getConnection();
 
     try {
         await connection.beginTransaction();
 
-        const [rows] = await connection.execute(
-            `SELECT ur.*, r.reward_type, r.metadata as reward_config 
-             FROM user_rewards ur 
-             JOIN rewards r ON ur.reward_id = r.reward_id 
+        const [[userReward]] = await connection.query(
+            `SELECT ur.*, r.reward_type, r.metadata as reward_config, r.duration_hours
+             FROM user_rewards ur
+             JOIN rewards r ON ur.reward_id = r.reward_id
              WHERE ur.id = ? AND ur.user_id = ? FOR UPDATE`,
             [userRewardId, userId]
         );
 
-        if (rows.length === 0) throw new Error("Reward instance not found");
-        const instance = rows[0];
-        const config = typeof instance.reward_config === 'string' ? JSON.parse(instance.reward_config || '{}') : instance.reward_config;
-
-        if (instance.status !== 'unlocked') {
-            throw new Error(`Reward is ${instance.status}, cannot claim.`);
+        if (!userReward) {
+            throw new Error("Quà không tồn tại hoặc đã được nhận rồi.");
         }
-        if (instance.expired_at && new Date(instance.expired_at) < new Date()) {
-            throw new Error("Reward has expired.");
+        if (userReward.status !== REWARD_STATUS.UNLOCKED) {
+            throw new Error(`Quà ở trạng thái ${userReward.status}, không thể nhận.`);
         }
-
-        // Apply Instant Effects
-        if (instance.reward_type === 'exp') {
-            const amount = config.amount || config.exp || 0; // handle various formats
-            // TODO: Call UserLevelService.addExp(userId, amount, connection);
-        } else if (instance.reward_type === 'currency') {
-             const amount = config.amount || config.currency || 0;
-             await UserCurrency.add(userId, amount, connection);
+        if (userReward.expired_at && new Date(userReward.expired_at) < new Date()) {
+            throw new Error("Quà đã hết hạn.");
         }
 
-        await connection.execute(
-            "UPDATE user_rewards SET status = 'claimed', claimed_at = NOW() WHERE id = ?",
-            [userRewardId]
+        const meta = typeof userReward.reward_config === 'string'
+            ? JSON.parse(userReward.reward_config || '{}')
+            : (userReward.reward_config || {});
+        const { reward_type, reward_id, quantity = 1, duration_hours } = userReward;
+
+        // Phân phát theo loại
+        if (reward_type === 'currency') {
+            const currencyType = meta.currency_type || 'linh_thach';
+            const amount = (meta.amount || meta.currency || 0) * quantity;
+            if (currencyType === 'linh_thach') {
+                await connection.query(
+                    `UPDATE users_new SET linh_thach = linh_thach + ? WHERE id = ?`,
+                    [amount, userId]
+                );
+            } else {
+                throw new Error(`currency_type không hỗ trợ: ${currencyType}`);
+            }
+        } else if (reward_type === 'exp') {
+            const amount = (meta.amount || meta.exp || 0) * quantity;
+            await connection.query(
+                `INSERT INTO user_points (user_id, total_exp) VALUES (?, ?)
+                 ON DUPLICATE KEY UPDATE total_exp = total_exp + VALUES(total_exp)`,
+                [userId, amount]
+            );
+        } else if (['badge', 'item', 'buff', 'title'].includes(reward_type)) {
+            let expiresAt = null;
+            if (duration_hours && duration_hours > 0) {
+                const d = new Date();
+                d.setHours(d.getHours() + duration_hours);
+                expiresAt = d.toISOString().slice(0, 19).replace('T', ' ');
+            }
+            await connection.query(
+                `INSERT INTO user_inventory (user_id, reward_id, quantity, expires_at, acquired_from)
+                 VALUES (?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity),
+                   expires_at = IF(VALUES(expires_at) IS NOT NULL, VALUES(expires_at), expires_at)`,
+                [userId, reward_id, quantity, expiresAt, INVENTORY_SOURCE.REWARD]
+            );
+        }
+
+        await connection.query(
+            `UPDATE user_rewards SET status = ?, claimed_at = NOW() WHERE id = ?`,
+            [REWARD_STATUS.CLAIMED, userRewardId]
         );
 
         await connection.commit();
-        return { success: true, type: instance.reward_type };
-
+        return {
+            success: true,
+            message: "Nhận quà thành công!",
+            reward: { reward_type, quantity, metadata: meta },
+        };
     } catch (error) {
         await connection.rollback();
+        logger.warn("[Reward] claimRewardInstance rollback", { userId, userRewardId, error: error.message });
         throw error;
     } finally {
         connection.release();
@@ -228,11 +357,24 @@ const claimRewardInstance = async ({ userId, userRewardId }) => {
 };
 
 const useReward = async ({ userId, userRewardId }) => {
-     // Same as before
-      const connection = await db.getConnection();
+    const connection = await db.getConnection();
     try {
-        await connection.execute("UPDATE user_rewards SET status = 'used', used_at = NOW() WHERE id = ? AND user_id = ?", [userRewardId, userId]);
+        await connection.beginTransaction();
+        const [[row]] = await connection.execute(
+            "SELECT id FROM user_rewards WHERE id = ? AND user_id = ? FOR UPDATE",
+            [userRewardId, userId]
+        );
+        if (!row) throw new Error("Vật phẩm không tồn tại hoặc không thuộc về bạn.");
+        await connection.execute(
+            "UPDATE user_rewards SET status = ?, used_at = NOW() WHERE id = ? AND user_id = ?",
+            [REWARD_STATUS.USED, userRewardId, userId]
+        );
+        await connection.commit();
         return { success: true };
+    } catch (error) {
+        await connection.rollback();
+        logger.warn("[Reward] useReward rollback", { userId, userRewardId, error: error.message });
+        throw error;
     } finally {
         connection.release();
     }
@@ -260,7 +402,8 @@ module.exports = {
     getUserRewards,
     grantReward,
     buyReward,
-    claimMilestone, // New: Claim from Catalog via Level
-    claimRewardInstance, // Renamed: Claim from Instance (Activate)
-    useReward
+    claimMilestone,
+    claimRewardInstance,
+    useReward,
+    triggerLevelUpRewards,
 };

@@ -8,6 +8,7 @@ const NOTIFY_TYPES = {
 
     // Nhóm 2: Truyện mới (11-20)
     NEW_CHAPTER: 11,
+    CHAPTER_REJECTED: 13,
     BOOK_APPROVED: 12,
 
     // Nhóm 3: Hệ thống (21-30)
@@ -17,7 +18,7 @@ const NOTIFY_TYPES = {
 
 const CATEGORY_MAP = {
     interaction: [1, 2, 3],
-    story: [11, 12],
+    story: [11, 12, 13],
     system: [21, 22]
 };
 

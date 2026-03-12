@@ -107,6 +107,10 @@ const uploadStory = async (req, res) => {
       thoi_gian_dang: now,
     });
 
+    if (StoryModel.invalidateStoryListCache) {
+      await StoryModel.invalidateStoryListCache();
+    }
+
     if (trang_thai_kiem_duyet === "cho_duyet") {
       try {
         const adminContent = NOTIF_TEMPLATE.STORY_PENDING_REVIEW(data.ten_truyen, data.tac_gia);

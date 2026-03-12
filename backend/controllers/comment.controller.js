@@ -4,12 +4,16 @@ exports.createComment = async (req, res) => {
   try {
     const userId = req.user.id;
     const { truyen_id, content, parent_id } = req.body;
-    await commentService.addComment(userId, truyen_id, content, parent_id);
-    
+    const commentId = await commentService.addComment(userId, truyen_id, content, parent_id);
+
     // GAMIFICATION TRIGGER: Comment
     try {
         const taskService = require("../services/task.service");
-        taskService.completeTaskByName(userId, "Bình luận truyện").catch(err => {
+        const eventOpts = {
+             eventType: "comment_story",
+             eventRef: `story:${truyen_id}:comment:${commentId}`,
+        };
+        taskService.completeTaskByName(userId, "Bình luận truyện", eventOpts).catch(err => {
              console.error("Gamification Comment Error:", err.message);
         });
     } catch (e) {
@@ -22,28 +26,32 @@ exports.createComment = async (req, res) => {
   }
 };
 
-// Thêm phần getComments để lấy comment của truyện
 exports.getComments = async (req, res) => {
   try {
     const { truyen_id, page } = req.query;
-    const comments = await commentService.getComments(truyen_id, page);
+    const result = await commentService.getComments(truyen_id, page);
     res.json({
       success: true,
-      comments,
+      data: result.data,
+      pagination: result.pagination,
+      total: result.total,
     });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-// Xóa comment (chỉ admin)
+// Xóa comment — admin/author/chủ comment (15p hoặc chưa có reply)
 exports.deleteComment = async (req, res) => {
   try {
     const { id } = req.params;
-    const truyenId = req.query.truyen_id || req.body.truyen_id || null;
-    await commentService.removeComment(id, truyenId);
+    const userId = req.user?.id;
+    const userRole = req.user?.role ?? "user";
+    const deleteReason = req.body?.reason ?? null;
+    await commentService.removeComment(id, userId, userRole, deleteReason);
     res.json({ success: true });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    const status = err.status ?? (err.message.includes("quyền") || err.message.includes("15 phút") || err.message.includes("phản hồi") ? 403 : 400);
+    res.status(status).json({ error: err.message });
   }
 };

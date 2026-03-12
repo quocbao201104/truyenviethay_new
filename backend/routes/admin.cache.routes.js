@@ -83,6 +83,36 @@ router.get('/cache/view-tracking-stats', async (req, res) => {
   }
 });
 
+/**
+ * Gamification Health - Cache + DB metrics
+ * GET /api/admin/gamification/health
+ */
+router.get('/gamification/health', async (req, res) => {
+  try {
+    const db = require('../config/db');
+    const { getStats } = require('../utils/cache');
+
+    const cacheStats = await getStats().catch(() => ({ error: 'cache_unavailable' }));
+
+    const [[tasksRes], [rewardsRes]] = await Promise.all([
+      db.query("SELECT COUNT(*) as c FROM user_tasks WHERE DATE(assigned_at) = CURDATE()"),
+      db.query("SELECT COUNT(*) as c FROM user_rewards WHERE status = 'unlocked'"),
+    ]).catch(() => [[{ c: 0 }], [{ c: 0 }]]);
+
+    res.json({
+      success: true,
+      gamification: {
+        cache: cacheStats,
+        todayTasksAssigned: tasksRes?.[0]?.c ?? 0,
+        unlockedRewardsCount: rewardsRes?.[0]?.c ?? 0,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching gamification health:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch gamification health' });
+  }
+});
+
 // POST /admin/cache/invalidate - Invalidate specific cache pattern
 router.post('/cache/invalidate', async (req, res) => {
   try {

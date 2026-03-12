@@ -32,8 +32,6 @@ const addHistory = async (req, res) => {
       timeSpent,
     });
 
-    const historyData = req.body;
-    await levelHistoryService.createHistory(historyData);
     return successResponse(res, null, "Tạo lịch sử cấp bậc thành công", 201);
   } catch (err) {
     return errorResponse(res, err.message || "Lỗi khi tạo lịch sử cấp bậc", 500);

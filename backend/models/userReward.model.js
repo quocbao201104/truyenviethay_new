@@ -3,18 +3,18 @@ const db = require("../config/db");
 const UserReward = {
   getByUserId: async (userId) => {
     const [rows] = await db.query(
-      "SELECT ur.*, r.name FROM user_rewards ur JOIN rewards r ON ur.reward_id = r.reward_id WHERE ur.user_id = ?",
+      "SELECT ur.*, r.reward_name, r.price, r.min_level FROM user_rewards ur JOIN rewards r ON ur.reward_id = r.reward_id WHERE ur.user_id = ?",
       [userId]
     );
     return rows;
   },
 
   claim: async ({ user_id, reward_id }) => {
-    // H4: Comprehensive reward eligibility checks
+    // Eligibility: reward exists, user has enough EXP (price), not already claimed
     
-    // 1. Check reward exists and get required points
+    // 1. Check reward exists and get price (cost in EXP)
     const [rewards] = await db.query(
-      "SELECT points_required FROM rewards WHERE reward_id = ?",
+      "SELECT price, min_level FROM rewards WHERE reward_id = ?",
       [reward_id]
     );
 
@@ -22,7 +22,7 @@ const UserReward = {
       throw new Error("Phần thưởng không tồn tại");
     }
 
-    const requiredPoints = rewards[0].points_required;
+    const requiredPoints = rewards[0].price ?? 0;
 
     // 2. Check user has enough points
     const [userPoints] = await db.query(

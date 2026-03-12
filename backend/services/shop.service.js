@@ -3,6 +3,12 @@ const UserCurrency = require("../models/userCurrency.model");
 const InventoryModel = require("../models/inventory.model");
 const ShopItemModel = require("../models/shopItem.model");
 const ShopTransactionModel = require("../models/shopTransaction.model");
+const { MAX_QUANTITY } = require("../validators/shop.validator");
+const { INVENTORY_SOURCE } = require("../constants/inventoryContract");
+const { getOrSet, invalidate } = require("../utils/cache");
+const logger = require("../utils/logger");
+
+const CATALOG_CACHE_TTL = 120; // 2 phút
 
 const PERMANENT_SINGLE_OWNERSHIP_TYPES = new Set(["avatar_frame", "badge", "chat_color"]);
 
@@ -31,34 +37,42 @@ function normalizeWriteError(error) {
 
 const ShopService = {
   getCatalog: async (filters = {}) => {
-    return ShopItemModel.getCatalog({
-      itemType: filters.itemType || null,
-      includeHidden: false,
-      onlyPurchasable: false,
-    });
+    const itemType = filters.itemType || null;
+    const cacheKey = `shop:catalog${itemType ? `:${itemType}` : ""}`;
+    return getOrSet(cacheKey, CATALOG_CACHE_TTL, () =>
+      ShopItemModel.getCatalog({
+        itemType,
+        includeHidden: false,
+        onlyPurchasable: false,
+      })
+    );
   },
 
-  getUserTransactions: async (userId, limit = 20) => {
-    return ShopTransactionModel.getUserTransactions(userId, limit);
+  invalidateCatalogCache: () => invalidate("shop:catalog"),
+
+  getUserTransactions: async (userId, options = {}) => {
+    return ShopTransactionModel.getUserTransactions(userId, options);
   },
 
   getUserInventory: async (userId, filters = {}) => {
     return InventoryModel.getUserShopItems(userId, {
       itemType: filters.itemType || null,
       includeExpired: filters.includeExpired === true,
+      limit: filters.limit,
+      offset: filters.offset,
     });
   },
 
   buyItem: async ({ userId, itemId, quantity = 1 }) => {
     const parsedItemId = Number(itemId);
-    const parsedQuantity = Number(quantity) || 1;
+    const parsedQuantity = Math.min(Number(quantity) || 1, MAX_QUANTITY);
 
     if (!Number.isInteger(parsedItemId) || parsedItemId <= 0) {
       throw new Error("itemId khong hop le.");
     }
 
-    if (!Number.isInteger(parsedQuantity) || parsedQuantity <= 0) {
-      throw new Error("quantity khong hop le.");
+    if (!Number.isInteger(parsedQuantity) || parsedQuantity < 1 || parsedQuantity > MAX_QUANTITY) {
+      throw new Error(`quantity phai tu 1 den ${MAX_QUANTITY}.`);
     }
 
     const connection = await db.getConnection();
@@ -129,8 +143,8 @@ const ShopService = {
         const initialQuantity = item.item_type === "consumable" ? parsedQuantity : 1;
         const [insertResult] = await connection.query(
           `INSERT INTO user_inventory (user_id, reward_id, shop_item_id, quantity, is_equipped, expires_at, acquired_from)
-           VALUES (?, NULL, ?, ?, 0, ?, 'shop_buy')`,
-          [userId, parsedItemId, initialQuantity, nextExpiresAt]
+           VALUES (?, NULL, ?, ?, 0, ?, ?)`,
+          [userId, parsedItemId, initialQuantity, nextExpiresAt, INVENTORY_SOURCE.SHOP]
         );
         inventoryId = insertResult.insertId;
       } else if (item.item_type === "consumable") {
@@ -138,18 +152,18 @@ const ShopService = {
           `UPDATE user_inventory
            SET quantity = quantity + ?,
                expires_at = COALESCE(?, expires_at),
-               acquired_from = 'shop_buy'
+               acquired_from = ?
            WHERE id = ?`,
-          [parsedQuantity, nextExpiresAt, existingInventory.id]
+          [parsedQuantity, nextExpiresAt, INVENTORY_SOURCE.SHOP, existingInventory.id]
         );
       } else {
         await connection.query(
           `UPDATE user_inventory
            SET quantity = GREATEST(quantity, 1),
                expires_at = ?,
-               acquired_from = 'shop_buy'
+               acquired_from = ?
            WHERE id = ?`,
-          [nextExpiresAt, existingInventory.id]
+          [nextExpiresAt, INVENTORY_SOURCE.SHOP, existingInventory.id]
         );
       }
 
@@ -170,6 +184,15 @@ const ShopService = {
       );
 
       await connection.commit();
+
+      logger.info(JSON.stringify({
+        event: "shop_buy",
+        user_id: userId,
+        item_id: parsedItemId,
+        quantity: parsedQuantity,
+        amount_paid: totalPrice,
+        transaction_id: transactionId,
+      }));
 
       return {
         transaction_id: transactionId,

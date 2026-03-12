@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const taskController = require("../controllers/userTask.controller");
 const { authenticateToken, authorizeRoles } = require("../middleware/auth");
-const { validateTaskAssignment, validateTaskCompletion } = require("../validators/task.validator");
+const { validateTaskAssignment, validateTaskCompletion, validateTaskClaim } = require("../validators/task.validator");
 
 // Route lấy danh sách nhiệm vụ
 router.get("/", authenticateToken, taskController.getAllTasks);
@@ -22,6 +22,13 @@ router.post(
   authenticateToken,
   validateTaskCompletion,
   taskController.completeTask
+);
+
+router.post(
+  "/claim",
+  authenticateToken,
+  validateTaskClaim,
+  taskController.claimTask
 );
 
 module.exports = router;

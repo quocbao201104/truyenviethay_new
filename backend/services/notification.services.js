@@ -18,7 +18,7 @@ const NOTIF_TEMPLATE = {
 };
 
 /**
- * Core notification sender
+ * Core notification sender with idempotency check
  * @param {number} user_id
  * @param {string} content - Notification text
  * @param {number} type - Constants from notification.constants.js
@@ -27,6 +27,18 @@ const NOTIF_TEMPLATE = {
 const sendNotification = async (user_id, content, type = NOTIFY_TYPES.GIFT_LINH_THACH, target_id = null) => {
   try {
     const safeContent = sanitizeText(content);
+    
+    // Idempotency check to avoid duplicates (e.g. multiple clicks, retries, fanout overlap)
+    // Key: user + type + target + first 50 chars of content
+    const idempotencyKey = `notif_idemp:${user_id}:${type}:${target_id || 0}:${Buffer.from(safeContent.substring(0, 50)).toString('hex')}`;
+    const exists = await redis.get(idempotencyKey);
+    if (exists) {
+      logger.debug(`Duplicate notification suppressed: ${idempotencyKey}`);
+      return null;
+    }
+    // Set idempotency key for 60 seconds
+    await redis.set(idempotencyKey, "1", "EX", 60);
+
     const query = `
       INSERT INTO thong_bao (user_id, content, is_read, type, target_id)
       VALUES (?, ?, 0, ?, ?)
@@ -46,9 +58,10 @@ const sendNotification = async (user_id, content, type = NOTIFY_TYPES.GIFT_LINH_
     // Broadcast via Socket.io
     try {
       const io = getIO();
-      io.to(`user_notification_${user_id}`).emit("new_notification", notificationData);
+      if (io) {
+        io.to(`user_notification_${user_id}`).emit("new_notification", notificationData);
+      }
     } catch (socketError) {
-      // Don't fail the whole request if socket fails
       logger.error("Socket broadcast failed in sendNotification:", socketError);
     }
 
@@ -77,92 +90,153 @@ const sendSystemNotice = async (content) => {
 };
 
 /**
- * Batching: Push a large notification task into Redis queue
+ * Batching: Push a large notification task into Redis queue with Correlation ID
  */
 const pushNotifyToQueue = async (userIds, content, targetId, type) => {
   if (!userIds || userIds.length === 0) return;
   
+  const correlationId = `notif_job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const job = {
+    correlationId,
     userIds,
     content,
     targetId,
-    type
+    type,
+    queuedAt: Date.now()
   };
   
   try {
     await redis.rpush("notification_queue", JSON.stringify(job));
-    logger.info(`Notification job pushed to queue for ${userIds.length} users.`);
+    logger.info(`Notification job pushed [CID:${correlationId}] for ${userIds.length} users.`);
   } catch (err) {
-    logger.error("Error pushing notification to queue:", err);
+    logger.error(`Error pushing notification to queue [CID:${correlationId}]:`, err);
   }
 };
 
 /**
- * Background Worker: Processes the notification queue in batches
+ * Bulk notification sender for fanout optimization
+ */
+const sendBatchNotifications = async (userIds, content, type, targetId, correlationId = null) => {
+  if (!userIds || userIds.length === 0) return [];
+  
+  try {
+    const safeContent = sanitizeText(content);
+    const values = userIds.map(userId => [userId, safeContent, 0, type, targetId]);
+    
+    const query = `
+      INSERT INTO thong_bao (user_id, content, is_read, type, target_id)
+      VALUES ?
+    `;
+    
+    const [result] = await db.query(query, [values]);
+    
+    // Broadcast via Socket.io in batch
+    try {
+      const io = getIO();
+      if (io) {
+        userIds.forEach(userId => {
+          io.to(`user_notification_${userId}`).emit("new_notification", {
+            id: result.insertId,
+            user_id: userId,
+            content: safeContent,
+            type,
+            target_id: targetId,
+            is_read: 0,
+            created_at: new Date()
+          });
+        });
+      }
+    } catch (socketError) {
+      logger.error(`Socket broadcast failed [CID:${correlationId || 'N/A'}]:`, socketError);
+    }
+
+    return result;
+  } catch (error) {
+    logger.error(`Error in sendBatchNotifications [CID:${correlationId || 'N/A'}]:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Background Worker: Processes the notification queue with Observability
  */
 const startNotificationWorker = async () => {
-  logger.info("Notification Worker started.");
+  logger.info("Notification Worker started (Observability Enabled).");
   
-  // Use a dedicated client for blocking operations (infinite timeout)
   const workerRedis = redis.createRedisClient({ 
-    commandTimeout: null, // No timeout for blocking ops
-    maxRetriesPerRequest: null // Required by ioredis for blocking commands
+    commandTimeout: null,
+    maxRetriesPerRequest: null
   });
 
-  workerRedis.on('error', (err) => {
-    logger.error("Notification Worker Redis Client error:", err);
-  });
+  let consecutiveErrors = 0;
+  const ERROR_ALERT_THRESHOLD = 5;
 
   while (true) {
     try {
-      // Blocking pop from the right side of the list (0 = wait forever)
-      const data = await workerRedis.blpop("notification_queue", 0);
+      // 1. Queue Lag Metric
+      const lag = await redis.llen("notification_queue");
+      if (lag > 100) {
+        logger.warn(`ALERT: Notification queue lag detected! Size: ${lag}`);
+      }
+
+      const data = await workerRedis.blpop("notification_queue", 10); // Wait up to 10s
       if (!data) continue;
       
+      const startTime = Date.now();
       const job = JSON.parse(data[1]);
-      logger.info(`Processing notification job for ${job.userIds.length} users.`);
+      const cid = job.correlationId || "legacy";
       
-      const batchSize = 50;
+      logger.info(`Processing job [CID:${cid}] for ${job.userIds.length} users.`);
+      
+      const batchSize = 100;
+      let processed = 0;
+
       for (let i = 0; i < job.userIds.length; i += batchSize) {
         const batch = job.userIds.slice(i, i + batchSize);
+        await sendBatchNotifications(batch, job.content, job.type, job.targetId, cid);
+        processed += batch.length;
         
-        // Process each user in the current batch
-        await Promise.all(batch.map(userId => 
-          sendNotification(userId, job.content, job.type, job.targetId)
-        ));
-        
-        // Brief sleep to avoid congestion
         if (i + batchSize < job.userIds.length) {
-          await new Promise(res => setTimeout(res, 300));
+          await new Promise(res => setTimeout(res, 200));
         }
       }
-      logger.info(`Finished processing job for ${job.userIds.length} users.`);
+
+      const duration = (Date.now() - startTime) / 1000;
+      const throughput = processed / (duration || 0.1);
+      
+      // 2. Throughput Metric
+      logger.info(`Job Finished [CID:${cid}]: ${processed} sent in ${duration.toFixed(2)}s (${throughput.toFixed(1)} notif/s).`);
+      
+      consecutiveErrors = 0; // Reset errors on success
     } catch (err) {
-      logger.error("Notification Worker error:", err);
-      // Wait a bit before retrying a failed job
+      consecutiveErrors++;
+      logger.error(`Notification Worker error (Total: ${consecutiveErrors}):`, err);
+      
+      // 3. Reliability Alert
+      if (consecutiveErrors >= ERROR_ALERT_THRESHOLD) {
+        logger.error(`CRITICAL ALERT: Notification worker failing repeatedly! Threshold: ${ERROR_ALERT_THRESHOLD}`);
+      }
+      
       await new Promise(res => setTimeout(res, 5000));
     }
   }
 };
 
-// Gửi thông báo cho người theo dõi khi có chương mới hoặc bị từ chối
-const notifyFollowersAboutChapterUpdate = async (storyId, tenTruyen, action, targetId = null) => {
+/**
+ * Gửi thông báo cho followers KHI CHƯƠNG ĐƯỢC DUYỆT.
+ * Khi reject: chỉ gửi cho tác giả (đã xử lý ở chapter.services), không fanout followers.
+ */
+const notifyFollowersAboutChapterUpdate = async (storyId, tenTruyen, chapterId) => {
   try {
     const followers = await storyModel.getFollowers(storyId);
     if (!followers || followers.length === 0) return;
-    
-    const content = action === "duyet"
-      ? NOTIF_TEMPLATE.NEW_CHAPTER(tenTruyen)
-      : NOTIF_TEMPLATE.CHAPTER_REJECTED(tenTruyen);
 
-    const type = action === "duyet" ? NOTIFY_TYPES.NEW_CHAPTER : NOTIFY_TYPES.NEW_CHAPTER; 
-
-    // Use Queue for followers (potentially large list)
+    const content = NOTIF_TEMPLATE.NEW_CHAPTER(tenTruyen);
     await pushNotifyToQueue(
       followers.map(f => f.user_id),
       content,
-      targetId || storyId,
-      type
+      chapterId,
+      NOTIFY_TYPES.NEW_CHAPTER
     );
   } catch (error) {
     console.error("Error notifying followers:", error);

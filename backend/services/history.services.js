@@ -1,10 +1,16 @@
 const db = require("../config/db");
-const formatTimeAgo = require("../utils/time");
+const readingStateModel = require("../models/readingState.model");
 
-const LIMIT = 18;
+const DEFAULT_LIMIT = 18;
+const MAX_LIMIT = 100;
+const MIN_LIMIT = 1;
 
-exports.getReadingHistory = async (userId, page) => {
-  const offset = (page - 1) * LIMIT;
+const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+
+exports.getReadingHistory = async (userId, page = 1, limit = DEFAULT_LIMIT) => {
+  const safeLimit = clamp(parseInt(limit, 10) || DEFAULT_LIMIT, MIN_LIMIT, MAX_LIMIT);
+  const safePage = Math.max(1, parseInt(page, 10) || 1);
+  const offset = (safePage - 1) * safeLimit;
 
   const [countResult] = await db.query(
     `
@@ -15,7 +21,7 @@ exports.getReadingHistory = async (userId, page) => {
     [userId]
   );
   const totalItems = countResult[0].total;
-  const totalPages = Math.ceil(totalItems / LIMIT);
+  const totalPages = Math.ceil(totalItems / safeLimit) || 1;
 
   const [rows] = await db.query(
     `
@@ -41,7 +47,7 @@ exports.getReadingHistory = async (userId, page) => {
     ORDER BY lsd.thoi_gian_doc DESC
     LIMIT ? OFFSET ?
     `,
-    [userId, userId, LIMIT, offset]
+    [userId, userId, safeLimit, offset]
   );
 
   const history = [];
@@ -64,39 +70,37 @@ exports.getReadingHistory = async (userId, page) => {
       chuong_moi_nhat: so_chuong ? `Chương ${so_chuong}` : "Không có chương",
       chuong_moi_nhat_so_chuong: so_chuong,
       chuong_slug: row.chuong_slug,
-      thoi_gian_doc: row.thoi_gian_doc, // Return raw timestamp for frontend formatting
+      last_read_chuong_id: row.chuong_id,
+      thoi_gian_doc: row.thoi_gian_doc,
     });
   }
   return {
-    history,
-    total_pages: totalPages,
-    current_page: page,
+    data: history,
+    pagination: {
+      current_page: safePage,
+      total_pages: totalPages,
+      total: totalItems,
+      limit: safeLimit,
+    },
   };
 };
 
+/**
+ * Save reading history: concurrency-safe UPSERT.
+ * Requires unique (user_id, truyen_id, chuong_id) on lich_su_doc_new (migration 19).
+ * Also updates reading_state (canonical last-read per user, story).
+ */
 exports.saveReadingHistory = async (userId, truyenId, chuongId) => {
-  const [existing] = await db.query(
-    `SELECT id FROM lich_su_doc_new 
-     WHERE user_id = ? AND truyen_id = ? AND chuong_id = ?`,
-    [userId, truyenId, chuongId]
+  const now = new Date();
+
+  await db.query(
+    `INSERT INTO lich_su_doc_new (user_id, truyen_id, chuong_id, thoi_gian_doc)
+     VALUES (?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE thoi_gian_doc = VALUES(thoi_gian_doc)`,
+    [userId, truyenId, chuongId, now]
   );
 
-  if (existing.length > 0) {
-    // Update existing record
-    await db.query(
-      `UPDATE lich_su_doc_new 
-       SET thoi_gian_doc = ? 
-       WHERE user_id = ? AND truyen_id = ? AND chuong_id = ?`,
-      [new Date(), userId, truyenId, chuongId]
-    );
-  } else {
-    // Insert new record
-    await db.query(
-      `INSERT INTO lich_su_doc_new (user_id, truyen_id, chuong_id, thoi_gian_doc) 
-       VALUES (?, ?, ?, ?)`,
-      [userId, truyenId, chuongId, new Date()]
-    );
-  }
+  await readingStateModel.upsert(userId, truyenId, chuongId);
 
   return { success: true };
 };

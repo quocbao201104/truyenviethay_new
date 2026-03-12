@@ -2,25 +2,41 @@ const db = require("../config/db");
 // models/follow.model.js
 
 exports.toggleFollow = async (userId, truyenId) => {
-  const [rows] = await db.query(
-    `SELECT * FROM theo_doi WHERE user_id = ? AND truyen_id = ?`,
-    [userId, truyenId]
-  );
-
-  if (rows.length > 0) {
-    await db.query(`DELETE FROM theo_doi WHERE user_id = ? AND truyen_id = ?`, [
-      userId,
-      truyenId,
-    ]);
-    await db.query(`UPDATE truyen_new SET luot_theo_doi = GREATEST(luot_theo_doi - 1, 0) WHERE id = ?`, [truyenId]);
-    return { followed: false };
-  } else {
-    await db.query(
-      `INSERT INTO theo_doi (user_id, truyen_id, ngay_theo_doi) VALUES (?, ?, NOW())`,
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [rows] = await conn.query(
+      `SELECT 1 FROM theo_doi WHERE user_id = ? AND truyen_id = ?`,
       [userId, truyenId]
     );
-    await db.query(`UPDATE truyen_new SET luot_theo_doi = luot_theo_doi + 1 WHERE id = ?`, [truyenId]);
-    return { followed: true };
+
+    if (rows.length > 0) {
+      await conn.query(`DELETE FROM theo_doi WHERE user_id = ? AND truyen_id = ?`, [
+        userId,
+        truyenId,
+      ]);
+      await conn.query(
+        `UPDATE truyen_new SET luot_theo_doi = GREATEST(luot_theo_doi - 1, 0) WHERE id = ?`,
+        [truyenId]
+      );
+      await conn.commit();
+      return { followed: false };
+    } else {
+      await conn.query(
+        `INSERT INTO theo_doi (user_id, truyen_id, ngay_theo_doi) VALUES (?, ?, NOW())`,
+        [userId, truyenId]
+      );
+      await conn.query(`UPDATE truyen_new SET luot_theo_doi = luot_theo_doi + 1 WHERE id = ?`, [
+        truyenId,
+      ]);
+      await conn.commit();
+      return { followed: true };
+    }
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
   }
 };
 
@@ -73,24 +89,45 @@ exports.isFollowing = (userId, truyenId) => {
   );
 };
 
-// Thêm truyện vào danh sách theo dõi
+// Thêm truyện vào danh sách theo dõi (trong transaction)
 exports.addFollow = async (userId, truyenId) => {
-  await db.query(`UPDATE truyen_new SET luot_theo_doi = luot_theo_doi + 1 WHERE id = ?`, [truyenId]);
-  return db.query(
-    `
-    INSERT INTO theo_doi (user_id, truyen_id, ngay_theo_doi) VALUES (?, ?, NOW())
-  `,
-    [userId, truyenId]
-  );
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+    await conn.query(
+      `INSERT INTO theo_doi (user_id, truyen_id, ngay_theo_doi) VALUES (?, ?, NOW())`,
+      [userId, truyenId]
+    );
+    await conn.query(`UPDATE truyen_new SET luot_theo_doi = luot_theo_doi + 1 WHERE id = ?`, [
+      truyenId,
+    ]);
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
 };
 
-// Xóa truyện khỏi danh sách theo dõi
+// Xóa truyện khỏi danh sách theo dõi (trong transaction)
 exports.removeFollow = async (userId, truyenId) => {
-  await db.query(`UPDATE truyen_new SET luot_theo_doi = GREATEST(luot_theo_doi - 1, 0) WHERE id = ?`, [truyenId]);
-  return db.query(
-    `
-    DELETE FROM theo_doi WHERE user_id = ? AND truyen_id = ?
-  `,
-    [userId, truyenId]
-  );
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+    await conn.query(`DELETE FROM theo_doi WHERE user_id = ? AND truyen_id = ?`, [
+      userId,
+      truyenId,
+    ]);
+    await conn.query(
+      `UPDATE truyen_new SET luot_theo_doi = GREATEST(luot_theo_doi - 1, 0) WHERE id = ?`,
+      [truyenId]
+    );
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
 };

@@ -24,16 +24,24 @@ const validateTaskAssignment = [
   handleValidationErrors,
 ];
 
-// Validate task completion
+// Validate task completion (body: { task_id })
 const validateTaskCompletion = [
-  param('taskId')
+  body('task_id')
     .isInt({ min: 1 })
-    .withMessage('taskId phải là số nguyên dương'),
+    .withMessage('task_id phải là số nguyên dương'),
+  handleValidationErrors,
+];
+
+const validateTaskClaim = [
+  body('task_id')
+    .isInt({ min: 1 })
+    .withMessage('task_id phải là số nguyên dương'),
   handleValidationErrors,
 ];
 
 module.exports = {
   validateTaskAssignment,
   validateTaskCompletion,
+  validateTaskClaim,
   handleValidationErrors,
 };

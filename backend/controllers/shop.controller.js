@@ -1,20 +1,21 @@
-﻿const ShopService = require("../services/shop.service");
+const ShopService = require("../services/shop.service");
 
 function getStatusFromMessage(message) {
   const businessErrors = [
-    "itemId khong hop le.",
-    "quantity khong hop le.",
-    "inventoryId khong hop le.",
-    "Vat pham khong ton tai.",
-    "Vat pham nay tam thoi khong mo ban.",
-    "Vat pham nay khong the mua truc tiep trong shop.",
-    "Chi vat pham tieu hao moi duoc mua nhieu hon 1 lan.",
-    "Ban da so huu vat pham vinh vien nay roi.",
-    "Khong du Linh Thach",
-    "Vat pham khong ton tai trong tui do.",
-    "Vat pham da het han su dung.",
-    "Vat pham nay khong the trang bi.",
-    "DB hien tai van dang bat buoc reward_id khac NULL. Can ALTER reward_id cho phep NULL truoc khi luu item shop bang shop_item_id.",
+    "itemId không hợp lệ.",
+    "quantity không hợp lệ.",
+    "quantity phai tu 1 den 999.",
+    "inventoryId không hợp lệ.",
+    "Vật phẩm không tồn tại.",
+    "Vật phẩm này tạm thời không mở bán.",
+    "Vật phẩm này không thể mua trực tiếp trong shop.",
+    "Chỉ vật phẩm tiêu hao mới được mua nhiều hơn 1 lần.",
+    "Bạn đã sở hữu vật phẩm vĩnh viễn này rồi.",
+    "Không đủ Linh Thạch",
+    "Vật phẩm không tồn tại trong túi đồ.",
+    "Vật phẩm đã hết hạn sử dụng.",
+    "Vật phẩm này không thể trang bị.",
+    "DB hiện tại vẫn đang bắt buộc reward_id khác NULL. Can ALTER reward_id cho phép NULL trước khi lưu item shop bằng shop_item_id.",
   ];
 
   return businessErrors.includes(message) ? 400 : 500;
@@ -29,7 +30,7 @@ exports.getCatalog = async (req, res) => {
     res.json({ success: true, data: items });
   } catch (error) {
     console.error("Shop catalog error:", error.message);
-    res.status(500).json({ success: false, message: "Khong the lay danh sach vat pham shop." });
+    res.status(500).json({ success: false, message: "Không thể lấy danh sách vật phẩm shop." });
   }
 };
 
@@ -43,7 +44,7 @@ exports.buyItem = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Mua vat pham thanh cong.",
+      message: "Mua vật phẩm thành công.",
       data: result,
     });
   } catch (error) {
@@ -56,10 +57,18 @@ exports.buyItem = async (req, res) => {
 exports.getMyTransactions = async (req, res) => {
   try {
     const limit = Number(req.query.limit) || 20;
-    const rows = await ShopService.getUserTransactions(req.user.id, limit);
-    res.json({ success: true, data: rows });
+    const offset = Number(req.query.offset) || 0;
+    const { rows, total } = await ShopService.getUserTransactions(req.user.id, {
+      limit,
+      offset,
+    });
+    res.json({
+      success: true,
+      data: rows,
+      meta: { total, limit, offset },
+    });
   } catch (error) {
     console.error("Shop transaction error:", error.message);
-    res.status(500).json({ success: false, message: "Khong the lay lich su giao dich shop." });
+    res.status(500).json({ success: false, message: "Không thể lấy lịch sử giao dịch shop." });
   }
 };

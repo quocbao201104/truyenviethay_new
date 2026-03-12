@@ -1,8 +1,11 @@
 const Rating = require("../models/rating.model");
+const { invalidate } = require("../utils/cache");
 
 const RatingService = {
   addOrUpdateRating: async (userId, truyenId, rating) => {
-    return await Rating.upsertRating(userId, truyenId, rating);
+    const result = await Rating.upsertRating(userId, truyenId, rating);
+    await invalidate("topRated");
+    return result;
   },
 
   getRatingsForTruyen: async (truyenId) => {

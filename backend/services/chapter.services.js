@@ -41,8 +41,8 @@ const approveChapter = async (chapter_id, action, reason) => {
     // Nếu duyệt, cập nhật thời gian cập nhật của truyện
     if (action === "duyet") {
       await db.query("UPDATE truyen_new SET thoi_gian_cap_nhat = NOW() WHERE id = ?", [truyen_id]);
-      // Update newest chapter text and count
       await ChapterModel.updateChuongMoiNhat(truyen_id);
+      if (StoryModel.invalidateStoryListCache) await StoryModel.invalidateStoryListCache();
     }
 
     // Gửi thông báo cho tác giả (type: BOOK_APPROVED, target: story)
@@ -54,19 +54,21 @@ const approveChapter = async (chapter_id, action, reason) => {
         contentForAuthor += `. Lý do: ${reason}`;
     }
 
+    const notifyTypeAuthor = action === "duyet" ? NOTIFY_TYPES.BOOK_APPROVED : NOTIFY_TYPES.CHAPTER_REJECTED;
     await notificationService.sendNotification(
       user_id,
       contentForAuthor,
-      NOTIFY_TYPES.BOOK_APPROVED,
-      truyen_id
+      notifyTypeAuthor,
+      action === "duyet" ? chapter_id : truyen_id
     );
 
-    // Gửi thông báo cho followers (type: NEW_CHAPTER, target: story)
-    await notificationService.notifyFollowersAboutChapterUpdate(
-      truyen_id,
-      ten_truyen,
-      action
-    );
+    if (action === "duyet") {
+      await notificationService.notifyFollowersAboutChapterUpdate(
+        truyen_id,
+        ten_truyen,
+        chapter_id
+      );
+    }
 
     return {
       success: true,

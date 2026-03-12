@@ -3,19 +3,13 @@ const RatingService = require("../services/rating.services");
 const RatingController = {
   createOrUpdateRating: async (req, res) => {
     try {
-      const userId = req.user.id; 
+      const userId = req.user.id;
       const { truyenId, rating } = req.body;
-
-      if (rating < 1 || rating > 5) {
-        return res.status(400).json({ message: "Rating phải từ 1 đến 5 sao." });
-      }
-
       await RatingService.addOrUpdateRating(userId, truyenId, rating);
-      res.status(200).json({ message: "Đánh giá thành công!" });
+      res.status(200).json({ success: true, message: "Đánh giá thành công!" });
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: "Lỗi khi đánh giá", error: error.message });
+      const status = error.status ?? (error.code === "ER_NO_REFERENCED_ROW_2" ? 404 : 400);
+      res.status(status).json({ error: error.message || "Lỗi khi đánh giá" });
     }
   },
 
@@ -24,11 +18,9 @@ const RatingController = {
       const { truyenId } = req.params;
       const ratings = await RatingService.getRatingsForTruyen(truyenId);
       const stats = await RatingService.getTruyenRatingStats(truyenId);
-      res.status(200).json({ stats, ratings });
+      res.status(200).json({ success: true, stats, ratings });
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: "Lỗi khi lấy đánh giá", error: error.message });
+      res.status(error.status ?? 400).json({ error: error.message || "Lỗi khi lấy đánh giá" });
     }
   },
 
@@ -38,9 +30,7 @@ const RatingController = {
       const stories = await RatingService.getTopRatedStories(limit);
       res.status(200).json({ success: true, data: stories });
     } catch (error) {
-      res
-        .status(500)
-        .json({ message: "Lỗi khi lấy xếp hạng", error: error.message });
+      res.status(error.status ?? 400).json({ error: error.message || "Lỗi khi lấy xếp hạng" });
     }
   },
 };

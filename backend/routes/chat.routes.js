@@ -9,10 +9,16 @@ const { authenticateToken } = require("../middleware/auth");
  * Chat System Routes
  */
 
-// Send Megaphone (World Chat - Paid)
+// Check if current user has Loa Truyền Âm item (client-side button gate)
+router.get("/megaphone-access", authenticateToken, ChatController.getMegaphoneAccess);
+
+// Send Megaphone (World Chat - Paid LT)
 router.post("/world", authenticateToken, ChatController.sendMegaphone);
 
-// Get Room History (Redis Buffer)
+// Send Megaphone (World Chat - Paid via Loa Truyền Âm Item)
+router.post("/world/megaphone", authenticateToken, ChatController.sendMegaphoneItem);
+
+// Get Room History (DB for world, Redis for author)
 router.get("/history/:roomId", authenticateToken, ChatController.getRoomHistory);
 
 // Get Online Stats

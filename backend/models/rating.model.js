@@ -2,46 +2,53 @@ const db = require("../config/db");
 const { getOrSet } = require("../utils/cache");
 
 const Rating = {
-  // Tạo hoặc cập nhật đánh giá
+  // Tạo hoặc cập nhật đánh giá (trong transaction)
   upsertRating: async (userId, truyenId, rating) => {
-    // Check if user already rated
-    const [existing] = await db.query(
-      `SELECT rating FROM ratings WHERE user_id = ? AND truyen_id = ?`,
-      [userId, truyenId]
-    );
-
-    const isNew = existing.length === 0;
-    const oldRating = isNew ? 0 : existing[0].rating;
-
-    const [result] = await db.query(
-      `INSERT INTO ratings (user_id, truyen_id, rating)
-       VALUES (?, ?, ?)
-       ON DUPLICATE KEY UPDATE rating = ?, updated_at = CURRENT_TIMESTAMP`,
-      [userId, truyenId, rating, rating]
-    );
-
-    // Update truyen_new table mathematically
-    if (isNew) {
-      await db.query(
-        `UPDATE truyen_new 
-         SET rating = ((rating * rating_count) + ?) / (rating_count + 1),
-             rating_count = rating_count + 1,
-             hot_score = (((rating * rating_count) + ?) / (rating_count + 1) * 0.4) + ((rating_count + 1) * 0.3) + (luot_xem * 0.3)
-         WHERE id = ?`,
-        [rating, rating, truyenId]
+    const conn = await db.getConnection();
+    try {
+      await conn.beginTransaction();
+      const [existing] = await conn.query(
+        `SELECT rating FROM ratings WHERE user_id = ? AND truyen_id = ?`,
+        [userId, truyenId]
       );
-    } else if (oldRating !== rating) {
-      // Only recalculate if rating actually changed
-      await db.query(
-        `UPDATE truyen_new 
-         SET rating = ((rating * rating_count) - ? + ?) / rating_count,
-             hot_score = (((rating * rating_count) - ? + ?) / rating_count * 0.4) + (rating_count * 0.3) + (luot_xem * 0.3)
-         WHERE id = ? AND rating_count > 0`,
-        [oldRating, rating, oldRating, rating, truyenId]
+
+      const isNew = existing.length === 0;
+      const oldRating = isNew ? 0 : existing[0].rating;
+
+      const [result] = await conn.query(
+        `INSERT INTO ratings (user_id, truyen_id, rating)
+         VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE rating = ?, updated_at = CURRENT_TIMESTAMP`,
+        [userId, truyenId, rating, rating]
       );
+
+      if (isNew) {
+        await conn.query(
+          `UPDATE truyen_new 
+           SET rating = ((rating * rating_count) + ?) / (rating_count + 1),
+               rating_count = rating_count + 1,
+               hot_score = (((rating * rating_count) + ?) / (rating_count + 1) * 0.4) + ((rating_count + 1) * 0.3) + (luot_xem * 0.3)
+           WHERE id = ?`,
+          [rating, rating, truyenId]
+        );
+      } else if (oldRating !== rating) {
+        await conn.query(
+          `UPDATE truyen_new 
+           SET rating = ((rating * rating_count) - ? + ?) / rating_count,
+               hot_score = (((rating * rating_count) - ? + ?) / rating_count * 0.4) + (rating_count * 0.3) + (luot_xem * 0.3)
+           WHERE id = ? AND rating_count > 0`,
+          [oldRating, rating, oldRating, rating, truyenId]
+        );
+      }
+
+      await conn.commit();
+      return result;
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
     }
-
-    return result;
   },
 
   // Lấy tất cả đánh giá theo truyện

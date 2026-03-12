@@ -1,8 +1,31 @@
-﻿const { Server } = require("socket.io");
+const { Server } = require("socket.io");
+const jwt = require("jsonwebtoken");
 const logger = require("../utils/logger");
 const onlineStatusService = require("../services/onlineStatus.service");
+const ChatRoomModel = require("../models/chat_room.model");
 
 let io;
+
+/**
+ * JWT auth middleware: verify token at handshake, set socket.data.userId from payload.
+ * Token from auth.token or query.token. Guests (no token) get socket.data.userId = null.
+ */
+const socketAuthMiddleware = (socket, next) => {
+  const token = socket.handshake.auth?.token || socket.handshake.query?.token;
+  if (!token) {
+    socket.data.userId = null;
+    return next();
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      logger.warn(`Socket handshake JWT invalid: ${err.message}`);
+      socket.data.userId = null;
+      return next();
+    }
+    socket.data.userId = decoded.id ? String(decoded.id) : null;
+    next();
+  });
+};
 
 const initSocket = (server) => {
   io = new Server(server, {
@@ -15,14 +38,16 @@ const initSocket = (server) => {
     pingInterval: 10000 // Send ping every 10s
   });
 
+  io.use(socketAuthMiddleware);
+
   io.on("connection", (socket) => {
-    logger.info(`New client connected: ${socket.id}`);
+    const userId = socket.data.userId; // From JWT, not query
+    logger.info(`New client connected: ${socket.id}, userId: ${userId || "guest"}`);
     onlineStatusService.sessionConnected(socket.id).then(async () => {
-      const count = await onlineStatusService.getOnlineCount();
+      const count = await onlineStatusService.getWorldOnlineCount();
       io.emit("world_presence_update", { count });
     });
     socket.joinedAuthorRooms = new Set();
-    const userId = socket.handshake.query.userId;
 
     if (userId) {
       onlineStatusService.userConnected(userId);
@@ -31,8 +56,18 @@ const initSocket = (server) => {
       logger.info(`User ${userId} joined notification room.`);
     }
 
-    socket.on("join_room", (roomId) => {
-      socket.join(`room_${roomId}`);
+    socket.on("join_room", async (roomId) => {
+      const rid = Number(roomId);
+      if (!rid || rid < 1) return;
+      if (rid === 1) {
+        socket.join("room_1");
+        return;
+      }
+      if (!userId) return;
+      const room = await ChatRoomModel.getRoomById(rid);
+      if (!room) return;
+      const isMember = await ChatRoomModel.isMember(rid, userId);
+      if (isMember) socket.join(`room_${rid}`);
     });
 
     socket.on("leave_room", (roomId) => {
@@ -43,7 +78,7 @@ const initSocket = (server) => {
       if (!userId) {
         await onlineStatusService.worldGuestJoined(socket.id);
       }
-      const count = await onlineStatusService.getOnlineCount();
+      const count = await onlineStatusService.getWorldOnlineCount();
       io.emit("world_presence_update", { count });
     });
 
@@ -51,7 +86,7 @@ const initSocket = (server) => {
       if (!userId) {
         await onlineStatusService.worldGuestLeft(socket.id);
       }
-      const count = await onlineStatusService.getOnlineCount();
+      const count = await onlineStatusService.getWorldOnlineCount();
       io.emit("world_presence_update", { count });
     });
 
@@ -60,7 +95,7 @@ const initSocket = (server) => {
       if (!userId || !authorId) return;
       
       const ChatService = require("../services/chat.service");
-      const { onlineCount, history } = await ChatService.joinAuthorRoom(userId, authorId);
+      const { onlineCount, history } = await ChatService.joinAuthorRoom(userId, authorId, socket.id);
       
       socket.join(`author_room_${authorId}`);
       socket.joinedAuthorRooms.add(authorId);
@@ -79,7 +114,7 @@ const initSocket = (server) => {
       if (!userId || !authorId) return;
       
       const ChatService = require("../services/chat.service");
-      const { onlineCount } = await ChatService.leaveAuthorRoom(userId, authorId);
+      const { onlineCount } = await ChatService.leaveAuthorRoom(userId, authorId, socket.id);
       
       socket.leave(`author_room_${authorId}`);
       socket.joinedAuthorRooms.delete(authorId);
@@ -93,23 +128,21 @@ const initSocket = (server) => {
     socket.on("disconnect", async () => {
       logger.info(`Client disconnected: ${socket.id}`);
       await onlineStatusService.sessionDisconnected(socket.id);
-      const count = await onlineStatusService.getOnlineCount();
+      const count = await onlineStatusService.getWorldOnlineCount();
       io.emit("world_presence_update", { count });
 
       if (userId) {
-        // Cleanup Author Room presence
         const ChatService = require("../services/chat.service");
         for (const authorId of socket.joinedAuthorRooms) {
-          const { onlineCount } = await ChatService.leaveAuthorRoom(userId, authorId);
+          const { onlineCount } = await ChatService.leaveAuthorRoom(userId, authorId, socket.id);
           io.to(`author_room_${authorId}`).emit("author_presence_update", { 
             authorId, 
             count: onlineCount 
           });
         }
 
-        // Check if user has other active sockets before removing from online set
         const sockets = await io.fetchSockets();
-        const hasOtherSessions = sockets.some(s => s.handshake.query.userId === userId && s.id !== socket.id);
+        const hasOtherSessions = sockets.some(s => s.data?.userId === userId && s.id !== socket.id);
         
         if (!hasOtherSessions) {
           onlineStatusService.userDisconnected(userId);

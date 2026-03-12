@@ -6,10 +6,8 @@ const NotificationController = {
     try {
       const { CATEGORY_MAP } = require("../constants/notification.constants");
       const userId = req.user.id;
-      const { category } = req.query; // e.g., 'interaction'
-      const page = parseInt(req.query.page) || 1;
+      const { category, last_id } = req.query; // last_id for keyset pagination
       const limit = parseInt(req.query.limit) || 20;
-      const offset = (page - 1) * limit;
 
       let typeFilter = "";
       if (category && CATEGORY_MAP[category]) {
@@ -17,15 +15,24 @@ const NotificationController = {
         typeFilter = `AND type IN (${types})`;
       }
 
+      // Keyset pagination: If last_id is provided, get notifications older than last_id
+      let keysetFilter = "";
+      const queryParams = [userId];
+      if (last_id) {
+        keysetFilter = `AND id < ?`;
+        queryParams.push(parseInt(last_id));
+      }
+      queryParams.push(limit);
+
       const query = `
         SELECT id, user_id, content, is_read, type, target_id, created_at
         FROM thong_bao 
-        WHERE user_id = ? ${typeFilter}
-        ORDER BY created_at DESC 
-        LIMIT ? OFFSET ?
+        WHERE user_id = ? ${typeFilter} ${keysetFilter}
+        ORDER BY id DESC 
+        LIMIT ?
       `;
 
-      const [notifications] = await db.query(query, [userId, limit, offset]);
+      const [notifications] = await db.query(query, queryParams);
 
       const [countResult] = await db.query(
         `SELECT COUNT(*) as total FROM thong_bao WHERE user_id = ? ${typeFilter}`,
@@ -42,9 +49,9 @@ const NotificationController = {
         data: notifications,
         pagination: {
           total: countResult[0].total,
-          page,
           limit,
-          totalPages: Math.ceil(countResult[0].total / limit),
+          last_id: notifications.length > 0 ? notifications[notifications.length - 1].id : null,
+          hasMore: notifications.length === limit
         },
         unreadCount: unreadResult[0].unread
       });

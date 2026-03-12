@@ -1,4 +1,4 @@
-﻿const InventoryModel = require("../models/inventory.model");
+const InventoryModel = require("../models/inventory.model");
 const ShopService = require("../services/shop.service");
 
 function getStatusFromMessage(message) {
@@ -50,9 +50,13 @@ exports.equipBadge = async (req, res) => {
 
 exports.getMyShopInventory = async (req, res) => {
   try {
-    const rows = await ShopService.getUserInventory(req.user.id, {
+    const limit = Number(req.query.limit) || 50;
+    const offset = Number(req.query.offset) || 0;
+    const { rows, total } = await ShopService.getUserInventory(req.user.id, {
       itemType: req.query.itemType || null,
       includeExpired: req.query.includeExpired === "true",
+      limit,
+      offset,
     });
 
     const equippedFrame = rows.find((item) => item.item_type === "avatar_frame" && item.is_equipped) || null;
@@ -61,6 +65,7 @@ exports.getMyShopInventory = async (req, res) => {
       success: true,
       data: rows,
       equipped_frame: equippedFrame,
+      meta: { total, limit, offset },
     });
   } catch (error) {
     console.error("Inventory shop items error:", error.message);

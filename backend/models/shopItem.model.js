@@ -1,4 +1,4 @@
-﻿const db = require("../config/db");
+const db = require("../config/db");
 
 const ShopItemModel = {
   getCatalog: async (filters = {}, connection = db) => {
@@ -22,7 +22,7 @@ const ShopItemModel = {
     const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
     const [rows] = await connection.query(
-      `SELECT id, name, description, item_type, price, duration_days, image_url, css_class, status, created_at
+      `SELECT id, name, description, item_type, price, duration_days, image_url, css_class, status, metadata, created_at
        FROM shop_items
        ${whereClause}
        ORDER BY price ASC, id ASC`,
@@ -34,7 +34,7 @@ const ShopItemModel = {
 
   findById: async (itemId, connection = db, { forUpdate = false } = {}) => {
     const [rows] = await connection.query(
-      `SELECT id, name, description, item_type, price, duration_days, image_url, css_class, status, created_at
+      `SELECT id, name, description, item_type, price, duration_days, image_url, css_class, status, metadata, created_at
        FROM shop_items
        WHERE id = ?
        LIMIT 1 ${forUpdate ? "FOR UPDATE" : ""}`,

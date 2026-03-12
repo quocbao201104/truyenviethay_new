@@ -19,7 +19,11 @@ exports.toggleLike = async (req, res) => {
              const taskService = require("../services/task.service");
              // "Like truyện" is an infinite task
              // fire-and-forget
-             taskService.completeTaskByName(userId, "Like truyện").catch(err => {
+             const eventOpts = {
+                 eventType: "like_story",
+                 eventRef: `story:${truyenId}`,
+             };
+             taskService.completeTaskByName(userId, "Like truyện", eventOpts).catch(err => {
                  console.error("Gamification Like Error:", err.message);
              });
          } catch (e) {

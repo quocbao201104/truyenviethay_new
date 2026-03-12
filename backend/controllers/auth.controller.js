@@ -106,7 +106,11 @@ exports.login = async (req, res) => {
 
         try {
             const taskService = require("../services/task.service");
-            taskService.completeTaskByName(user.id, "\u0110\u0103ng nh\u1eadp h\u00e0ng ng\u00e0y").catch((error) => {
+            const loginEvent = {
+                eventType: "daily_login",
+                eventRef: `login:${new Date().toISOString().slice(0, 10)}`,
+            };
+            taskService.completeTaskByName(user.id, "\u0110\u0103ng nh\u1eadp h\u00e0ng ng\u00e0y", loginEvent).catch((error) => {
                 console.error("Gamification Login Error:", error.message);
             });
         } catch (error) {
@@ -215,7 +219,11 @@ exports.updateMe = async (req, res) => {
 
         try {
             const taskService = require("../services/task.service");
-            await taskService.completeTaskByName(userId, "C\u1eadp nh\u1eadt h\u1ed3 s\u01a1");
+            const profileEvent = {
+                eventType: "profile_update",
+                eventRef: `profile:${userId}`,
+            };
+            await taskService.completeTaskByName(userId, "C\u1eadp nh\u1eadt h\u1ed3 s\u01a1", profileEvent);
         } catch (taskErr) {
             console.error("Gamification Trigger Error:", taskErr.message);
         }
@@ -350,7 +358,11 @@ exports.googleLogin = async (req, res) => {
 
         try {
             const taskService = require("../services/task.service");
-            taskService.completeTaskByName(user.id, "\u0110\u0103ng nh\u1eadp h\u00e0ng ng\u00e0y").catch((error) => {
+            const loginEvent = {
+                eventType: "daily_login",
+                eventRef: `login:${new Date().toISOString().slice(0, 10)}`,
+            };
+            taskService.completeTaskByName(user.id, "\u0110\u0103ng nh\u1eadp h\u00e0ng ng\u00e0y", loginEvent).catch((error) => {
                 console.error("AGL Error:", error.message);
             });
         } catch (error) {

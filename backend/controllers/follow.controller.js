@@ -2,28 +2,23 @@
 
 const followService = require("../services/follow.services");
 
-// Lấy danh sách truyện theo dõi
+// Lấy danh sách truyện theo dõi — format chuẩn { data, pagination, total }
 exports.getFollowList = async (req, res) => {
-  const userId = req.user.id; 
+  const userId = req.user.id;
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 12; // Accept limit from frontend
+  const limit = parseInt(req.query.limit) || 12;
 
   try {
     const result = await followService.getFollowedStories(userId, page, limit);
-    
-    // console.log(`[Follow Controller] Sending response: ${result.stories.length} stories, total: ${result.totalCount}`);
-    
     res.json({
       success: true,
-      data: result.stories,
-      totalFollowed: result.totalCount,
+      data: result.data,
+      pagination: result.pagination,
+      total: result.pagination?.total ?? result.data?.length ?? 0,
     });
   } catch (error) {
     console.error("getFollowList error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Lỗi khi lấy danh sách truyện theo dõi",
-    });
+    res.status(error.status ?? 400).json({ error: error.message || "Lỗi khi lấy danh sách truyện theo dõi" });
   }
 };
 
@@ -31,18 +26,12 @@ exports.getFollowList = async (req, res) => {
 exports.toggleFollow = async (req, res) => {
   try {
     const userId = req.user.id;
-    const truyenId = parseInt(req.params.truyenId); 
-
-    if (!truyenId)
-      return res
-        .status(400)
-        .json({ success: false, message: "Thiếu truyenId" });
-
+    const truyenId = parseInt(req.params.truyenId, 10);
     const result = await followService.toggleFollow(userId, truyenId);
-
-    res.json(result);
+    res.json({ success: true, ...result });
   } catch (err) {
     console.error("Toggle follow error:", err);
-    res.status(500).json({ success: false, message: "Có lỗi xảy ra!" });
+    const status = err.status ?? (err.code === "ER_NO_REFERENCED_ROW_2" ? 404 : 400);
+    res.status(status).json({ error: err.message || "Có lỗi xảy ra!" });
   }
 };
