@@ -14,11 +14,11 @@ export interface Story {
 export interface FollowResponse {
   success: boolean;
   data: Story[];
-  totalFollowed: number;
-  pagination?: {
-    page: number;
-    limit: number;
+  pagination: {
+    current_page: number;
+    total_pages: number;
     total: number;
+    limit: number;
   };
 }
 

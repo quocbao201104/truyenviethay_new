@@ -30,11 +30,13 @@ export const useFavoriteStore = defineStore("favorite", () => {
         try {
             const res = await getFollowedStories(page, pagination.value.limit);
             
-            // Handle response structure
             if (res.data) {
                 favorites.value = res.data;
-                pagination.value.page = page;
-                pagination.value.total = res.totalFollowed || res.data.length;
+                pagination.value = {
+                    page: res.pagination.current_page,
+                    limit: res.pagination.limit,
+                    total: res.pagination.total
+                };
             } else {
                 favorites.value = [];
                 pagination.value.total = 0;
@@ -64,16 +66,20 @@ export const useFavoriteStore = defineStore("favorite", () => {
             // Backend returns { success: true, message: "Đã theo dõi" } or "Đã bỏ theo dõi"
             const isNowFollowed = response.message.includes("Đã theo dõi");
             
+            // SYNC with storyStore if it exists to fix stale UI in StoryDetailView
+            const storyStore = (await import("@/modules/storyText/story.store")).useStoryStore();
+            if (storyStore.currentStory && storyStore.currentStory.id === storyId) {
+                storyStore.currentStory.is_followed = isNowFollowed;
+            }
+
             if (isNowFollowed) {
                 // Story was just followed - need to refresh favorites to get updated list
-                toast.success("Đã theo dõi truyện thành công");
                 // Optionally refresh favorites to get the new story in the list
                 await fetchFavorites(pagination.value.page);
             } else {
                 // Story was unfollowed - remove from local state
                 favorites.value = favorites.value.filter(story => story.id !== storyId);
                 pagination.value.total = Math.max(0, pagination.value.total - 1);
-                toast.success("Đã bỏ theo dõi truyện");
                 
                 // Refresh if page is now empty and not first page
                 if (favorites.value.length === 0 && pagination.value.page > 1) {

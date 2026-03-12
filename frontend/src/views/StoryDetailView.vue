@@ -203,7 +203,7 @@
         <!-- Tab: Bình Luận (Luận Đạo) -->
         <div v-if="currentTab === 'comments'" class="content-panel comments">
            <h3 class="panel-title"><i class="fas fa-comments"></i> Khu Vực Luận Đạo</h3>
-           <CommentList :story-id="story.id" />
+           <CommentList :story-id="story.id" :story-author-id="story.user_id" />
         </div>
       </section>
 
@@ -288,26 +288,32 @@ const storyHistory = computed(() => {
 const hasHistory = computed(() => !!storyHistory.value);
 
 const readTarget = computed(() => {
-    if (hasHistory.value && storyHistory.value?.chuong_slug) {
-        // Find the chapter ID if possible, otherwise we might need the backend to return it or just use slug
-        // Actually the button query needs chapterId. If history doesn't have ID, we might have an issue.
-        // Let's check history service interface. It doesn't have chuong_id! 
-        // This is a problem for our requirement "Carry ID of story or chapter".
-        
-        // Let's check if the chapterList has the chapter with this slug
-        const lastRead = chapters.value.find(c => c.slug === storyHistory.value?.chuong_slug);
+    if (hasHistory.value && storyHistory.value) {
+        // Ưu tiên last_read_chuong_id (từ API), fallback chuong_slug
+        const lastRead = storyHistory.value.last_read_chuong_id
+            ? chapters.value.find(c => c.id === storyHistory.value?.last_read_chuong_id)
+            : storyHistory.value.chuong_slug
+                ? chapters.value.find(c => c.slug === storyHistory.value?.chuong_slug)
+                : null;
         if (lastRead) return { slug: lastRead.slug, id: lastRead.id };
     }
-    
-    // Fallback to first chapter
     if (chapters.value.length > 0) {
         return { slug: chapters.value[0].slug, id: chapters.value[0].id };
     }
     return null;
 });
 
-// Follow/Like Logic
-const isFollowed = computed(() => story.value ? favoriteStore.favorites.some(f => f.id === story.value?.id) : false);
+// Follow/Like Logic: Ưu tiên is_followed từ API (khi đăng nhập), fallback favoriteStore
+const isFollowed = computed(() => {
+    if (!story.value) return false;
+    // Check if the story is in the favoriteStore.favorites list first for reactive updates
+    const inFavorites = favoriteStore.favorites.some(f => f.id === story.value?.id);
+    if (inFavorites) return true;
+    
+    // Fallback to the property from backend (snapshot) if not in the current favorites list
+    // This allows the button to update immediately when toggled
+    return !!story.value.is_followed;
+});
 const toggleFollow = async () => {
     if (!story.value) return;
     await favoriteStore.toggleFollow(story.value.id);

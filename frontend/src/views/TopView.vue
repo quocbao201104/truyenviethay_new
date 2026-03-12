@@ -83,9 +83,6 @@
                   <span class="author-tag">
                     <i class="fas fa-feather-alt text-rose-500"></i> {{ story.tac_gia }}
                   </span>
-                  <span class="stat-tag">
-                    <i class="fas fa-eye text-orange-500"></i> {{ formatNumber(story.luot_xem) }}
-                  </span>
                   <span v-if="story.luot_thich" class="stat-tag">
                     <i class="fas fa-heart text-pink-500"></i> {{ formatNumber(story.luot_thich) }}
                   </span>
@@ -181,6 +178,7 @@ const handleImageError = (event: Event) => {
   letter-spacing: 5px;
   background: linear-gradient(to right, #f43f5e, #fff, #fb923c);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 0 10px rgba(244, 63, 94, 0.3));
 }
@@ -433,59 +431,81 @@ const handleImageError = (event: Event) => {
 @media (max-width: 768px) {
   .section-title { font-size: 1.8rem; letter-spacing: 2px; }
   
-  /* Quay lại Grid 2 cột trên Mobile theo yêu cầu của Bảo */
   .topview-list-v2 {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
   
   .ranking-pill {
-    flex-direction: column;
-    border-radius: 20px;
-    padding: 15px;
-    height: 100%;
+    flex-direction: row;
+    border-radius: 12px;
+    padding: 10px;
+    height: auto;
     align-items: center;
-    text-align: center;
+    text-align: left;
+    gap: 12px;
   }
   
   .rank-indicator {
     position: absolute;
-    top: -10px;
-    left: -10px;
-    width: 40px;
-    height: 40px;
+    top: -8px;
+    left: -8px;
+    width: 35px;
+    height: 35px;
+    z-index: 10;
   }
   
-  .rank-num { font-size: 1rem; }
+  .circle-inner {
+    border-width: 1.5px;
+  }
+  
+  .rank-num { font-size: 0.9rem; }
   
   .story-cover-pill {
-    width: 100%;
-    height: 140px;
+    width: 65px;
+    height: 90px;
     margin-left: 0;
-    margin-bottom: 10px;
+    margin-bottom: 0;
+    border-radius: 8px;
   }
   
   .story-details {
     margin-left: 0;
-    width: 100%;
+    width: auto;
+    flex: 1;
+    min-width: 0;
   }
   
-  .title-link { font-size: 0.95rem; white-space: normal; line-height: 1.2; height: 2.4em; overflow: hidden; }
+  .title-link { 
+    font-size: 1rem; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+  }
   
-  .meta-row { flex-direction: column; gap: 4px; align-items: center; font-size: 0.7rem; }
+  .meta-row { 
+    flex-direction: row; 
+    flex-wrap: wrap;
+    gap: 10px; 
+    align-items: center; 
+    font-size: 0.75rem; 
+  }
   
   .score-crystal-fire {
-    margin-top: 10px;
-    width: 100%;
-    min-width: auto;
-    background: transparent;
-    border: none;
-    padding: 0;
+    margin-top: 0;
+    width: auto;
+    min-width: 75px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 6px 10px;
+    border-radius: 12px;
     box-shadow: none;
   }
   
-  .fire-row .val { font-size: 1rem; }
+  .fire-row .val { font-size: 1.1rem; }
+  .score-crystal-fire .total { font-size: 0.55rem; }
 }
 
 @keyframes fadeIn {

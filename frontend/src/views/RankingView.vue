@@ -180,6 +180,7 @@ const handleImageError = (event: Event) => {
   letter-spacing: 5px;
   background: linear-gradient(to right, #fbbf24, #fff, #fbbf24);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.3));
 }
@@ -461,35 +462,78 @@ const handleImageError = (event: Event) => {
 @media (max-width: 768px) {
   .section-title { font-size: 1.8rem; letter-spacing: 2px; }
   
+  .ranking-list-v2 {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
   .ranking-pill {
-    border-radius: 20px;
-    padding-right: 15px;
-    flex-wrap: wrap;
-    justify-content: space-between;
+    flex-direction: row;
+    border-radius: 12px;
+    padding: 10px;
+    height: auto;
+    align-items: center;
+    text-align: left;
+    gap: 12px;
+  }
+  
+  .rank-indicator {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    width: 35px;
+    height: 35px;
+    z-index: 10;
+  }
+  
+  .rank-num { font-size: 0.9rem; }
+  
+  .story-cover-pill {
+    width: 65px;
+    height: 90px;
+    margin-left: 0;
+    margin-bottom: 0;
+    border-radius: 8px;
   }
   
   .story-details {
-    width: calc(100% - 170px);
-    margin-left: 10px;
+    margin-left: 0;
+    width: auto;
+    flex: 1;
+    min-width: 0;
   }
   
-  .title-link { font-size: 1rem; }
+  .title-link { 
+    font-size: 1rem; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+  }
+  
+  .meta-row { 
+    flex-direction: row; 
+    flex-wrap: wrap;
+    gap: 10px; 
+    align-items: center; 
+    font-size: 0.75rem; 
+  }
   
   .score-crystal {
-    order: 3;
-    margin-top: 10px;
-    width: 100%;
-    padding: 5px;
-    background: transparent;
-    border: none;
+    margin-top: 0;
+    width: auto;
+    min-width: 60px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 6px 10px;
+    border-radius: 12px;
     box-shadow: none;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 5px;
+    display: block;
+    text-align: center;
   }
 
-  .star-row .val { font-size: 1rem; }
+  .star-row .val { font-size: 1.1rem; }
 }
 
 @keyframes fadeIn {

@@ -50,10 +50,10 @@
             </div>
 
             <div class="name-spirit-plate">
-              <div class="plate-magic-wrapper" :style="{ '--badge-color': authStore.user?.badge?.color || '#34d399' }">
+              <div class="plate-magic-wrapper" :style="{ '--badge-color': user?.badge?.color || '#34d399' }">
                 <div class="plate-inner">
                   <h1 class="display-name">{{ user?.full_name || "Vô Danh Đạo Hữu" }}</h1>
-                  <UserBadge :badge="authStore.user?.badge" size="md" />
+                  <UserBadge :badge="user?.badge" size="md" class="magic-badge-glow" />
                 </div>
               </div>
               <p class="spirit-handle">@{{ user?.username || "unknown" }}</p>
@@ -112,14 +112,6 @@
             </div>
           </div>
  
-          <div class="tu-vi-section" v-if="currentLevel">
-            <LevelCard
-              :level="currentLevel"
-              :points="userPoints?.total_exp || 0"
-              :nextLevelPoints="currentLevel?.next_level_points"
-              :nextLevelName="currentLevel?.next_level_name || ''"
-            />
-          </div>
 
           <div class="spirit-nav-footer">
             <router-link to="/user/cai-dat-thong-tin" class="spirit-nav-pill">
@@ -175,7 +167,7 @@ import { computed, onMounted, watch } from "vue";
 import { useAuthStore } from "@/modules/auth/auth.store";
 import { useUserStore } from "@/modules/user/user.store";
 import { getAvatarUrl } from "@/config/constants";
-import LevelCard from "@/components/gamification/LevelCard.vue";
+
 import UserBadge from "@/components/gamification/UserBadge.vue";
 import { useGamification } from "@/composables/useGamification";
 import { useRouter } from "vue-router";
@@ -272,7 +264,7 @@ export default {
     };
   },
   components: {
-    LevelCard,
+
     UserBadge,
   },
 };
@@ -417,6 +409,7 @@ export default {
   box-shadow:
     0 0 0 6px rgba(var(--aura-primary), 0.2),
     0 0 26px rgba(var(--aura-primary), 0.16);
+  transform: scale(0.85);
 }
 
 .avatar-frame-overlay {
@@ -607,6 +600,16 @@ export default {
     display: flex;
     align-items: center;
     margin-top: -1px;
+}
+
+.magic-badge-glow {
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 10px var(--badge-color, rgba(52, 211, 153, 0.5)));
+  animation: badge-pulse 2s infinite ease-in-out alternate;
+}
+
+@keyframes badge-pulse {
+  from { filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 8px var(--badge-color, rgba(52, 211, 153, 0.3))); }
+  to { filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 15px var(--badge-color, rgba(52, 211, 153, 0.8))); transform: scale(1.05); }
 }
 
 .spirit-handle {

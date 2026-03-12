@@ -1,79 +1,84 @@
-<template>
+cd<template>
+  <!-- Chat Bubble Floating (FAB) -->
+  <div 
+    v-if="authStore.isLoggedIn"
+    class="chat-bubble-fab"
+    :class="{ hidden: chatStore.isOpen }"
+    @click="chatStore.isOpen = true"
+  >
+    <div class="bubble-inner">
+      <i class="fas fa-comments"></i>
+      <span v-if="totalUnread > 0" class="unread-badge">{{ totalUnread }}</span>
+    </div>
+  </div>
+
   <div
     v-if="chatStore.isOpen"
     class="chat-shell"
     :class="{ minimized: chatStore.isMinimized }"
   >
     <div class="chat-header">
-      <div v-show="!chatStore.isMinimized" class="tabs-container">
-        <div class="tabs scrollbar-hide">
-          <button
-            :class="['tab', { active: chatStore.activeTabId === 'world' }]"
-            @click="chatStore.switchTab('world')"
-          >
-            <i class="fas fa-globe-americas mr-1"></i> World
-            <span v-if="chatStore.unreadWorld > 0" class="badge-dot"></span>
-          </button>
+      <div class="header-main">
+        <div class="tabs-container">
+          <div class="tabs scrollbar-hide">
+            <button
+              :class="['tab', { active: chatStore.activeTabId === 'world' }]"
+              @click="chatStore.switchTab('world')"
+            >
+              <i class="fas fa-globe-americas mr-1"></i> Thế giới
+              <span v-if="chatStore.unreadWorld > 0" class="badge-dot"></span>
+            </button>
 
-          <div
-            v-for="room in chatStore.authorRoomsList"
-            :key="room.authorId"
-            class="author-tab-wrap"
-          >
-            <button
-              :class="[
-                'tab',
-                { active: chatStore.activeTabId === room.authorId },
-              ]"
-              @click="chatStore.switchTab(room.authorId)"
+            <div
+              v-for="room in chatStore.authorRoomsList"
+              :key="room.authorId"
+              class="author-tab-wrap"
             >
-              <i class="fas fa-at text-[10px] opacity-50"></i> {{ room.name }}
-              <span v-if="room.unreadCount > 0" class="badge">{{
-                room.unreadCount
-              }}</span>
-            </button>
-            <button
-              class="close-room"
-              @click.stop="chatStore.leaveRoom(room.authorId)"
-            >
-              <i class="fas fa-times"></i>
-            </button>
+              <button
+                :class="[
+                  'tab',
+                  { active: chatStore.activeTabId === room.authorId },
+                ]"
+                @click="chatStore.switchTab(room.authorId)"
+              >
+                <i class="fas fa-at text-[10px] opacity-50"></i> {{ room.name }}
+                <span v-if="room.unreadCount > 0" class="badge">{{
+                  room.unreadCount
+                }}</span>
+              </button>
+              <button
+                class="close-tab-btn"
+                @click.stop="chatStore.leaveRoom(room.authorId)"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div
-        v-show="chatStore.isMinimized"
-        class="mini-info"
-        @click="chatStore.setMinimized(false)"
-      >
-        <span class="online-dot"></span>
-        {{ currentOnlineCount }} <span class="opacity-60 ml-1">Online</span>
-      </div>
-
-      <div class="actions">
-        <button
-          class="action-btn"
-          @click="chatStore.setMinimized(!chatStore.isMinimized)"
-        >
-          <i
-            :class="
-              chatStore.isMinimized ? 'fas fa-chevron-up' : 'fas fa-minus'
-            "
-          ></i>
-        </button>
-        <button class="action-btn close-btn" @click="chatStore.isOpen = false">
-          <i class="fas fa-times"></i>
-        </button>
+        <div class="header-actions">
+          <button
+            class="header-btn"
+            title="Thu nhỏ"
+            @click="chatStore.isOpen = false"
+          >
+            <i class="fas fa-minus"></i>
+          </button>
+          <button 
+            class="header-btn close" 
+            title="Đóng"
+            @click="chatStore.isOpen = false"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
       </div>
     </div>
 
-    <div v-show="!chatStore.isMinimized" class="chat-body">
+    <div class="chat-body">
       <div class="presence-bar">
         <i class="fas fa-users mr-2 opacity-50"></i>
-        <span
-          >{{ currentOnlineCount }} <small>người trực tuyến</small></span
-        >
+        <span>{{ currentOnlineCount }} <small>đang trực tuyến</small></span>
       </div>
 
       <div class="message-list scrollbar-custom" ref="messageList">
@@ -97,11 +102,23 @@
 
           <div class="bubble-wrap">
             <div class="name" v-if="!isMine(msg)">
+              <span v-if="msg.level" class="[msg.level.type]">
+              </span>
               {{ msg.fullName || msg.username }}
+              <UserBadge v-if="msg.badge" :badge="msg.badge" size="xs" />
             </div>
-            <div class="bubble-content" :class="msg.equipped_frame?.css_class || ''">
-              <div class="bubble" :class="[{ megaphone: msg.isMegaphone }, msg.equipped_frame?.css_class || '']">
-                {{ msg.content }}
+            
+            <div class="bubble-content" :class="[msg.equipped_frame?.css_class || '', msg.equipped_chat_color?.css_class || '']">
+              <div class="bubble-wrapper">
+                <img
+                  v-if="msg.equipped_chat_color?.image_url"
+                  :src="msg.equipped_chat_color.image_url"
+                  alt="chat frame"
+                  class="chat-bg-frame"
+                />
+                <div class="bubble" :class="[{ megaphone: msg.isMegaphone }, { 'has-frame': msg.equipped_chat_color?.image_url }, msg.equipped_frame?.css_class || '', msg.equipped_chat_color?.css_class || '']">
+                  {{ msg.content }}
+                </div>
               </div>
               <span class="msg-time-tip">{{
                 msg.timestamp ? formatTime(msg.timestamp) : ""
@@ -117,7 +134,18 @@
       </div>
 
       <div class="input-area" :class="{ disabled: !authStore.isLoggedIn }">
+        <!-- the old megaphone bar has been removed -->
         <div class="input-wrapper">
+          <button
+            v-if="chatStore.activeTabId === 'world'"
+            class="megaphone-toggle-btn"
+            :class="{ active: isMegaphoneActive }"
+            @click="toggleMegaphone"
+            title="Bật/tắt Loa Truyền Âm"
+          >
+            <i class="fas fa-bullhorn"></i>
+            <span v-if="megaphoneCooldown > 0" class="cd-overlay">{{ megaphoneCooldown }}s</span>
+          </button>
           <input
             v-model="newMessage"
             @keyup.enter="handleSendMessage"
@@ -154,6 +182,7 @@ import { ref, onMounted, onUnmounted, nextTick, computed, watch } from "vue";
 import { useAuthStore } from "@/modules/auth/auth.store";
 import { useChatStore, type Message } from "@/modules/chat/chat.store";
 import { getAvatarUrl } from "@/config/constants";
+import UserBadge from "@/modules/gamification/components/UserBadge.vue";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import axios from "@/utils/axios";
@@ -175,6 +204,7 @@ const formatTime = (timestamp: number) => {
   }
 };
 let cooldownInterval: any = null;
+const hasMegaphoneItem = ref(false);
 
 const currentMessages = computed(() => {
   if (chatStore.activeTabId === "world") return chatStore.worldMessages;
@@ -186,6 +216,14 @@ const currentOnlineCount = computed(() => {
   return (
     chatStore.joinedAuthorRooms.get(chatStore.activeTabId)?.onlineCount || 0
   );
+});
+
+const totalUnread = computed(() => {
+  let count = chatStore.unreadWorld;
+  chatStore.authorRoomsList.forEach((room) => {
+    count += room.unreadCount;
+  });
+  return count;
 });
 
 const isMine = (msg: Message) =>
@@ -200,22 +238,68 @@ const scrollToEnd = () => {
   }
 };
 
+const isMegaphoneActive = ref(false);
+
+// Auto-activate megaphone when triggered from Inventory (item ID 3 "Dùng ngay")
+watch(
+  () => chatStore.pendingMegaphoneActivation,
+  (pending) => {
+    if (pending && hasMegaphoneItem.value) {
+      isMegaphoneActive.value = true;
+      chatStore.pendingMegaphoneActivation = false;
+    } else if (pending && !hasMegaphoneItem.value) {
+      // Re-check access then activate
+      refreshMegaphoneAccess().then(() => {
+        if (hasMegaphoneItem.value) isMegaphoneActive.value = true;
+        chatStore.pendingMegaphoneActivation = false;
+      });
+    }
+  },
+);
+
+const toggleMegaphone = () => {
+  if (!hasMegaphoneItem.value) {
+    alert("Bạn cần mua 'Loa Truyền Âm' trong Cửa Hàng để sử dụng chức năng này!");
+    return;
+  }
+  isMegaphoneActive.value = !isMegaphoneActive.value;
+};
+
 const handleSendMessage = async () => {
-  if (!newMessage.value.trim() || cooldown.value > 0) return;
+  if (!newMessage.value.trim() || cooldown.value > 0 || !authStore.isLoggedIn) return;
 
   try {
-    const url =
-      chatStore.activeTabId === "world"
-        ? "/api/chat/world"
-        : `/api/chat/author/${chatStore.activeTabId}`;
+    const text = newMessage.value;
 
-    await axios.post(url, { message: newMessage.value });
+    if (chatStore.activeTabId === "world") {
+      if (isMegaphoneActive.value) {
+        if (megaphoneCooldown.value > 0) return;
+        await axios.post("/api/chat/world/megaphone", { message: text });
+        
+        // Start Megaphone cooldown
+        megaphoneCooldown.value = 60;
+        if (megaphoneInterval) clearInterval(megaphoneInterval);
+        megaphoneInterval = setInterval(() => {
+          megaphoneCooldown.value--;
+          if (megaphoneCooldown.value <= 0) clearInterval(megaphoneInterval);
+        }, 1000);
+      } else {
+        await axios.post("/api/chat/world", { message: text });
+      }
+    } else {
+      await axios.post(`/api/chat/author/${chatStore.activeTabId}`, { message: text });
+    }
+
     newMessage.value = "";
     startCooldown();
+    nextTick(() => scrollToEnd());
   } catch (err: any) {
     alert(err.response?.data?.message || "Send failed");
   }
 };
+
+const megaphoneCooldown = ref(0);
+let megaphoneInterval: any = null;
 
 const startCooldown = () => {
   cooldown.value = 3;
@@ -227,15 +311,38 @@ const startCooldown = () => {
 };
 
 watch(
-  () => [currentMessages.value.length, chatStore.activeTabId],
+  () => [currentMessages.value.length, chatStore.activeTabId, chatStore.isOpen],
   () => {
-    nextTick(() => scrollToEnd());
+    if (chatStore.isOpen) {
+      nextTick(() => scrollToEnd());
+    }
   },
 );
 
-onMounted(() => {
+const refreshMegaphoneAccess = async () => {
+  if (!authStore.isLoggedIn) return;
+  try {
+    const res = await axios.get("/api/chat/megaphone-access");
+    hasMegaphoneItem.value = !!res.data?.data?.hasAccess;
+  } catch {
+    hasMegaphoneItem.value = false;
+  }
+};
+
+onMounted(async () => {
   chatStore.initListeners();
+  await refreshMegaphoneAccess();
 });
+
+// Re-check every time the chat panel opens so that a recent purchase is reflected
+watch(
+  () => chatStore.isOpen,
+  async (open) => {
+    if (open) {
+      await refreshMegaphoneAccess();
+    }
+  },
+);
 
 onUnmounted(() => {
   if (cooldownInterval) clearInterval(cooldownInterval);
@@ -243,46 +350,96 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Biáº¿n mÃ u sáº¯c */
-:emphasis {
-  --primary: #0ea5e9;
-  --success: #22c55e;
-  --bg-dark: #0f172a;
-  --bg-card: rgba(30, 41, 59, 0.95);
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
+/* COLORS & VARIABLES */
+.chat-shell {
+  --chan-bg: #0f172a;
+  --chan-header: #1e293b;
+  --chan-accent: #6366f1;
+  --chan-bubble-mine: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  --chan-bubble-others: #334155;
+  --chan-text-main: #f8fafc;
+  --chan-text-muted: #94a3b8;
 }
 
+/* FLOATING BUBBLE (FAB) */
+.chat-bubble-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  z-index: 1999;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.chat-bubble-fab.hidden {
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chat-bubble-fab:hover {
+  transform: scale(1.1);
+}
+
+.bubble-inner {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+  color: white;
+  font-size: 24px;
+  position: relative;
+}
+
+.unread-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ef4444;
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 10px;
+  border: 2px solid #111827;
+  animation: bounce 1s infinite alternate;
+}
+
+/* CHAT SHELL */
 .chat-shell {
   position: fixed;
   right: 20px;
   bottom: 20px;
   width: 380px;
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  max-width: calc(100vw - 40px);
+  background: var(--chan-bg);
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 2000;
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  animation: slideIn 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-.chat-shell.minimized {
-  width: 200px;
-  border-radius: 30px;
-}
-
-/* Header & Tabs */
+/* HEADER */
 .chat-header {
-  padding: 10px 14px;
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--chan-header);
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.header-main {
   display: flex;
   align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  justify-content: space-between;
 }
 
 .tabs-container {
@@ -292,52 +449,108 @@ onUnmounted(() => {
 
 .tabs {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   overflow-x: auto;
   padding-bottom: 2px;
 }
 
+.author-tab-wrap {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding-right: 8px;
+  transition: 0.2s;
+}
+
 .tab {
   white-space: nowrap;
-  background: transparent;
-  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--chan-text-muted);
   border: none;
   padding: 6px 12px;
   border-radius: 12px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: 0.2s;
   display: flex;
   align-items: center;
-  position: relative;
 }
 
 .tab.active {
-  background: var(--primary);
+  background: var(--chan-accent);
   color: white;
 }
 
-.badge-dot {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 6px;
-  height: 6px;
-  background: #ef4444;
-  border-radius: 50%;
-  box-shadow: 0 0 8px #ef4444;
+.author-tab-wrap .tab {
+  background: transparent !important;
+  padding-right: 6px;
 }
 
-/* Chat Body */
+.author-tab-wrap:has(.tab.active) {
+  background: var(--chan-accent);
+}
+
+.close-tab-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 10px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition: 0.2s;
+}
+
+.close-tab-btn:hover {
+  color: white;
+  opacity: 1;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.header-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--chan-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+.header-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.header-btn.close:hover {
+  background: #ef4444;
+}
+
+/* BODY */
 .chat-body {
-  height: 480px;
+  height: 500px;
   display: flex;
   flex-direction: column;
 }
 
 .presence-bar {
-  padding: 6px 16px;
+  padding: 8px 16px;
   background: rgba(0, 0, 0, 0.2);
   font-size: 11px;
   color: #38bdf8;
@@ -351,15 +564,24 @@ onUnmounted(() => {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
-/* Bubble Styles */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--chan-text-muted);
+}
+
+/* MESSAGES */
 .message-row {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-start; /* Changed from flex-end to flex-start */
   gap: 10px;
-  max-width: 90%;
+  max-width: 85%;
   animation: fadeIn 0.3s ease;
 }
 
@@ -369,99 +591,211 @@ onUnmounted(() => {
 }
 
 .avatar-shell {
-  position: relative;
   width: 32px;
   height: 32px;
   flex-shrink: 0;
-  --avatar-frame-scale: 1.32;
+  position: relative;
+  margin-top: 2px;
+  --avatar-frame-scale: 1.45;
+}
+
+.message-row:not(.mine) .avatar-shell {
+  margin-right: 2px;
+}
+
+.mine .avatar-shell {
+  margin-left: 2px;
 }
 
 .avatar-container {
-  position: relative;
   width: 100%;
   height: 100%;
+  position: relative;
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-.avatar-frame-overlay {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
+  border-radius: 50%;
   object-fit: cover;
-  object-position: center;
-  pointer-events: none;
-  transform: scale(var(--avatar-frame-scale));
-  transform-origin: center;
-  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.25));
+  transform: scale(0.85);
+}
+
+.bubble-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.mine .bubble-wrap {
+  align-items: flex-end;
 }
 
 .name {
   font-size: 11px;
-  font-weight: 700;
-  color: var(--text-muted);
+  font-weight: 800;
+  color: var(--chan-text-muted);
   margin-bottom: 4px;
-  margin-left: 4px;
+  padding-left: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.level-badge {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  line-height: 1;
+}
+
+.level-badge.level-author {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.level-badge.level-user {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.bubble-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-top: 2px;
+}
+
+.chat-bg-frame {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  width: calc(100% + 40px);
+  height: calc(100% + 40px);
+  z-index: 0;
+  pointer-events: none;
+  object-fit: fill; 
 }
 
 .bubble {
-  background: #334155;
-  color: #f1f5f9;
-  padding: 10px 14px;
-  border-radius: 16px;
-  border-top-left-radius: 2px;
+  padding: 10px 16px;
+  border-radius: 18px;
   font-size: 14px;
   line-height: 1.5;
+  color: var(--chan-text-main);
+  background: var(--chan-bubble-others);
   position: relative;
-  transition: 0.2s;
+  z-index: 1;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.mine .bubble {
-  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-  border-radius: 16px;
-  border-top-right-radius: 2px;
-  border-top-left-radius: 16px;
+.bubble.has-frame {
+  background: transparent !important;
+  padding: 12px 18px;
+  border: none;
+  box-shadow: none;
 }
 
 .bubble.megaphone {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: #000;
-  font-weight: 700;
-  box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+  font-weight: 800;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.bubble-content[class] .bubble:not(.megaphone) {
-  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.08), 0 8px 18px rgba(0, 0, 0, 0.18);
+.mine .bubble {
+  background: var(--chan-bubble-mine);
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Input Area */
+.message-row:not(.mine) .bubble {
+  border-bottom-left-radius: 4px;
+}
+
+.msg-time-tip {
+  font-size: 10px;
+  color: var(--chan-text-muted);
+  margin-top: 4px;
+  display: block;
+}
+
+/* INPUT */
 .input-area {
   padding: 16px;
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--chan-header);
 }
 
 .input-wrapper {
   display: flex;
-  background: #0f172a;
+  align-items: center;
+  background: #0b0f19;
   border-radius: 14px;
   padding: 4px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: 0.3s;
+  gap: 6px;
 }
 
 .input-wrapper:focus-within {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+  border-color: var(--chan-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-.input-area input {
+.megaphone-toggle-btn {
+  background: transparent;
+  color: #6b7280;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  position: relative;
+  margin-left: 2px;
+}
+
+.megaphone-toggle-btn:hover {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.megaphone-toggle-btn.active {
+  color: #f59e0b;
+  text-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+  animation: pulse-loa 2s infinite;
+}
+
+@keyframes pulse-loa {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.cd-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: white;
+}
+
+.input-wrapper input {
   flex: 1;
   background: transparent;
   border: none;
@@ -472,15 +806,14 @@ onUnmounted(() => {
 }
 
 .send-btn {
-  background: var(--success);
-  color: #052e16;
+  background: #10b981;
+  color: white;
   border: none;
   border-radius: 10px;
   width: 38px;
   height: 38px;
   cursor: pointer;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   transition: 0.2s;
@@ -488,35 +821,71 @@ onUnmounted(() => {
 
 .send-btn:hover:not(:disabled) {
   transform: scale(1.05);
-  filter: brightness(1.1);
+  background: #059669;
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .cd-number {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
 }
 
-/* Custom Scrollbar */
-.scrollbar-custom::-webkit-scrollbar {
-  width: 4px;
-}
-.scrollbar-custom::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+/* MOBILE RESPONSIVE */
+@media (max-width: 640px) {
+  .chat-shell {
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 75vh;
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    border: none;
+  }
+
+  .chat-body {
+    height: calc(100% - 60px);
+  }
+
+  .chat-bubble-fab {
+    right: 15px;
+    bottom: 15px;
+  }
 }
 
-
-.avatar-shell.frame-phoenix-fire {
-  --avatar-frame-scale: 1.72;
+/* ANIMATIONS */
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-.avatar-shell.frame-bang-tinh {
-  --avatar-frame-scale: 1.22;
+@keyframes bounce {
+  to { transform: translateY(-3px); }
 }
 
-.avatar-shell.frame-thien-thanh {
-  --avatar-frame-scale: 1.24;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+
+/* FRAME OVERLAYS */
+.avatar-frame-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  transform: scale(var(--avatar-frame-scale));
+  transform-origin: center;
+}
+
+.avatar-shell.frame-phoenix-fire { --avatar-frame-scale: 1.72; }
+.avatar-shell.frame-bang-tinh { --avatar-frame-scale: 1.22; }
+.avatar-shell.frame-thien-thanh { --avatar-frame-scale: 1.24; }
 
 .avatar-shell.frame-phoenix-fire .avatar-frame-overlay,
 .bubble.frame-phoenix-fire {
@@ -532,44 +901,6 @@ onUnmounted(() => {
   animation: phoenixFlare 2.8s ease-in-out infinite;
 }
 
-.avatar-shell.frame-phoenix-fire::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 14px;
-  background: radial-gradient(circle, rgba(251, 113, 133, 0.22), transparent 70%);
-  filter: blur(8px);
-  opacity: 0.8;
-  pointer-events: none;
-  animation: phoenixHalo 2.8s ease-in-out infinite;
-}
-
-.avatar-shell.frame-bang-tinh .avatar-frame-overlay,
-.bubble.frame-bang-tinh {
-  filter: drop-shadow(0 0 10px rgba(125, 211, 252, 0.6));
-}
-
-.bubble.frame-bang-tinh {
-  background:
-    radial-gradient(circle at top left, rgba(186, 230, 253, 0.28), transparent 36%),
-    linear-gradient(135deg, #082f49 0%, #0f3d5e 45%, #172554 100%);
-  border: 1px solid rgba(125, 211, 252, 0.35);
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.2);
-}
-
-.avatar-shell.frame-thien-thanh .avatar-frame-overlay,
-.bubble.frame-thien-thanh {
-  filter: drop-shadow(0 0 12px rgba(167, 139, 250, 0.58));
-}
-
-.bubble.frame-thien-thanh {
-  background:
-    radial-gradient(circle at top left, rgba(216, 180, 254, 0.26), transparent 40%),
-    linear-gradient(135deg, #312e81 0%, #4c1d95 52%, #1e1b4b 100%);
-  border: 1px solid rgba(196, 181, 253, 0.35);
-  box-shadow: 0 0 18px rgba(139, 92, 246, 0.22);
-}
-
 @keyframes phoenixFlare {
   0%, 100% {
     box-shadow: 0 0 18px rgba(249, 115, 22, 0.18), inset 0 0 18px rgba(255, 237, 213, 0.04);
@@ -581,20 +912,46 @@ onUnmounted(() => {
   }
 }
 
-@keyframes phoenixHalo {
-  0%, 100% { opacity: 0.45; transform: scale(0.96); }
-  50% { opacity: 0.9; transform: scale(1.05); }
+/* Cửu Vĩ Hồ (ID 7) */
+.avatar-shell.frame-nine-tails-purple { --avatar-frame-scale: 1.6; }
+.avatar-shell.frame-nine-tails-purple .avatar-frame-overlay,
+.bubble.frame-nine-tails-purple {
+  filter: drop-shadow(0 0 10px rgba(192, 132, 252, 0.6));
+}
+.bubble.frame-nine-tails-purple {
+  background: 
+    radial-gradient(circle at top left, rgba(232, 121, 249, 0.2), transparent 40%),
+    linear-gradient(135deg, #4c1d95 0%, #701a75 50%, #4c1d95 100%);
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Thất Sắc (ID 14) */
+.avatar-shell.frame-that-sac { --avatar-frame-scale: 1.5; }
+.bubble.frame-that-sac {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: rainbow-border 4s linear infinite;
+}
+@keyframes rainbow-border {
+  0% { border-color: rgba(255, 182, 193, 0.6); box-shadow: 0 0 10px rgba(255, 182, 193, 0.3); }
+  25% { border-color: rgba(255, 250, 205, 0.6); box-shadow: 0 0 10px rgba(255, 250, 205, 0.3); }
+  50% { border-color: rgba(175, 238, 238, 0.6); box-shadow: 0 0 10px rgba(175, 238, 238, 0.3); }
+  75% { border-color: rgba(232, 121, 249, 0.6); box-shadow: 0 0 10px rgba(232, 121, 249, 0.3); }
+  100% { border-color: rgba(255, 182, 193, 0.6); box-shadow: 0 0 10px rgba(255, 182, 193, 0.3); }
+}
+
+
+/* SCROLLBAR */
+.scrollbar-custom::-webkit-scrollbar { width: 4px; }
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.name.mine-badge {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 2px;
 }
 </style>
 

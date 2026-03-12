@@ -1,5 +1,5 @@
 <template>
-  <BaseModal :isOpen="isOpen" title="XÁC NHẬN GIAO DỊCH" @close="$emit('close')">
+  <BaseModal :isOpen="isOpen" title="XÁC NHẬN GIAO DỊCH" @close="handleClose">
     <div v-if="item" class="modal-buy-content">
       <div class="modal-item-preview">
         <div class="item-icon-box large">
@@ -11,23 +11,43 @@
           <p>{{ item.description || 'Vật phẩm này đang chờ đạo hữu kết duyên.' }}</p>
         </div>
       </div>
+
+      <!-- Quantity picker: only for consumable items -->
+      <div v-if="item.item_type === 'consumable'" class="qty-row">
+        <span class="qty-label">Số lượng</span>
+        <div class="qty-controls">
+          <button class="qty-btn" @click="dec" :disabled="localQty <= 1">−</button>
+          <span class="qty-value">{{ localQty }}</span>
+          <button class="qty-btn" @click="inc" :disabled="localQty >= 99">+</button>
+        </div>
+      </div>
       
       <div class="transaction-details">
         <div class="detail-box">
-          <span class="label">Giá mua</span>
+          <span class="label">Đơn giá</span>
           <span class="value price">{{ (item.price || 0).toLocaleString() }} <i class="fas fa-gem"></i></span>
+        </div>
+        <div class="detail-box" v-if="item.item_type === 'consumable' && localQty > 1">
+          <span class="label">Tổng cộng (x{{ localQty }})</span>
+          <span class="value price">{{ ((item.price || 0) * localQty).toLocaleString() }} <i class="fas fa-gem"></i></span>
         </div>
         <div class="detail-box">
           <span class="label">Số dư hiện tại</span>
           <span class="value wallet">{{ (userCurrency || 0).toLocaleString() }} <i class="fas fa-gem"></i></span>
         </div>
+        <div class="detail-box">
+          <span class="label">Số dư sau giao dịch</span>
+          <span class="value" :class="remaining < 0 ? 'insufficient' : 'wallet'">
+            {{ remaining.toLocaleString() }} <i class="fas fa-gem"></i>
+          </span>
+        </div>
       </div>
 
       <div class="modal-actions">
-        <button class="game-btn ghost" @click="$emit('close')">Hủy bỏ</button>
-        <button class="game-btn primary" :disabled="processing" @click="$emit('confirm')">
+        <button class="game-btn ghost" @click="handleClose">Hủy bỏ</button>
+        <button class="game-btn primary" :disabled="processing || remaining < 0" @click="$emit('confirm', localQty)">
           <i v-if="processing" class="fas fa-spinner fa-spin"></i>
-          <template v-else>Xác Nhận Mua</template>
+          <template v-else>Xác Nhận Mua{{ localQty > 1 ? ` (x${localQty})` : '' }}</template>
         </button>
       </div>
     </div>
@@ -35,9 +55,10 @@
 </template>
 
 <script setup>
+import { ref, computed, watch } from 'vue';
 import BaseModal from '@/components/common/BaseModal.vue';
 
-defineProps({
+const props = defineProps({
   isOpen: Boolean,
   item: Object,
   userCurrency: Number,
@@ -45,7 +66,25 @@ defineProps({
   getItemTypeLabel: Function
 });
 
-defineEmits(['close', 'confirm']);
+const emit = defineEmits(['close', 'confirm']);
+
+const localQty = ref(1);
+
+// Reset quantity every time the modal opens with a new item
+watch(() => props.isOpen, (open) => { if (open) localQty.value = 1; });
+
+const inc = () => { if (localQty.value < 99) localQty.value++; };
+const dec = () => { if (localQty.value > 1) localQty.value--; };
+
+const remaining = computed(() => {
+  if (!props.item) return 0;
+  return (props.userCurrency || 0) - (props.item.price || 0) * localQty.value;
+});
+
+const handleClose = () => {
+  localQty.value = 1;
+  emit('close');
+};
 </script>
 
 <style scoped>
@@ -81,6 +120,35 @@ defineEmits(['close', 'confirm']);
 .detail-box .value { font-size: 1.25rem; font-weight: 700; }
 .detail-box .price { color: #fff; }
 .detail-box .wallet { color: #fbbf24; }
+.detail-box .insufficient { color: #f43f5e; }
+
+/* Quantity row */
+.qty-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+}
+.qty-label { font-size: 0.9rem; color: #94a3b8; font-weight: 600; }
+.qty-controls { display: flex; align-items: center; gap: 1rem; }
+.qty-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(34, 211, 238, 0.4);
+  background: rgba(34, 211, 238, 0.1);
+  color: #22d3ee;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.qty-btn:hover:not(:disabled) { background: rgba(34, 211, 238, 0.25); }
+.qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.qty-value { font-size: 1.4rem; font-weight: 800; color: #fff; min-width: 2.5rem; text-align: center; }
 
 .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
 

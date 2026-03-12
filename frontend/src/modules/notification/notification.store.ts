@@ -38,7 +38,9 @@ export const useNotificationStore = defineStore('notification', {
         if (reset) {
           this.notifications = response.data;
         } else {
-          this.notifications = [...this.notifications, ...response.data];
+          const existingIds = new Set(this.notifications.map(n => n.id));
+          const newItems = response.data.filter((d: Notification) => !existingIds.has(d.id));
+          this.notifications = [...this.notifications, ...newItems];
         }
 
         this.unreadCount = response.unreadCount;
@@ -72,6 +74,13 @@ export const useNotificationStore = defineStore('notification', {
       } catch (error) {
         console.error('Error marking all as read:', error);
       }
+    },
+
+    addRealtimeNotification(data: Notification) {
+      const exists = this.notifications.some(n => n.id === data.id);
+      if (exists) return;
+      this.notifications = [data, ...this.notifications];
+      if (data.is_read === 0) this.unreadCount++;
     }
   }
 });

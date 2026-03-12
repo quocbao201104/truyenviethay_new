@@ -175,7 +175,7 @@ const routes: Array<RouteRecordRaw> = [
       meta: { requiresAuth: true, requiredRole: ["author", "admin"] },
   },
   {
-    path: "/author/apply",
+    path: "/user/dang-ky-tac-gia",
     name: "AuthorApply",
     component: AuthorApplyView,
     meta: { requiresAuth: true },

@@ -8,29 +8,33 @@
       <UserBadge :badge="user.badge" size="md" show-name />
   -->
   <span
-    v-if="badge && badge.icon_url"
+    v-if="badge"
     class="user-badge"
-    :class="[`rarity-${badge.rarity}`, `anim-${badge.animation_type}`, `size-${size}`]"
+    :class="[`rarity-${badge.rarity || 'common'}`, `anim-${badge.animation_type || 'none'}`, `size-${size}`, { 'is-fallback': !resolvedIconUrl || imageFailed }]"
     :style="{ '--badge-color': badge.color }"
     :title="badge.badge_name"
   >
     <!-- Wrapper controls proportional sizing via em units -->
     <span class="badge-img-wrap">
       <img
-        :src="badge.icon_url"
+        v-if="resolvedIconUrl && !imageFailed"
+        :src="resolvedIconUrl"
         :alt="badge.badge_name"
         class="badge-icon"
         @error="onImgError"
       />
+      <span v-else class="badge-fallback">{{ badge.badge_name?.charAt(0) || '?' }}</span>
     </span>
     <span v-if="showName" class="badge-name">{{ badge.badge_name }}</span>
   </span>
 </template>
 
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue';
 import type { Badge } from '@/types/badge';
+import { getImageUrl } from '@/config/constants';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     badge?: Badge | null;
     size?: 'xs' | 'sm' | 'md' | 'lg';
@@ -43,9 +47,23 @@ withDefaults(
   }
 );
 
-const onImgError = (e: Event) => {
-  // Hide broken badge image gracefully
-  (e.target as HTMLImageElement).style.display = 'none';
+const imageFailed = ref(false);
+
+const resolvedIconUrl = computed(() => {
+  if (!props.badge?.icon_url) return null;
+  return getImageUrl(props.badge.icon_url, 128);
+});
+
+watch(
+  () => props.badge?.icon_url,
+  () => {
+    imageFailed.value = false;
+  },
+  { immediate: true }
+);
+
+const onImgError = () => {
+  imageFailed.value = true;
 };
 </script>
 
@@ -83,6 +101,20 @@ const onImgError = (e: Event) => {
   object-fit: contain;
   display: block;
   transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.badge-fallback {
+  width: 100%;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--badge-color, #888) 35%, #fff), var(--badge-color, #888));
+  color: #fff;
+  font-weight: 800;
+  text-transform: uppercase;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--badge-color, #888) 40%, transparent);
 }
 
 /* ── Badge name ──────────────────────────────────────────────────────────────── */
@@ -201,5 +233,9 @@ const onImgError = (e: Event) => {
 /* hover lift for all badges */
 .user-badge:hover .badge-icon {
   transform: scale(1.18) translateY(-2px);
+}
+
+.user-badge.is-fallback:hover .badge-fallback {
+  transform: scale(1.08) translateY(-1px);
 }
 </style>

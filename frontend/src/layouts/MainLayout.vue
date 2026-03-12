@@ -2,6 +2,7 @@
 <template>
   <div class="main-layout">
     <AppHeader />
+    <MegaphoneTicker />
     <main class="main-content">
       <slot />
     </main>
@@ -14,6 +15,7 @@
 import AppHeader from "@/components/layout/AppHeader.vue";
 import AppFooter from "@/components/layout/AppFooter.vue";
 import UnifiedChat from "@/components/common/UnifiedChat.vue";
+import MegaphoneTicker from "@/components/common/MegaphoneTicker.vue";
 </script>
 
 <style scoped>

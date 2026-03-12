@@ -8,20 +8,25 @@ export interface HistoryItem {
   chuong_moi_nhat: string;
   chuong_moi_nhat_so_chuong: number | null;
   chuong_slug: string | null;
+  last_read_chuong_id?: number;
   thoi_gian_doc: string;
 }
 
 export interface HistoryResponse {
   success: boolean;
-  history: HistoryItem[];
-  total_pages: number;
-  current_page: number;
+  data: HistoryItem[];
+  pagination: {
+    current_page: number;
+    total_pages: number;
+    total: number;
+    limit: number;
+  };
 }
 
-export const getReadingHistory = async (page = 1): Promise<HistoryResponse> => {
-  const response = await axios.get<HistoryResponse>("/api/history", {
-    params: { page }
-  });
+export const getReadingHistory = async (page = 1, limit?: number): Promise<HistoryResponse> => {
+  const params: { page: number; limit?: number } = { page };
+  if (limit != null) params.limit = limit;
+  const response = await axios.get<HistoryResponse>("/api/history", { params });
   return response.data;
 };
 

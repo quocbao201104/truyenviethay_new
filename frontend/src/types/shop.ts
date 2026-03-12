@@ -1,4 +1,4 @@
-﻿export interface AvatarFrame {
+export interface AvatarFrame {
   inventory_id: number;
   item_id: number;
   name: string;
@@ -19,7 +19,15 @@ export interface ShopItem {
   image_url: string | null;
   css_class: string | null;
   status: 'active' | 'hidden';
+  metadata?: Record<string, unknown> | null;
   created_at: string;
+}
+
+/** Pagination meta từ backend (shop/transactions, inventory/items) */
+export interface PaginationMeta {
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface InventoryItem {
@@ -29,7 +37,7 @@ export interface InventoryItem {
   quantity: number;
   is_equipped: boolean;
   expires_at: string | null;
-  acquired_from: 'shop_buy' | 'gacha' | 'quest_reward' | 'admin_gift';
+  acquired_from: 'shop_buy' | 'reward' | 'mail' | 'system' | 'gacha' | 'quest_reward' | 'admin_gift';
   created_at: string;
   updated_at: string;
   name: string;

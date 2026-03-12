@@ -1,4 +1,31 @@
+<template>
+  <div v-if="level" class="level-card">
+    <div class="level-header">
+      <div class="level-info">
+        <div class="level-badge" :class="getBadgeClass(level.level_id)">
+          <i class="fas fa-star"></i>
+          {{ level.name || `Cảnh Giới ${level.level_id}` }}
+        </div>
+        <span class="level-level">Tầng {{ level.level_id }}</span>
+      </div>
+      <router-link to="/tasks" class="view-task-btn">
+        Nhiệm Vụ <i class="fas fa-arrow-right"></i>
+      </router-link>
+    </div>
 
+    <div class="points-row">
+      <span class="points-label">Linh Lực</span>
+      <span class="points-value">{{ (points || 0).toLocaleString() }} / {{ (nextLevelPoints || 0).toLocaleString() }}</span>
+    </div>
+
+    <ProgressBar :value="progress" color="#4caf50" />
+
+    <div class="progress-text">
+      <span>{{ Math.round(progress) }}% hoàn thành</span>
+      <span v-if="nextLevelName" class="next-level-name">→ {{ nextLevelName }}</span>
+    </div>
+  </div>
+</template>
 
 <script>
 import ProgressBar from './ProgressBar.vue';
@@ -36,11 +63,11 @@ export default {
   methods: {
     getBadgeClass(id) {
         if (!id) return '';
-        if (id <= 5) return 'badge-bronze'; // 1-5
-        if (id <= 10) return 'badge-silver'; // 6-10
-        if (id <= 15) return 'badge-gold'; // 11-15
-        if (id <= 20) return 'badge-platinum'; // 16-20
-        return 'badge-diamond'; // > 20
+        if (id <= 5) return 'badge-bronze';
+        if (id <= 10) return 'badge-silver';
+        if (id <= 15) return 'badge-gold';
+        if (id <= 20) return 'badge-platinum';
+        return 'badge-diamond';
     }
   }
 }

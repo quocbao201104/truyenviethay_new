@@ -100,7 +100,7 @@
             </section>
 
             <section class="spirit-block">
-              <h3 class="sidebar-title-xianxia">📜 Căn Cơ Phân Loại</h3>
+              <h3 class="sidebar-title-xianxia">📜 Phân Loại</h3>
               <div class="tag-cloud-spirit">
                 <router-link 
                   v-for="cat in categories" 
@@ -139,7 +139,7 @@
             </div>
 
             <div class="sidebar-card-aura categories">
-              <h3 class="sidebar-title-xianxia">📜 Căn Cơ Phân Loại</h3>
+              <h3 class="sidebar-title-xianxia">📜 Phân Loại</h3>
               <div class="tag-cloud-spirit">
                 <router-link 
                   v-for="cat in categories" 
@@ -485,7 +485,7 @@ onMounted(() => {
   .spirit-more-link:hover, .spirit-more-link-mobile:hover { color: #34d399; }
 }
 
-/* CĂN CƠ PHÂN LOẠI (TAG CLOUD) */
+/* PHÂN LOẠI (TAG CLOUD) */
 .tag-cloud-spirit { display: flex; flex-wrap: wrap; gap: 10px; }
 
 .tag-pill-spirit {

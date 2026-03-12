@@ -7,7 +7,7 @@
     <!-- ========================================== -->
     <div v-if="isFirstSlide" class="mobile-static-banner mobile-only">
       <div class="mobile-bg-wrapper">
-        <img src="https://res.cloudinary.com/dg9ftuhv4/image/upload/v1772805142/truyenviethay/banners/banner-mobile.png" alt="Truyện Việt Hay Banner" class="mobile-bg-img" />
+        <img src="https://res.cloudinary.com/dg9ftuhv4/image/upload/f_auto,q_auto,w_800/v1772805142/truyenviethay/banners/banner-mobile.png" alt="Truyện Việt Hay Banner" class="mobile-bg-img" />
         <!-- Lớp phủ gradient đen lên phần chữ để đảm bảo dễ đọc -->
         <div class="mobile-vignette"></div>
       </div>

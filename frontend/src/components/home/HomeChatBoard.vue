@@ -23,25 +23,52 @@
         :key="index"
         :class="['chat-msg-item', { 'is-megaphone': msg.isMegaphone }]"
       >
-        <div class="avatar-wrapper">
-          <img
-            class="msg-avatar"
-            :src="getAvatarUrl(msg.avatar)"
-            alt="avatar"
-          />
-          <div v-if="msg.isMegaphone" class="crown-icon">
-            <i class="fas fa-crown"></i>
+        <div class="avatar-frame-zone" :class="msg.equipped_frame?.css_class">
+          <div class="avatar-wrapper">
+            <span v-if="msg.equipped_frame" class="aura-ring outer"></span>
+            <span v-if="msg.equipped_frame" class="aura-ring inner"></span>
+            <img
+              class="msg-avatar"
+              :src="getAvatarUrl(msg.avatar)"
+              alt="avatar"
+              crossorigin="anonymous"
+            />
+            <img
+              v-if="msg.equipped_frame?.image_url"
+              :src="msg.equipped_frame.image_url"
+              class="avatar-frame-overlay"
+              alt="frame"
+              crossorigin="anonymous"
+            />
+            <div v-if="msg.isMegaphone" class="crown-icon">
+              <i class="fas fa-crown"></i>
+            </div>
           </div>
         </div>
 
         <div class="msg-content">
           <div class="msg-info">
+            <div v-if="msg.level" class="level-badge" :class="['level-' + msg.level.type, 'level-id-' + msg.level.id]">
+              <i v-if="msg.level.type === 'author'" class="fas fa-feather-alt mr-1"></i>
+              <i v-else class="fas fa-medal mr-1"></i>
+            </div>
             <span class="msg-user">{{
               msg.fullName || msg.username || "Anonymous"
             }}</span>
+            <UserBadge v-if="msg.badge" :badge="msg.badge" size="xs" />
             <span class="msg-time">{{ formatTime(msg.timestamp) }}</span>
           </div>
-          <div class="msg-text">{{ msg.content }}</div>
+          <div class="msg-text-wrapper" :class="msg.equipped_chat_color?.css_class">
+            <img
+              v-if="msg.equipped_chat_color?.image_url"
+              :src="msg.equipped_chat_color.image_url"
+              alt="chat frame"
+              class="chat-bg-frame"
+            />
+            <div class="msg-text" :class="{ 'has-frame': msg.equipped_chat_color?.image_url || msg.equipped_chat_color?.css_class }">
+              {{ msg.content }}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -64,6 +91,7 @@
 import { ref, onMounted, watch, nextTick } from "vue";
 import { useChatStore } from "@/modules/chat/chat.store";
 import { getAvatarUrl } from "@/config/constants";
+import UserBadge from "@/modules/gamification/components/UserBadge.vue";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 
@@ -189,32 +217,110 @@ onMounted(() => {
 
 .chat-msg-item {
   display: flex;
+  align-items: flex-start;
   gap: 12px;
   transition: all 0.2s ease;
 }
 
+/* Outer zone: fixed width to absorb frame bleed without pushing text */
+.avatar-frame-zone {
+  flex-shrink: 0;
+  width: 52px;       /* 36 avatar + ~8px each side for frame */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 2px;
+}
+
 .avatar-wrapper {
   position: relative;
-  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
 }
 
 .msg-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%; 
   border: 1.5px solid rgba(255, 255, 255, 0.1);
   background: #1e293b;
+  z-index: 2;
+  object-fit: cover;
+  transform: scale(0.85); /* Slightly smaller to fit frame */
 }
 
+.avatar-frame-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1.35);
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Add aura rings for avatar frames if needed */
+.aura-ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.aura-ring.outer { inset: -5px; z-index: 1; }
+.aura-ring.inner { inset: -2px; z-index: 3; border: 1px solid rgba(255,255,255,0.2); }
+
+
+.msg-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding-top: 2px; /* Align with avatar better */
+}
+
+/* Message Info & Levels */
 .msg-info {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
 }
 
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* User Levels - Greenish/Blueish */
+.level-user {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Author Levels - Gold/Flame */
+.level-author {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  box-shadow: 0 0 5px rgba(245, 158, 11, 0.2);
+}
+
+/* Specific Tiers (Optional override) */
+.level-id-1 { color: #94a3b8; border-color: #475569; } /* Level 1: Phàm Nhân */
+
 .msg-user {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: #34d399; /* Tên người dùng màu nổi hơn */
 }
@@ -224,15 +330,41 @@ onMounted(() => {
   color: #64748b;
 }
 
+.msg-text-wrapper {
+  position: relative;
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.chat-bg-frame {
+  position: absolute;
+  top: -20px; 
+  left: -20px;
+  width: calc(100% + 40px);
+  height: calc(100% + 40px);
+  z-index: 0;
+  pointer-events: none;
+  object-fit: fill; 
+}
+
 .msg-text {
+  position: relative;
+  z-index: 1;
   font-size: 0.85rem;
   color: #cbd5e1;
   line-height: 1.5;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 6px 10px;
-  border-radius: 0 12px 12px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 12px;
+  border-radius: 2px 12px 12px 12px;
   display: inline-block;
 }
+
+.msg-text.has-frame {
+  background: transparent; 
+  padding: 10px 14px; /* Tăng padding để text không bị chữ đè lên viền */
+}
+
 
 /* Megaphone Style - Làm rực rỡ hơn */
 .is-megaphone {
@@ -254,6 +386,22 @@ onMounted(() => {
   color: #fbbf24;
   font-weight: 500;
   padding: 0;
+}
+
+/* Truyền Âm Phù (Tin nhắn thường) - Khung màu thanh tím lam */
+.chat-msg-item:not(.is-megaphone) {
+  background: linear-gradient(
+    90deg,
+    rgba(99, 102, 241, 0.08) 0%,
+    transparent 100%
+  );
+  padding: 10px;
+  border-radius: 12px;
+  border-left: 3px solid #6366f1;
+}
+
+.chat-msg-item:not(.is-megaphone) .msg-user {
+  color: #818cf8;
 }
 
 .crown-icon {

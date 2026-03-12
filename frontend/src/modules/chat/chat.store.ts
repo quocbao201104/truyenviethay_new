@@ -4,6 +4,7 @@ import { ref, computed } from "vue";
 import { useSocket } from "@/composables/useSocket";
 import axios from "@/utils/axios";
 import type { AvatarFrame } from "@/types/shop";
+import type { Badge } from "@/types/badge";
 
 export interface Message {
   userId: number;
@@ -15,6 +16,13 @@ export interface Message {
   isMegaphone?: boolean;
   author_id?: string;
   equipped_frame?: AvatarFrame | null;
+  equipped_chat_color?: any | null;
+  level?: {
+    id: number;
+    name?: string | null;
+    type?: string | null;
+  } | null;
+  badge?: Badge | null;
 }
 
 export interface ChatRoom {
@@ -35,6 +43,8 @@ export const useChatStore = defineStore("chat", () => {
   const worldMessages = ref<Message[]>([]);
   const onlineCountWorld = ref(0);
   const unreadWorld = ref(0);
+  const megaphoneQueue = ref<Message[]>([]);
+  const pendingMegaphoneActivation = ref(false); // set to true to activate megaphone in UnifiedChat
 
   const toRoomKey = (id: string | number) => String(id);
 
@@ -58,6 +68,9 @@ export const useChatStore = defineStore("chat", () => {
     isMegaphone: !!msg?.isMegaphone,
     author_id: msg?.author_id !== undefined && msg?.author_id !== null ? String(msg.author_id) : undefined,
     equipped_frame: msg?.equipped_frame || null,
+    equipped_chat_color: msg?.equipped_chat_color || null,
+    level: msg?.level || null,
+    badge: msg?.badge || null,
   });
 
   const toggleChat = () => {
@@ -125,12 +138,22 @@ export const useChatStore = defineStore("chat", () => {
     }
   };
 
-  const initListeners = () => {
-    if (!socket.value) return;
-
+  const rejoinRooms = () => {
+    if (!socket.value?.connected) return;
+    socket.value.emit("join_room", 1);
     if (activeTabId.value === "world") {
       socket.value.emit("join_world_chat");
     }
+    for (const [key] of joinedAuthorRooms.value) {
+      socket.value.emit("join_author_room", { authorId: key });
+    }
+  };
+
+  const initListeners = () => {
+    if (!socket.value) return;
+
+    socket.value.on("connect", rejoinRooms);
+    if (socket.value.connected) rejoinRooms();
 
     socket.value.off("new_message");
     socket.value.on("new_message", (msg: any) => {
@@ -141,9 +164,13 @@ export const useChatStore = defineStore("chat", () => {
 
     socket.value.off("new_megaphone");
     socket.value.on("new_megaphone", (msg: any) => {
-      worldMessages.value.push({ ...normalizeMessage(msg), isMegaphone: true });
+      const normalized = { ...normalizeMessage(msg), isMegaphone: true };
+      worldMessages.value.push(normalized);
       if (worldMessages.value.length > 50) worldMessages.value.shift();
       if (activeTabId.value !== "world") unreadWorld.value++;
+      // Add to ticker queue
+      megaphoneQueue.value.push(normalized);
+      if (megaphoneQueue.value.length > 10) megaphoneQueue.value.shift();
     });
 
     socket.value.off("author_room_joined");
@@ -189,6 +216,14 @@ export const useChatStore = defineStore("chat", () => {
     });
   };
 
+  // Opens world chat in megaphone mode (called from inventory when using Loa ID 3)
+  const openWithMegaphone = () => {
+    isOpen.value = true;
+    isMinimized.value = false;
+    activeTabId.value = "world";
+    pendingMegaphoneActivation.value = true;
+  };
+
   return {
     isOpen,
     isMinimized,
@@ -196,6 +231,8 @@ export const useChatStore = defineStore("chat", () => {
     worldMessages,
     onlineCountWorld,
     unreadWorld,
+    megaphoneQueue,
+    pendingMegaphoneActivation,
     joinedAuthorRooms,
     authorRoomsList,
     toggleChat,
@@ -204,6 +241,7 @@ export const useChatStore = defineStore("chat", () => {
     joinAuthorRoom,
     leaveRoom,
     initListeners,
+    openWithMegaphone,
   };
 });
 

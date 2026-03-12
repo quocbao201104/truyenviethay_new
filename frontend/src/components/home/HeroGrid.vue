@@ -4,8 +4,8 @@
     <div class="hero-mobile-static mobile-only">
       <div class="mobile-bg-wrapper">
         <img
-          src="https://res.cloudinary.com/dg9ftuhv4/image/upload/v1772805142/truyenviethay/banners/banner-mobile.png"
-          alt="Truyá»‡n Viá»‡t Hay Banner"
+          src="https://res.cloudinary.com/dg9ftuhv4/image/upload/f_auto,q_auto,w_800/v1772805142/truyenviethay/banners/banner-mobile.png"
+          alt="Truyện Việt Hay Banner"
           class="mobile-bg-img"
         />
         <!-- Lá»›p phá»§ gradient Ä‘en lÃªn pháº§n chá»¯ Ä‘á»ƒ Ä‘áº£m báº£o dá»… Ä‘á»c -->

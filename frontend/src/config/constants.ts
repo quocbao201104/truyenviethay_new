@@ -5,14 +5,14 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 // For now, it mirrors the API_BASE_URL logic or can be a separate env var.
 export const IMAGE_BASE_URL = import.meta.env.VITE_APP_IMAGE_URL || API_BASE_URL;
 
-export const getImageUrl = (path: string | null | undefined, width: number = 500): string => {
+export const getImageUrl = (path: string | null | undefined, width: number = 600): string => {
     if (!path) return '/placeholder.jpg'; // Or a default local asset
     
     // Cloudinary Optimization
     if (path.includes('cloudinary.com')) {
-        // Inject transformations (f_auto, q_auto, w_X)
+        // Inject transformations (w_X, f_auto, q_auto)
         // Regex looks for /upload/ and inserts params after it
-        return path.replace('/upload/', `/upload/f_auto,q_auto,w_${width}/`);
+        return path.replace('/upload/', `/upload/w_${width},f_auto,q_auto/`);
     }
 
     if (path.startsWith('http')) return path;
@@ -23,7 +23,15 @@ export const getImageUrl = (path: string | null | undefined, width: number = 500
 };
 
 export const getAvatarUrl = (path: string | null | undefined): string => {
-     if (!path || path.toLowerCase().includes('default-avatar') || path.toLowerCase().includes('avatar-default')) return '/img/avatar-default.png';
+     if (!path || path.toLowerCase().includes('default-avatar') || path.toLowerCase().includes('avatar-default')) {
+         return 'https://res.cloudinary.com/dg9ftuhv4/image/upload/w_200,h_200,c_fill,f_auto,q_auto/v1773304807/avatar-default_xtvub1.png';
+     }
+
+     // Cloudinary Optimization for Avatars
+     if (path.includes('cloudinary.com')) {
+         return path.replace('/upload/', '/upload/w_200,h_200,c_fill,f_auto,q_auto/');
+     }
+
      if (path.startsWith('http')) return path;
      
      const cleanPath = path.startsWith('/') ? path : `/${path}`;

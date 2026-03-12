@@ -3,7 +3,7 @@
     <section class="hero-gate">
       <div class="hero-bg-wrapper">
         <img 
-          src="https://res.cloudinary.com/dg9ftuhv4/image/upload/v1772805144/truyenviethay/banners/banner-desktop.jpg" 
+          src="https://res.cloudinary.com/dg9ftuhv4/image/upload/f_auto,q_auto,w_800/v1772805144/truyenviethay/banners/banner-desktop.jpg" 
           alt="TruyenVietHay Background" 
           class="hero-bg-image"
           crossorigin="anonymous"

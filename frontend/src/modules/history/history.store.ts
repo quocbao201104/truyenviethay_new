@@ -14,7 +14,9 @@ export const useHistoryStore = defineStore("history", () => {
     const error = ref<string | null>(null);
     const pagination = ref({
         page: 1,
-        total_pages: 1
+        total_pages: 1,
+        total: 0,
+        limit: 18
     });
 
     // Getters
@@ -22,15 +24,19 @@ export const useHistoryStore = defineStore("history", () => {
     const hasPrevPage = computed(() => pagination.value.page > 1);
 
     // Actions
-    const fetchHistory = async (page = 1) => {
+    const fetchHistory = async (page = 1, limit?: number) => {
         loading.value = true;
         error.value = null;
         try {
-            const response = await getReadingHistory(page);
-            
-            history.value = response.history || [];
-            pagination.value.page = response.current_page;
-            pagination.value.total_pages = response.total_pages;
+            const response = await getReadingHistory(page, limit);
+
+            history.value = response.data || [];
+            pagination.value = {
+                page: response.pagination.current_page,
+                total_pages: response.pagination.total_pages,
+                total: response.pagination.total,
+                limit: response.pagination.limit
+            };
         } catch (err: any) {
             // Handle 401 - redirect to login
             if (err.response?.status === 401) {

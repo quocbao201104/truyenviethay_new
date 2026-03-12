@@ -1,18 +1,28 @@
 <template>
   <div v-if="!mailbox || mailbox.length === 0" class="empty-state">Chưa có cơ duyên mới trong hộp thư.</div>
   <div v-else class="list-layout">
-    <article v-for="mail in mailbox" :key="mail.id" class="list-card">
+    <article v-for="mail in mailbox" :key="mail.id" class="list-card" :class="{ 'is-read': mail.status === 'read', 'is-claimed': mail.is_claimed }">
       <div class="card-content">
-        <p class="kicker">Thiên Đạo Ban Thưởng</p>
-        <h3 class="card-title">{{ mail.reward_name }}</h3>
-        <p class="card-desc">{{ mail.description || 'Có duyên đang chờ đạo hữu lĩnh ngộ.' }}</p>
+        <p class="kicker">{{ getSourceLabel(mail.mail_type) }}</p>
+        <h3 class="card-title">{{ mail.subject }}</h3>
+        <p class="card-desc">{{ mail.body || 'Có duyên đang chờ đạo hữu lĩnh ngộ.' }}</p>
+        <div v-if="mail.attachments && mail.attachments.length > 0" class="attachments-preview">
+           <span v-for="att in mail.attachments" :key="att.id" class="att-badge">
+             {{ att.reward_name || 'Vật phẩm' }} x{{ att.quantity }}
+           </span>
+        </div>
       </div>
       <div class="card-actions row">
-        <span class="qty-text">x{{ mail.quantity }}</span>
-        <button class="game-btn primary" :disabled="processingId === mail.id" @click="$emit('claim', mail.id)">
+        <button 
+          v-if="mail.is_claimable"
+          class="game-btn primary" 
+          :disabled="processingId === mail.id || mail.is_claimed" 
+          @click="$emit('claim', mail.id)"
+        >
           <i v-if="processingId === mail.id" class="fas fa-spinner fa-spin"></i>
-          <template v-else>Lĩnh Thưởng</template>
+          <template v-else>{{ mail.is_claimed ? 'Đã Nhận' : 'Lĩnh Thưởng' }}</template>
         </button>
+        <span v-else class="status-badge">{{ mail.is_claimed ? 'Hoàn tất' : 'Đã Xem' }}</span>
       </div>
     </article>
   </div>
@@ -25,6 +35,16 @@ defineProps({
 });
 
 defineEmits(['claim']);
+
+const getSourceLabel = (type) => {
+  const labels = {
+    reward: 'Thiên Đạo Ban Thưởng',
+    announcement: 'Truyền Tin',
+    compensation: 'Bồi Hoàn',
+    system: 'Hệ Thống',
+  };
+  return labels[type] || 'Hệ Thống';
+};
 </script>
 
 <style scoped>
@@ -62,8 +82,34 @@ defineEmits(['claim']);
   margin-bottom: 0.25rem;
 }
 
-.card-actions { display: flex; align-items: center; gap: 1rem; min-width: 180px; justify-content: flex-end; }
-.qty-text { color: #fbbf24; font-weight: 700; font-size: 1.1rem; }
+.attachments-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.att-badge {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.list-card.is-claimed {
+  opacity: 0.7;
+}
+
+.status-badge {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.card-actions { display: flex; align-items: center; gap: 1rem; min-width: 150px; justify-content: flex-end; }
 
 .game-btn {
   border: none; border-radius: 99px;

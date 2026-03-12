@@ -8,12 +8,12 @@ export const useCommentStore = defineStore("comment", () => {
     const loading = ref(false);
     const error = ref<string | null>(null);
 
-    const fetchComments = async (storyId: number) => {
+    const fetchComments = async (storyId: number, page = 1) => {
         loading.value = true;
         error.value = null;
         try {
-            const response = await getCommentsByStory(storyId);
-            comments.value = response.comments || [];
+            const response = await getCommentsByStory(storyId, page);
+            comments.value = response.data || [];
         } catch (err: any) {
             error.value = err.message || "Không thể tải bình luận";
         } finally {

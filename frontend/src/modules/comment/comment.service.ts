@@ -1,4 +1,4 @@
-﻿import axios from "@/utils/axios";
+import axios from "@/utils/axios";
 import type { Badge } from '@/types/badge';
 import type { AvatarFrame } from '@/types/shop';
 
@@ -25,9 +25,16 @@ export interface CreateCommentPayload {
     parent_id?: number | null;
 }
 
-export const getCommentsByStory = async (storyId: number): Promise<{ success: boolean; comments: Comment[] }> => {
+export interface CommentsResponse {
+    success: boolean;
+    data: Comment[];
+    pagination: { page: number; limit: number; total: number; total_pages: number };
+    total: number;
+}
+
+export const getCommentsByStory = async (storyId: number, page = 1): Promise<CommentsResponse> => {
     const response = await axios.get("/api/comments", {
-        params: { truyen_id: storyId }
+        params: { truyen_id: storyId, page }
     });
     return response.data;
 };

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="comment-section">
     <h3 class="section-title">Bình Luận ({{ comments.length }})</h3>
 
@@ -75,14 +75,18 @@
               :style="{ '--plate-color': comment.author_badge?.color || '#555e6b' }"
             >
               <span class="plate-shine"></span>
-              <span class="comment-author">{{ comment.author_name || 'Ẩn danh' }}</span>
+              <span class="comment-author" :class="{ 'is-story-author': comment.user_id === props.storyAuthorId }">
+                <i v-if="comment.user_id === props.storyAuthorId" class="fas fa-crown author-crown"></i>
+                {{ comment.author_name || 'Ẩn danh' }}
+              </span>
               <UserBadge :badge="comment.author_badge" size="sm" />
+              <span v-if="comment.user_id === props.storyAuthorId" class="author-badge-tag">Tác giả</span>
             </div>
             <p class="comment-text">{{ comment.content }}</p>
 
-            <!-- Admin delete (inside bubble, top-right) -->
+            <!-- Delete: admin | author | owner (backend checks 15p, no replies) -->
             <button
-              v-if="isAdmin"
+              v-if="canDelete(comment)"
               @click="handleDelete(comment.id)"
               class="btn-delete"
               title="Xóa bình luận"
@@ -136,12 +140,16 @@
                       :style="{ '--plate-color': reply.author_badge?.color || '#555e6b' }"
                     >
                       <span class="plate-shine"></span>
-                      <span class="comment-author">{{ reply.author_name || 'ẩn danh' }}</span>
+                      <span class="comment-author" :class="{ 'is-story-author': reply.user_id === props.storyAuthorId }">
+                        <i v-if="reply.user_id === props.storyAuthorId" class="fas fa-crown author-crown"></i>
+                        {{ reply.author_name || 'ẩn danh' }}
+                      </span>
                       <UserBadge :badge="reply.author_badge" size="sm" />
+                      <span v-if="reply.user_id === props.storyAuthorId" class="author-badge-tag">Tác giả</span>
                     </div>
                     <p class="comment-text">{{ reply.content }}</p>
                     <button
-                      v-if="isAdmin"
+                      v-if="canDelete(reply)"
                       @click="handleDelete(reply.id)"
                       class="btn-delete"
                       title="Xóa"
@@ -205,9 +213,13 @@ import type { Comment } from "./comment.service";
 import UserBadge from "@/components/gamification/UserBadge.vue";
 import { getAvatarUrl } from "@/config/constants";
 
-const props = defineProps<{
-  storyId: number;
-}>();
+const props = withDefaults(
+  defineProps<{
+    storyId: number;
+    storyAuthorId?: number | null;
+  }>(),
+  { storyAuthorId: null }
+);
 
 const store = useCommentStore();
 const authStore = useAuthStore();
@@ -226,7 +238,16 @@ const comments = computed(() => store.comments);
 const loading = computed(() => store.loading);
 const error = computed(() => store.error);
 const isLoggedIn = computed(() => !!authStore.token);
-const isAdmin = computed(() => authStore.user?.role === 'admin');
+const isAdmin = computed(() => authStore.user?.role === "admin");
+const userId = computed(() => authStore.user?.id ?? null);
+const isStoryAuthor = computed(
+  () => !!userId.value && !!props.storyAuthorId && props.storyAuthorId === userId.value
+);
+/** Hiện nút xóa: admin | author truyện | chủ comment (backend kiểm tra 15p, chưa reply) */
+const canDelete = (comment: Comment) =>
+  isAdmin.value ||
+  isStoryAuthor.value ||
+  (!!userId.value && comment.user_id === userId.value);
 
 onMounted(() => {
   if (props.storyId) store.fetchComments(props.storyId);
@@ -700,5 +721,31 @@ const onAvatarError = (e: Event) => {
 
 @keyframes plate-shine { 0% { transform: translateX(-160%); } 30%, 100% { transform: translateX(160%); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.comment-author.is-story-author {
+  color: #fbbf24 !important;
+  font-weight: 800;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
+}
+
+.author-crown {
+  margin-right: 4px;
+  color: #fbbf24;
+  font-size: 0.8em;
+  filter: drop-shadow(0 0 3px rgba(251, 191, 36, 0.5));
+}
+
+.author-badge-tag {
+  font-size: 0.65rem;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  color: #000;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-left: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  letter-spacing: 0.5px;
+}
 </style>
 

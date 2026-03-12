@@ -3,6 +3,7 @@ import axios from '@/utils/axios';
 import { useAppToast } from './useAppToast';
 import { useUserStore } from '@/modules/user/user.store';
 import type { InventoryItem, ShopItem } from '@/types/shop';
+import type { MailboxItem, TaskItem } from '@/types/gamification';
 
 export function useGamification() {
   const { showSuccessToast, showErrorToast } = useAppToast();
@@ -10,10 +11,10 @@ export function useGamification() {
 
   const userPoints = ref<any>(null);
   const currentLevel = ref<any>(null);
-  const tasks = ref<any[]>([]);
+  const tasks = ref<TaskItem[]>([]);
   const rewards = ref<any[]>([]);
   const userRewards = ref<any[]>([]);
-  const mailbox = ref<any[]>([]);
+  const mailbox = ref<MailboxItem[]>([]);
   const badges = ref<any[]>([]);
   const shopItems = ref<ShopItem[]>([]);
   const inventoryItems = ref<InventoryItem[]>([]);
@@ -79,11 +80,38 @@ export function useGamification() {
 
   const completeTask = async (taskId: number) => {
     try {
-      await axios.post('/api/tasks/complete', { task_id: taskId });
-      showSuccessToast('Hoan thanh nhiem vu! +Diem');
+      const res = await axios.post('/api/tasks/complete', { task_id: taskId });
+      showSuccessToast(res.data.message || 'Cap nhat nhiem vu thanh cong');
       await fetchTasks();
+      return res.data.data;
     } catch (e: any) {
       showErrorToast(e.response?.data?.message || 'Loi hoan thanh nhiem vu');
+      throw e;
+    }
+  };
+
+  const claimTask = async (taskId: number) => {
+    try {
+      const res = await axios.post('/api/tasks/claim', { task_id: taskId });
+      showSuccessToast(res.data.message || 'Nhan thuong thanh cong!');
+      await Promise.all([
+        fetchTasks(),
+        fetchUserCurrency(),
+        userStore.fetchUserProfile(),
+      ]);
+      const userId = userStore.profile?.id;
+      if (userId) {
+        await Promise.all([
+          fetchUserPoints(userId),
+          fetchCurrentLevel(userId),
+        ]);
+      } else {
+        await fetchTasks();
+      }
+      return res.data.data;
+    } catch (e: any) {
+      showErrorToast(e.response?.data?.message || 'Loi khi nhan thuong nhiem vu');
+      await fetchTasks();
       throw e;
     }
   };
@@ -104,7 +132,7 @@ export function useGamification() {
 
   const fetchMailbox = async () => {
     try {
-      const res = await axios.get('/api/user-rewards/mailbox');
+      const res = await axios.get('/api/mailbox');
       mailbox.value = res.data.data || [];
     } catch (e) {
       console.error('fetchMailbox:', e);
@@ -112,10 +140,20 @@ export function useGamification() {
     }
   };
 
-  const claimFromMailbox = async (userRewardId: number) => {
+  const readMail = async (mailId: number) => {
     try {
-      const res = await axios.post('/api/user-rewards/claim', { userRewardId });
-      showSuccessToast(res.data.message || 'Nhan qua thanh cong!');
+      const res = await axios.get(`/api/mailbox/${mailId}`);
+      return res.data.data;
+    } catch (e) {
+      console.error('readMail:', e);
+      return null;
+    }
+  };
+
+  const claimFromMailbox = async (mailId: number) => {
+    try {
+      const res = await axios.post(`/api/mailbox/${mailId}/claim`);
+      showSuccessToast(res.data.message || 'Nhận quà thành công!');
       await Promise.all([
         fetchMailbox(),
         fetchInventoryBadges(),
@@ -125,7 +163,7 @@ export function useGamification() {
       ]);
       return res.data.data;
     } catch (e: any) {
-      showErrorToast(e.response?.data?.message || 'Loi khi nhan qua');
+      showErrorToast(e.response?.data?.message || 'Lỗi khi nhận quà');
       throw e;
     }
   };
@@ -143,8 +181,12 @@ export function useGamification() {
   const equipBadge = async (rewardId: number) => {
     try {
       await axios.post('/api/inventory/equip', { rewardId });
-      showSuccessToast('Deo huy hieu thanh cong!');
-      await Promise.all([fetchInventoryBadges(), userStore.fetchUserProfile()]);
+      showSuccessToast('Thao tác huy hiệu thành công!');
+      await Promise.all([
+        fetchInventoryBadges(),
+        fetchInventoryItems(),
+        userStore.fetchUserProfile()
+      ]);
     } catch (e: any) {
       showErrorToast(e.response?.data?.message || 'Loi khi deo huy hieu');
       throw e;
@@ -180,9 +222,16 @@ export function useGamification() {
     }
   };
 
-  const fetchInventoryItems = async (itemType?: string, includeExpired = false) => {
+  const fetchInventoryItems = async (
+    itemType?: string,
+    includeExpired = false,
+    options?: { limit?: number; offset?: number }
+  ) => {
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, string | number> = {
+        limit: options?.limit ?? 100,
+        offset: options?.offset ?? 0,
+      };
       if (itemType) params.itemType = itemType;
       if (includeExpired) params.includeExpired = 'true';
       const res = await axios.get('/api/inventory/items', { params });
@@ -198,11 +247,20 @@ export function useGamification() {
   const equipInventoryItem = async (inventoryId: number) => {
     try {
       const res = await axios.post('/api/inventory/equip-item', { inventoryId });
-      showSuccessToast(res.data.message || 'Trang bi vat pham thanh cong!');
+      const consumed = res.data.data?.consumed;
+      showSuccessToast(consumed ? 'Sử dụng vật phẩm thành công!' : 'Trang bị vật phẩm thành công!');
       
       const userId = userStore.profile?.id;
-      const tasks = [fetchInventoryItems(), userStore.fetchUserProfile()];
-      if (res.data.data?.consumed && userId) {
+      const tasks: Promise<any>[] = [fetchInventoryItems(), userStore.fetchUserProfile()];
+      
+      const itemData = res.data.data;
+      
+      // If equipping a badge, we MUST refresh reward badges too for sync
+      if (itemData?.item_type === 'badge') {
+        tasks.push(fetchInventoryBadges());
+      }
+
+      if (consumed && userId) {
         tasks.push(fetchUserPoints(userId));
       }
       
@@ -214,9 +272,11 @@ export function useGamification() {
     }
   };
 
-  const fetchShopTransactions = async (limit = 20) => {
+  const fetchShopTransactions = async (limit = 50, offset = 0) => {
     try {
-      const res = await axios.get('/api/shop/transactions', { params: { limit } });
+      const res = await axios.get('/api/shop/transactions', {
+        params: { limit, offset },
+      });
       shopTransactions.value = res.data.data || [];
       return shopTransactions.value;
     } catch (e) {
@@ -261,8 +321,10 @@ export function useGamification() {
     upgradeLevel,
     fetchTasks,
     completeTask,
+    claimTask,
     fetchRewards,
     fetchMailbox,
+    readMail,
     claimFromMailbox,
     fetchInventoryBadges,
     equipBadge,
@@ -274,4 +336,3 @@ export function useGamification() {
     fetchUserCurrency,
   };
 }
-

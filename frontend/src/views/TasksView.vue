@@ -29,7 +29,12 @@
 
     <div class="content-area">
       <section v-show="activeTab === 'tasks'" class="panel animate-fadeIn">
-        <QuestList :tasks="orderedTasks" :loading="loading.tasks" />
+        <QuestList
+          :tasks="orderedTasks"
+          :loading="loading.tasks"
+          :processingTaskId="processingTask"
+          @claim="handleClaimTask"
+        />
       </section>
 
       <section v-show="activeTab === 'mailbox'" class="panel animate-fadeIn">
@@ -81,6 +86,7 @@ import { computed, ref, onMounted } from 'vue';
 import { useGamification } from '@/composables/useGamification';
 import { useAuthStore } from '@/modules/auth/auth.store';
 import { useUserStore } from '@/modules/user/user.store';
+import { useChatStore } from '@/modules/chat/chat.store';
 import { getAvatarUrl } from '@/config/constants';
 
 import HeroPanel from '@/modules/gamification/components/HeroPanel.vue';
@@ -103,6 +109,7 @@ export default {
   setup() {
     const authStore = useAuthStore();
     const userStore = useUserStore();
+    const chatStore = useChatStore();
 
     const {
       userPoints,
@@ -117,6 +124,7 @@ export default {
       fetchUserPoints,
       fetchCurrentLevel,
       fetchTasks,
+      claimTask,
       fetchUserCurrency,
       fetchMailbox,
       fetchInventoryBadges,
@@ -143,6 +151,7 @@ export default {
     ];
 
     const processingMailbox = ref(null);
+    const processingTask = ref(null);
     const processingEquip = ref(null);
     const processingUpgrade = ref(false);
     const processingBuy = ref(null);
@@ -156,7 +165,21 @@ export default {
     const heroName = computed(() => authStore.user?.full_name || authStore.user?.full_name || 'Đạo Hữu');
     const heroAvatarUrl = computed(() => getAvatarUrl(authStore.user?.avatar));
     const heroEquippedFrame = computed(() => authStore.user?.equipped_frame || null);
-    const equippedBadge = computed(() => (badges.value || []).find(b => b.is_equipped) || null);
+    const equippedBadge = computed(() => {
+      const rewardBadge = (badges.value || []).find(b => b.is_equipped);
+      if (rewardBadge) return rewardBadge;
+
+      const shopBadge = (inventoryItems.value || []).find(item => item.item_type === 'badge' && item.is_equipped);
+      if (shopBadge) {
+        return {
+          badge_name: shopBadge.name,
+          icon_url: shopBadge.image_url,
+          color: shopBadge.css_class || '#34d399',
+          rarity: 'rare'
+        };
+      }
+      return null;
+    });
 
     const filteredShopItems = computed(() => {
       const items = shopItems.value || [];
@@ -189,8 +212,8 @@ export default {
     const orderedTasks = computed(() => {
       const safeTasks = tasks.value || [];
       return [
-        ...safeTasks.filter((task) => task.status !== 'completed'),
         ...safeTasks.filter((task) => task.status === 'completed'),
+        ...safeTasks.filter((task) => task.status !== 'completed'),
       ];
     });
 
@@ -227,20 +250,20 @@ export default {
       isBuyModalOpen.value = true;
     };
 
-    const closeBuyModal = () => {
-      if (processingBuy.value) return;
+    const closeBuyModal = (force = false) => {
+      if (processingBuy.value && !force) return;
       isBuyModalOpen.value = false;
       buyModalItem.value = null;
     };
 
-    const handleConfirmBuy = async () => {
+    const handleConfirmBuy = async (qty = 1) => {
       if (!buyModalItem.value) return;
       processingBuy.value = buyModalItem.value.id;
       try {
-        await buyShopItem(buyModalItem.value.id, 1);
+        await buyShopItem(buyModalItem.value.id, qty);
         await fetchInventoryItems();
         await fetchUserCurrency();
-        closeBuyModal();
+        closeBuyModal(true); // pass force=true
       } finally {
         processingBuy.value = null;
       }
@@ -256,6 +279,15 @@ export default {
       }
     };
 
+    const handleClaimTask = async (taskId) => {
+      processingTask.value = taskId;
+      try {
+        await claimTask(taskId);
+      } finally {
+        processingTask.value = null;
+      }
+    };
+
     const handleEquipBadge = async (rewardId) => {
       processingEquip.value = rewardId;
       try {
@@ -266,10 +298,19 @@ export default {
     };
 
     const handleUseInventoryItem = async (item) => {
-      if (!item || !canEquipItem(item.item_type) || item.is_equipped) return;
-      processingInventoryItem.value = item.inventory_id;
+      if (!item || !canEquipItem(item.item_type)) return;
+
       try {
+        // Special case: Loa Truyền Âm (shop_item_id = 3) → open chat in megaphone mode
+        if (Number(item.item_id) === 3) {
+          chatStore.openWithMegaphone();
+          return;
+        }
+
+        processingInventoryItem.value = item.inventory_id;
         await equipInventoryItem(item.inventory_id);
+      } catch (e) {
+        console.error('[handleUseInventoryItem]', e);
       } finally {
         processingInventoryItem.value = null;
       }
@@ -323,7 +364,9 @@ export default {
       heroName,
       heroAvatarUrl,
       heroEquippedFrame,
+      equippedBadge,
       processingMailbox,
+      processingTask,
       processingEquip,
       processingUpgrade,
       processingBuy,
@@ -332,6 +375,7 @@ export default {
       buyModalItem,
       filteredShopItems,
       handleClaimMailbox,
+      handleClaimTask,
       handleEquipBadge,
       handleUseInventoryItem,
       handleUpgradeLevel,

@@ -33,9 +33,9 @@
 
         <div class="realm-badge-container">
           <div class="realm-badge">
-            <i class="fas fa-yin-yang aura-spin"></i>
+            <UserBadge v-if="equippedBadge" :badge="equippedBadge" size="md" class="magic-badge-glow" />
+            <i v-else class="fas fa-yin-yang aura-spin"></i>
             <span class="realm-name">{{ currentLevel.name }}</span>
-            <UserBadge v-if="equippedBadge" :badge="equippedBadge" size="md" />
           </div>
           
           <button
@@ -231,6 +231,7 @@ const frameEffectClass = computed(() => {
   padding: 3px;
   background: #050a14;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transform: scale(0.85);
 }
 
 .hero-frame {
@@ -321,6 +322,16 @@ const frameEffectClass = computed(() => {
   align-items: center;
   gap: 0.8rem;
   backdrop-filter: blur(5px);
+}
+
+.magic-badge-glow {
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 10px var(--badge-color, rgba(52, 211, 153, 0.5)));
+  animation: badge-pulse 2s infinite ease-in-out alternate;
+}
+
+@keyframes badge-pulse {
+  from { filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 8px var(--badge-color, rgba(52, 211, 153, 0.3))); }
+  to { filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 15px var(--badge-color, rgba(52, 211, 153, 0.8))); transform: scale(1.05); }
 }
 
 .aura-spin {

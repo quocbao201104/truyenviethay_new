@@ -23,22 +23,18 @@ export function useSocket() {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
     socket.value = io(apiUrl, {
-      query: { userId, token },
       auth: { token },
+      query: { token },
       transports: ['websocket']
     });
 
     socket.value.on('connect', () => {
       console.log('Connected to Spirit Realm (Socket.io)');
-      // Join World Chat Room by default
       socket.value?.emit('join_room', 1);
     });
 
     socket.value.on('new_notification', (data) => {
-      notificationStore.unreadCount++;
-      // Add to list if it matches current filter or we are in "all" view
-      notificationStore.notifications = [data, ...notificationStore.notifications];
-      
+      notificationStore.addRealtimeNotification(data);
       showSuccessToast(`[Thông báo mới] ${data.content}`);
     });
 
