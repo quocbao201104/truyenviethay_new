@@ -50,7 +50,7 @@
             </label>
             <div class="textarea-glow-wrapper">
               <textarea 
-                v-model="form.noi_dung"
+                v-model="form.content"
                 rows="25"
                 placeholder="Truyền năng lượng vào ngòi bút... Viết ra những dòng thiên cổ..."
                 required
@@ -95,7 +95,7 @@ const loading = ref(false);
 const form = ref({
     ten_chuong: '',
     so_chuong: null as number | null,
-    noi_dung: ''
+    content: ''
 });
 
 const goBack = () => {
@@ -109,7 +109,7 @@ const handleSubmit = async () => {
             truyen_id: storyId,
             tieu_de: form.value.ten_chuong, 
             so_chuong: form.value.so_chuong,
-            noi_dung: form.value.noi_dung
+            content: form.value.content
         };
 
         if (isEditMode.value) {
@@ -136,7 +136,7 @@ onMounted(async () => {
             if (found) {
                 form.value.ten_chuong = found.tieu_de || found.ten_chuong; 
                 form.value.so_chuong = found.so_chuong;
-                form.value.noi_dung = found.noi_dung;
+                form.value.content = found.content || "";
             } else {
                  showErrorToast("Không tìm thấy thông tin chương này.");
             }

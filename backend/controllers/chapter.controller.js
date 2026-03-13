@@ -1,13 +1,15 @@
 const ChapterModel = require("../models/chapter.model");
 const chapterService = require("../services/chapter.services"); 
 const slugify = require("../utils/slugify"); 
+const { uploadChapterJson } = require("../services/r2ChapterStorage.service");
+
 
 // Tác giả thêm chương mới (chờ duyệt)
 const createChapter = async (req, res) => {
   try {
-    const { truyen_id, so_chuong, tieu_de, noi_dung } = req.body;
+    const { truyen_id, so_chuong, tieu_de, content } = req.body;
 
-    if (!truyen_id || !so_chuong || !tieu_de || !noi_dung) {
+    if (!truyen_id || !so_chuong || !tieu_de || !content) {
       return res.status(400).json({ message: "Thiếu thông tin chương!" });
     }
 
@@ -17,9 +19,25 @@ const createChapter = async (req, res) => {
       truyen_id,
       so_chuong,
       tieu_de,
-      noi_dung,
       slug,
     });
+
+    try {
+      const { contentUrl, contentHash, contentLength } = await uploadChapterJson({
+        storyId: truyen_id,
+        chapterId: result.chapter_id,
+        title: tieu_de,
+        content,
+      });
+      await ChapterModel.updateChapterContentMeta(result.chapter_id, {
+        content_url: contentUrl,
+        content_hash: contentHash,
+        content_length: contentLength,
+      });
+    } catch (uploadErr) {
+      await ChapterModel.deleteChapter(result.chapter_id);
+      throw uploadErr;
+    }
 
     res.status(201).json({
       message: "Đã gửi chương chờ duyệt!",
@@ -162,20 +180,39 @@ const getChapterBySlug = async (req, res) => {
 const updateChapter = async (req, res) => {
   try {
     const chapterId = req.params.id;
-    const { tieu_de, noi_dung, so_chuong } = req.body;
+    const { tieu_de, content, so_chuong } = req.body;
 
-    if (!tieu_de || !noi_dung || !so_chuong) {
+    if (!tieu_de || !content || !so_chuong) {
       return res.status(400).json({ message: "Thiếu thông tin cập nhật!" });
     }
 
     const slug = slugify(tieu_de, { lower: true, strict: true });
 
+    const existing = await ChapterModel.getChapterById(chapterId);
+    if (!existing) {
+      return res.status(404).json({ message: "Không tìm thấy chương!" });
+    }
+
+    const { contentUrl, contentHash, contentLength } = await uploadChapterJson({
+      storyId: existing.truyen_id,
+      chapterId: chapterId,
+      title: tieu_de,
+      content,
+    });
+
     const affected = await ChapterModel.updateChapter(chapterId, {
       tieu_de,
-      noi_dung,
       so_chuong,
       slug,
     });
+
+    if (affected > 0) {
+      await ChapterModel.updateChapterContentMeta(chapterId, {
+        content_url: contentUrl,
+        content_hash: contentHash,
+        content_length: contentLength,
+      });
+    }
 
     if (affected === 0) {
       return res.status(404).json({ message: "Không tìm thấy chương!" });

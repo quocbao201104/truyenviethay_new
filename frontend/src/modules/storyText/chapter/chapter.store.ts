@@ -44,6 +44,30 @@ export const useChapterStore = defineStore("chapter", () => {
         }
     };
 
+    const hydrateChapterContent = async (chapter: Chapter, isPreload = false) => {
+        if (!chapter) return chapter;
+        if (!chapter.content_url) return chapter;
+
+        try {
+            const response = await fetch(chapter.content_url, { cache: "force-cache" });
+            if (!response.ok) {
+                throw new Error(`CDN fetch failed (${response.status})`);
+            }
+            const json = await response.json();
+            if (!json?.content) {
+                throw new Error("CDN payload missing content");
+            }
+            chapter.content = json.content;
+        } catch (err: any) {
+            if (!isPreload) {
+                error.value = "Không thể tải nội dung chương. Vui lòng thử lại.";
+            }
+            console.warn("CDN content fetch failed:", err?.message || err);
+        }
+
+        return chapter;
+    };
+
     const fetchChapter = async (slug: string, storySlug: string, isPreload = false) => {
         // Don't set global loading state for preloads
         if (!isPreload) {
@@ -66,6 +90,9 @@ export const useChapterStore = defineStore("chapter", () => {
             // Fetch from API
             console.log(`❌ Chapter Cache MISS: ${cacheKey} - Fetching...`);
             const data = await getChapterBySlug(slug, storySlug);
+            if (data) {
+                await hydrateChapterContent(data, isPreload);
+            }
             
             // Validate data before caching
             if (data) {
@@ -109,6 +136,9 @@ export const useChapterStore = defineStore("chapter", () => {
         error.value = null;
         try {
             const chap = await getChapterById(id);
+            if (chap) {
+                await hydrateChapterContent(chap, false);
+            }
             // Don't overwrite currentChapter if it's being used for reading view, 
             // but for editor we might want to return it or set it.
             // Let's just return it to keep it simple for the editor.

@@ -6,7 +6,7 @@ export interface Chapter {
   truyen_id: number;
   ten_chuong: string;
   slug: string;
-  noi_dung: string;
+  content_url?: string;
   so_chuong: number;
   truyen?: {
     id: number;

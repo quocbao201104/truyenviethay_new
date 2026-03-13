@@ -22,18 +22,17 @@ const updateChuongMoiNhat = async (truyen_id) => {
 };
 
 const ChapterModel = {
-  createChapter: async ({ truyen_id, so_chuong, tieu_de, noi_dung, slug }) => {
+  createChapter: async ({ truyen_id, so_chuong, tieu_de, slug }) => {
     const thoi_gian_dang = new Date();
     const [result] = await db.execute(
       `INSERT INTO chuong (
-        truyen_id, so_chuong, tieu_de, noi_dung, slug,
+        truyen_id, so_chuong, tieu_de, slug,
         thoi_gian_dang, trang_thai, is_chuong_mau
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         truyen_id,
         so_chuong,
         tieu_de,
-        noi_dung, // <-- Sử dụng cột noi_dung cho chương bình thường
         slug,
         thoi_gian_dang,
         "cho_duyet", 
@@ -68,9 +67,12 @@ const ChapterModel = {
   },
 
   getChapterById: async (chapter_id) => {
-    const [rows] = await db.execute(`SELECT * FROM chuong WHERE id = ?`, [
-      chapter_id,
-    ]);
+    const [rows] = await db.execute(
+      `SELECT id, truyen_id, so_chuong, tieu_de, slug, thoi_gian_dang, trang_thai,
+              ly_do_tu_choi, luot_xem, is_chuong_mau, content_url, content_hash, content_length
+       FROM chuong WHERE id = ?`,
+      [chapter_id]
+    );
     return rows[0];
   },
 
@@ -78,7 +80,8 @@ const ChapterModel = {
     // Tối ưu: Dùng so_chuong để điều hướng thay vì id
     const query = `
       SELECT 
-        c.*, 
+        c.id, c.truyen_id, c.so_chuong, c.tieu_de, c.slug, c.thoi_gian_dang,
+        c.trang_thai, c.luot_xem, c.content_url, c.content_hash, c.content_length,
         t.ten_truyen, 
         t.slug as truyen_slug,
         (SELECT slug FROM chuong WHERE truyen_id = c.truyen_id AND so_chuong < c.so_chuong AND trang_thai = 'da_duyet' ORDER BY so_chuong DESC LIMIT 1) as prev_chapter_slug,
@@ -106,21 +109,31 @@ const ChapterModel = {
     return null;
   },
 
-  updateChapter: async (id, { tieu_de, noi_dung, so_chuong, slug }) => {
+  updateChapter: async (id, { tieu_de, so_chuong, slug }) => {
     // Need truyen_id to update chuong_moi if needed
     const [chapter] = await db.query(`SELECT truyen_id, trang_thai FROM chuong WHERE id = ?`, [id]);
     
     const [result] = await db.execute(
       `UPDATE chuong 
-        SET tieu_de = ?, noi_dung = ?, so_chuong = ?, slug = ? 
+        SET tieu_de = ?, so_chuong = ?, slug = ? 
         WHERE id = ?`,
-      [tieu_de, noi_dung, so_chuong, slug, id]
+      [tieu_de, so_chuong, slug, id]
     );
     
     if (chapter && chapter.length > 0 && chapter[0].trang_thai === 'da_duyet') {
       await updateChuongMoiNhat(chapter[0].truyen_id);
     }
     
+    return result.affectedRows;
+  },
+
+  updateChapterContentMeta: async (id, { content_url, content_hash, content_length }) => {
+    const [result] = await db.execute(
+      `UPDATE chuong 
+        SET content_url = ?, content_hash = ?, content_length = ? 
+        WHERE id = ?`,
+      [content_url, content_hash, content_length, id]
+    );
     return result.affectedRows;
   },
 
@@ -144,15 +157,14 @@ const ChapterModel = {
   createSampleChapter: async (chapterData) => {
     await db.query(
       `INSERT INTO chuong (
-        truyen_id, so_chuong, tieu_de, noi_dung, noi_dung_chuong_mau,
+        truyen_id, so_chuong, tieu_de, noi_dung_chuong_mau,
         thoi_gian_dang, trang_thai, is_chuong_mau
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         chapterData.truyen_id,
         0, // Chương mẫu thường có số chương là 0 hoặc một giá trị đặc biệt
         "Chương mẫu",
-        chapterData.noi_dung, // <-- Satisfy NOT NULL constraint for noi_dung
-        chapterData.noi_dung, // <-- Also save to noi_dung_chuong_mau
+        chapterData.sample_content,
         chapterData.thoi_gian_dang,
         "chuong_mau", // Trạng thái đặc biệt cho chương mẫu
         1, // Đánh dấu đây là chương mẫu

@@ -6,7 +6,8 @@ export interface Chapter {
   ten_chuong: string; // Keep for compatibility
   tieu_de: string; // Backend field name
   slug: string;
-  noi_dung: string;
+  content_url?: string;
+  content?: string;
   so_chuong: number;
   created_at?: string;
   thoi_gian_dang?: string; // Backend field name

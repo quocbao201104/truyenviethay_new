@@ -103,7 +103,7 @@ const uploadStory = async (req, res) => {
 
     await ChapterModel.createSampleChapter({
       truyen_id: storyId,
-      noi_dung: data.chuong_mau,
+      sample_content: data.chuong_mau,
       thoi_gian_dang: now,
     });
 

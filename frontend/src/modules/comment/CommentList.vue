@@ -80,7 +80,6 @@
                 {{ comment.author_name || 'Ẩn danh' }}
               </span>
               <UserBadge :badge="comment.author_badge" size="sm" />
-              <span v-if="comment.user_id === props.storyAuthorId" class="author-badge-tag">Tác giả</span>
             </div>
             <p class="comment-text">{{ comment.content }}</p>
 

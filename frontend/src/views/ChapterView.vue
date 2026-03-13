@@ -87,7 +87,7 @@
         class="spirit-content-body animate-fadeIn"
         :class="fontFamily"
         :style="{ fontSize: fontSize + 'px' }"
-        v-html="formattedContent"
+        v-html="contentHtml"
       />
 
       <div class="chapter-spirit-footer">
@@ -110,22 +110,28 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, watch, ref, onBeforeUnmount } from "vue";
+import { onMounted, computed, watch, ref, onBeforeUnmount, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useChapterStore } from "@/modules/storyText/chapter/chapter.store";
 import { saveReadingHistory } from "@/modules/history/history.service";
 import { useAuthStore } from "@/modules/auth/auth.store";
+import { getChapterBySlug, getChapterById, type Chapter } from "@/modules/storyText/chapter/chapter.service";
 
 const route = useRoute();
 const router = useRouter();
 const store = useChapterStore();
 
-const chapter = computed(() => store.currentChapter);
+const chapterMeta = shallowRef<Chapter | null>(null);
+const chapter = computed(() => chapterMeta.value);
 const chapterList = computed(() => store.chapterList);
 
 const fontSize = ref(Number(localStorage.getItem('reading-font-size')) || 22);
 const fontFamily = ref(localStorage.getItem('reading-font-family') || "font-serif");
 const isDarkMode = ref(localStorage.getItem('reading-theme') !== 'light');
+
+const chapterContent = shallowRef<string>("");
+const contentHtml = shallowRef<string>("");
+let activeRequestId = 0;
 
 // Mobile Bubble State
 const isMobileControlOpen = ref(false);
@@ -177,16 +183,20 @@ const chapterTitle = computed(() => {
   return chapter.value.tieu_de.replace(/<\/?[^>]+(>|$)/g, "").trim();
 });
 
-const formattedContent = computed(() => {
-  if (!chapter.value?.noi_dung) return "";
-  let content = chapter.value.noi_dung
+const formatContent = (raw: string) => {
+  if (!raw) return "";
+  let content = raw
     .replace(/\r\n/g, "\n")
     .replace(/\n\n+/g, "</p><p>")
     .replace(/\n/g, "<br>");
   if (!content.startsWith("<p")) content = `<p>${content}`;
   if (!content.endsWith("</p>")) content = `${content}</p>`;
   return content;
-});
+};
+
+const updateContentHtml = () => {
+  contentHtml.value = chapterContent.value ? formatContent(chapterContent.value) : "";
+};
 
 const handleScroll = () => {
   const winScroll = document.documentElement.scrollTop;
@@ -235,20 +245,81 @@ const nextChapter = () => {
 
 const handleSelectChapter = (event: Event) => navigateToChapter((event.target as HTMLSelectElement).value);
 
+const fetchChapterMeta = async (chapterSlug: string, storySlug: string) => {
+  try {
+    return await getChapterBySlug(chapterSlug, storySlug);
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404 && /^\d+$/.test(chapterSlug)) {
+      return await getChapterById(Number(chapterSlug));
+    }
+    throw err;
+  }
+};
+
 const loadData = async () => {
   const chapterSlug = route.params.chapterSlug as string;
   const storySlug = route.params.storySlug as string;
   if (chapterSlug && storySlug) {
-    await store.fetchChapter(chapterSlug, storySlug);
-    if (chapter.value) {
-      // Save reading history for logged in user
-      if (useAuthStore().isLoggedIn) {
-        saveReadingHistory(chapter.value.truyen_id, chapter.value.id).catch(err => {
-          console.error("Failed to save reading history:", err);
-        });
+    const requestId = ++activeRequestId;
+    chapterContent.value = "";
+    contentHtml.value = "<p>Đang tải chương...</p>";
+
+    try {
+      const meta = await fetchChapterMeta(chapterSlug, storySlug);
+      if (requestId !== activeRequestId) return;
+      chapterMeta.value = meta;
+
+      if (meta) {
+        // Save reading history for logged in user
+        if (useAuthStore().isLoggedIn) {
+          saveReadingHistory(meta.truyen_id, meta.id).catch(err => {
+            console.error("Failed to save reading history:", err);
+          });
+        }
+        if (chapterList.value.length === 0 || chapterList.value[0].truyen_id !== meta.truyen_id) {
+          await store.fetchChapterList(meta.truyen_id);
+        }
       }
-      if (chapterList.value.length === 0 || chapterList.value[0].truyen_id !== chapter.value.truyen_id) {
-        await store.fetchChapterList(chapter.value.truyen_id);
+
+      let rawContent = "";
+      if (meta?.content_url) {
+        const r = await fetch(meta.content_url, { cache: "force-cache" });
+        if (!r.ok) throw new Error(`CDN fetch failed (${r.status})`);
+        const json = await r.json();
+        rawContent = json?.content || "";
+      } else if (meta?.content) {
+        rawContent = meta.content;
+      }
+
+      if (requestId !== activeRequestId) return;
+      chapterContent.value = rawContent;
+      updateContentHtml();
+
+      // Prefetch next chapter in background (warm CDN cache)
+      const nextSlug = meta?.navigation?.next_slug;
+      if (nextSlug) {
+        getChapterBySlug(nextSlug, storySlug)
+          .then((nextMeta) => {
+            if (nextMeta?.content_url) {
+              fetch(nextMeta.content_url, { cache: "force-cache" }).catch(() => {});
+            }
+          })
+          .catch(() => {});
+      }
+    } catch (err: any) {
+      if (requestId !== activeRequestId) return;
+      chapterContent.value = "";
+      const status = err?.response?.status;
+      if (status === 404) {
+        contentHtml.value = "<p>Chương không tồn tại hoặc đã bị ẩn.</p>";
+      } else {
+        contentHtml.value = "<p>Không thể tải nội dung chương. Vui lòng thử lại.</p>";
+      }
+      console.error("Chapter load error:", err?.message || err);
+    } finally {
+      if (requestId === activeRequestId) {
+        // No-op: contentHtml already set to final state
       }
     }
   }

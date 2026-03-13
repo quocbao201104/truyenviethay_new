@@ -200,7 +200,7 @@
              Tầng {{ selectedChapter.so_chuong }}: {{ selectedChapter.tieu_de }}
            </h3>
            
-           <div class="chapter-spirit-preview scrollbar-magic" v-html="selectedChapter.noi_dung || 'Chưa thể tải nội dung tầng này.'"></div>
+           <div class="chapter-spirit-preview scrollbar-magic" v-html="selectedChapterContent || 'Chưa thể tải nội dung tầng này.'"></div>
            
            <div v-if="selectedChapter.ly_do_tu_choi" class="mt-4 p-4 bg-rose-900/20 border border-rose-500/30 rounded-xl">
                <h4 class="text-rose-400 font-bold text-sm mb-1"><i class="fas fa-exclamation-circle"></i> Thiên Âm Khiển Trách (Lý do phong ấn):</h4>
@@ -317,17 +317,22 @@ const closeChapterModal = () => { isChapterModalOpen.value = false; currentStory
 // Xem chi tiết một chương
 const isChapterDetailModalOpen = ref(false);
 const selectedChapter = ref<any>(null);
+const selectedChapterContent = ref<string>("");
 const openChapterDetail = async (chapter: any) => {
-  // Nếu API list chương không trả về noi_dung, bạn cần fetch lại chi tiết chương ở đây.
-  if (!chapter.noi_dung) {
-    try {
-      selectedChapter.value = await chapterStore.fetchChapterById(chapter.id);
-    } catch (error) {
-       toast.error("Thiên cơ bị che khuất, không thể tải nội dung tầng chương này.");
-       return;
+  selectedChapterContent.value = "";
+  try {
+    selectedChapter.value = await chapterStore.fetchChapterById(chapter.id);
+    if (selectedChapter.value?.content_url) {
+      const res = await fetch(selectedChapter.value.content_url, { cache: "force-cache" });
+      if (!res.ok) throw new Error(`CDN fetch failed (${res.status})`);
+      const json = await res.json();
+      selectedChapterContent.value = json?.content || "";
+    } else if (selectedChapter.value?.content) {
+      selectedChapterContent.value = selectedChapter.value.content;
     }
-  } else {
-    selectedChapter.value = chapter; 
+  } catch (error) {
+     toast.error("Thiên cơ bị che khuất, không thể tải nội dung tầng chương này.");
+     return;
   }
   isChapterDetailModalOpen.value = true;
 };
