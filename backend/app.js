@@ -15,6 +15,9 @@ const errorMiddleware = require("./middleware/errorHandler");
 
 const app = express();
 
+// Trust first proxy (Cloudflare / reverse proxy) for correct IP detection
+app.set("trust proxy", 1);
+
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173",

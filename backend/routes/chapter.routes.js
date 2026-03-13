@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const chapterController = require("../controllers/chapter.controller");
 const { authenticateToken, authorizeRoles, optionalAuthenticateToken } = require("../middleware/auth");
+const { chapterViewLimiter } = require("../middleware/rateLimiters");
 // const {
 // validateCreateChapter,
 // validateUpdateChapter,
@@ -55,7 +56,7 @@ router.put(
 );
 
 // Tăng lượt xem chương (Explicit call từ frontend sau timeout/scroll)
-router.post("/:id/view", optionalAuthenticateToken, chapterController.incrementChapterView);
+router.post("/:id/view", optionalAuthenticateToken, chapterViewLimiter, chapterController.incrementChapterView);
 
 router.delete(
   "/:id",

@@ -131,6 +131,7 @@ const isDarkMode = ref(localStorage.getItem('reading-theme') !== 'light');
 
 const chapterContent = shallowRef<string>("");
 const contentHtml = shallowRef<string>("");
+const contentLoaded = ref(false);
 let activeRequestId = 0;
 
 // Mobile Bubble State
@@ -146,7 +147,7 @@ const isViewCounted = ref(false);
 let viewTimer: ReturnType<typeof setTimeout> | null = null;
 
 const triggerViewIncrement = () => {
-  if (isViewCounted.value || !chapter.value?.id) return;
+  if (isViewCounted.value || !chapter.value?.id || !contentLoaded.value) return;
   isViewCounted.value = true;
   store.incrementView(chapter.value.id);
   if (viewTimer) clearTimeout(viewTimer);
@@ -211,7 +212,7 @@ const handleScroll = () => {
   }
   
   // Trigger view if scrolled significantly (300px)
-  if (winScroll > 300 && !isViewCounted.value) {
+  if (contentLoaded.value && winScroll > 300 && !isViewCounted.value) {
     triggerViewIncrement();
   }
 
@@ -264,6 +265,9 @@ const loadData = async () => {
     const requestId = ++activeRequestId;
     chapterContent.value = "";
     contentHtml.value = "<p>Đang tải chương...</p>";
+    contentLoaded.value = false;
+    if (viewTimer) clearTimeout(viewTimer);
+    isViewCounted.value = false;
 
     try {
       const meta = await fetchChapterMeta(chapterSlug, storySlug);
@@ -295,6 +299,8 @@ const loadData = async () => {
       if (requestId !== activeRequestId) return;
       chapterContent.value = rawContent;
       updateContentHtml();
+      contentLoaded.value = true;
+      startViewTimer();
 
       // Prefetch next chapter in background (warm CDN cache)
       const nextSlug = meta?.navigation?.next_slug;
@@ -311,6 +317,8 @@ const loadData = async () => {
       if (requestId !== activeRequestId) return;
       chapterContent.value = "";
       const status = err?.response?.status;
+      contentLoaded.value = false;
+      if (viewTimer) clearTimeout(viewTimer);
       if (status === 404) {
         contentHtml.value = "<p>Chương không tồn tại hoặc đã bị ẩn.</p>";
       } else {
@@ -328,7 +336,6 @@ const loadData = async () => {
 onMounted(() => {
   loadData();
   window.addEventListener('scroll', handleScroll);
-  startViewTimer();
 });
 
 onBeforeUnmount(() => {
@@ -338,7 +345,6 @@ onBeforeUnmount(() => {
 
 watch(() => [route.params.chapterSlug, route.params.storySlug], () => {
   loadData();
-  startViewTimer(); // Reset timer for new chapter
 });
 </script>
 

@@ -310,32 +310,6 @@ const getStoriesByUserId = async (req, res) => {
   }
 };
 
-const incrementViewCount = async (req, res) => {
-  try {
-    const { storyId } = req.body;
-
-    if (!storyId) {
-      return res.status(400).json({
-        success: false,
-        message: "Thiếu storyId"
-      });
-    }
-
-    await StoryModel.incrementViewCount(storyId);
-
-    res.json({
-      success: true,
-      message: "Đã tăng lượt xem"
-    });
-  } catch (error) {
-    console.error("incrementViewCount error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Lỗi server khi tăng lượt xem"
-    });
-  }
-};
-
 const getTopMonthlyStories = async (req, res) => {
   try {
     const limit = req.query.limit;
@@ -369,7 +343,6 @@ module.exports = {
   getMyStories,
   getStoryBySlug,
   getPublicStories,
-  incrementViewCount,
   getTopMonthlyStories,
   getHotStories,
 };

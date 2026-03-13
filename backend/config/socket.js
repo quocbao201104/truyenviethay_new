@@ -48,6 +48,7 @@ const initSocket = (server) => {
       io.emit("world_presence_update", { count });
     });
     socket.joinedAuthorRooms = new Set();
+    socket.inWorldChat = false;
 
     if (userId) {
       onlineStatusService.userConnected(userId);
@@ -75,16 +76,22 @@ const initSocket = (server) => {
     });
 
     socket.on("join_world_chat", async () => {
+      socket.inWorldChat = true;
       if (!userId) {
         await onlineStatusService.worldGuestJoined(socket.id);
+      } else {
+        await onlineStatusService.worldUserJoined(userId, socket.id);
       }
       const count = await onlineStatusService.getWorldOnlineCount();
       io.emit("world_presence_update", { count });
     });
 
     socket.on("leave_world_chat", async () => {
+      socket.inWorldChat = false;
       if (!userId) {
         await onlineStatusService.worldGuestLeft(socket.id);
+      } else {
+        await onlineStatusService.worldUserLeft(userId, socket.id);
       }
       const count = await onlineStatusService.getWorldOnlineCount();
       io.emit("world_presence_update", { count });
@@ -128,6 +135,13 @@ const initSocket = (server) => {
     socket.on("disconnect", async () => {
       logger.info(`Client disconnected: ${socket.id}`);
       await onlineStatusService.sessionDisconnected(socket.id);
+      if (socket.inWorldChat) {
+        if (!userId) {
+          await onlineStatusService.worldGuestLeft(socket.id);
+        } else {
+          await onlineStatusService.worldUserLeft(userId, socket.id);
+        }
+      }
       const count = await onlineStatusService.getWorldOnlineCount();
       io.emit("world_presence_update", { count });
 
@@ -162,5 +176,4 @@ const getIO = () => {
 };
 
 module.exports = { initSocket, getIO };
-
 

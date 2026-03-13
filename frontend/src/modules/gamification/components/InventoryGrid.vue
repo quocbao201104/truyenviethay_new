@@ -41,7 +41,7 @@
 
         <span class="slot-qty">x{{ item.quantity }}</span>
         <span v-if="item.is_equipped" class="slot-state equipped-text">Đang dùng </span>
-        <span v-else-if="canEquipItem(item.item_type)" class="slot-state use-text">Dùng ngay</span>
+        <span v-else-if="canEquipItem(item.item_type)" class="slot-state use-text">Sử dụng</span>
 
         <span v-if="processingItemId === item.inventory_id" class="slot-loading">
           <i class="fas fa-spinner fa-spin"></i>
@@ -81,7 +81,7 @@
 
           <span class="badge-tip desktop-tip">
             <strong>{{ badge.badge_name }}</strong>
-            <small>{{ badge.is_equipped ? 'Dang mac' : 'Cham de mac' }}</small>
+            <small>{{ badge.is_equipped ? 'Đang đeo' : 'Chạm để đeo' }}</small>
           </span>
 
           <span class="badge-tip-mobile" v-if="activeBadgeHint === badge.reward_id">

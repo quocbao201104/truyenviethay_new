@@ -69,9 +69,6 @@ router.put(
   storyController.approveOrRejectStory
 );
 
-// Tăng lượt xem (không cần auth - public action)
-// IMPORTANT: Must be BEFORE generic POST "/" route
-router.post("/increment-view", storyController.incrementViewCount);
 
 // Định nghĩa route ĐĂNG TRUYỆN MỚI
 router.post(

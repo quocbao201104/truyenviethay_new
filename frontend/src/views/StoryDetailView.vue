@@ -223,7 +223,6 @@ import { useHistoryStore } from '@/modules/history/history.store';
 import { useChatStore } from '@/modules/chat/chat.store';
 import CommentList from '@/modules/comment/CommentList.vue';
 import SkeletonLoader from '@/components/common/SkeletonLoader.vue';
-import { incrementViewCount } from "@/modules/storyText/story.service";
 import { getImageUrl } from "@/config/constants";
 
 const route = useRoute();

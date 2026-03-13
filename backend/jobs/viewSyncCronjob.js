@@ -1,7 +1,7 @@
 /**
  * View Sync Cronjob
  *
- * Chạy định kỳ mỗi 5 phút để:
+ * Chạy định kỳ mỗi 1 phút để:
  * 1. Lấy toàn bộ view counts từ node-cache (buffer)
  * 2. Bulk update vào MySQL (truyen_new.luot_xem, chuong.luot_xem)
  * 3. Cập nhật truyen_views (lượt xem theo ngày)
@@ -133,7 +133,7 @@ function startViewSyncCron() {
     });
   });
 
-  logger.info(`[ViewSync] Cronjob started: runs every 5 minutes (${CRON_SCHEDULE})`);
+  logger.info(`[ViewSync] Cronjob started: runs every 1 minute (${CRON_SCHEDULE})`);
 }
 
 module.exports = {

@@ -451,27 +451,6 @@ if (ids.length > 0) {
     };
   },
 
-  incrementViewCount: async (storyId) => {
-    // 1. Update total views and recalculate hot_score
-    await db.query(
-      `UPDATE truyen_new 
-       SET luot_xem = luot_xem + 1,
-           hot_score = (rating * 0.4) + (rating_count * 0.3) + ((luot_xem + 1) * 0.3)
-       WHERE id = ?`,
-      [storyId]
-    );
-
-    // 2. Upsert daily views
-    await db.query(
-      `INSERT INTO truyen_views (truyen_id, ngay_xem, so_luot_xem) 
-       VALUES (?, CURDATE(), 1) 
-       ON DUPLICATE KEY UPDATE so_luot_xem = so_luot_xem + 1`,
-      [storyId]
-    );
-    
-    return { success: true };
-  },
-
   getTopMonthlyStories: async (limit = 10) => {
     const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
     const cacheKey = `topMonthly:${safeLimit}`;

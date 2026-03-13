@@ -23,11 +23,10 @@
           <aside class="filters-sidebar-xianxia">
             <div class="sidebar-inner">
               
-              <!-- Search Input (Linh Lực Tìm Kiếm) -->
               <div class="filter-block">
                 <div class="block-header">
                   <i class="fas fa-wand-magic-sparkles"></i>
-                  <h3>Linh Lực Tìm Kiếm</h3>
+                  <h3>Thần Thức Tìm Kiếm</h3>
                 </div>
                 <div class="aura-search-wrapper">
                   <input
@@ -47,7 +46,7 @@
               <div class="filter-block">
                 <div class="block-header">
                   <i class="fas fa-scroll"></i>
-                  <h3>Phân Loại Căn Cơ</h3>
+                  <h3>Phân Loại</h3>
                 </div>
                 <div v-if="loadingGenres" class="filter-loading">
                   <i class="fas fa-yin-yang fa-spin"></i>

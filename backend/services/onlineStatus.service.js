@@ -4,6 +4,8 @@ const logger = require("../utils/logger");
 const REDIS_ONLINE_USERS_KEY = "online_users";
 const REDIS_TOTAL_SESSIONS_KEY = "total_sessions";
 const REDIS_WORLD_GUESTS_KEY = "world_chat_guests"; // specifically for guests
+const REDIS_WORLD_USERS_KEY = "world_chat_users"; // logged-in users in world chat
+const REDIS_WORLD_USER_SOCKETS_PREFIX = "world_chat_user_sockets:"; // per-user sockets in world chat
 
 const OnlineStatusService = {
   /**
@@ -105,9 +107,40 @@ const OnlineStatusService = {
     }
   },
 
+  /**
+   * Track logged-in users in world chat (dedupe multi-tab by userId)
+   */
+  worldUserJoined: async (userId, socketId) => {
+    if (!userId || !socketId) return;
+    const key = `${REDIS_WORLD_USER_SOCKETS_PREFIX}${userId}`;
+    try {
+      await redis.sadd(key, socketId);
+      const count = await redis.scard(key);
+      if (count === 1) {
+        await redis.sadd(REDIS_WORLD_USERS_KEY, userId);
+      }
+    } catch (err) {
+      logger.error("Error in worldUserJoined:", err);
+    }
+  },
+
+  worldUserLeft: async (userId, socketId) => {
+    if (!userId || !socketId) return;
+    const key = `${REDIS_WORLD_USER_SOCKETS_PREFIX}${userId}`;
+    try {
+      await redis.srem(key, socketId);
+      const count = await redis.scard(key);
+      if (count === 0) {
+        await redis.srem(REDIS_WORLD_USERS_KEY, userId);
+      }
+    } catch (err) {
+      logger.error("Error in worldUserLeft:", err);
+    }
+  },
+
   getWorldOnlineCount: async () => {
     try {
-      const loggedInCount = await redis.scard(REDIS_ONLINE_USERS_KEY);
+      const loggedInCount = await redis.scard(REDIS_WORLD_USERS_KEY);
       const guestWorldCount = await redis.scard(REDIS_WORLD_GUESTS_KEY);
       return loggedInCount + guestWorldCount;
     } catch (err) {

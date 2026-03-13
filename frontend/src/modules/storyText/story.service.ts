@@ -150,15 +150,6 @@ export const getMyStories = async (params: any) => {
   return response.data;
 };
 
-export const incrementViewCount = async (
-  storyId: number,
-): Promise<{ success: boolean; message: string }> => {
-  const response = await axios.post("/api/truyen/increment-view", {
-    storyId,
-  });
-  return response.data;
-};
-
 export const getTopMonthlyStories = async (limit: number = 10) => {
   const response = await axios.get<{ data: Story[] }>("/api/truyen/top-thang", {
     params: { limit },
