@@ -1,6 +1,5 @@
 ﻿<template>
   <div class="hero-grid-container" v-if="stories.length > 0">
-    <!-- MOBILE HERO STATIC BANNER -->
     <div class="hero-mobile-static mobile-only">
       <div class="mobile-bg-wrapper">
         <img
@@ -8,7 +7,6 @@
           alt="Truyện Việt Hay Banner"
           class="mobile-bg-img"
         />
-        <!-- Lá»›p phá»§ gradient Ä‘en lÃªn pháº§n chá»¯ Ä‘á»ƒ Ä‘áº£m báº£o dá»… Ä‘á»c -->
         <div class="mobile-vignette"></div>
       </div>
 
@@ -22,7 +20,7 @@
           </div>
         </h1>
 
-        <p class="slogan-mobile">VẬN GIẢI KHAI NGỮ - TIÊN LỮ THỐNG THIÊN</p>
+        <p class="slogan-mobile">VẠN GIẢI KHAI NGỮ - TIÊN LỮ THÔNG THIÊN</p>
 
         <div class="action-buttons-mobile">
           <router-link to="/truyen-chu" class="spirit-btn-sm emerald">
@@ -37,7 +35,6 @@
       </div>
     </div>
 
-    <!-- DESKTOP: Main Highlight (Left) -->
     <div class="main-highlight desktop-only">
       <transition name="fade" mode="out-in">
         <div class="highlight-content" :key="mainStory.id || 'default'">
@@ -87,7 +84,6 @@
             </div>
           </div>
 
-          <!-- Floating Cover Image -->
           <div class="floating-cover">
             <img
               :src="getImageUrl(mainStory.anh_bia)"
@@ -95,13 +91,10 @@
               class="book-cover-3d"
             />
           </div>
-          <!-- end floating-cover -->
-        </div>
-        <!-- end highlight-content -->
-      </transition>
+          </div>
+        </transition>
     </div>
 
-    <!-- DESKTOP: Live Chat (Right) - Replacing ThiÃªn Báº£ng -->
     <div class="side-trending desktop-only">
       <HomeChatBoard />
     </div>
@@ -184,7 +177,7 @@ const truncateText = (text: string, length: number) => {
 </script>
 
 <style scoped>
-/* ===== CORE LAYOUT ===== */
+/* ===== CORE LAYOUT (GIỮ NGUYÊN DESKTOP) ===== */
 .hero-grid-container {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -195,15 +188,12 @@ const truncateText = (text: string, length: number) => {
   align-items: stretch;
 }
 
-/* =========================================
-   LEFT MAIN HIGHLIGHT (KHU Vá»°C Tá»¤ LINH)
-   ========================================= */
 .main-highlight {
   position: relative;
   border-radius: 20px;
   overflow: hidden;
-  background: #0b0f19; /* Ná»n sÃ¢u nhÆ° hÆ° khÃ´ng */
-  border: 1px solid rgba(52, 211, 153, 0.15); /* Viá»n linh khÃ­ nháº¡t */
+  background: #0b0f19; 
+  border: 1px solid rgba(52, 211, 153, 0.15); 
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -262,7 +252,6 @@ const truncateText = (text: string, length: number) => {
   align-items: center;
 }
 
-/* Glassmorphism Background */
 .main-cover-bg {
   position: absolute;
   top: 0;
@@ -272,15 +261,14 @@ const truncateText = (text: string, length: number) => {
   min-height: 0;
   box-sizing: border-box;
   object-fit: cover;
-  filter: blur(45px) brightness(0.6) saturate(1.2); /* Má» má»‹t, tÄƒng bÃ£o hÃ²a mÃ u */
+  filter: blur(45px) brightness(0.6) saturate(1.2);
   z-index: 1;
-  transform: scale(1.1); /* TrÃ¡nh viá»n tráº¯ng khi blur */
+  transform: scale(1.1);
 }
 
 .overlay-gradient {
   position: absolute;
   inset: 0;
-  /* Phá»§ tá»« Ä‘en Ä‘áº·c (chá»— chá»©a chá»¯) sang trong suá»‘t má» áº£o (chá»— chá»©a áº£nh 3D) */
   background: linear-gradient(
     90deg,
     #05080f 0%,
@@ -297,7 +285,6 @@ const truncateText = (text: string, length: number) => {
   color: white;
 }
 
-/* Badge dáº¡ng Ngá»c Giáº£n */
 .badge-hot {
   display: inline-flex;
   align-items: center;
@@ -343,7 +330,7 @@ const truncateText = (text: string, length: number) => {
 }
 .main-meta i {
   color: #34d399;
-} /* Äiá»ƒm nháº¥n aura xanh */
+} 
 
 .main-summary {
   color: #cbd5e1;
@@ -358,7 +345,6 @@ const truncateText = (text: string, length: number) => {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-/* NÃºt HÃ nh Äá»™ng (Tá»¥ Linh Äan) */
 .actions {
   display: flex;
   gap: 16px;
@@ -390,7 +376,6 @@ const truncateText = (text: string, length: number) => {
   transition: all 0.3s;
 }
 
-/* BÃ¬a Truyá»‡n 3D Tá»a HÃ o Quang */
 .floating-cover {
   position: absolute;
   right: 50px;
@@ -408,7 +393,6 @@ const truncateText = (text: string, length: number) => {
   box-sizing: border-box;
   object-fit: cover;
   border-radius: 12px;
-  /* Phá»‘i há»£p bÃ³ng tá»‘i (depth) vÃ  hÃ o quang (glow) */
   box-shadow:
     -15px 15px 30px rgba(0, 0, 0, 0.7),
     0 0 30px rgba(52, 211, 153, 0.2);
@@ -416,14 +400,11 @@ const truncateText = (text: string, length: number) => {
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* =========================================
-   RIGHT SIDE TRENDING (THIÃŠN Báº¢NG)
-   ========================================= */
 .side-trending {
   background: rgba(11, 15, 25, 0.7);
   border-radius: 20px;
   padding: 24px 20px;
-  border: 1px solid rgba(52, 211, 153, 0.15); /* Äá»“ng bá»™ viá»n linh khÃ­ */
+  border: 1px solid rgba(52, 211, 153, 0.15); 
   display: flex;
   flex-direction: column;
   backdrop-filter: blur(20px);
@@ -437,7 +418,7 @@ const truncateText = (text: string, length: number) => {
 .side-title {
   font-size: 1.3rem;
   font-weight: 900;
-  color: #34d399; /* Aura Primary */
+  color: #34d399;
   margin-bottom: 20px;
   padding-bottom: 15px;
   border-bottom: 1px dashed rgba(52, 211, 153, 0.2);
@@ -473,7 +454,6 @@ const truncateText = (text: string, length: number) => {
   position: relative;
 }
 
-/* Rank Badges - Lá»‡nh BÃ i Xáº¿p Háº¡ng */
 .item-rank {
   font-size: 1rem;
   font-weight: 900;
@@ -482,7 +462,7 @@ const truncateText = (text: string, length: number) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%; /* TrÃ²n nhÆ° Ä‘an dÆ°á»£c */
+  border-radius: 50%; 
   color: #94a3b8;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -490,28 +470,9 @@ const truncateText = (text: string, length: number) => {
   z-index: 2;
 }
 
-/* KhÃ­ TrÃ ng Top 1-2-3 */
-.rank-1 {
-  background: rgba(251, 191, 36, 0.1);
-  border-color: #fbbf24;
-  color: #fbbf24;
-  box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
-  text-shadow: 0 0 5px #fbbf24;
-}
-.rank-2 {
-  background: rgba(226, 232, 240, 0.1);
-  border-color: #e2e8f0;
-  color: #e2e8f0;
-  box-shadow: 0 0 15px rgba(226, 232, 240, 0.2);
-  text-shadow: 0 0 5px #e2e8f0;
-}
-.rank-3 {
-  background: rgba(217, 119, 6, 0.1);
-  border-color: #d97706;
-  color: #d97706;
-  box-shadow: 0 0 15px rgba(217, 119, 6, 0.2);
-  text-shadow: 0 0 5px #d97706;
-}
+.rank-1 { background: rgba(251, 191, 36, 0.1); border-color: #fbbf24; color: #fbbf24; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); text-shadow: 0 0 5px #fbbf24; }
+.rank-2 { background: rgba(226, 232, 240, 0.1); border-color: #e2e8f0; color: #e2e8f0; box-shadow: 0 0 15px rgba(226, 232, 240, 0.2); text-shadow: 0 0 5px #e2e8f0; }
+.rank-3 { background: rgba(217, 119, 6, 0.1); border-color: #d97706; color: #d97706; box-shadow: 0 0 15px rgba(217, 119, 6, 0.2); text-shadow: 0 0 5px #d97706; }
 
 .item-cover {
   width: 50px;
@@ -553,28 +514,14 @@ const truncateText = (text: string, length: number) => {
   gap: 8px;
 }
 
-.meta-genre {
-  color: #60a5fa;
-  font-weight: 600;
-}
-.dot {
-  opacity: 0.5;
-  font-size: 10px;
-}
-.meta-views i {
-  color: #34d399;
-  margin-right: 4px;
-}
+.meta-genre { color: #60a5fa; font-weight: 600; }
+.dot { opacity: 0.5; font-size: 10px; }
+.meta-views i { color: #34d399; margin-right: 4px; }
 
-/* Banner Fade Transition */
 .fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
+.fade-leave-active { transition: opacity 0.5s ease; }
 .fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
+.fade-leave-to { opacity: 0; }
 
 /* =========================================
    RESPONSIVE (MOBILE & TABLET)
@@ -594,12 +541,12 @@ const truncateText = (text: string, length: number) => {
     display: none !important;
   }
 
-  /* Mobile Static Banner */
+  /* ===== BẮT ĐẦU VÙNG TỐI ƯU MOBILE BANNER ===== */
   .hero-mobile-static {
     position: relative;
     width: 100vw;
     height: 60vh;
-    left: -12px; /* KÃ©o bÃ¹ lá» cá»§a Container */
+    left: -12px; 
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -620,19 +567,23 @@ const truncateText = (text: string, length: number) => {
     inset: 0;
     z-index: 1;
   }
+  
   .mobile-bg-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center top;
+    /* Hiệu ứng trôi chậm tạo cảm giác vũ trụ rộng lớn */
+    animation: slow-pan 20s ease-in-out infinite alternate;
   }
+  
   .mobile-vignette {
     position: absolute;
     inset: 0;
     background: linear-gradient(
       to bottom,
-      transparent 30%,
-      rgba(5, 7, 10, 0.6) 60%,
+      rgba(5, 7, 10, 0.2) 0%,
+      rgba(5, 7, 10, 0.5) 50%,
       #0b0f19 100%
     );
   }
@@ -640,19 +591,19 @@ const truncateText = (text: string, length: number) => {
   .mobile-content-wrapper {
     position: relative;
     z-index: 10;
-    padding: 20px 15px 40px;
+    padding: 20px 20px 45px;
     text-align: center;
   }
 
   .grand-title-mobile {
     font-family: "Spectral", serif;
-    font-size: 3rem;
+    font-size: 3.2rem;
     font-weight: 800;
     line-height: 1;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
     letter-spacing: 2px;
   }
 
@@ -661,52 +612,73 @@ const truncateText = (text: string, length: number) => {
     justify-content: center;
     gap: 10px;
   }
+  
   .word-glow {
     color: #fff;
     text-shadow:
       0 0 15px rgba(255, 255, 255, 0.5),
       0 4px 10px rgba(0, 0, 0, 0.8);
   }
+  
   .word-glow-emerald {
     color: #34d399;
-    text-shadow:
-      0 0 20px rgba(52, 211, 153, 0.6),
-      0 4px 10px rgba(0, 0, 0, 0.8);
+    /* Hiệu ứng ánh sáng tỏa ra và nhấp nháy nhẹ mang đậm "tiên khí" */
+    animation: aura-pulse 3s infinite ease-in-out;
+    text-shadow: 
+      0 0 5px #34d399, 
+      0 0 20px rgba(52, 211, 153, 0.6), 
+      0 4px 10px rgba(0, 0, 0, 0.9);
   }
 
   .slogan-mobile {
     font-family: "Cinzel", serif;
     font-size: 0.75rem;
-    color: #cbd5e1;
-    letter-spacing: 2px;
-    margin-bottom: 25px;
+    color: #e2e8f0;
+    letter-spacing: 2.5px;
+    margin-bottom: 30px;
     font-weight: 700;
+    /* Tăng độ tương phản để dễ đọc hơn trên nền sao */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.8);
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.4), transparent);
+    padding: 6px 0;
   }
 
   .action-buttons-mobile {
     display: flex;
     justify-content: center;
-    gap: 15px;
+    gap: 16px;
     width: 100%;
+    padding: 0 10px;
   }
 
   .spirit-btn-sm {
     position: relative;
     flex: 1;
-    padding: 12px 0;
+    padding: 14px 0;
     text-decoration: none;
-    border-radius: 50px;
+    /* Nút bấm bất đối xứng kiểu Tiên Hiệp */
+    border-radius: 16px 4px 16px 4px; 
     overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  }
+  
+  .spirit-btn-sm:active {
+    transform: scale(0.96);
+    filter: brightness(1.2);
   }
 
   .btn-inner-sm {
     position: relative;
     z-index: 2;
     color: white;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 0.85rem;
     letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
+  
   .btn-aura-sm {
     position: absolute;
     inset: 0;
@@ -715,17 +687,31 @@ const truncateText = (text: string, length: number) => {
   }
 
   .spirit-btn-sm.emerald {
-    border: 1px solid transparent;
+    border-color: rgba(52, 211, 153, 0.5);
+    box-shadow: 0 4px 20px rgba(52, 211, 153, 0.25);
   }
   .spirit-btn-sm.emerald .btn-aura-sm {
-    background: linear-gradient(135deg, #10b981, #047857);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(4, 120, 87, 0.95));
   }
+  
   .spirit-btn-sm.azure {
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-color: rgba(56, 189, 248, 0.5);
+    background: rgba(15, 23, 42, 0.4);
   }
   .spirit-btn-sm.azure .btn-aura-sm {
     background: transparent;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px); 
   }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes slow-pan {
+  0% { transform: scale(1); object-position: center top; }
+  100% { transform: scale(1.15); object-position: center bottom; }
+}
+
+@keyframes aura-pulse {
+  0%, 100% { filter: brightness(100%) drop-shadow(0 0 2px #34d399); }
+  50% { filter: brightness(130%) drop-shadow(0 0 12px #34d399); }
 }
 </style>

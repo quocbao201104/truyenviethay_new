@@ -57,11 +57,10 @@
     <div class="footer-bottom-aura">
       <div class="bottom-aura-content">
         <span class="copyright-spirit">
-          &copy; 2026 <span class="text-emerald-400">TruyenVietHay</span>. Tu luyện bởi <strong>Võ Đình Quốc Bảo</strong>.
+          &copy; 2026 <span class="text-emerald-400">TruyenVietHay</span>
         </span>
         <div class="bottom-spirit-badges">
           <span>Hệ thống: V2.1.0</span>
-          <span>Pháp khí: Antigravity</span>
         </div>
       </div>
     </div>

@@ -251,6 +251,17 @@ const handleScroll = () => {
 };
 
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+const resetScrollPosition = () => {
+  window.scrollTo({ top: 0, behavior: "auto" });
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+  const app = document.getElementById("app");
+  if (app) app.scrollTop = 0;
+  scrollProgress.value = 0;
+  isScrolled.value = false;
+  isScrollingDown.value = false;
+  lastScrollTop.value = 0;
+};
 
 const currentIndex = computed(() => {
     if (!chapter.value || chapterList.value.length === 0) return -1;
@@ -302,6 +313,9 @@ const loadData = async () => {
   const chapterSlug = route.params.chapterSlug as string;
   const storySlug = route.params.storySlug as string;
   if (chapterSlug && storySlug) {
+    // Reset scroll ngay khi chuyển chương để tránh giữ vị trí cũ (đặc biệt khi đang ở cuối trang)
+    resetScrollPosition();
+
     const requestId = ++activeRequestId;
     chapterContent.value = "";
     contentHtml.value = "<p>Đang tải chương...</p>";
@@ -525,7 +539,9 @@ watch(() => [route.params.chapterSlug, route.params.storySlug], () => {
 @media (max-width: 640px) {
   /* Bong bóng rút gọn */
   .mobile-bubble-btn {
-    display: flex; position: fixed; bottom: 30px; right: 20px;
+    display: flex; position: fixed; 
+    bottom: 30px; 
+    left: 20px; /* [FIX] Đổi từ right: 20px sang left: 20px để tránh đè bong bóng chat */
     width: 48px; height: 48px; border-radius: 50%;
     background: #131b2c; border: 2px solid #34d399; color: #34d399;
     z-index: 1001; align-items: center; justify-content: center;
@@ -616,7 +632,15 @@ watch(() => [route.params.chapterSlug, route.params.storySlug], () => {
   display: flex; justify-content: space-between; margin-top: 80px;
   padding-top: 40px; border-top: 1px dashed #1e293b;
 }
-
+.spirit-fab {
+  position: fixed; 
+  bottom: 90px; /* [FIX] Nâng từ 30px lên 90px để né khu vực của bong bóng chat */
+  right: 20px;  /* Đổi nhẹ thành 20px cho đồng bộ lề */
+  width: 50px; height: 50px; border-radius: 50%;
+  background: #131b2c; border: 2px solid #34d399; color: #34d399;
+  font-size: 1.5rem; display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
 .btn-nav-spirit {
   display: flex; align-items: center; gap: 8px; padding: 12px 20px;
   border-radius: 50px; font-weight: 800; font-size: 0.8rem;

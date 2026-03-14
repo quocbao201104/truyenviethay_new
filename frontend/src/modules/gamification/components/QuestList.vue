@@ -1,6 +1,6 @@
 <template>
-  <div v-if="loading" class="empty-state">Dang cam ung Thien Dao...</div>
-  <div v-else-if="!tasks || tasks.length === 0" class="empty-state">Chua co nhiem vu moi.</div>
+  <div v-if="loading" class="empty-state">Đang cảm ứng Thiên Đạo...</div>
+  <div v-else-if="!tasks || tasks.length === 0" class="empty-state">Chưa có nhiệm vụ mới.</div>
   <div v-else class="list-layout">
     <article
       v-for="task in orderedTasks"
@@ -12,11 +12,11 @@
       }"
     >
       <div class="card-content">
-        <p class="kicker">Nhiem vu</p>
+        <p class="kicker">Nhiệm vụ</p>
         <h3 class="card-title">{{ task.task_name || task.title }}</h3>
         <p class="card-desc">{{ task.description }}</p>
         <p v-if="task.progress_target && task.progress_target > 1" class="progress-text">
-          Tien do: {{ task.progress_current || 0 }}/{{ task.progress_target }}
+          Tiến độ: {{ task.progress_current || 0 }}/{{ task.progress_target }}
         </p>
       </div>
       <div class="card-actions">
@@ -29,7 +29,7 @@
           @click="$emit('claim', task.task_id)"
         >
           <i v-if="processingTaskId === task.task_id" class="fas fa-spinner fa-spin"></i>
-          <template v-else>Linh Thuong</template>
+          <template v-else>Lĩnh Thưởng</template>
         </button>
 
         <span v-else class="status-tag" :class="task.status || 'pending'">
@@ -70,10 +70,10 @@ const orderedTasks = computed(() => {
 });
 
 const getStatusLabel = (status) => {
-  if (status === 'claimed') return 'Da nhan';
-  if (status === 'in_progress') return 'Dang tien hanh';
-  if (status === 'expired') return 'Het han';
-  return 'Chua hoan thanh';
+  if (status === 'claimed') return 'Đã nhận';
+  if (status === 'in_progress') return 'Đang tiến hành';
+  if (status === 'expired') return 'Hết hạn';
+  return 'Chưa hoàn thành';
 };
 </script>
 

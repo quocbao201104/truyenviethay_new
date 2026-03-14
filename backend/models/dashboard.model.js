@@ -7,6 +7,30 @@
 
 const db = require("../config/db");
 
+const toDateKey = (d) => {
+  if (d instanceof Date) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+  return String(d).slice(0, 10);
+};
+
+const buildLast7DatesFromDbToday = async () => {
+  const [rows] = await db.query("SELECT CURDATE() AS today");
+  const todayKey = toDateKey(rows?.[0]?.today);
+  const [y, m, d] = todayKey.split("-").map(Number);
+  const baseDate = new Date(y, m - 1, d);
+  const dates = [];
+  for (let i = 6; i >= 0; i--) {
+    const day = new Date(baseDate);
+    day.setDate(baseDate.getDate() - i);
+    dates.push(toDateKey(day));
+  }
+  return dates;
+};
+
 const DashboardModel = {
   /**
    * Author Dashboard: Tổng views và comments của TẤT CẢ truyện do author sáng tác
@@ -41,25 +65,19 @@ const DashboardModel = {
        FROM daily_stats ds
        JOIN truyen_new tn ON ds.novel_id = tn.id
        WHERE tn.user_id = ?
-         AND ds.date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+         AND ds.date BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE()
        GROUP BY ds.date
        ORDER BY ds.date ASC`,
       [authorId]
     );
 
     // Fill missing dates với 0 (7 ngày gần nhất luôn có đủ 7 phần tử)
-    const last7Dates = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      last7Dates.push(d.toISOString().slice(0, 10));
-    }
-
-    const toDateKey = (d) => (d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10));
+    const last7Dates = await buildLast7DatesFromDbToday();
     const rowMap = new Map(rows.map((r) => [toDateKey(r.date), r]));
 
     const labels = last7Dates.map((d) => {
-      const dt = new Date(d + "T00:00:00");
+      const [y, m, day] = d.split("-").map(Number);
+      const dt = new Date(y, m - 1, day);
       return dt.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
     });
 
@@ -105,23 +123,17 @@ const DashboardModel = {
          SUM(ds.views_count) AS views,
          SUM(ds.comments_count) AS comments
        FROM daily_stats ds
-       WHERE ds.date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+       WHERE ds.date BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE()
        GROUP BY ds.date
        ORDER BY ds.date ASC`
     );
 
-    const last7Dates = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      last7Dates.push(d.toISOString().slice(0, 10));
-    }
-
-    const toDateKey = (d) => (d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10));
+    const last7Dates = await buildLast7DatesFromDbToday();
     const rowMap = new Map(rows.map((r) => [toDateKey(r.date), r]));
 
     const labels = last7Dates.map((d) => {
-      const dt = new Date(d + "T00:00:00");
+      const [y, m, day] = d.split("-").map(Number);
+      const dt = new Date(y, m - 1, day);
       return dt.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
     });
 

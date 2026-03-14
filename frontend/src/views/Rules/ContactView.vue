@@ -11,12 +11,12 @@
         <div class="contact-grid">
           <div class="contact-card">
             <i class="fas fa-envelope-open-text"></i>
-            <h4>Linh Thư (Email)</h4>
-            <p>quocbao201104@gmail.com</p>
+            <h4>Email</h4>
+            <p>contact@truyenviethay.id.vn</p>
           </div>
           <div class="contact-card">
             <i class="fab fa-telegram"></i>
-            <h4>Thần Thức (Zalo/Tele)</h4>
+            <h4>Zalo</h4>
             <p>0372783767</p>
           </div>
           <div class="contact-card">

@@ -28,6 +28,7 @@ export interface Story {
   tac_gia: string;
   mo_ta: string;
   luot_xem: number;
+  luot_xem_thang?: number;
   trang_thai: string;
   thoi_gian_cap_nhat: string;
   the_loai_chinh?: string;

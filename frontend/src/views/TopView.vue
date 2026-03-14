@@ -4,11 +4,12 @@
     <main class="main-content">
       <div class="container">
         
-        <!-- THIÊN BẢNG HỎA CẤP HEADER -->
+        <!-- PHONG VÂN BẢNG HEADER -->
+         <!-- (Bảng gió giục mây vần) – Nơi các "đại lão" tranh giành vị thế. -->
         <div class="section-header-block animate-fadeIn">
           <div class="title-wrapper">
              <i class="fas fa-fire-alt fire-main"></i>
-             <h2 class="section-title">Thiên Bảng Hỏa Cấp</h2>
+             <h2 class="section-title">PHONG VÂN BẢNG</h2>
           </div>
           <p class="section-subtitle">Linh khí hội tụ - Vạn chúng chú mục</p>
           <div class="section-divider-aura">

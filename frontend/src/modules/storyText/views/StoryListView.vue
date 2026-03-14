@@ -2,7 +2,6 @@
   <div class="story-list-page-xianxia">
     
     <main class="main-content-spirit">
-      <!-- THIÊN PHẨM LINH THƯ - Hero Gate -->
       <section class="hero-aura-wrapper animate-fadeIn">
         <HeroGrid 
           :stories="hotStories.slice(0, 5)" 
@@ -10,24 +9,22 @@
         />
       </section>
 
-      <!-- TIẾP TỤC TU LUYỆN - Jade Slip Strip -->
       <div class="continue-cultivation-area">
         <ContinueReadingStrip />
       </div>
 
       <div class="content-body-grid">
-        <!-- TẢ ĐẠO: LINH KHÍ TRẬN (Main Column) -->
         <div class="main-col-spirit">
           
-          <!-- 1. MỚI XUẤT THẾ -->
           <section class="spirit-block">
-            <div class="spirit-header">
+            <div class="spirit-header emerald">
               <h2 class="spirit-title">
-                <i class="fas fa-sparkles text-emerald-400"></i>
-                Linh Khí Mới
+                <i class="fas fa-seedling"></i>
+                Tân Tú Bảng
+                <span class="spirit-note">Kỳ tài mới nổi</span>
               </h2>
-              <router-link to="/tim-kiem" class="view-all-spirit">
-                Tầm Tiên <i class="fas fa-arrow-right-long ml-1"></i>
+              <router-link to="/tim-kiem" class="view-all-spirit emerald">
+                Xem thêm <i class="fas fa-arrow-right-long ml-1"></i>
               </router-link>
             </div>
             
@@ -40,15 +37,16 @@
             </div>
           </section>
 
-          <!-- 2. THIÊN CẤP ĐÁNH GIÁ -->
-          <section class="spirit-block">
-            <div class="spirit-header">
-              <h2 class="spirit-title gold">
-                <i class="fas fa-crown text-yellow-500"></i>
-                Thiên Cấp
+          <section class="spirit-block">  
+            <div class="spirit-header gold">
+              <h2 class="spirit-title">
+                <i class="fas fa-medal"></i>
+                Lệnh Bài Bảng
+                <span class="spirit-note">Vạn người tín ngưỡng</span>
               </h2>
-              <router-link to="/xep-hang" class="view-all-spirit gold">Thiên Bảng</router-link>
+              <router-link to="/xep-hang" class="view-all-spirit gold">Xem thêm</router-link>
             </div>
+            
             <div class="spirit-grid-responsive">
               <NewStoryCard 
                 v-for="story in topRatedStories.slice(0, 8)" 
@@ -58,14 +56,14 @@
             </div>
           </section>
 
-          <!-- 3. CÔNG ĐỨC VIÊN MÃN -->
           <section class="spirit-block">
-            <div class="spirit-header">
-              <h2 class="spirit-title sky">
-                <i class="fas fa-circle-check text-sky-400"></i>
-                Viên Mãn
+            <div class="spirit-header purple">
+              <h2 class="spirit-title">
+                <i class="fas fa-yin-yang"></i>
+                Đại Viên Mãn
+                <span class="spirit-note">Công đức tròn đầy</span>
               </h2>
-              <router-link to="/tim-kiem?status=hoan_thanh" class="view-all-spirit sky">Toàn Thư</router-link>
+              <router-link to="/tim-kiem?status=hoan_thanh" class="view-all-spirit purple">Toàn Thư</router-link>
             </div>
             <div class="spirit-grid-responsive">
               <NewStoryCard 
@@ -76,37 +74,44 @@
             </div>
           </section>
 
-          <!-- MOBILE ONLY SECTIONS (Bảng xếp hạng di động) -->
           <div class="mobile-extra-aura">
             <section class="spirit-block">
-              <div class="spirit-header">
-                <h2 class="spirit-title">🔥 Thiên Bảng</h2>
+              <div class="spirit-header moon">
+                <h2 class="spirit-title">
+                  <i class="fas fa-moon"></i> Nguyệt Bảng 
+                  <span class="spirit-note">Tranh hùng tuế nguyệt</span>
+                </h2>
               </div>
-              <div class="ranking-spirit-list-mobile">
+              <div class="ranking-spirit-list-mobile moon-board">
                 <div 
-                  v-for="(story, index) in topViewStories.slice(0, 5)" 
+                  v-for="(story, index) in topMonthlyStories.slice(0, 5)" 
                   :key="'mb-'+story.id" 
                   @click="navigateToStory(story.slug)"
-                  class="ranking-spirit-item"
+                  class="ranking-spirit-item moon-item"
                 >
                   <div class="rank-orb" :class="`top-${index + 1}`">{{ index + 1 }}</div>
                   <div class="rank-details">
                     <h4 class="rank-name">{{ story.ten_truyen }}</h4>
-                    <span class="rank-val">{{ formatNumber(story.luot_xem) }} lượt xem</span>
+                    <span class="rank-val">{{ formatNumber(story.luot_xem_thang || story.luot_xem) }} uy vọng</span>
                   </div>
                 </div>
               </div>
-              <router-link to="/truyen-hot" class="spirit-more-link-mobile">Xem tất cả</router-link>
+              <router-link to="/truyen-hot" class="spirit-more-link-mobile moon-text">Khám phá Nguyệt Bảng...</router-link>
             </section>
 
-            <section class="spirit-block">
-              <h3 class="sidebar-title-xianxia">📜 Phân Loại</h3>
+            <section class="spirit-block mt-8">
+              <div class="spirit-header fire">
+                <h2 class="spirit-title">
+                  <i class="fas fa-scroll"></i> Linh Anh
+                  <span class="spirit-note">Đại đạo muôn hình</span>
+                </h2>
+              </div>
               <div class="tag-cloud-spirit">
                 <router-link 
                   v-for="cat in categories" 
                   :key="cat.id_theloai"
                   :to="`/the-loai?categories=${cat.id_theloai}`"
-                  class="tag-pill-spirit"
+                  class="tag-pill-spirit fire-pill"
                 >
                   {{ cat.ten_theloai }}
                 </router-link>
@@ -115,42 +120,53 @@
           </div>
         </div>
 
-        <!-- HỮU ĐẠO: THIÊN CƠ CÁC (Sidebar - Desktop Only) -->
         <aside class="sidebar-col-spirit">
           <div class="sticky-spirit-box">
-            <div class="sidebar-card-aura ranking">
-              <h3 class="sidebar-title-xianxia">🔥 Thiên Bảng</h3>
+            
+            <div class="sidebar-card-aura ranking moon-board">
+              <div class="spirit-header moon mb-4">
+                <h3 class="sidebar-title-xianxia">
+                  <i class="fas fa-moon moon-icon"></i> Nguyệt Bảng
+                </h3>
+              </div>
+              <p class="moon-subtitle">Kỳ lân xuất thế - Quần hùng tranh bá trong tháng.</p>
+              
               <div class="ranking-spirit-list">
                 <div 
-                  v-for="(story, index) in topViewStories.slice(0, 5)" 
+                  v-for="(story, index) in topMonthlyStories.slice(0, 5)" 
                   :key="story.id" 
                   @click="navigateToStory(story.slug)"
-                  class="ranking-spirit-item"
+                  class="ranking-spirit-item moon-item"
                 >
                   <div class="rank-orb" :class="`top-${index + 1}`">{{ index + 1 }}</div>
                   <div class="rank-details">
                     <h4 class="rank-name">{{ story.ten_truyen }}</h4>
-                    <span class="rank-val">{{ formatNumber(story.luot_xem) }} lượt xem</span>
+                    <span class="rank-val">{{ formatNumber(story.luot_xem_thang || story.luot_xem) }} uy vọng</span>
                   </div>
-                  <i v-if="index < 3" class="fas fa-fire-alt text-rose-500/40 text-[10px]"></i>
+                  <i v-if="index < 3" class="fas fa-star text-slate-300 text-[10px] animate-pulse"></i>
                 </div>
               </div>
-              <router-link to="/truyen-hot" class="spirit-more-link">Xem tất cả...</router-link>
+              <router-link to="/truyen-hot" class="spirit-more-link moon-text">Khám phá thêm...</router-link>
             </div>
 
-            <div class="sidebar-card-aura categories">
-              <h3 class="sidebar-title-xianxia">📜 Phân Loại</h3>
+            <div class="sidebar-card-aura categories fire-board">
+              <div class="spirit-header fire mb-4">
+                <h3 class="sidebar-title-xianxia">
+                  <i class="fas fa-scroll"></i> Linh Anh
+                </h3>
+              </div>
               <div class="tag-cloud-spirit">
                 <router-link 
                   v-for="cat in categories" 
                   :key="cat.id_theloai"
                   :to="`/the-loai?categories=${cat.id_theloai}`"
-                  class="tag-pill-spirit"
+                  class="tag-pill-spirit fire-pill"
                 >
                   {{ cat.ten_theloai }}
                 </router-link>
               </div>
             </div>
+
           </div>
         </aside>
       </div>
@@ -180,7 +196,6 @@ const navigateToStory = (slug: string) => {
 
 const categories = ref<Category[]>([]);
 const newStories = ref<Story[]>([]);
-const topViewStories = ref<Story[]>([]);
 const hotStories = ref<Story[]>([]);
 const topMonthlyStories = ref<Story[]>([]);
 const topRatedStories = ref<Story[]>([]);
@@ -191,7 +206,6 @@ const fetchAllData = async () => {
     const results = await Promise.all([
       storyStore.fetchCategories(),
       storyStore.fetchNewStories(10),
-      storyStore.fetchTopViewStories(10),
       getHotStories(5),
       storyStore.fetchTopMonthlyStories(5),
       storyStore.fetchTopRatedStories(8),
@@ -200,11 +214,10 @@ const fetchAllData = async () => {
 
     categories.value = results[0];
     newStories.value = results[1];
-    topViewStories.value = results[2];
-    hotStories.value = results[3];
-    topMonthlyStories.value = results[4];
-    topRatedStories.value = results[5];
-    completedStories.value = results[6];
+    hotStories.value = results[2];
+    topMonthlyStories.value = results[3];
+    topRatedStories.value = results[4];
+    completedStories.value = results[5];
   } catch (err) {
     console.error("Thiên cơ bị nhiễu loạn:", err);
   }
@@ -227,8 +240,10 @@ onMounted(() => {
 /* ===== CORE BACKGROUND ===== */
 .story-list-page-xianxia {
   min-height: 100vh;
-  background-color: #05080f; /* Tối hơn một chút để các khối nổi bật lên */
-  background-image: radial-gradient(circle at 50% 0%, rgba(52, 211, 153, 0.03) 0%, transparent 70%);
+  background-color: #03050a; /* Nền tối sâu hơn để Glow nổi bật */
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(52, 211, 153, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(148, 163, 184, 0.04) 0%, transparent 50%);
   color: #cbd5e1;
   font-family: 'Be Vietnam Pro', sans-serif;
   overflow-x: hidden;
@@ -240,10 +255,9 @@ onMounted(() => {
   padding: 30px 25px 80px;
 }
 
-/* ===== HERO & STRIP ===== */
 .hero-aura-wrapper {
   margin-bottom: 50px;
-  border-radius: 20px; /* Đồng bộ góc bo của HeroGrid */
+  border-radius: 20px;
   overflow: hidden;
 }
 
@@ -253,298 +267,241 @@ onMounted(() => {
   z-index: 10;
 }
 
-/* ===== GRID LAYOUT ===== */
 .content-body-grid {
   display: grid;
   grid-template-columns: 1fr 340px;
   gap: 40px;
 }
 
-.spirit-block { margin-bottom: 50px; }
+.spirit-block { margin-bottom: 55px; }
 
-/* ===== LINH KHÍ TRẬN (SECTION HEADERS) ===== */
+/* ===== LINH KHÍ TRẬN (SECTION HEADERS CHUNG) ===== */
 .spirit-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   margin-bottom: 25px;
   padding-bottom: 12px;
   position: relative;
 }
 
-/* Đường line phân cách ma thuật */
-.spirit-header::after {
-  content: ''; 
-  position: absolute; 
-  bottom: 0; 
-  left: 0; 
-  width: 100%; 
-  height: 1px;
-  background: linear-gradient(90deg, rgba(52, 211, 153, 0.4) 0%, rgba(52, 211, 153, 0.05) 50%, transparent 100%);
-}
-
-.spirit-header::before {
-  content: ''; 
-  position: absolute; 
-  bottom: -1px; 
-  left: 0; 
-  width: 80px; 
-  height: 3px;
-  background: #34d399; 
-  box-shadow: 0 0 15px #34d399;
-  border-radius: 50px;
-  z-index: 2;
-}
-
 .spirit-title {
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 900;
-  color: #f8fafc;
   text-transform: uppercase;
   letter-spacing: 1.5px;
   display: flex;
   align-items: center;
   gap: 12px;
-  text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+  margin: 0;
 }
 
-.spirit-title i { filter: drop-shadow(0 0 8px currentColor); }
-
-/* Đổi màu theme cho các Header khác nhau */
-.spirit-title.gold { color: #fbbf24; }
-.spirit-header:has(.spirit-title.gold)::before { background: #fbbf24; box-shadow: 0 0 15px #fbbf24; }
-.spirit-header:has(.spirit-title.gold)::after { background: linear-gradient(90deg, rgba(251, 191, 36, 0.4) 0%, transparent 100%); }
-
-.spirit-title.sky { color: #38bdf8; }
-.spirit-header:has(.spirit-title.sky)::before { background: #38bdf8; box-shadow: 0 0 15px #38bdf8; }
-.spirit-header:has(.spirit-title.sky)::after { background: linear-gradient(90deg, rgba(56, 189, 248, 0.4) 0%, transparent 100%); }
+.spirit-note {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  margin-left: 10px;
+  opacity: 0.7;
+  display: inline-block;
+  transform: translateY(-2px);
+}
 
 .view-all-spirit {
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #34d399;
   letter-spacing: 1px;
   padding: 6px 16px;
   border-radius: 50px;
-  background: rgba(52, 211, 153, 0.1);
-  border: 1px solid rgba(52, 211, 153, 0.2);
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-@media (hover: hover) {
-  .view-all-spirit:hover {
-    background: #34d399;
-    color: #05080f;
-    box-shadow: 0 0 15px rgba(52, 211, 153, 0.4);
-  }
+/* ===== TONE MÀU CÁC BẢNG ===== */
+
+/* 1. EMERALD (Tân Tú - Lục Bảo) */
+.spirit-header.emerald { border-bottom: 1px solid rgba(52, 211, 153, 0.15); }
+.spirit-header.emerald::before {
+  content: ''; position: absolute; bottom: -1.5px; left: 0; width: 80px; height: 3px;
+  background: #34d399; box-shadow: 0 0 15px #34d399; border-radius: 50px;
+}
+.spirit-header.emerald .spirit-title { color: #f8fafc; text-shadow: 0 0 15px rgba(52, 211, 153, 0.3); }
+.spirit-header.emerald .spirit-title i { color: #34d399; filter: drop-shadow(0 0 8px #34d399); }
+.view-all-spirit.emerald { color: #34d399; background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.2); }
+.view-all-spirit.emerald:hover { background: #34d399; color: #05080f; box-shadow: 0 0 15px rgba(52, 211, 153, 0.4); transform: translateY(-2px); }
+
+/* 2. GOLD (Lệnh Bài - Hoàng Kim) */
+.spirit-header.gold { border-bottom: 1px solid rgba(251, 191, 36, 0.15); }
+.spirit-header.gold::before {
+  content: ''; position: absolute; bottom: -1.5px; left: 0; width: 80px; height: 3px;
+  background: #fbbf24; box-shadow: 0 0 15px #fbbf24; border-radius: 50px;
+}
+.spirit-header.gold .spirit-title { color: #f8fafc; text-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
+.spirit-header.gold .spirit-title i { color: #fbbf24; filter: drop-shadow(0 0 8px #fbbf24); }
+.view-all-spirit.gold { color: #fbbf24; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2); }
+.view-all-spirit.gold:hover { background: #fbbf24; color: #05080f; box-shadow: 0 0 15px rgba(251, 191, 36, 0.4); transform: translateY(-2px); }
+
+/* 3. PURPLE (Đại Viên Mãn - Tử Khí) */
+.spirit-header.purple { border-bottom: 1px solid rgba(192, 132, 252, 0.15); }
+.spirit-header.purple::before {
+  content: ''; position: absolute; bottom: -1.5px; left: 0; width: 80px; height: 3px;
+  background: #c084fc; box-shadow: 0 0 15px #c084fc; border-radius: 50px;
+}
+.spirit-header.purple .spirit-title { color: #f8fafc; text-shadow: 0 0 15px rgba(192, 132, 252, 0.3); }
+.spirit-header.purple .spirit-title i { color: #c084fc; filter: drop-shadow(0 0 8px #c084fc); }
+.view-all-spirit.purple { color: #c084fc; background: rgba(192, 132, 252, 0.1); border: 1px solid rgba(192, 132, 252, 0.2); }
+.view-all-spirit.purple:hover { background: #c084fc; color: #05080f; box-shadow: 0 0 15px rgba(192, 132, 252, 0.4); transform: translateY(-2px); }
+
+/* 4. FIRE (Linh Anh - Đỏ Cam) */
+.spirit-header.fire { border-bottom: 1px solid rgba(249, 115, 22, 0.15); padding-bottom: 8px;}
+.spirit-header.fire::before {
+  content: ''; position: absolute; bottom: -1.5px; left: 0; width: 60px; height: 3px;
+  background: #f97316; box-shadow: 0 0 15px #f97316; border-radius: 50px;
+}
+.sidebar-title-xianxia { margin: 0; font-size: 1.2rem; font-weight: 900; color: #f8fafc; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 10px; }
+.spirit-header.fire .sidebar-title-xianxia i { color: #f97316; filter: drop-shadow(0 0 8px #f97316); }
+
+/* ===== 5. MOON (Nguyệt Bảng - Ánh Trăng Bạc/Xám Nhạt) ĐẶC BIỆT ===== */
+.moon-board {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(3, 5, 10, 0.9) 100%) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6), inset 0 0 30px rgba(148, 163, 184, 0.05) !important;
+  position: relative;
+  overflow: hidden;
+}
+/* Hiệu ứng trăng sáng góc trên phải */
+.moon-board::before {
+  content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px;
+  background: radial-gradient(circle, rgba(226, 232, 240, 0.15) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none;
 }
 
-.view-all-spirit.gold { color: #fbbf24; background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.2); }
-@media (hover: hover) {
-  .view-all-spirit.gold:hover { background: #fbbf24; color: #05080f; box-shadow: 0 0 15px rgba(251, 191, 36, 0.4); }
+.spirit-header.moon { border-bottom: 1px solid rgba(148, 163, 184, 0.2); padding-bottom: 10px;}
+.spirit-header.moon::before {
+  content: ''; position: absolute; bottom: -1.5px; left: 0; width: 60px; height: 3px;
+  background: #e2e8f0; box-shadow: 0 0 15px #e2e8f0; border-radius: 50px;
 }
+.spirit-header.moon .sidebar-title-xianxia i, .spirit-header.moon .spirit-title i { color: #e2e8f0; filter: drop-shadow(0 0 8px #e2e8f0); }
+.spirit-header.moon .spirit-title { color: #f8fafc; text-shadow: 0 0 15px rgba(226, 232, 240, 0.3); }
 
-.view-all-spirit.sky { color: #38bdf8; background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.2); }
-@media (hover: hover) {
-  .view-all-spirit.sky:hover { background: #38bdf8; color: #05080f; box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
-}
+.moon-subtitle { font-size: 0.8rem; color: #94a3b8; margin-bottom: 20px; font-style: italic; }
 
 /* Grid mặc định cho Desktop */
 .spirit-grid-responsive {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
-  gap: 24px; /* Tăng gap để StoryCard thở */
+  gap: 28px 24px;
 }
 
-/* ===== THIÊN CƠ CÁC (SIDEBAR - GLASSMORPHISM) ===== */
+/* ===== SIDEBAR - GLASSMORPHISM ===== */
 .sticky-spirit-box { 
-  position: sticky; 
-  top: 90px; 
-  display: flex; 
-  flex-direction: column; 
-  gap: 30px; 
+  position: sticky; top: 90px; display: flex; flex-direction: column; gap: 30px; 
 }
 
 .sidebar-card-aura { 
   background: rgba(11, 15, 25, 0.6); 
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(52, 211, 153, 0.15); 
-  border-radius: 20px; 
-  padding: 24px; 
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05); 
+  border-radius: 20px; padding: 24px; 
 }
 
-.sidebar-title-xianxia { 
-  font-size: 1.1rem; 
-  font-weight: 900; 
-  color: #34d399; 
-  text-transform: uppercase; 
-  letter-spacing: 1.5px; 
-  margin-bottom: 24px; 
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-shadow: 0 0 10px rgba(52, 211, 153, 0.3);
-  border-bottom: 1px dashed rgba(52, 211, 153, 0.2);
-  padding-bottom: 15px;
-}
-
-/* THIÊN BẢNG LIST */
+/* NGUYỆT BẢNG ITEM */
 .ranking-spirit-list, .ranking-spirit-list-mobile { display: flex; flex-direction: column; gap: 12px; }
 
 .ranking-spirit-item {
-  display: flex; align-items: center; gap: 15px; padding: 12px;
-  background: transparent;
-  border: 1px solid transparent; 
+  display: flex; align-items: center; gap: 15px; padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255,255,255,0.03); 
   border-radius: 12px; cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
 }
 
-@media (hover: hover) {
-  .ranking-spirit-item:hover {
-    background: rgba(52, 211, 153, 0.05);
-    border-color: rgba(52, 211, 153, 0.2);
-    transform: translateX(5px);
-  }
+.ranking-spirit-item:hover {
+  background: rgba(226, 232, 240, 0.08);
+  border-color: rgba(226, 232, 240, 0.2);
+  transform: translateX(8px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
 .rank-orb {
-  width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%;
+  width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-weight: 900; font-size: 1rem; color: #94a3b8; 
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  z-index: 2;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
 }
 
-/* Lệnh Bài Top 1-2-3 */
-.rank-orb.top-1 { background: rgba(251, 191, 36, 0.1); border-color: #fbbf24; color: #fbbf24; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); text-shadow: 0 0 5px #fbbf24; }
-.rank-orb.top-2 { background: rgba(226, 232, 240, 0.1); border-color: #e2e8f0; color: #e2e8f0; box-shadow: 0 0 15px rgba(226, 232, 240, 0.2); text-shadow: 0 0 5px #e2e8f0; }
-.rank-orb.top-3 { background: rgba(217, 119, 6, 0.1); border-color: #d97706; color: #d97706; box-shadow: 0 0 15px rgba(217, 119, 6, 0.2); text-shadow: 0 0 5px #d97706; }
-
-/* ===== CHUẨN HÓA LẠI CĂN CHỈNH THIÊN BẢNG ===== */
+/* Top 1-2-3 Nguyệt Bảng (Tone Bạc/Trăng) */
+.moon-item .rank-orb.top-1 { background: rgba(241, 245, 249, 0.15); border-color: #f8fafc; color: #f8fafc; box-shadow: 0 0 15px rgba(248, 250, 252, 0.4); text-shadow: 0 0 5px #f8fafc; }
+.moon-item .rank-orb.top-2 { background: rgba(203, 213, 225, 0.1); border-color: #cbd5e1; color: #cbd5e1; box-shadow: 0 0 12px rgba(203, 213, 225, 0.3); }
+.moon-item .rank-orb.top-3 { background: rgba(148, 163, 184, 0.1); border-color: #94a3b8; color: #94a3b8; box-shadow: 0 0 10px rgba(148, 163, 184, 0.2); }
 
 .rank-details {
-  flex-grow: 1;
-  min-width: 0; 
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start; /* Ép tất cả nội dung canh trái tuyệt đối */
-  gap: 4px; /* Khoảng cách vừa phải giữa tên và lượt xem */
+  flex-grow: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 6px;
 }
 
 .rank-name { 
-  margin: 0; /* QUAN TRỌNG: Xóa margin mặc định của thẻ h4 làm lệch form */
-  padding: 0;
-  font-size: 0.95rem; 
-  font-weight: 700; 
-  color: #f1f5f9; 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-  width: 100%;
-  line-height: 1.2; /* Ép chiều cao chữ vừa vặn */
+  margin: 0; padding: 0; font-size: 0.95rem; font-weight: 800; color: #f1f5f9; 
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
   transition: color 0.3s;
 }
 
-@media (hover: hover) {
-  .ranking-spirit-item:hover .rank-name { color: #34d399; }
-}
+.ranking-spirit-item:hover .rank-name { color: #e2e8f0; text-shadow: 0 0 8px rgba(226, 232, 240, 0.5); }
 
 .rank-val { 
-  margin: 0;
-  font-size: 0.75rem; 
-  color: #64748b; 
-  font-weight: 600; 
-  display: flex; 
-  align-items: center; 
-  gap: 6px; /* Khoảng cách giữa icon mắt và số */
-  line-height: 1;
+  margin: 0; font-size: 0.75rem; color: #94a3b8; font-weight: 600; 
+  display: flex; align-items: center; gap: 6px; 
 }
-
-/* Icon con mắt màu lục bảo */
-.rank-val::before { 
-  content: '\f06e'; 
-  font-family: 'Font Awesome 6 Free'; 
-  font-weight: 900; 
-  color: #34d399; 
-  font-size: 0.75rem; 
-}
+.rank-val::before { content: '\f06e'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: #94a3b8; font-size: 0.75rem; }
 
 .spirit-more-link, .spirit-more-link-mobile {
   display: block; text-align: center; margin-top: 20px;
-  color: #94a3b8; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
-  transition: color 0.3s;
-  text-decoration: none;
+  font-size: 0.8rem; font-weight: 800; text-transform: uppercase;
+  transition: all 0.3s; text-decoration: none; padding: 10px; border-radius: 8px;
 }
-@media (hover: hover) {
-  .spirit-more-link:hover, .spirit-more-link-mobile:hover { color: #34d399; }
-}
+.spirit-more-link.moon-text { color: #cbd5e1; background: rgba(255,255,255,0.02); }
+.spirit-more-link.moon-text:hover { color: #0f172a; background: #e2e8f0; box-shadow: 0 0 15px rgba(226, 232, 240, 0.5); }
 
 /* PHÂN LOẠI (TAG CLOUD) */
-.tag-cloud-spirit { display: flex; flex-wrap: wrap; gap: 10px; }
+.tag-cloud-spirit { display: flex; flex-wrap: wrap; gap: 12px; }
 
 .tag-pill-spirit {
   padding: 8px 16px; 
-  background: rgba(255, 255, 255, 0.03); 
+  background: rgba(0, 0, 0, 0.3); 
   border: 1px solid rgba(255, 255, 255, 0.1); 
-  border-radius: 50px;
-  color: #cbd5e1; 
-  font-size: 0.8rem; 
-  font-weight: 600; 
-  text-decoration: none;
+  border-radius: 8px; /* Đổi sang bo góc nhẹ thay vì pill tròn */
+  color: #cbd5e1; font-size: 0.85rem; font-weight: 600; text-decoration: none;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-@media (hover: hover) {
-  .tag-pill-spirit:hover {
-    background: rgba(52, 211, 153, 0.1);
-    border-color: #34d399;
-    color: #34d399;
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(52, 211, 153, 0.2);
-  }
+.tag-pill-spirit.fire-pill:hover {
+  background: rgba(249, 115, 22, 0.15); border-color: #f97316; color: #f97316;
+  transform: translateY(-3px) scale(1.05); box-shadow: 0 5px 15px rgba(249, 115, 22, 0.2);
 }
 
 .mobile-extra-aura { display: none; }
 
-/* ===== MOBILE OPTIMIZATION (ĐỘT PHÁ CẢNH GIỚI) ===== */
+/* ===== MOBILE OPTIMIZATION ===== */
 @media (max-width: 1024px) {
   .content-body-grid { grid-template-columns: 1fr; }
   .sidebar-col-spirit { display: none; }
-  .mobile-extra-aura { display: block; margin-top: 20px; }
+  .mobile-extra-aura { display: block; margin-top: 30px; }
 }
 
 @media (max-width: 640px) {
-  .main-content-spirit { padding: 15px 12px; }
-  
+  .main-content-spirit { padding: 15px 12px 60px; }
   .hero-aura-wrapper { margin-bottom: 30px; border-radius: 16px; }
   .continue-cultivation-area { margin-bottom: 40px; }
-
-  .spirit-header { margin-bottom: 20px; }
-  .spirit-title { font-size: 1.2rem; }
-
-  /* Lưới 2 cột cho Mobile để to rõ, dễ bấm */
-  .spirit-grid-responsive {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
   .spirit-block { margin-bottom: 40px; }
+  
+  .spirit-title { font-size: 1.3rem; }
+  .spirit-note { display: none; /* Ẩn note phụ trên mobile cho gọn */ }
 
-  /* Bảng xếp hạng trên mobile cũng xài Glassmorphism */
-  .ranking-spirit-list-mobile {
-    background: rgba(11, 15, 25, 0.6);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 15px;
-    border-radius: 20px;
-    border: 1px solid rgba(52, 211, 153, 0.15);
-  }
+  .spirit-grid-responsive { grid-template-columns: repeat(2, 1fr); gap: 16px 12px; }
+
+  .ranking-spirit-list-mobile { padding: 15px; border-radius: 16px; }
 }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
