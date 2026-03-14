@@ -8,6 +8,8 @@ export interface Chapter {
   slug: string;
   content_url?: string;
   content?: string;
+  content_hash?: string;
+  updated_at?: string;
   so_chuong: number;
   created_at?: string;
   thoi_gian_dang?: string; // Backend field name

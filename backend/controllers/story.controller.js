@@ -5,6 +5,44 @@ const followModel = require("../models/follow.model");
 const readingStateModel = require("../models/readingState.model");
 const generateSlug = require("../utils/slugify"); 
 const db = require("../config/db"); // Import DB connection 
+const { getOrSet, invalidate } = require("../utils/cache");
+
+const STORY_DETAIL_CACHE_TTL_SECONDS = 600; // 10 phút
+const ALL_STORIES_CACHE_TTL_SECONDS = 600; // 10 phút
+
+const safeKeyPart = (value) =>
+  encodeURIComponent(value === undefined || value === null ? "" : String(value));
+const toIntOrUndefined = (value) => {
+  const parsed = parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const storyDetailIdKey = (id) => `storyDetail:id:${id}`;
+const storyDetailSlugKey = (slug) => `storyDetail:slug:${slug}`;
+const allStoriesCacheKey = (params) => {
+  const {
+    page,
+    limit,
+    trang_thai_kiem_duyet,
+    keyword,
+    author_id,
+    category_id,
+    sort_by,
+    order,
+  } = params;
+
+  return [
+    "storyListAll",
+    `page=${safeKeyPart(page)}`,
+    `limit=${safeKeyPart(limit)}`,
+    `trang_thai_kiem_duyet=${safeKeyPart(trang_thai_kiem_duyet)}`,
+    `keyword=${safeKeyPart(keyword)}`,
+    `author_id=${safeKeyPart(author_id)}`,
+    `category_id=${safeKeyPart(category_id)}`,
+    `sort_by=${safeKeyPart(sort_by)}`,
+    `order=${safeKeyPart(order)}`,
+  ].join(":");
+};
 
 const getAllStories = async (req, res) => {
   try {
@@ -19,16 +57,23 @@ const getAllStories = async (req, res) => {
       order,
     } = req.query;
 
-    const result = await StoryModel.getAll({
-      page: parseInt(page),
-      limit: parseInt(limit),
-       trang_thai_kiem_duyet,
-       keyword,
-       author_id: parseInt(author_id),
-       category_id: parseInt(category_id),
-       sort_by,
-       order,
-    });
+    const safePage = toIntOrUndefined(page) ?? 1;
+    const safeLimit = toIntOrUndefined(limit) ?? 10;
+    const params = {
+      page: safePage,
+      limit: safeLimit,
+      trang_thai_kiem_duyet,
+      keyword,
+      author_id: toIntOrUndefined(author_id),
+      category_id: toIntOrUndefined(category_id),
+      sort_by,
+      order,
+    };
+
+    const cacheKey = allStoriesCacheKey(params);
+    const result = await getOrSet(cacheKey, ALL_STORIES_CACHE_TTL_SECONDS, () =>
+      StoryModel.getAll(params)
+    );
     res.status(200).json(result);
   } catch (error) {
     console.error("Lỗi khi lấy danh sách truyện (Admin):", error);
@@ -83,13 +128,22 @@ const attachUserContext = async (story, userId) => {
 const getStoryById = async (req, res) => {
   try {
     const storyId = req.params.id;
-    const story = await StoryModel.getById(storyId);
+    const cacheKey = storyDetailIdKey(storyId);
+    const cachedStory = await getOrSet(cacheKey, STORY_DETAIL_CACHE_TTL_SECONDS, async () => {
+      const story = await StoryModel.getById(storyId);
+      if (!story) return null;
+      story.genres = await TheLoaiModel.getByStoryId(storyId);
+      return story;
+    });
 
-    if (!story) {
+    if (!cachedStory) {
       return res.status(404).json({ message: "Không tìm thấy truyện" });
     }
 
-    story.genres = await TheLoaiModel.getByStoryId(storyId);
+    const story = {
+      ...cachedStory,
+      genres: Array.isArray(cachedStory.genres) ? [...cachedStory.genres] : cachedStory.genres,
+    };
     if (req.user?.id) await attachUserContext(story, req.user.id);
 
     res.status(200).json(story);
@@ -102,13 +156,22 @@ const getStoryById = async (req, res) => {
 const getStoryBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    const story = await StoryModel.getBySlug(slug);
+    const cacheKey = storyDetailSlugKey(slug);
+    const cachedStory = await getOrSet(cacheKey, STORY_DETAIL_CACHE_TTL_SECONDS, async () => {
+      const story = await StoryModel.getBySlug(slug);
+      if (!story) return null;
+      story.genres = await TheLoaiModel.getByStoryId(story.id);
+      return story;
+    });
 
-    if (!story) {
+    if (!cachedStory) {
       return res.status(404).json({ message: "Không tìm thấy truyện" });
     }
 
-    story.genres = await TheLoaiModel.getByStoryId(story.id);
+    const story = {
+      ...cachedStory,
+      genres: Array.isArray(cachedStory.genres) ? [...cachedStory.genres] : cachedStory.genres,
+    };
     if (req.user?.id) await attachUserContext(story, req.user.id);
 
     res.json(story);
@@ -198,6 +261,9 @@ const updateStory = async (req, res) => {
     
     if (affectedRows > 0) {
       await StoryModel.invalidateStoryListCache?.();
+      await invalidate(storyDetailIdKey(storyId));
+      if (existingStory?.slug) await invalidate(storyDetailSlugKey(existingStory.slug));
+      if (slug && slug !== existingStory?.slug) await invalidate(storyDetailSlugKey(slug));
       return res.status(200).json({ message: "Cập nhật truyện thành công" });
     } else {
       return res
@@ -227,6 +293,9 @@ const deleteStory = async (req, res) => {
     }
 
     const affectedRows = await StoryModel.delete(storyId);
+    await StoryModel.invalidateStoryListCache?.();
+    await invalidate(storyDetailIdKey(storyId));
+    if (existingStory?.slug) await invalidate(storyDetailSlugKey(existingStory.slug));
     res.status(200).json({ message: "Xoá truyện thành công" });
   } catch (error) {
     console.error("Lỗi khi xoá truyện:", error);
@@ -259,6 +328,9 @@ const approveOrRejectStory = async (req, res) => {
   try {
     const result = await storyService.approveStory(storyId, action);
     await StoryModel.invalidateStoryListCache?.();
+    await invalidate(storyDetailIdKey(storyId));
+    const existingStory = await StoryModel.getById(storyId);
+    if (existingStory?.slug) await invalidate(storyDetailSlugKey(existingStory.slug));
     res.json(result);
   } catch (error) {
     console.error("Error in approveOrRejectStory:", error);

@@ -3,12 +3,13 @@ const { NOTIFY_TYPES, NOTIF_TEMPLATE } = require("./notification.services");
 const db = require("../config/db");
 const StoryModel = require("../models/story.model");
 const ChapterModel = require("../models/chapter.model");
+const { invalidate } = require("../utils/cache");
 
 // Duyệt chương và gửi thông báo
 const approveChapter = async (chapter_id, action, reason) => {
   try {
     const [rows] = await db.query(
-      `SELECT c.truyen_id, c.trang_thai AS trang_thai_kiem_duyet, t.user_id, t.ten_truyen AS ten_truyen
+      `SELECT c.truyen_id, c.trang_thai AS trang_thai_kiem_duyet, t.user_id, t.ten_truyen AS ten_truyen, t.slug AS truyen_slug
        FROM chuong c
        JOIN truyen_new t ON c.truyen_id = t.id
        WHERE c.id = ?`,
@@ -19,7 +20,7 @@ const approveChapter = async (chapter_id, action, reason) => {
       return { success: false, message: "Không tìm thấy chương." };
     }
 
-    const { truyen_id, user_id, trang_thai_kiem_duyet, ten_truyen } = chapter;
+    const { truyen_id, user_id, trang_thai_kiem_duyet, ten_truyen, truyen_slug } = chapter;
 
     if (action === "duyet" && trang_thai_kiem_duyet === "da_duyet") {
       return { success: false, message: "Chương đã được duyệt trước đó." };
@@ -43,6 +44,9 @@ const approveChapter = async (chapter_id, action, reason) => {
       await db.query("UPDATE truyen_new SET thoi_gian_cap_nhat = NOW() WHERE id = ?", [truyen_id]);
       await ChapterModel.updateChuongMoiNhat(truyen_id);
       if (StoryModel.invalidateStoryListCache) await StoryModel.invalidateStoryListCache();
+      await invalidate(`chaptersByStory:${truyen_id}`);
+      await invalidate(`storyDetail:id:${truyen_id}`);
+      if (truyen_slug) await invalidate(`storyDetail:slug:${truyen_slug}`);
     }
 
     // Gửi thông báo cho tác giả (type: BOOK_APPROVED, target: story)

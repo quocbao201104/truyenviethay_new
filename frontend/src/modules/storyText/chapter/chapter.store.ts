@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, markRaw } from "vue";
 import { 
     getChapterBySlug, 
     getChapterById,
@@ -14,12 +14,14 @@ import {
     type Chapter 
 } from "./chapter.service";
 import { useAppToast } from "@/composables/useAppToast";
+import { buildChapterCdnUrl } from "@/utils/chapterCdn";
 
 export const useChapterStore = defineStore("chapter", () => {
     const currentChapter = ref<Chapter | null>(null);
     const chapterList = ref<Chapter[]>([]); 
     const loading = ref(false);
     const error = ref<string | null>(null);
+    const loadingSet = new Set<string>();
 
     // Toast
     let toast = { showSuccessToast: (msg:string) => {}, showErrorToast: (msg:string) => console.error(msg) };
@@ -30,26 +32,38 @@ export const useChapterStore = defineStore("chapter", () => {
     const { showSuccessToast, showErrorToast } = toast;
 
     // Cache
-    const contentCache = ref<Map<string, Chapter>>(new Map());
+    const contentCache = markRaw(new Map<string, Chapter>());
 
     const cacheChapter = (storySlug: string, slug: string, chapter: Chapter) => {
         const cacheKey = `${storySlug}:${slug}`;
-        if (!contentCache.value.has(cacheKey)) {
-             contentCache.value.set(cacheKey, chapter);
+        if (!contentCache.has(cacheKey)) {
+             contentCache.set(cacheKey, chapter);
              // Optional: Limit cache size (LRU)
-             if (contentCache.value.size > 30) {
-                 const firstKey = contentCache.value.keys().next().value;
-                 if (firstKey) contentCache.value.delete(firstKey);
+             if (contentCache.size > 30) {
+                 const firstKey = contentCache.keys().next().value;
+                 if (firstKey) contentCache.delete(firstKey);
              }
         }
     };
 
+    const resolveChapterCdnUrl = (chapter: Chapter) => {
+        if (chapter?.truyen_id && chapter?.id) {
+            return buildChapterCdnUrl(
+                chapter.truyen_id,
+                chapter.id,
+                chapter.content_hash || chapter.updated_at
+            );
+        }
+        return chapter.content_url;
+    };
+
     const hydrateChapterContent = async (chapter: Chapter, isPreload = false) => {
         if (!chapter) return chapter;
-        if (!chapter.content_url) return chapter;
+        const cdnUrl = resolveChapterCdnUrl(chapter);
+        if (!cdnUrl) return chapter;
 
         try {
-            const response = await fetch(chapter.content_url, { cache: "force-cache" });
+            const response = await fetch(cdnUrl, { cache: "force-cache" });
             if (!response.ok) {
                 throw new Error(`CDN fetch failed (${response.status})`);
             }
@@ -78,11 +92,11 @@ export const useChapterStore = defineStore("chapter", () => {
         try {
             // Check cache first
             const cacheKey = `${storySlug}:${slug}`;
-            if (contentCache.value.has(cacheKey)) {
+            if (contentCache.has(cacheKey)) {
                 // If this is the active chapter (not preload), update currentChapter
                 if (!isPreload) {
                    console.log(`✅ Chapter Cache HIT: ${cacheKey}`);
-                   currentChapter.value = contentCache.value.get(cacheKey) || null;
+                   currentChapter.value = contentCache.get(cacheKey) || null;
                 }
                 return; // Done
             }
@@ -120,16 +134,27 @@ export const useChapterStore = defineStore("chapter", () => {
         }
     };
 
-    const preloadChapter = async (slug: string, storySlug: string) => {
-        // Use requestIdleCallback if available to avoid blocking main thread
-        // or just call fetchChapter with isPreload=true
-        if (contentCache.value.has(slug)) return; // Already cached
+    const preloadChapter = (slug: string, storySlug: string) => {
+  const cacheKey = `${storySlug}:${slug}`;
 
-        // Simple delay to let main render finish first
-        setTimeout(() => {
-             fetchChapter(slug, storySlug, true);
-        }, 1000);
-    };
+  if (contentCache.has(cacheKey) || loadingSet.has(cacheKey)) return;
+
+  const preload = async () => {
+    loadingSet.add(cacheKey);
+
+    try {
+      await fetchChapter(slug, storySlug, true);
+    } finally {
+      loadingSet.delete(cacheKey);
+    }
+  };
+
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(preload, { timeout: 2000 });
+  } else {
+    setTimeout(preload, 500);
+  }
+};
 
     const fetchChapterById = async (id: number) => {
         loading.value = true;
@@ -276,7 +301,7 @@ export const useChapterStore = defineStore("chapter", () => {
     };
     
     const clearCache = () => {
-        contentCache.value.clear();
+        contentCache.clear();
     };
 
     return {

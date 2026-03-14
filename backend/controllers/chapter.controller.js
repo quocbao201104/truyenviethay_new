@@ -1,7 +1,27 @@
 const ChapterModel = require("../models/chapter.model");
+const StoryModel = require("../models/story.model");
 const chapterService = require("../services/chapter.services"); 
 const slugify = require("../utils/slugify"); 
 const { uploadChapterJson } = require("../services/r2ChapterStorage.service");
+const { getOrSet, invalidate } = require("../utils/cache");
+
+const CHAPTER_LIST_CACHE_TTL_SECONDS = 600; // 10 phút
+
+const chaptersByStoryKey = (storyId, page, limit) =>
+  `chaptersByStory:${storyId}:p:${page}:l:${limit}`;
+const chaptersByStoryKeyPrefix = (storyId) => `chaptersByStory:${storyId}`;
+const storyDetailIdKey = (storyId) => `storyDetail:id:${storyId}`;
+const storyDetailSlugKey = (slug) => `storyDetail:slug:${slug}`;
+
+const invalidateStoryDetailCache = async (storyId) => {
+  try {
+    await invalidate(storyDetailIdKey(storyId));
+    const story = await StoryModel.getById(storyId);
+    if (story?.slug) await invalidate(storyDetailSlugKey(story.slug));
+  } catch (err) {
+    console.error("invalidateStoryDetailCache error:", err);
+  }
+};
 
 
 // Tác giả thêm chương mới (chờ duyệt)
@@ -73,18 +93,17 @@ const approveOrRejectChapter = async (req, res) => {
 const getChaptersByStoryId = async (req, res) => {
   try {
     const truyen_id = parseInt(req.params.id); 
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
     const offset = (page - 1) * limit;
 
     if (!truyen_id) {
       return res.status(400).json({ message: "Thiếu ID truyện!" });
     }
 
-    const chapters = await ChapterModel.getChaptersByStoryId(
-      truyen_id,
-      limit,
-      offset
+    const cacheKey = chaptersByStoryKey(truyen_id, page, limit);
+    const chapters = await getOrSet(cacheKey, CHAPTER_LIST_CACHE_TTL_SECONDS, () =>
+      ChapterModel.getChaptersByStoryId(truyen_id, limit, offset)
     );
     res.json({ chapters });
   } catch (error) {
@@ -144,32 +163,40 @@ const getChapterBySlug = async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy chương!" });
     }
 
-    // VIEW TRACKING: Moved to separate endpoint /view to support "Time-on-page" logic
-    // We no longer call recordChapterView here automatically.
+    // Không cache endpoint động (có gamification + dữ liệu thay đổi)
+    res.set("Cache-Control", "private, no-store");
+
+    // VIEW TRACKING: Moved to separate endpoint /view
 
     // GAMIFICATION TRIGGER
     if (req.user && req.user.id) {
-         try {
-            const taskService = require("../services/task.service");
-            const userId = req.user.id;
-            const readStoryEvent = {
-                eventType: "read_chapter",
-                eventRef: `story:${chapter.truyen_id}:chapter:${chapter.id}`,
-            };
-            await taskService.completeTaskByName(userId, "Đọc truyện", readStoryEvent);
-            if (chapter.so_chuong === 1) {
-              const firstChapterEvent = {
-                eventType: "read_first_chapter",
-                eventRef: `story:${chapter.truyen_id}:first`,
-              };
-              await taskService.completeTaskByName(userId, "Đọc chương đầu tiên", firstChapterEvent);
-            }
-         } catch (e) {
-             console.error("AutoTask Error:", e.message);
-         }
+      try {
+        const taskService = require("../services/task.service");
+        const userId = req.user.id;
+
+        const readStoryEvent = {
+          eventType: "read_chapter",
+          eventRef: `story:${chapter.truyen_id}:chapter:${chapter.id}`,
+        };
+
+        await taskService.completeTaskByName(userId, "Đọc truyện", readStoryEvent);
+
+        if (chapter.so_chuong === 1) {
+          const firstChapterEvent = {
+            eventType: "read_first_chapter",
+            eventRef: `story:${chapter.truyen_id}:first`,
+          };
+
+          await taskService.completeTaskByName(userId, "Đọc chương đầu tiên", firstChapterEvent);
+        }
+
+      } catch (e) {
+        console.error("AutoTask Error:", e.message);
+      }
     }
 
     res.json(chapter);
+
   } catch (error) {
     console.error("getChapterBySlug error:", error);
     res.status(500).json({ message: "Lỗi server khi lấy chương theo slug." });
@@ -212,6 +239,11 @@ const updateChapter = async (req, res) => {
         content_hash: contentHash,
         content_length: contentLength,
       });
+
+      if (existing.trang_thai === "da_duyet") {
+        await invalidate(chaptersByStoryKeyPrefix(existing.truyen_id));
+        await invalidateStoryDetailCache(existing.truyen_id);
+      }
     }
 
     if (affected === 0) {
@@ -230,10 +262,16 @@ const deleteChapter = async (req, res) => {
   try {
     const chapterId = req.params.id;
 
+    const existing = await ChapterModel.getChapterById(chapterId);
     const affected = await ChapterModel.deleteChapter(chapterId);
 
     if (affected === 0) {
       return res.status(404).json({ message: "Không tìm thấy chương!" });
+    }
+
+    if (affected > 0 && existing?.truyen_id) {
+      await invalidate(chaptersByStoryKeyPrefix(existing.truyen_id));
+      await invalidateStoryDetailCache(existing.truyen_id);
     }
 
     res.json({ message: "Xóa chương thành công!" });
@@ -252,6 +290,8 @@ const approveAllChapters = async (req, res) => {
     }
     const ChapterModel = require("../models/chapter.model");
     await ChapterModel.approveAllChapters(truyen_id);
+    await invalidate(chaptersByStoryKeyPrefix(truyen_id));
+    await invalidateStoryDetailCache(truyen_id);
     res.json({ message: "Đã duyệt tất cả chương của truyện này!" });
   } catch (error) {
     console.error("approveAllChapters error:", error);

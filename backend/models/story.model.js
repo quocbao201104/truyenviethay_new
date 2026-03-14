@@ -1,7 +1,7 @@
 const db = require("../config/db");
 const { getOrSet, invalidate } = require("../utils/cache");
 
-const STORY_LIST_CACHE_TTL = 180; // 3 phút
+const STORY_LIST_CACHE_TTL = 600; // 10 phút
 
 const StoryModel = {
   create: async (storyData) => {
@@ -457,7 +457,7 @@ if (ids.length > 0) {
 
     const rows = await getOrSet(
       cacheKey,
-      600,
+      1200,
       async () => {
         const [r] = await db.query(
           `SELECT tn.*, IFNULL(SUM(tv.so_luot_xem), 0) as luot_xem_thang
@@ -489,7 +489,7 @@ if (ids.length > 0) {
     const cacheKey = `hotStories:${safeLimit}`;
     const rows = await getOrSet(
       cacheKey,
-      300,
+      600,
       async () => {
         const [r] = await db.query(
           `SELECT id, ten_truyen, slug, anh_bia, tac_gia, mo_ta,

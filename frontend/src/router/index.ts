@@ -214,7 +214,7 @@ const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition;
 
-    if (to.name === "story-detail") {
+    if (to.name === "StoryDetail" || to.name === "ChapterRead") {
       return { top: 0 };
     }
 
@@ -223,24 +223,13 @@ const router = createRouter({
 });
 
 router.afterEach((to, from) => {
-  const attemptScrollToTop = () => {
+  if (to.name === "ChapterRead") return;
+  requestAnimationFrame(() => {
     window.scrollTo(0, 0);
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
     const app = document.getElementById("app");
     if (app) app.scrollTop = 0;
-  };
-
-  // Immediate
-  attemptScrollToTop();
-
-  // Frame 1
-  requestAnimationFrame(() => {
-    attemptScrollToTop();
-    // Frame 2
-    requestAnimationFrame(() => {
-      attemptScrollToTop();
-    });
   });
 });
 

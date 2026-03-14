@@ -2,8 +2,8 @@
   <div class="chapter-view-xianxia" :class="{ 'light-aura': !isDarkMode }">
     <div class="fixed top-0 left-0 w-full z-1000">
       <div
-        class="h-[3px] bg-linear-to-r from-emerald-600 via-emerald-400 to-teal-300 shadow-[0_0_10px_#34d399] transition-all duration-300"
-        :style="{ width: scrollProgress + '%' }"
+        class="h-[3px] bg-linear-to-r from-emerald-600 via-emerald-400 to-teal-300 shadow-[0_0_10px_#34d399] transition-transform duration-300 progress-bar"
+        :style="{ transform: `scaleX(${scrollProgress / 100})` }"
       />
     </div>
 
@@ -25,7 +25,7 @@
           {{ chapter?.truyen?.ten_truyen }}
         </router-link>
 
-        <h1 class="chapter-title-glow">
+        <h1 class="chapter-title-glow" :class="{ 'title-ready': titleReady }">
           {{ chapterTitle }}
         </h1>
         
@@ -49,7 +49,7 @@
           <div class="chapter-select-wrapper">
             <select @change="handleSelectChapter" :value="chapter?.slug" class="spirit-select xianxia-dropdown">
               <option
-                v-for="c in chapterList"
+                v-for="c in visibleChapters"
                 :key="c.id"
                 :value="c.slug"
                 class="spirit-option"
@@ -84,11 +84,22 @@
       </div>
 
       <article
+        v-if="contentReady && isHtml"
         class="spirit-content-body animate-fadeIn"
         :class="fontFamily"
         :style="{ fontSize: fontSize + 'px' }"
         v-html="contentHtml"
       />
+      <article
+        v-else-if="contentReady"
+        class="spirit-content-body animate-fadeIn plain-text"
+        :class="fontFamily"
+        :style="{ fontSize: fontSize + 'px' }"
+        v-text="displayText"
+      />
+      <div v-else class="chapter-loading-placeholder">
+        {{ plainMessage || "Đang tải chương..." }}
+      </div>
 
       <div class="chapter-spirit-footer">
         <button @click="prevChapter" :disabled="!hasPrev" class="btn-nav-spirit prev">
@@ -116,6 +127,7 @@ import { useChapterStore } from "@/modules/storyText/chapter/chapter.store";
 import { saveReadingHistory } from "@/modules/history/history.service";
 import { useAuthStore } from "@/modules/auth/auth.store";
 import { getChapterBySlug, getChapterById, type Chapter } from "@/modules/storyText/chapter/chapter.service";
+import { buildChapterCdnUrl } from "@/utils/chapterCdn";
 
 const route = useRoute();
 const router = useRouter();
@@ -131,7 +143,10 @@ const isDarkMode = ref(localStorage.getItem('reading-theme') !== 'light');
 
 const chapterContent = shallowRef<string>("");
 const contentHtml = shallowRef<string>("");
+const plainMessage = shallowRef<string>("");
 const contentLoaded = ref(false);
+const contentReady = ref(false);
+const titleReady = ref(false);
 let activeRequestId = 0;
 
 // Mobile Bubble State
@@ -184,39 +199,55 @@ const chapterTitle = computed(() => {
   return chapter.value.tieu_de.replace(/<\/?[^>]+(>|$)/g, "").trim();
 });
 
-const formatContent = (raw: string) => {
-  if (!raw) return "";
-  let content = raw
-    .replace(/\r\n/g, "\n")
-    .replace(/\n\n+/g, "</p><p>")
-    .replace(/\n/g, "<br>");
-  if (!content.startsWith("<p")) content = `<p>${content}`;
-  if (!content.endsWith("</p>")) content = `${content}</p>`;
-  return content;
-};
+const isHtml = computed(() => /<\/?[a-z][\s\S]*>/i.test(chapterContent.value || ""));
+const displayText = computed(() => chapterContent.value || plainMessage.value);
 
 const updateContentHtml = () => {
-  contentHtml.value = chapterContent.value ? formatContent(chapterContent.value) : "";
+  contentHtml.value = isHtml.value ? (chapterContent.value || "") : "";
 };
 
-const handleScroll = () => {
-  const winScroll = document.documentElement.scrollTop;
-  const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-  scrollProgress.value = (winScroll / height) * 100;
-  isScrolled.value = winScroll > 600;
-
-  if (winScroll > lastScrollTop.value && winScroll > 150) {
-      isScrollingDown.value = true;
+const showContentLater = () => {
+  contentReady.value = false;
+  const run = () => {
+    contentReady.value = true;
+  };
+  if ("requestIdleCallback" in window) {
+    (window as any).requestIdleCallback(run);
   } else {
-      isScrollingDown.value = false;
+    requestAnimationFrame(run);
   }
-  
-  // Trigger view if scrolled significantly (300px)
-  if (contentLoaded.value && winScroll > 300 && !isViewCounted.value) {
-    triggerViewIncrement();
-  }
+};
 
-  lastScrollTop.value = winScroll <= 0 ? 0 : winScroll;
+const scheduleTitleReady = () => {
+  titleReady.value = false;
+  requestAnimationFrame(() => {
+    titleReady.value = true;
+  });
+};
+
+let scrollRafId = 0;
+const handleScroll = () => {
+  if (scrollRafId) return;
+  scrollRafId = requestAnimationFrame(() => {
+    const winScroll = document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    scrollProgress.value = height > 0 ? (winScroll / height) * 100 : 0;
+    isScrolled.value = winScroll > 600;
+
+    if (winScroll > lastScrollTop.value && winScroll > 150) {
+        isScrollingDown.value = true;
+    } else {
+        isScrollingDown.value = false;
+    }
+    
+    // Trigger view if scrolled significantly (300px)
+    if (contentLoaded.value && winScroll > 300 && !isViewCounted.value) {
+      triggerViewIncrement();
+    }
+
+    lastScrollTop.value = winScroll <= 0 ? 0 : winScroll;
+    scrollRafId = 0;
+  });
 };
 
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -228,6 +259,15 @@ const currentIndex = computed(() => {
 
 const hasPrev = computed(() => !!chapter.value?.navigation?.prev_slug || currentIndex.value > 0);
 const hasNext = computed(() => !!chapter.value?.navigation?.next_slug || (currentIndex.value >= 0 && currentIndex.value < chapterList.value.length - 1));
+const visibleChapters = computed(() => {
+  const list = chapterList.value;
+  if (list.length <= 220) return list;
+  const idx = currentIndex.value;
+  if (idx < 0) return list.slice(0, 220);
+  const start = Math.max(0, idx - 110);
+  const end = Math.min(list.length, idx + 110);
+  return list.slice(start, end);
+});
 
 const navigateToChapter = (chapterSlug: string) => {
     router.push(`/truyen-chu/${route.params.storySlug}/${chapterSlug}`);
@@ -265,7 +305,9 @@ const loadData = async () => {
     const requestId = ++activeRequestId;
     chapterContent.value = "";
     contentHtml.value = "<p>Đang tải chương...</p>";
+    plainMessage.value = "Đang tải chương...";
     contentLoaded.value = false;
+    contentReady.value = false;
     if (viewTimer) clearTimeout(viewTimer);
     isViewCounted.value = false;
 
@@ -273,6 +315,7 @@ const loadData = async () => {
       const meta = await fetchChapterMeta(chapterSlug, storySlug);
       if (requestId !== activeRequestId) return;
       chapterMeta.value = meta;
+      scheduleTitleReady();
 
       if (meta) {
         // Save reading history for logged in user
@@ -287,8 +330,9 @@ const loadData = async () => {
       }
 
       let rawContent = "";
-      if (meta?.content_url) {
-        const r = await fetch(meta.content_url, { cache: "force-cache" });
+      if (meta?.truyen_id && meta?.id) {
+        const cdnUrl = buildChapterCdnUrl(meta.truyen_id, meta.id, meta.content_hash || meta.updated_at);
+        const r = await fetch(cdnUrl, { cache: "force-cache" });
         if (!r.ok) throw new Error(`CDN fetch failed (${r.status})`);
         const json = await r.json();
         rawContent = json?.content || "";
@@ -298,8 +342,10 @@ const loadData = async () => {
 
       if (requestId !== activeRequestId) return;
       chapterContent.value = rawContent;
+      plainMessage.value = "";
       updateContentHtml();
       contentLoaded.value = true;
+      showContentLater();
       startViewTimer();
 
       // Prefetch next chapter in background (warm CDN cache)
@@ -307,8 +353,13 @@ const loadData = async () => {
       if (nextSlug) {
         getChapterBySlug(nextSlug, storySlug)
           .then((nextMeta) => {
-            if (nextMeta?.content_url) {
-              fetch(nextMeta.content_url, { cache: "force-cache" }).catch(() => {});
+            if (nextMeta?.truyen_id && nextMeta?.id) {
+              const nextUrl = buildChapterCdnUrl(
+                nextMeta.truyen_id,
+                nextMeta.id,
+                nextMeta.content_hash || nextMeta.updated_at
+              );
+              fetch(nextUrl, { cache: "force-cache" }).catch(() => {});
             }
           })
           .catch(() => {});
@@ -321,9 +372,12 @@ const loadData = async () => {
       if (viewTimer) clearTimeout(viewTimer);
       if (status === 404) {
         contentHtml.value = "<p>Chương không tồn tại hoặc đã bị ẩn.</p>";
+        plainMessage.value = "Chương không tồn tại hoặc đã bị ẩn.";
       } else {
         contentHtml.value = "<p>Không thể tải nội dung chương. Vui lòng thử lại.</p>";
+        plainMessage.value = "Không thể tải nội dung chương. Vui lòng thử lại.";
       }
+      contentReady.value = true;
       console.error("Chapter load error:", err?.message || err);
     } finally {
       if (requestId === activeRequestId) {
@@ -335,12 +389,13 @@ const loadData = async () => {
 
 onMounted(() => {
   loadData();
-  window.addEventListener('scroll', handleScroll);
+  window.addEventListener('scroll', handleScroll, { passive: true });
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', handleScroll);
   if (viewTimer) clearTimeout(viewTimer);
+  if (scrollRafId) cancelAnimationFrame(scrollRafId);
 });
 
 watch(() => [route.params.chapterSlug, route.params.storySlug], () => {
@@ -359,6 +414,12 @@ watch(() => [route.params.chapterSlug, route.params.storySlug], () => {
   color: #94a3b8;
   min-height: 100vh;
   transition: all 0.5s ease;
+}
+
+.progress-bar {
+  width: 100%;
+  transform-origin: left center;
+  will-change: transform;
 }
 
 .reading-spirit-wrapper {
@@ -389,6 +450,11 @@ watch(() => [route.params.chapterSlug, route.params.storySlug], () => {
   margin-top: 15px;
   line-height: 1.3;
   color: #fff;
+  filter: none;
+  font-size-adjust: 0.52;
+  min-height: 2.8rem;
+}
+.chapter-title-glow.title-ready {
   filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
 }
 
@@ -522,9 +588,28 @@ watch(() => [route.params.chapterSlug, route.params.storySlug], () => {
 }
 
 /* Content Body */
-.spirit-content-body { line-height: 1.8; color: #cbd5e1; text-align: justify; }
+.spirit-content-body {
+  line-height: 1.8;
+  color: #cbd5e1;
+  text-align: left;
+  content-visibility: auto;
+  contain: layout paint;
+  contain-intrinsic-size: 1000px;
+  min-height: 40vh;
+}
+.spirit-content-body.plain-text { white-space: pre-line; }
 .spirit-content-body :deep(p) { margin-bottom: 2.5rem; text-indent: 1.5em; }
 .spirit-content-body :deep(p:first-of-type) { text-indent: 0; }
+
+@media (min-width: 1024px) {
+  .spirit-content-body { text-align: justify; }
+}
+
+.chapter-loading-placeholder {
+  min-height: 40vh;
+  padding: 12px 0;
+  opacity: 0.7;
+}
 
 /* Footer Nav */
 .chapter-spirit-footer {
@@ -556,6 +641,10 @@ watch(() => [route.params.chapterSlug, route.params.storySlug], () => {
 .light-aura .spirit-content-body { color: #1e293b; }
 .light-aura .spirit-select, .light-aura .spirit-select-small { color: #1e293b; background: #fff; }
 .light-aura .mobile-bubble-btn { background: #fff; }
+
+@media (prefers-reduced-transparency: reduce) {
+  .spirit-control-bar { backdrop-filter: none; }
+}
 
 /* Animations */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

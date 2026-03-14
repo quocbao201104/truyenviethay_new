@@ -72,7 +72,7 @@ const uploadChapterJson = async ({ storyId, chapterId, title, content, updatedAt
       Body: gzBuffer,
       ContentType: "application/json",
       ContentEncoding: "gzip",
-      CacheControl: "public, max-age=31536000, immutable, stale-while-revalidate=86400",
+      CacheControl: "public, max-age=604800, stale-while-revalidate=86400",
     })
   );
 
