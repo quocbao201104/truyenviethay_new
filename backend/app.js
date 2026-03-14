@@ -20,7 +20,12 @@ app.set("trust proxy", 1);
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: [
+      "http://localhost:5173", 
+      "https://truyen-viet-hay.vercel.app", 
+      "https://truyenviethay.id.vn", 
+      "https://www.truyenviethay.id.vn"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Content-Length", "X-Requested-With"],
     credentials: true,
