@@ -19,7 +19,7 @@
       </div>
 
       <div class="jade-chapter-badge">
-        <i class="fas fa-scroll text-[10px] text-emerald-400"></i>
+        <i class="fas fa-scroll text-[10px] text-sky-400"></i>
         <span>{{ story.chuong_moi || `Chương ${story.so_chuong || story.so_luong_chuong || 0}` }}</span>
       </div>  
 
@@ -115,38 +115,39 @@ const getStatusClass = (status) => {
 
 .xianxia-story-card {
   font-family: 'Be Vietnam Pro', sans-serif;
-  background: #0b0f19; /* Nền tối sâu */
+  /* ĐỔI NỀN: Dùng nền trong suốt sáng hơn một chút kết hợp Glassmorphism để tách khỏi nền web */
+  background: rgba(30, 41, 59, 0.4); 
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 16px;
-  color: #cbd5e1;
+  color: #f8fafc; /* Chữ sáng hơn */
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid rgba(52, 211, 153, 0.1); /* Viền aura nhạt */
+  border: 1px solid rgba(56, 189, 248, 0.15); /* Viền Băng Lam mờ */
   height: 100%;
   cursor: pointer;
   position: relative;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  /* Đổ bóng để thẻ nổi lên hẳn */
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,255,255,0.02);
 }
 
 @media (hover: hover) {
   .xianxia-story-card:hover {
     transform: translateY(-6px);
-    border-color: rgba(52, 211, 153, 0.4);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(52, 211, 153, 0.15);
+    background: rgba(30, 41, 59, 0.7); /* Sáng lên khi hover */
+    border-color: rgba(56, 189, 248, 0.6); /* Viền rực sáng */
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.2);
   }
 
   .xianxia-story-card:hover .story-cover-img {
-    transform: scale(1.1) rotate(1deg); /* Thêm chút xoay nhẹ cho ảo diệu */
+    transform: scale(1.1) rotate(1deg);
   }
 
   .xianxia-story-card:hover .aura-overlay { opacity: 1; }
-
-  .xianxia-story-card:hover .read-btn-spirit {
-    transform: translateY(0);
-  }
-
-  .xianxia-story-card:hover .story-title-main { color: #34d399; }
+  .xianxia-story-card:hover .read-btn-spirit { transform: translateY(0); }
+  .xianxia-story-card:hover .story-title-main { color: #38bdf8; } /* Đổi text hover sang Băng Lam */
 }
 
 .cover-aura-wrapper {
@@ -154,24 +155,46 @@ const getStatusClass = (status) => {
   width: 100%;
   padding-top: 140%;
   overflow: hidden;
-  background: #131b2c;
+  background: #0b0f19;
 }
 
+.cover-blur-bg {
+  position: absolute;
+  inset: -20px; /* Phóng to một chút để viền không bị gắt */
+  background-size: cover;
+  background-position: center;
+  filter: blur(15px) brightness(0.4); /* Làm mờ và làm tối nền để tôn ảnh chính */
+  z-index: 0;
+}
+
+/* Ảnh chính của truyện */
 .story-cover-img {
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  object-fit: cover;
+  
+  /* Lấp đầy 100% khung không để lại khoảng trống */
+  object-fit: cover; 
+  
+  /* QUAN TRỌNG: Neo ảnh từ đỉnh trên cùng, giữ trọn vẹn khuôn mặt/đầu nhân vật */
+  object-position: top center; 
+  
   transition: transform 0.6s ease-out;
+  z-index: 1;
 }
 
+/* Lưu ý: Nếu đạo hữu có hover zoom ảnh thì phải giữ nguyên z-index */
+@media (hover: hover) {
+  .xianxia-story-card:hover .story-cover-img {
+    transform: scale(1.05) rotate(1deg); 
+  }
+}
 
-
-/* Lớp phủ chân ảnh */
+/* Lớp phủ chân ảnh TỐI ƯU LẠI: Mỏng hơn, chỉ che 30% dưới cùng */
 .bottom-vignette {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, #0b0f19 0%, rgba(11, 15, 25, 0.4) 30%, transparent 60%);
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.9) 0%, transparent 40%);
   pointer-events: none;
   z-index: 1;
 }
@@ -180,8 +203,8 @@ const getStatusClass = (status) => {
 .aura-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(5, 8, 15, 0.5);
-  backdrop-filter: blur(2px); /* Kính mờ nhẹ */
+  background: rgba(2, 6, 23, 0.5);
+  backdrop-filter: blur(3px); 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -190,43 +213,41 @@ const getStatusClass = (status) => {
   z-index: 5;
 }
 
-
-
 .read-btn-spirit {
-  background: linear-gradient(135deg, #10b981, #34d399);
-  color: #05080f;
+  background: linear-gradient(135deg, #0ea5e9, #38bdf8); /* Màu Băng Lam */
+  color: #020617;
   padding: 8px 20px;
   border-radius: 50px;
   font-weight: 800;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  box-shadow: 0 4px 15px rgba(52, 211, 153, 0.4);
+  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
   transform: translateY(10px);
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-
-
 
 /* NGỌC PHIẾN CHƯƠNG (Chapter Badge) */
 .jade-chapter-badge {
   position: absolute;
   bottom: 8px;
   right: 8px;
-  background: rgba(11, 15, 25, 0.75);
+  background: rgba(15, 23, 42, 0.85); /* Tối ưu nền badge */
   backdrop-filter: blur(6px);
-  color: #f8fafc;
+  color: #e0f2fe;
   padding: 4px 12px;
   border-radius: 50px;
   font-size: 0.7rem;
   font-weight: 700;
-  border: 1px solid rgba(52, 211, 153, 0.3);
+  border: 1px solid rgba(56, 189, 248, 0.3);
   z-index: 10;
   display: flex;
   align-items: center;
   gap: 6px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.4);
 }
+
+.jade-chapter-badge i { color: #38bdf8; }
 
 /* CẢNH GIỚI TAG (Status Sigil - Lệnh Bài) */
 .sigil-status {
@@ -247,26 +268,26 @@ const getStatusClass = (status) => {
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
-/* Viên Mãn - Ngọc Bích */
+/* Viên Mãn - Ngọc Bích (Giữ nguyên màu xanh lá cho trạng thái hoàn thành) */
 .status-completed { 
-  background: rgba(16, 185, 129, 0.15); 
-  border: 1px solid rgba(16, 185, 129, 0.5); 
+  background: rgba(16, 185, 129, 0.2); 
+  border: 1px solid rgba(16, 185, 129, 0.4); 
   color: #34d399;
   text-shadow: 0 0 5px rgba(52, 211, 153, 0.4);
 }
 
 /* Đang Ra - Băng Lam */
 .status-on-going { 
-  background: rgba(59, 130, 246, 0.15); 
-  border: 1px solid rgba(59, 130, 246, 0.5); 
-  color: #60a5fa;
-  text-shadow: 0 0 5px rgba(96, 165, 250, 0.4);
+  background: rgba(56, 189, 248, 0.2); 
+  border: 1px solid rgba(56, 189, 248, 0.4); 
+  color: #38bdf8;
+  text-shadow: 0 0 5px rgba(56, 189, 248, 0.4);
 }
 
 /* Đề Cử - Xích Kim */
 .status-suggested { 
-  background: rgba(245, 158, 11, 0.15); 
-  border: 1px solid rgba(245, 158, 11, 0.5); 
+  background: rgba(245, 158, 11, 0.2); 
+  border: 1px solid rgba(245, 158, 11, 0.4); 
   color: #fbbf24;
   text-shadow: 0 0 5px rgba(251, 191, 36, 0.4);
 }
@@ -278,13 +299,14 @@ const getStatusClass = (status) => {
   flex-direction: column;
   flex-grow: 1;
   gap: 8px;
+  background: transparent; /* Kế thừa nền kính mờ của card */
 }
 
 .story-title-main {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  color: #f1f5f9;
+  color: #ffffff; /* Text trắng tinh cho sáng sủa */
   line-height: 1.4;
   height: 2.8em;
   overflow: hidden;
@@ -292,48 +314,47 @@ const getStatusClass = (status) => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   transition: color 0.3s;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
 }
 
-
-
 .author-spirit {
-  font-size: 0.75rem;
-  color: #64748b;
+  font-size: 0.8rem;
+  color: #94a3b8;
   display: flex;
   align-items: center;
   gap: 6px;
   font-weight: 600;
 }
 
-.author-spirit i { color: rgba(52, 211, 153, 0.6); font-size: 0.7rem; }
+.author-spirit i { color: rgba(56, 189, 248, 0.8); font-size: 0.75rem; }
 
 /* Thống kê Footer */
 .stats-spirit-footer {
   display: flex;
   justify-content: space-between;
   margin-top: auto;
-  padding-top: 10px;
-  border-top: 1px dashed rgba(52, 211, 153, 0.15); /* Đường gạch nối linh khí */
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05); /* Đổi sang vạch trắng mờ cho sáng */
 }
 
 .stat-spirit {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #94a3b8;
 }
 
-.stat-icon-blue { color: #3b82f6; }
+.stat-icon-blue { color: #38bdf8; }
 .stat-icon-gray { color: #64748b; }
 
 .animate-spin-slow { animation: spin 8s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 @media (max-width: 640px) {
-  .story-title-main { font-size: 0.9rem; }
-  .sigil-status { font-size: 0.5rem; padding: 3px 8px; }
+  .story-title-main { font-size: 0.95rem; }
+  .sigil-status { font-size: 0.55rem; padding: 3px 8px; }
   .jade-chapter-badge { font-size: 0.65rem; padding: 3px 10px; }
 }
 </style>

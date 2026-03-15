@@ -184,6 +184,7 @@ const getChapterLink = (item: HistoryItem) => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top center;
   transition: transform 0.5s ease;
 }
 

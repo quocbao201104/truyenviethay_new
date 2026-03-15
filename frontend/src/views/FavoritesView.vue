@@ -4,16 +4,14 @@
     <main class="main-content">
       <div class="container">
         
-        <!-- THIÊN THƯ HEADER -->
         <div class="section-header-aura animate-fadeIn">
-          <h2 class="section-title-xianxia">Tâm Đắc Linh Thư</h2>
-          <p class="section-subtitle">Những bí tịch đang đồng hành trên đạo lộ tu tiên</p>
+          <h2 class="section-title-xianxia">Thần Thức Lạc Ấn</h2>
+          <p class="section-subtitle">Những bí tịch đã kết ấn, đồng hành trên đạo lộ tu tiên</p>
           <div class="header-divider-spirit">
             <div class="dot"></div>
           </div>
         </div>
 
-        <!-- TRẠNG THÁI CẢM ỨNG (LOADING) -->
         <div v-if="favoriteStore.loading" class="loading-aura-container">
           <div class="skeleton-grid-xianxia">
             <div v-for="n in 10" :key="n" class="skeleton-pill-card">
@@ -26,43 +24,37 @@
           </div>
         </div>
 
-        <!-- THIÊN CƠ NHIỄU LOẠN (ERROR) -->
         <div v-else-if="favoriteStore.error" class="state-box-aura error">
-          <i class="fas fa-circle-nodes"></i>
-          <p>Thiên cơ nhiễu loạn: {{ favoriteStore.error }}</p>
+          <i class="fas fa-link-slash text-rose-500 opacity-50"></i>
+          <p>Lạc ấn đứt đoạn: {{ favoriteStore.error }}</p>
         </div>
 
-        <!-- VÔ DUYÊN BÍ TỊCH (EMPTY STATE) -->
         <div v-else-if="favoriteStore.favorites.length === 0" class="state-box-aura empty">
-          <i class="fas fa-heart-crack opacity-20"></i>
-          <h3>Vô Duyên Bí Tịch</h3>
-          <p>Đạo hữu chưa tìm thấy tâm đắc linh thư nào để lưu dấu.</p>
-          <router-link to="/truyen-chu" class="btn-seek-destiny">
+          <i class="fas fa-fingerprint opacity-20"></i>
+          <h3>Vô Ấn Lạc Trống</h3>
+          <p>Đạo hữu chưa dùng thần thức để phong ấn bất kỳ linh thư nào làm của riêng.</p>
+          <router-link to="/the-loai" class="btn-seek-destiny">
             <i class="fas fa-compass-drafting mr-2"></i>
             Tầm Tiên Lộ
           </router-link>
         </div>
 
-        <!-- LINH THƯ LƯỚI (FAVORITES GRID) -->
         <div v-else class="favorites-spirit-content animate-fadeIn">
           <div class="favorites-grid-xianxia">
             <div v-for="story in favoriteStore.favorites" :key="story.id" class="story-aura-wrapper group">
-              <!-- Sử dụng Card truyện đồng bộ -->
               <NewStoryCard :story="story" />
               
-              <!-- Nút Bỏ Theo Dõi (Dấu Ấn Đoạn Tuyệt) -->
               <button 
                 class="btn-sever-bond" 
                 @click.prevent.stop="handleUnfollow(story.id)"
-                title="Bỏ theo dõi bí tịch"
+                title="Giải trừ lạc ấn"
               >
-                <i class="fas fa-heart"></i>
-                <span class="tooltip-aura">Đoạn Tuyệt</span>
+                <i class="fas fa-fire-flame-simple"></i>
+                <span class="tooltip-aura">Giải Ấn</span>
               </button>
             </div>
           </div>
 
-          <!-- LINH TRẬN PHÂN TRANG (PAGINATION) -->
           <div v-if="favoriteStore.totalPages > 1" class="xianxia-pagination">
             <button 
               class="page-nav-btn" 
@@ -103,7 +95,7 @@ onMounted(() => {
 
 const handleUnfollow = async (storyId: number) => {
   await favoriteStore.toggleFollow(storyId);
-  // Optional: Thêm hiệu ứng toast báo bỏ theo dõi thành công
+  // Optional: Thêm hiệu ứng toast báo giải ấn thành công
 };
 </script>
 
@@ -111,7 +103,7 @@ const handleUnfollow = async (storyId: number) => {
 /* ===== CORE THEME XIANXIA ===== */
 .favorites-view-container-xianxia {
   min-height: 100vh;
-  background: #0b0f19; /* Nền tối sâu đồng bộ */
+  background: #0b0f19;
   color: #cbd5e1;
   font-family: 'Be Vietnam Pro', sans-serif;
   padding-bottom: 50px;
@@ -123,7 +115,7 @@ const handleUnfollow = async (storyId: number) => {
   padding: 40px 20px;
 }
 
-/* ===== HEADER SPIRIT ===== */
+/* ===== HEADER SPIRIT (Tone Tím Thần Thức) ===== */
 .section-header-aura {
   text-align: center;
   margin-bottom: 50px;
@@ -134,10 +126,11 @@ const handleUnfollow = async (storyId: number) => {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 4px;
-  background: linear-gradient(to right, #34d399, #fff, #34d399);
+  /* Chuyển sang dải màu Tím Amethyst - Mộng Ảo */
+  background: linear-gradient(to right, #a855f7, #ffffff, #a855f7);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.3));
+  filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.4));
 }
 
 .section-subtitle {
@@ -152,14 +145,14 @@ const handleUnfollow = async (storyId: number) => {
 .header-divider-spirit {
   height: 1px;
   width: 240px;
-  background: linear-gradient(90deg, transparent, #34d399, transparent);
+  background: linear-gradient(90deg, transparent, #a855f7, transparent);
   margin: 20px auto;
   position: relative;
 }
 
 .header-divider-spirit .dot {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg);
-  width: 8px; height: 8px; background: #34d399; box-shadow: 0 0 10px #34d399;
+  width: 8px; height: 8px; background: #a855f7; box-shadow: 0 0 10px #a855f7;
 }
 
 /* ===== FAVORITES GRID ===== */
@@ -175,7 +168,7 @@ const handleUnfollow = async (storyId: number) => {
   height: 100%;
 }
 
-/* ===== BTN SEVER BOND (UNFOLLOW) ===== */
+/* ===== BTN SEVER BOND (GIẢI ẤN) ===== */
 .btn-sever-bond {
   position: absolute;
   top: 12px;
@@ -183,10 +176,11 @@ const handleUnfollow = async (storyId: number) => {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgba(244, 63, 94, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(244, 63, 94, 0.3);
-  color: #f43f5e;
+  /* Màu đỏ của nghiệp hỏa để cảnh báo hủy theo dõi */
+  background: rgba(225, 29, 72, 0.15);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(225, 29, 72, 0.4);
+  color: #fb7185;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -196,10 +190,10 @@ const handleUnfollow = async (storyId: number) => {
 }
 
 .btn-sever-bond:hover {
-  background: #f43f5e;
+  background: #e11d48;
   color: #fff;
-  transform: scale(1.1) rotate(15deg);
-  box-shadow: 0 0 15px rgba(244, 63, 94, 0.5);
+  transform: scale(1.15) rotate(15deg);
+  box-shadow: 0 0 15px rgba(225, 29, 72, 0.6);
 }
 
 .tooltip-aura {
@@ -217,7 +211,7 @@ const handleUnfollow = async (storyId: number) => {
   transform: translateY(5px);
   transition: all 0.2s;
   pointer-events: none;
-  border: 1px solid #f43f5e40;
+  border: 1px solid #e11d4840;
 }
 
 .btn-sever-bond:hover .tooltip-aura {
@@ -235,28 +229,29 @@ const handleUnfollow = async (storyId: number) => {
   box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
-.state-box-aura i { font-size: 4rem; margin-bottom: 25px; color: #34d399; }
-.state-box-aura.error i { color: #f43f5e; }
+.state-box-aura i { font-size: 4rem; margin-bottom: 25px; color: #a855f7; }
+.state-box-aura.error i { color: #e11d48; }
 
 .btn-seek-destiny {
   display: inline-flex;
   align-items: center;
   padding: 14px 35px;
   margin-top: 30px;
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: #0b0f19;
+  /* Nút bấm dải màu gradient tím */
+  background: linear-gradient(135deg, #a855f7, #7e22ce);
+  color: #fff;
   border-radius: 12px;
   font-weight: 800;
   text-transform: uppercase;
   text-decoration: none;
   letter-spacing: 1px;
-  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 10px 20px rgba(168, 85, 247, 0.3);
   transition: all 0.3s;
 }
 
 .btn-seek-destiny:hover {
   transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 15px 30px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 15px 30px rgba(168, 85, 247, 0.5);
 }
 
 /* ===== PAGINATION XIANXIA ===== */
@@ -280,9 +275,9 @@ const handleUnfollow = async (storyId: number) => {
 }
 
 .page-nav-btn:hover:not(:disabled) {
-  border-color: #34d399;
-  color: #34d399;
-  box-shadow: 0 0 15px rgba(52, 211, 153, 0.2);
+  border-color: #a855f7;
+  color: #a855f7;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
 }
 
 .page-nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
@@ -295,7 +290,7 @@ const handleUnfollow = async (storyId: number) => {
   text-transform: uppercase;
 }
 
-.page-counter-aura .current { color: #34d399; font-weight: 900; }
+.page-counter-aura .current { color: #a855f7; font-weight: 900; }
 
 /* ===== ANIMATIONS ===== */
 @keyframes fadeIn {

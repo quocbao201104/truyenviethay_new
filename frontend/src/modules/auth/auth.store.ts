@@ -52,8 +52,6 @@ export const useAuthStore = defineStore("auth", {
       this.isInitialized = false;
       this.isInitialLoading = false;
       initializationPromise = null;
-      const toast = useToast();
-      toast.info("Bạn đã đăng xuất.");
     },
 
     async login(loginData: LoginPayload): Promise<LoginResponse> {

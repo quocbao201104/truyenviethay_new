@@ -15,6 +15,7 @@ import {
 } from "./chapter.service";
 import { useAppToast } from "@/composables/useAppToast";
 import { buildChapterCdnUrl } from "@/utils/chapterCdn";
+import { formatChapterContent } from "@/utils/chapterFormat";
 
 export const useChapterStore = defineStore("chapter", () => {
     const currentChapter = ref<Chapter | null>(null);
@@ -71,7 +72,7 @@ export const useChapterStore = defineStore("chapter", () => {
             if (!json?.content) {
                 throw new Error("CDN payload missing content");
             }
-            chapter.content = json.content;
+            chapter.content = formatChapterContent(json.content);
         } catch (err: any) {
             if (!isPreload) {
                 error.value = "Không thể tải nội dung chương. Vui lòng thử lại.";

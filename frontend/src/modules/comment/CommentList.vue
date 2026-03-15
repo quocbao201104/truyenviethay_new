@@ -333,7 +333,7 @@ const onAvatarError = (e: Event) => {
 
 <style scoped>
 .comment-section {
-  --aura-primary: #34d399;
+  --aura-primary: #0be3ff;
   --aura-bg: #0b0f19;
   --bubble-bg: rgba(19, 27, 44, 0.6);
   --border-light: rgba(52, 211, 153, 0.15);
@@ -353,7 +353,7 @@ const onAvatarError = (e: Event) => {
   gap: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  text-shadow: 0 0 10px rgba(52, 211, 153, 0.3);
+  text-shadow: 0 0 10px rgba(1, 216, 245, 0.3);
 }
 
 .comment-form, .reply-form { margin-bottom: 1.5rem; }

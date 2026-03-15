@@ -26,6 +26,11 @@ if (process.env.NODE_ENV !== "test") {
 const http = require("http");
 const server = http.createServer(app);
 const { initSocket } = require("./config/socket");
+const onlineStatusService = require("./services/onlineStatus.service");
+
+// Clear stale online status on startup
+onlineStatusService.clearAllOnlineStatus();
+
 initSocket(server);
 
 server.listen(port, () => {

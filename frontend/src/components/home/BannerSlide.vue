@@ -1,115 +1,350 @@
 <template>
   <div class="banner-slide-aura desktop-only" :class="{ active: isActive }">
-    
-    <div class="slide-jade-scroll">
-      <div class="cover-spirit-wrapper">
+    <!-- Background Layer with Blur -->
+    <div class="slide-cosmic-bg">
+      <div class="cover-cosmic-wrapper">
         <img :src="coverUrl" class="cover-bg-aura" alt="Background" />
       </div>
-      
-      <img :src="coverUrl" class="cover-img-spirit" :alt="story.ten_truyen" />
+      <div class="cosmic-overlay-radial"></div>
+    </div>
 
+    <!-- Main Content Grid -->
+    <div class="content-spirit-grid">
+      <!-- Left: Book Info -->
       <div class="info-spirit-wrapper">
-        <span class="badge-spirit-suggested">ĐỀ CỬ TUYỆT HẢO</span>
-        <h2 class="title-spectral">{{ story.ten_truyen }}</h2>
-        <div class="meta-spirit-row">
-          <span class="author-tag"><i class="fas fa-feather-alt"></i> {{ story.tac_gia || 'Đang cập nhật' }}</span>
-          <span class="view-tag"><i class="fas fa-eye text-emerald-400"></i> {{ formatNumber(story.luot_xem) }} lượt xem</span>
+        <div class="badge-divine animate-pulse-slow">
+          <i class="fas fa-crown text-[10px] mr-1"></i> Tuyệt Thế Bí Tịch
         </div>
-        <p class="description-spirit">{{ truncateText(story.mo_ta, 160) }}</p>
         
-        <router-link :to="`/truyen-chu/${story.slug}`" class="btn-khai-mon-aura">
-          KHAI MÔN TU LUYỆN <i class="fas fa-arrow-right ml-2"></i>
-        </router-link>
+        <h2 class="spirit-title-glow" @click="goToStory">
+          {{ story.ten_truyen }}
+        </h2>
+        
+        <div class="spirit-meta-aura">
+          <span class="meta-item">
+            <i class="fas fa-feather-pointed"></i> {{ story.tac_gia || 'Ẩn Danh Đạo Nhân' }}
+          </span>
+          <span class="aura-divider">|</span>
+          <span class="meta-item">
+            <i class="fas fa-eye"></i> {{ formatNumber(story.luot_xem) }} thần thức
+          </span>
+        </div>
+
+        <p class="spirit-summary">
+          {{ truncateText(story.mo_ta || '', 180) }}
+        </p>
+
+        <div class="spirit-actions">
+          <button class="spirit-btn cyan-glow" @click="goToStory">
+            <i class="fas fa-book-open mr-2"></i> LĨNH HỘI
+          </button>
+          <button class="spirit-btn dark-glass" @click="goToStory">
+            <i class="fas fa-circle-info mr-2"></i> TRA CỨU
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Book Cover 3D -->
+      <div class="cover-aura-display" @click="goToStory">
+        <div class="book-3d-container">
+          <img :src="coverUrl" class="book-cover-3d" :alt="story.ten_truyen" />
+          <div class="book-glow-cyan"></div>
+        </div>
       </div>
     </div>
-    
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed } from "vue";
+import { useRouter } from "vue-router";
 import { getImageUrl } from "@/config/constants";
 
-const props = defineProps({
-  story: { type: Object, required: true },
-  isActive: { type: Boolean, default: false },
-  index: { type: Number, default: 0 } // Giữ lại cho an toàn nếu mảng cha cần
-});
+interface Story {
+  id: number;
+  ten_truyen: string;
+  slug: string;
+  anh_bia: string;
+  tac_gia?: string;
+  mo_ta: string;
+  luot_xem: number;
+}
 
+const props = defineProps<{
+  story: Story;
+  isActive: boolean;
+}>();
+
+const router = useRouter();
 const coverUrl = computed(() => getImageUrl(props.story.anh_bia));
 
+const goToStory = () => {
+  router.push(`/truyen-chu/${props.story.slug}`);
+};
+
 const formatNumber = (num: number) => {
-  if (!num) return '0';
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+  if (!num) return "0";
+  if (num >= 1000) return (num / 1000).toFixed(1) + "k";
   return num.toString();
 };
 
 const truncateText = (text: string, length: number) => {
-  if (!text) return '';
-  return text.length > length ? text.substring(0, length) + '...' : text;
+  if (!text) return "";
+  return text.length > length ? text.substring(0, length) + "..." : text;
 };
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Spectral:wght@700;800&family=Be+Vietnam+Pro:wght@400;500;700;800&display=swap");
-
+/* ===== BASE LAYOUT ===== */
 .banner-slide-aura {
-  position: relative;
+  position: absolute;
+  inset: 0;
+  width: 100%;
   height: 100%;
+  opacity: 0;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  border-radius: 20px;
+  background-color: #020617;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.banner-slide-aura.active {
+  opacity: 1;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+/* ===== COSMIC BACKGROUND ===== */
+.slide-cosmic-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.cover-cosmic-wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.cover-bg-aura {
+  width: 105%;
+  height: 105%;
+  object-fit: cover;
+  object-position: center;
+  filter: blur(40px) brightness(0.4) saturate(1.2);
+  transform: scale(1.1);
+  transition: transform 10s linear;
+}
+
+.banner-slide-aura.active .cover-bg-aura {
+  transform: scale(1.2) rotate(1deg);
+}
+
+.cosmic-overlay-radial {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 70% 50%, transparent 20%, #020617 85%);
+}
+
+/* ===== CONTENT GRID ===== */
+.content-spirit-grid {
+  position: relative;
+  z-index: 10;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 40px;
+  padding: 40px 60px;
+  align-items: center;
+}
+
+/* Left Content */
+.info-spirit-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.banner-slide-aura.active .info-spirit-wrapper {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: 0.2s;
+}
+
+.badge-divine {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 4px 14px;
+  background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+  color: #020617;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.4);
+}
+
+.spirit-title-glow {
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.2;
+  cursor: pointer;
+  background: linear-gradient(to bottom, #fff 40%, #94a3b8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+  margin: 0;
+  transition: transform 0.3s ease;
+}
+
+.spirit-title-glow:hover {
+  transform: translateX(5px);
+}
+
+.spirit-meta-aura {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 15px;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 0.2;
-  transform: scale(0.92);
-  font-family: 'Be Vietnam Pro', sans-serif;
+  gap: 15px;
+  color: #22d3ee;
+  font-weight: 700;
+  font-size: 0.95rem;
 }
-.banner-slide-aura.active { opacity: 1; transform: scale(1); z-index: 10; }
 
-/* Ẩn hoàn toàn component này trên Mobile */
+.aura-divider {
+  opacity: 0.3;
+  color: #94a3b8;
+}
+
+.spirit-summary {
+  color: #94a3b8;
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 90%;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.spirit-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.spirit-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+}
+
+.spirit-btn.cyan-glow {
+  background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+  color: #020617;
+  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.4);
+}
+
+.spirit-btn.cyan-glow:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(34, 211, 238, 0.6);
+}
+
+.spirit-btn.dark-glass {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.spirit-btn.dark-glass:hover {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: #22d3ee;
+  color: #22d3ee;
+  transform: translateY(-3px);
+}
+
+/* Right Content: 3D Cover */
+.cover-aura-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateX(50px);
+  transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.banner-slide-aura.active .cover-aura-display {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: 0.4s;
+}
+
+.book-3d-container {
+  position: relative;
+  width: 200px;
+  height: 280px;
+  transform: perspective(1000px) rotateY(-15deg);
+  transition: transform 0.5s ease;
+}
+
+.book-3d-container:hover {
+  transform: perspective(1000px) rotateY(-5deg) scale(1.05);
+}
+
+.book-cover-3d {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 4px 12px 12px 4px;
+  box-shadow: 
+    -10px 10px 30px rgba(0, 0, 0, 0.8),
+    5px 0 15px rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.book-glow-cyan {
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.15) 0%, transparent 70%);
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(15px);
+}
+
+/* Animations */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s infinite ease-in-out;
+}
+
+/* Responsive */
 @media (max-width: 1024px) {
   .desktop-only { display: none !important; }
 }
-
-/* ===== DESKTOP STYLES ===== */
-.slide-jade-scroll {
-  position: relative; width: 100%; height: 100%;
-  border-radius: 24px; overflow: hidden;
-  background-color: #0b0f19;
-  border: 1px solid rgba(52, 211, 153, 0.2);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-}
-.cover-spirit-wrapper { position: absolute; inset: 0; z-index: 1; }
-.cover-bg-aura { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(40px) brightness(0.3); opacity: 0.8; }
-
-.cover-img-spirit {
-  position: absolute; top: 0; right: 0; width: 60%; height: 100%; object-fit: cover;
-  /* Kỹ thuật cắt ảnh Gradient cực đẹp cho banner */
-  mask-image: linear-gradient(to right, transparent, black 30%);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 30%);
-}
-
-.info-spirit-wrapper {
-  position: relative; z-index: 10; width: 55%; height: 100%; padding: 50px; display: flex; flex-direction: column;
-  justify-content: center; align-items: flex-start; background: linear-gradient(90deg, #0b0f19 0%, rgba(11, 15, 25, 0.85) 65%, transparent 100%);
-}
-
-.badge-spirit-suggested {
-  background: linear-gradient(135deg, #fbbf24, #d97706); color: #0b0f19;
-  padding: 5px 14px; border-radius: 50px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
-}
-
-.title-spectral {
-  font-family: 'Spectral', serif; font-size: 3.2rem; font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: 15px; text-shadow: 0 4px 15px rgba(0,0,0,0.5); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
-
-.meta-spirit-row { display: flex; align-items: center; gap: 20px; color: #94a3b8; font-size: 0.95rem; font-weight: 600; margin-bottom: 25px; }
-.meta-spirit-row i { margin-right: 5px; }
-
-.description-spirit { font-size: 1.05rem; color: #cbd5e1; line-height: 1.7; margin-bottom: 35px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-
-.btn-khai-mon-aura { background: linear-gradient(135deg, #10b981, #34d399); color: #05080f; padding: 14px 35px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; text-decoration: none; transition: all 0.3s; letter-spacing: 1px; box-shadow: 0 6px 20px rgba(52, 211, 153, 0.3); }
-.btn-khai-mon-aura:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(52, 211, 153, 0.5); background: linear-gradient(135deg, #34d399, #6ee7b7); }
 </style>

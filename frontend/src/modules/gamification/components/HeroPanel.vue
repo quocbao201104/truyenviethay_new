@@ -1,12 +1,11 @@
 <template>
-  <section class="hero-panel-aura" v-if="currentLevel">
-    <div class="divine-energy-waves"></div>
-    <div class="spirit-particles-bg"></div>
+  <section class="cosmic-hero-array" v-if="currentLevel">
+    <div class="galaxy-nebula-bg"></div>
 
-    <div class="hero-identity-layer">
-      <div class="avatar-shrine" :class="frameEffectClass">
-        <span class="aura-ring outer"></span>
-        <span class="aura-ring inner"></span>
+    <div class="hero-core-layer">
+      <div class="spirit-array-center" :class="frameEffectClass">
+        <div class="magic-circle-spin"></div>
+        <div class="magic-circle-reverse"></div>
 
         <img :src="avatarUrl" alt="avatar" class="hero-avatar item-img" />
         <img
@@ -17,22 +16,17 @@
         />
       </div>
 
-      <div class="hero-chronicle">
+      <div class="hero-destiny-chronicle">
         <div class="title-inscription">
-          <span class="inscription-bg"></span>
-          <p class="hero-kicker">TIÊN ĐỒ LỊCH LUYỆN</p>
+          <p class="hero-kicker">ĐỘNG THIÊN PHÚC ĐỊA</p>
         </div>
         
         <h1 class="hero-name-plate">
           <span class="name-text">{{ userName }}</span>
-          <span class="name-glow"></span>
         </h1>
 
-        <div 
-          class="realm-badge-container" 
-          :style="{ '--dynamic-realm-color': equippedBadge?.color || '#34d399' }"
-        >
-          <div class="realm-badge dynamic-realm-glow">
+        <div class="realm-badge-container">
+          <div class="realm-badge">
             <UserBadge v-if="equippedBadge" :badge="equippedBadge" size="md" class="magic-badge-glow" />
             <i v-else class="fas fa-yin-yang aura-spin"></i>
             <span class="realm-name">{{ currentLevel.name }}</span>
@@ -40,60 +34,63 @@
           
           <button
             v-if="currentLevel.next_level_points && (userPoints?.total_exp || 0) >= currentLevel.next_level_points"
-            class="breakthrough-btn-divine"
+            class="tribulation-breakthrough-btn"
             :disabled="processingUpgrade"
             @click="$emit('upgrade')"
           >
+            <div class="btn-lightning-glow"></div>
             <div class="btn-inner">
-              <i v-if="processingUpgrade" class="fas fa-circle-notch fa-spin"></i>
-              <span v-else>ĐỘT PHÁ</span>
+              <i v-if="processingUpgrade" class="fas fa-bolt fa-fade"></i>
+              <span v-else>ĐỘT PHÁ THIÊN KIẾP</span>
             </div>
-            <div class="btn-glow"></div>
           </button>
         </div>
 
-        <div class="spirit-progress-area">
-          <div class="progress-track-crystalline">
-            <div class="progress-fill-spiritual" :style="{ width: levelProgress + '%' }">
-              <div class="fill-spark"></div>
+        <div class="qi-flow-area">
+          <div class="qi-track-cosmic">
+            <div class="qi-fill-gold" :style="{ width: levelProgress + '%' }">
+              <div class="qi-sparkles"></div>
             </div>
           </div>
-          <div class="progress-stats-plate">
-            <span class="exp-value">{{ (userPoints?.total_exp || 0).toLocaleString() }}</span>
+          <div class="qi-stats-plate">
+            <span class="exp-current">{{ (userPoints?.total_exp || 0).toLocaleString() }}</span>
             <span class="exp-divider">/</span>
-            <span class="exp-target">{{ currentLevel.next_level_points ? currentLevel.next_level_points.toLocaleString() : 'Đỉnh Phong' }} EXP</span>
+            <span class="exp-target">{{ currentLevel.next_level_points ? currentLevel.next_level_points.toLocaleString() : 'Đỉnh Phong Đại Đạo' }} Tụ Khí</span>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="essential-stats-grid">
-      <article class="essence-box tu-vi">
-        <div class="box-inner">
+    <div class="divine-pillars-grid">
+      <article class="cosmic-pillar tu-vi">
+        <div class="pillar-glow"></div>
+        <div class="pillar-inner">
           <div class="stat-icon"><i class="fas fa-fire-flame-curved"></i></div>
           <div class="stat-content">
-            <label>Tu Vi</label>
+            <label>Căn Cơ Tu Vi</label>
             <strong>{{ (userPoints?.total_exp || 0).toLocaleString() }}</strong>
           </div>
         </div>
       </article>
 
-      <article class="essence-box linh-thach">
-         <div class="box-inner">
+      <article class="cosmic-pillar linh-thach">
+        <div class="pillar-glow"></div>
+        <div class="pillar-inner">
           <div class="stat-icon"><i class="fas fa-gem"></i></div>
           <div class="stat-content">
-            <label>Linh Thạch</label>
+            <label>Linh Thạch Tàng Trữ</label>
             <strong>{{ (userCurrency || 0).toLocaleString() }}</strong>
           </div>
         </div>
       </article>
 
-      <article class="essence-box tho-nguyen">
-         <div class="box-inner">
+      <article class="cosmic-pillar tho-nguyen">
+        <div class="pillar-glow"></div>
+        <div class="pillar-inner">
           <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
           <div class="stat-content">
-            <label>Thọ Nguyên</label>
-            <strong>{{ remainingLifespan || 'Vô Hạn' }}</strong>
+            <label>Thọ Nguyên Thiên Định</label>
+            <strong>{{ remainingLifespan || 'Vô Hạn Thọ' }}</strong>
           </div>
         </div>
       </article>
@@ -122,331 +119,201 @@ defineEmits(['upgrade']);
 
 const DEFAULT_FRAME_EFFECT = 'frame-default-aura';
 const SUPPORTED_FRAME_EFFECTS = [
-  'frame-phoenix-fire',
-  'frame-bang-tinh',
-  'frame-thien-thanh',
-  'frame-nine-tails-purple',
-  'frame-chan-long',
-  'frame-van-kiem',
-  'frame-ma-ton',
-  'frame-bang-long',
-  'frame-thien-co',
-  'frame-that-sac',
-  'frame-thien-nhien',
-  'frame-thanh-loan',
+  'frame-phoenix-fire', 'frame-bang-tinh', 'frame-thien-thanh', 'frame-nine-tails-purple',
+  'frame-chan-long', 'frame-van-kiem', 'frame-ma-ton', 'frame-bang-long',
+  'frame-thien-co', 'frame-that-sac', 'frame-thien-nhien', 'frame-thanh-loan',
 ];
 
 const frameEffectClass = computed(() => {
   const rawClass = (props.equippedFrame?.css_class || '').trim();
   if (!rawClass) return DEFAULT_FRAME_EFFECT;
-
-  const matchedClass = rawClass
-    .split(/\s+/)
-    .find((cssClass) => SUPPORTED_FRAME_EFFECTS.includes(cssClass));
-
+  const matchedClass = rawClass.split(/\s+/).find((cssClass) => SUPPORTED_FRAME_EFFECTS.includes(cssClass));
   return matchedClass || DEFAULT_FRAME_EFFECT;
 });
 </script>
 
 <style scoped>
-/* ===== MAIN PANEL ===== */
-.hero-panel-aura {
+/* ===== MAIN ARRAY (TỤ LINH TRẬN) ===== */
+.cosmic-hero-array {
   position: relative;
-  width: min(1120px, 100%);
-  margin-inline: auto;
-  border-radius: 32px;
-  border: 1px solid rgba(56, 189, 248, 0.15); 
-  padding: 2.5rem;
-  background: linear-gradient(165deg, rgba(15, 23, 42, 0.9) 0%, rgba(3, 7, 18, 0.95) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 
-    0 30px 60px -20px rgba(0, 0, 0, 0.8),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  width: 100%;
+  border-radius: 30px;
+  border: 1px solid rgba(251, 191, 36, 0.3); 
+  padding: 3rem;
+  background: radial-gradient(circle at 50% 100%, rgba(251, 191, 36, 0.08) 0%, rgba(5, 5, 16, 0.95) 80%);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), inset 0 0 50px rgba(251, 191, 36, 0.05);
   overflow: hidden;
   z-index: 10;
 }
 
-/* Decorative background */
-.divine-energy-waves {
-  position: absolute;
-  top: -50%;
-  right: -20%;
-  width: 80%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, transparent 60%);
-  transform: rotate(-15deg);
-  pointer-events: none;
-  z-index: 0;
+.galaxy-nebula-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 80% 0%, rgba(251, 191, 36, 0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at 20% 100%, rgba(239, 68, 68, 0.1) 0%, transparent 40%);
+  z-index: 0; pointer-events: none;
 }
 
-.spirit-particles-bg {
-  position: absolute;
-  inset: 0;
-  background-image: 
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    radial-gradient(circle at 80% 70%, rgba(56, 189, 248, 0.05) 1.5px, transparent 1.5px),
-    radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.04) 1px, transparent 1px);
-  background-size: 100px 100px, 150px 150px, 200px 200px;
-  opacity: 0.6;
-  pointer-events: none;
-  animation: slowPan 30s linear infinite alternate;
+/* ===== HERO CORE LAYER ===== */
+.hero-core-layer {
+  position: relative; z-index: 2; display: flex; align-items: center; gap: 4rem; margin-bottom: 4rem;
 }
 
-@keyframes slowPan {
-  0% { transform: scale(1) translate(0, 0); }
-  100% { transform: scale(1.1) translate(10px, 10px); }
+/* Avatar Tụ Linh Trận */
+.spirit-array-center {
+  position: relative; width: 170px; height: 170px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  --aura-gold: 251, 191, 36;
 }
 
-/* ===== IDENTITY LAYER ===== */
-.hero-identity-layer {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 3.5rem;
-  margin-bottom: 3.5rem;
+.magic-circle-spin, .magic-circle-reverse {
+  position: absolute; inset: -15px; border-radius: 50%;
+  border: 2px dashed rgba(var(--aura-gold), 0.4);
+  animation: spinArray 20s linear infinite; pointer-events: none;
 }
-
-/* Avatar Shrine Design */
-.avatar-shrine {
-  position: relative;
-  width: 150px; 
-  height: 150px;
-  flex-shrink: 0;
-  --aura-primary: 56, 189, 248; 
-  --frame-scale: 1.45;
-}
-
-.avatar-shrine::after {
-  content: '';
-  position: absolute;
-  inset: -15px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(var(--aura-primary), 0.2), transparent 70%);
-  filter: blur(15px);
-  z-index: 0;
-  animation: auraPulse 4s ease-in-out infinite;
+.magic-circle-reverse {
+  inset: -25px; border: 1px dotted rgba(var(--aura-gold), 0.6);
+  animation: spinArrayReverse 15s linear infinite;
 }
 
 .hero-avatar {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid rgba(var(--aura-primary), 0.8);
-  padding: 4px;
-  background: #050a14;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(var(--aura-primary), 0.5);
-  transform: scale(0.85);
+  position: relative; z-index: 2; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+  border: 4px solid rgba(var(--aura-gold), 0.8); background: #000;
+  box-shadow: 0 0 30px rgba(var(--aura-gold), 0.5), inset 0 0 20px rgba(var(--aura-gold), 0.8);
+  transform: scale(0.80);
 }
-
+ 
 .hero-frame {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  transform: scale(var(--frame-scale));
-  z-index: 3;
-  pointer-events: none;
-}
-
-.aura-ring.inner {
-  position: absolute;
-  inset: -6px;
-  border: 1px solid rgba(var(--aura-primary), 0.3);
-  border-radius: 50%;
-  z-index: 1;
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+  transform: scale(1.45 ); z-index: 3; pointer-events: none; filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.4));
 }
 
 /* Identity Content */
-.hero-chronicle { flex: 1; display: flex; flex-direction: column; }
+.hero-destiny-chronicle { flex: 1; display: flex; flex-direction: column; }
 
-.title-inscription { position: relative; margin-bottom: 0.5rem; display: inline-flex; }
-
+.title-inscription { margin-bottom: 0.5rem; }
 .hero-kicker {
-  margin: 0; font-size: 1.1rem; font-weight: 900; letter-spacing: 0.3em;
-  background: linear-gradient(90deg, #38bdf8 0%, #a7f3d0 25%, #fff 50%, #a7f3d0 75%, #38bdf8 100%);
-  background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-  animation: shine 4s linear infinite; text-shadow: 0 0 15px rgba(56, 189, 248, 0.3); text-transform: uppercase; position: relative; z-index: 1;
+  margin: 0; font-size: 1.2rem; font-weight: 900; letter-spacing: 0.4em;
+  background: linear-gradient(90deg, #fbbf24 0%, #fef3c7 50%, #fbbf24 100%);
+  background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  animation: goldShine 3s linear infinite; text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
 }
 
 .hero-name-plate {
-  margin: 0.2rem 0; font-size: 3rem; font-weight: 900; color: #ffffff; letter-spacing: -0.02em; line-height: 1.1;
-  text-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.2); position: relative;
+  margin: 0.2rem 0; font-size: 3.5rem; font-weight: 900; color: #ffffff; letter-spacing: 2px;
+  text-shadow: 0 5px 15px rgba(0,0,0,0.8), 0 0 25px rgba(251, 191, 36, 0.3);
 }
 
-/* ===== TÍCH HỢP MÀU DYNAMIC TỪ BADGE ===== */
-.realm-badge-container { 
-  display: flex; align-items: center; gap: 1.5rem; margin-top: 1rem; margin-bottom: 1.8rem; 
-}
-
-/* Biến CSS `--dynamic-realm-color` được truyền từ style của thẻ cha */
-.dynamic-realm-glow {
-  /* Dùng màu động cho nền gradient (opacity 15% -> 5%) */
-  background: linear-gradient(135deg, color-mix(in srgb, var(--dynamic-realm-color) 15%, transparent), color-mix(in srgb, var(--dynamic-realm-color) 5%, transparent));
-  /* Dùng màu động cho viền */
-  border: 1px solid color-mix(in srgb, var(--dynamic-realm-color) 40%, transparent);
-  /* Dùng màu động cho bóng đổ */
-  box-shadow: 0 0 15px color-mix(in srgb, var(--dynamic-realm-color) 20%, transparent);
-}
+.realm-badge-container { display: flex; align-items: center; gap: 1.5rem; margin-top: 1rem; margin-bottom: 2rem; }
 
 .realm-badge {
-  padding: 0.6rem 1.5rem; border-radius: 100px;
-  display: flex; align-items: center; gap: 0.8rem; backdrop-filter: blur(5px);
-  transition: all 0.4s ease;
+  padding: 0.6rem 2rem; border-radius: 50px; display: flex; align-items: center; gap: 1rem;
+  background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.4);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
 }
 
-.realm-name { 
-  font-size: 1.2rem; font-weight: 900; 
-  /* Chữ của Cảnh Giới lấy màu của Badge luôn */
-  color: var(--dynamic-realm-color); 
-  text-transform: uppercase; letter-spacing: 0.08em; 
-  text-shadow: 0 0 10px color-mix(in srgb, var(--dynamic-realm-color) 50%, transparent); 
+.realm-name { font-size: 1.3rem; font-weight: 900; color: #fbbf24; text-transform: uppercase; letter-spacing: 2px; }
+.aura-spin { font-size: 1.4rem; color: #fbbf24; animation: spinArray 4s linear infinite; }
+
+/* Nút Đột Phá Thiên Kiếp */
+.tribulation-breakthrough-btn {
+  position: relative; border: none; background: transparent; padding: 0; cursor: pointer;
 }
-
-.aura-spin { font-size: 1.2rem; color: var(--dynamic-realm-color); animation: spin 6s linear infinite; }
-
-.magic-badge-glow {
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 10px var(--badge-color, rgba(52, 211, 153, 0.5)));
-}
-
-@keyframes badge-pulse {
-  from { filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 8px var(--badge-color, rgba(52, 211, 153, 0.3))); }
-  to { filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 15px var(--badge-color, rgba(52, 211, 153, 0.8))); transform: scale(1.05); }
-}
-
-/* Breakthrough Button */
-.breakthrough-btn-divine { position: relative; border: none; background: transparent; padding: 0; cursor: pointer; }
 
 .btn-inner {
-  background: linear-gradient(135deg, #fbbf24 0%, #ea580c 100%); padding: 0.8rem 2rem; border-radius: 50px;
-  color: #fff; font-weight: 900; font-size: 0.9rem; letter-spacing: 0.1em; position: relative; z-index: 2;
-  box-shadow: 0 4px 15px rgba(234, 88, 12, 0.4), inset 0 2px 0 rgba(255,255,255,0.2); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  display: flex; align-items: center; gap: 0.6rem;
+  background: linear-gradient(135deg, #ef4444, #991b1b); padding: 1rem 2.5rem; border-radius: 50px;
+  color: #fff; font-weight: 900; font-size: 1rem; letter-spacing: 2px; position: relative; z-index: 2;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.3); display: flex; align-items: center; gap: 10px;
+  transition: all 0.3s;
 }
 
-.btn-glow {
-  position: absolute; inset: -4px; border-radius: 54px; background: linear-gradient(135deg, #fbbf24, #ea580c);
-  filter: blur(10px); opacity: 0.5; z-index: 1; animation: pulseGlow 2s infinite;
+.btn-lightning-glow {
+  position: absolute; inset: -5px; border-radius: 60px; background: linear-gradient(90deg, #ef4444, #fbbf24, #ef4444);
+  background-size: 200%; filter: blur(15px); opacity: 0.8; z-index: 1; animation: lightningFlash 2s infinite;
 }
 
-.breakthrough-btn-divine:hover .btn-inner { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(234, 88, 12, 0.6), inset 0 2px 0 rgba(255,255,255,0.4); }
-.breakthrough-btn-divine:active .btn-inner { transform: translateY(0); }
+.tribulation-breakthrough-btn:hover .btn-inner { transform: scale(1.05); background: linear-gradient(135deg, #f87171, #dc2626); }
+.tribulation-breakthrough-btn:active .btn-inner { transform: scale(0.95); }
 
-/* Progress Area */
-.spirit-progress-area { margin-top: 0.5rem; }
+/* Progress Area (Dòng chảy linh khí) */
+.qi-flow-area { margin-top: 0.5rem; }
 
-.progress-track-crystalline {
-  height: 10px; background: rgba(0, 0, 0, 0.4); border-radius: 10px; overflow: hidden; position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+.qi-track-cosmic {
+  height: 14px; background: rgba(0, 0, 0, 0.6); border-radius: 20px; position: relative;
+  border: 1px solid rgba(251, 191, 36, 0.2); box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+  overflow: hidden;
 }
 
-.progress-fill-spiritual {
-  height: 100%;
-  background: linear-gradient(90deg, #0ea5e9, #34d399, #0ea5e9); 
-  background-size: 200% 100%; animation: energyFlow 3s linear infinite; position: relative;
-  transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1); 
-  box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
+.qi-fill-gold {
+  height: 100%; background: linear-gradient(90deg, #d97706, #fbbf24, #fef3c7);
+  background-size: 200% 100%; animation: energyFlow 2s linear infinite; position: relative;
+  transition: width 1s ease-in-out; box-shadow: 0 0 15px rgba(251, 191, 36, 0.8);
 }
 
-.fill-spark {
-  position: absolute; right: 0; top: 0; width: 30px; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9));
-  filter: blur(2px); opacity: 0.9;
+.qi-sparkles {
+  position: absolute; right: 0; top: 0; width: 40px; height: 100%;
+  background: radial-gradient(circle, #fff, transparent); filter: blur(3px); opacity: 0.9;
 }
 
-.progress-stats-plate {
-  margin-top: 0.8rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; font-weight: 800; color: #94a3b8;
+.qi-stats-plate { margin-top: 1rem; font-size: 1.1rem; font-weight: 800; color: #94a3b8; }
+.exp-current { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+.exp-divider { margin: 0 8px; opacity: 0.5; }
+
+/* ===== 3 TRỤ ĐỘNG THIÊN (Cột Chỉ Số) ===== */
+.divine-pillars-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; position: relative; z-index: 2; }
+
+.cosmic-pillar {
+  position: relative; background: rgba(10, 15, 30, 0.8); border: 1px solid rgba(251, 191, 36, 0.15);
+  border-radius: 20px; padding: 2rem; backdrop-filter: blur(10px); transition: all 0.4s;
+  overflow: hidden; cursor: default;
 }
 
-.exp-value { color: #34d399; text-shadow: 0 0 8px rgba(52, 211, 153, 0.4); }
-.exp-divider { opacity: 0.4; }
-
-/* ===== 3 THẺ CHỈ SỐ ===== */
-.essential-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; z-index: 2; position: relative; }
-
-.essence-box {
-  position: relative; background: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%);
-  border-radius: 24px; padding: 1.5rem; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); overflow: hidden; cursor: default;
+.pillar-glow {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 80%; height: 2px;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.8), transparent); opacity: 0; transition: 0.4s;
 }
 
-.essence-box::before {
-  content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-  transform: skewX(-25deg); transition: 0.5s;
-}
+.cosmic-pillar:hover { transform: translateY(-10px); background: rgba(15, 20, 40, 0.9); border-color: rgba(251, 191, 36, 0.5); box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(251, 191, 36, 0.1); }
+.cosmic-pillar:hover .pillar-glow { opacity: 1; box-shadow: 0 5px 20px rgba(251, 191, 36, 0.6); }
 
-.essence-box:hover { transform: translateY(-8px); background: linear-gradient(145deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 1) 100%); }
-.essence-box:hover::before { left: 200%; transition: 0.8s ease-in-out; }
-
-.box-inner { display: flex; align-items: center; gap: 1.5rem; position: relative; z-index: 2;}
+.pillar-inner { display: flex; align-items: center; justify-content: flex-start; gap: 1.5rem; position: relative; z-index: 2;}
 
 .stat-icon {
-  width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
-  font-size: 1.6rem; transition: all 0.4s; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);
+  width: 65px; height: 65px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; background: rgba(251, 191, 36, 0.05); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2);
+  transition: 0.4s;
 }
 
+.cosmic-pillar:hover .stat-icon { background: #fbbf24; color: #050510; transform: scale(1.1) rotate(5deg); box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
+
 .stat-content { display: flex; flex-direction: column; }
-.stat-content label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.15em; color: #94a3b8; font-weight: 800; margin-bottom: 0.3rem; }
-.stat-content strong { font-size: 1.6rem; font-weight: 900; line-height: 1.2; }
-
-.tu-vi { border: 1px solid rgba(239, 68, 68, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-.tu-vi .stat-icon { color: #fca5a5; }
-.tu-vi .stat-content strong { color: #f8fafc; }
-.tu-vi:hover { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 15px 35px rgba(239, 68, 68, 0.15); }
-.tu-vi:hover .stat-icon { color: #ef4444; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); transform: scale(1.1) rotate(-5deg); text-shadow: 0 0 15px rgba(239, 68, 68, 0.8); }
-.tu-vi:hover .stat-content strong { color: #fca5a5; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
-
-.linh-thach { border: 1px solid rgba(245, 158, 11, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-.linh-thach .stat-icon { color: #fcd34d; }
-.linh-thach .stat-content strong { color: #fbbf24; } 
-.linh-thach:hover { border-color: rgba(245, 158, 11, 0.4); box-shadow: 0 15px 35px rgba(245, 158, 11, 0.15); }
-.linh-thach:hover .stat-icon { color: #f59e0b; background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); transform: scale(1.1); text-shadow: 0 0 15px rgba(245, 158, 11, 0.8); }
-.linh-thach:hover .stat-content strong { color: #fde68a; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
-
-.tho-nguyen { border: 1px solid rgba(14, 165, 233, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-.tho-nguyen .stat-icon { color: #bae6fd; }
-.tho-nguyen .stat-content strong { color: #f8fafc; }
-.tho-nguyen:hover { border-color: rgba(14, 165, 233, 0.4); box-shadow: 0 15px 35px rgba(14, 165, 233, 0.15); }
-.tho-nguyen:hover .stat-icon { color: #0ea5e9; background: rgba(14, 165, 233, 0.15); border-color: rgba(14, 165, 233, 0.3); transform: scale(1.1) rotate(5deg); text-shadow: 0 0 15px rgba(14, 165, 233, 0.8); }
-.tho-nguyen:hover .stat-content strong { color: #7dd3fc; text-shadow: 0 0 10px rgba(14, 165, 233, 0.5); }
-
+.stat-content label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: #94a3b8; font-weight: 800; margin-bottom: 0.5rem; }
+.stat-content strong { font-size: 1.8rem; font-weight: 900; color: #fff; line-height: 1; }
+.cosmic-pillar:hover .stat-content strong { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.3); }
 
 /* ===== ANIMATIONS ===== */
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spinArray { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spinArrayReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
 @keyframes energyFlow { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
-@keyframes pulseGlow { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.05); } }
-@keyframes auraPulse { 0%, 100% { opacity: 0.6; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } }
-@keyframes shine { to { background-position: 200% center; } }
+@keyframes goldShine { to { background-position: 200% center; } }
+@keyframes lightningFlash { 0%, 100% { filter: blur(10px); opacity: 0.6; } 50% { filter: blur(20px); opacity: 1; } }
 
 /* ===== MOBILE ADAPTATION ===== */
 @media (max-width: 1024px) {
-  .essential-stats-grid { gap: 1rem; }
-  .essence-box { padding: 1.2rem; }
-  .stat-icon { width: 48px; height: 48px; font-size: 1.3rem; }
-  .stat-content strong { font-size: 1.3rem; }
+  .hero-core-layer { gap: 2rem; }
+  .divine-pillars-grid { gap: 1rem; }
+  .cosmic-pillar { padding: 1.5rem; }
+  .stat-icon { width: 50px; height: 50px; font-size: 1.5rem; }
+  .stat-content strong { font-size: 1.4rem; }
 }
 
 @media (max-width: 900px) {
-  .hero-panel-aura { padding: 1.5rem; border-radius: 24px; }
-  .hero-identity-layer { gap: 2rem; margin-bottom: 2rem; }
-  .avatar-shrine { width: 120px; height: 120px; }
-  .hero-name-plate { font-size: 2.2rem; }
-  .realm-name { font-size: 1rem; }
-}
-
-@media (max-width: 768px) {
-  .hero-identity-layer { flex-direction: column; text-align: center; gap: 1.5rem; }
-  .hero-chronicle { align-items: center; }
-  .realm-badge-container { flex-direction: column; gap: 1rem; }
-  .progress-stats-plate { justify-content: center; }
-  .essential-stats-grid { grid-template-columns: 1fr; }
-  .box-inner { justify-content: center; } 
+  .cosmic-hero-array { padding: 2rem; border-radius: 20px; }
+  .hero-core-layer { flex-direction: column; text-align: center; }
+  .hero-destiny-chronicle { align-items: center; }
+  .realm-badge-container { flex-direction: column; gap: 15px; }
+  .qi-stats-plate { justify-content: center; }
+  .divine-pillars-grid { grid-template-columns: 1fr; }
+  .pillar-inner { justify-content: center; flex-direction: column; text-align: center; gap: 1rem; }
   .stat-content { align-items: center; }
 }
 </style>

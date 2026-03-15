@@ -128,6 +128,7 @@ import { saveReadingHistory } from "@/modules/history/history.service";
 import { useAuthStore } from "@/modules/auth/auth.store";
 import { getChapterBySlug, getChapterById, type Chapter } from "@/modules/storyText/chapter/chapter.service";
 import { buildChapterCdnUrl } from "@/utils/chapterCdn";
+import { formatChapterContent } from "@/utils/chapterFormat";
 
 const route = useRoute();
 const router = useRouter();
@@ -355,7 +356,7 @@ const loadData = async () => {
       }
 
       if (requestId !== activeRequestId) return;
-      chapterContent.value = rawContent;
+      chapterContent.value = formatChapterContent(rawContent);
       plainMessage.value = "";
       updateContentHtml();
       contentLoaded.value = true;

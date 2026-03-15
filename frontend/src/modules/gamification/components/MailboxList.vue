@@ -1,28 +1,47 @@
 <template>
-  <div v-if="!mailbox || mailbox.length === 0" class="empty-state">Chưa có cơ duyên mới trong hộp thư.</div>
-  <div v-else class="list-layout">
-    <article v-for="mail in mailbox" :key="mail.id" class="list-card" :class="{ 'is-read': mail.status === 'read', 'is-claimed': mail.is_claimed }">
-      <div class="card-content">
-        <p class="kicker">{{ getSourceLabel(mail.mail_type) }}</p>
-        <h3 class="card-title">{{ mail.subject }}</h3>
-        <p class="card-desc">{{ mail.body || 'Có duyên đang chờ đạo hữu lĩnh ngộ.' }}</p>
-        <div v-if="mail.attachments && mail.attachments.length > 0" class="attachments-preview">
-           <span v-for="att in mail.attachments" :key="att.id" class="att-badge">
-             {{ att.reward_name || 'Vật phẩm' }} x{{ att.quantity }}
+  <div v-if="!mailbox || mailbox.length === 0" class="empty-state-cosmic">
+    <i class="fas fa-dove opacity-30 text-5xl mb-4"></i>
+    <p>Bầu trời tĩnh lặng, chưa có Phi Kiếm Truyền Thư nào gửi đến đạo hữu.</p>
+  </div>
+  
+  <div v-else class="list-layout-divine">
+    <article 
+      v-for="mail in mailbox" 
+      :key="mail.id" 
+      class="list-card-cosmic" 
+      :class="{ 'is-read': mail.status === 'read', 'is-claimed': mail.is_claimed }"
+    >
+      <div class="card-content-aura">
+        <p class="kicker-gold">
+          <i class="fas fa-feather-pointed mr-1"></i> {{ getSourceLabel(mail.mail_type) }}
+        </p>
+        <h3 class="card-title-divine">{{ mail.subject }}</h3>
+        <p class="card-desc-spirit">{{ mail.body || 'Bí mật thiên cơ, hãy dùng thần thức để lĩnh ngộ.' }}</p>
+        
+        <div v-if="mail.attachments && mail.attachments.length > 0" class="attachments-preview-array">
+           <span v-for="att in mail.attachments" :key="att.id" class="att-badge-gem">
+             <i class="fas fa-gem opacity-70 mr-1"></i> 
+             {{ att.reward_name || 'Kỳ Trân Thượng Cổ' }} 
+             <span class="qty-highlight">x{{ att.quantity }}</span>
            </span>
         </div>
       </div>
-      <div class="card-actions row">
+
+      <div class="card-actions-array">
         <button 
           v-if="mail.is_claimable"
-          class="game-btn primary" 
+          class="claim-btn-divine" 
           :disabled="processingId === mail.id || mail.is_claimed" 
           @click="$emit('claim', mail.id)"
         >
-          <i v-if="processingId === mail.id" class="fas fa-spinner fa-spin"></i>
-          <template v-else>{{ mail.is_claimed ? 'Đã Nhận' : 'Lĩnh Thưởng' }}</template>
+          <i v-if="processingId === mail.id" class="fas fa-yin-yang fa-spin"></i>
+          <template v-else>{{ mail.is_claimed ? 'Đã Thu Nhận' : 'Nhận Lễ Vật' }}</template>
         </button>
-        <span v-else class="status-badge">{{ mail.is_claimed ? 'Hoàn tất' : 'Đã Xem' }}</span>
+        
+        <span v-else class="status-badge-rune">
+          <i class="fas fa-check-double mr-1" v-if="mail.is_claimed"></i>
+          {{ mail.is_claimed ? 'Đã thu thập' : 'Đã hội kiến' }}
+        </span>
       </div>
     </article>
   </div>
@@ -39,92 +58,178 @@ defineEmits(['claim']);
 const getSourceLabel = (type) => {
   const labels = {
     reward: 'Thiên Đạo Ban Thưởng',
-    announcement: 'Truyền Tin',
-    compensation: 'Bồi Hoàn',
-    system: 'Hệ Thống',
+    announcement: 'Tông Môn Truyền Âm',
+    compensation: 'Thiên Đạo Bồi Hoàn',
+    system: 'Hệ Thống Trận Pháp',
   };
-  return labels[type] || 'Hệ Thống';
+  return labels[type] || 'Phi Kiếm Truyền Thư';
 };
 </script>
 
 <style scoped>
-.empty-state {
-  padding: 3rem;
-  border-radius: 16px;
-  border: 1px dashed rgba(100, 116, 139, 0.4);
+.empty-state-cosmic {
+  padding: 4rem 2rem;
+  border-radius: 20px;
+  border: 1px dashed rgba(251, 191, 36, 0.3);
   text-align: center;
-  color: #94a3b8;
-  background: rgba(15, 23, 42, 0.2);
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.05);
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
 }
 
-.list-layout { display: flex; flex-direction: column; gap: 1rem; }
-
-.list-card {
-  display: flex; justify-content: space-between; align-items: center; gap: 1.5rem;
-  background: rgba(30, 41, 59, 0.4);
-  border: 1px solid rgba(255,255,255,0.05);
-  padding: 1.25rem 1.5rem;
-  border-radius: 16px;
-  transition: all 0.2s;
+.list-layout-divine { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 1.2rem; 
 }
 
-.list-card:hover { border-color: rgba(255,255,255,0.1); background: rgba(51, 65, 85, 0.4); }
+.list-card-cosmic {
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  gap: 1.5rem;
+  background: rgba(10, 15, 30, 0.8);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  padding: 1.5rem 1.8rem;
+  border-radius: 20px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4), inset 0 0 15px rgba(251, 191, 36, 0.05);
+}
 
-.card-title { font-size: 1.15rem; color: #fff; margin: 0; }
-.card-desc { font-size: 0.9rem; color: #94a3b8; margin: 0.25rem 0 0; line-height: 1.5; }
+.list-card-cosmic:hover { 
+  border-color: rgba(251, 191, 36, 0.8); 
+  background: rgba(15, 20, 40, 0.9);
+  transform: translateX(5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.6), inset 0 0 25px rgba(251, 191, 36, 0.1); 
+}
 
-.kicker {
+/* Thư đã đọc */
+.list-card-cosmic.is-read { 
+  border-color: rgba(255,255,255,0.1); 
+  background: rgba(10, 15, 30, 0.4); 
+  box-shadow: none; 
+}
+
+/* Thư đã nhận quà */
+.list-card-cosmic.is-claimed { 
+  opacity: 0.6; 
+  filter: grayscale(40%); 
+}
+
+.card-content-aura { flex: 1; }
+
+.kicker-gold {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #22d3ee;
-  margin-bottom: 0.25rem;
+  letter-spacing: 0.2em;
+  color: #fbbf24;
+  margin-bottom: 0.5rem;
 }
 
-.attachments-preview {
+.card-title-divine { 
+  font-size: 1.25rem; 
+  color: #fff; 
+  margin: 0; 
+  font-weight: 900;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+}
+
+.card-desc-spirit { 
+  font-size: 0.95rem; 
+  color: #94a3b8; 
+  margin: 0.5rem 0 0; 
+  line-height: 1.6; 
+}
+
+.attachments-preview-array {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
+  gap: 0.8rem;
+  margin-top: 1rem;
 }
 
-.att-badge {
-  background: rgba(251, 191, 36, 0.15);
+.att-badge-gem {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fef3c7;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  padding: 0.35rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.15);
+}
+
+.qty-highlight {
   color: #fbbf24;
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  padding: 0.25rem 0.6rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 900;
+  margin-left: 6px;
 }
 
-.list-card.is-claimed {
-  opacity: 0.7;
+.card-actions-array { 
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; 
+  min-width: 160px; 
+  justify-content: flex-end; 
 }
 
-.status-badge {
-  color: #94a3b8;
-  font-size: 0.9rem;
-  font-weight: 600;
+.claim-btn-divine {
+  border: 1px solid #fef3c7; 
+  border-radius: 50px;
+  font-weight: 900; 
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 0.5rem;
+  padding: 0.85rem 1.6rem;
+  background: linear-gradient(135deg, #fbbf24, #d97706); 
+  color: #050510;
+  box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3);
 }
 
-.card-actions { display: flex; align-items: center; gap: 1rem; min-width: 150px; justify-content: flex-end; }
-
-.game-btn {
-  border: none; border-radius: 99px;
-  font-weight: 600; cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+.claim-btn-divine:hover:not(:disabled) { 
+  box-shadow: 0 0 25px rgba(251, 191, 36, 0.6); 
+  transform: translateY(-2px) scale(1.05); 
 }
 
-.game-btn.primary { background: #22d3ee; color: #020617; }
-.game-btn.primary:hover:not(:disabled) { box-shadow: 0 0 15px rgba(34, 211, 238, 0.5); transform: translateY(-1px); }
-.game-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.claim-btn-divine:disabled { 
+  opacity: 0.6; 
+  cursor: not-allowed; 
+  filter: grayscale(50%);
+  box-shadow: none;
+}
+
+.status-badge-rune {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  font-style: italic;
+}
 
 @media (max-width: 768px) {
-  .list-card { flex-direction: column; align-items: flex-start; gap: 1rem; }
-  .card-actions { width: 100%; justify-content: space-between; min-width: auto; }
+  .list-card-cosmic { 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 1.2rem; 
+    padding: 1.2rem;
+  }
+  .card-actions-array { 
+    width: 100%; 
+    justify-content: flex-start; 
+  }
+  .claim-btn-divine {
+    width: 100%;
+  }
 }
 </style>

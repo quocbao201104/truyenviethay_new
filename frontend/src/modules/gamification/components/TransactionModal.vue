@@ -1,53 +1,54 @@
 <template>
-  <BaseModal :isOpen="isOpen" title="XÁC NHẬN GIAO DỊCH" @close="handleClose">
-    <div v-if="item" class="modal-buy-content">
-      <div class="modal-item-preview">
-        <div class="item-icon-box large">
+  <BaseModal :isOpen="isOpen" title="THIÊN ĐỊA KHẾ ƯỚC" @close="handleClose">
+    <div v-if="item" class="modal-buy-cosmic">
+      
+      <div class="modal-item-preview-array">
+        <div class="item-icon-shrine large">
+          <div class="shrine-glow"></div>
           <img v-if="item.image_url" :src="item.image_url" :alt="item.name" />
         </div>
         <div class="modal-item-info">
-          <span class="game-tag">{{ getItemTypeLabel(item.item_type) }}</span>
-          <h3>{{ item.name }}</h3>
-          <p>{{ item.description || 'Vật phẩm này đang chờ đạo hữu kết duyên.' }}</p>
+          <span class="game-tag-rune">{{ getItemTypeLabel(item.item_type) }}</span>
+          <h3 class="magic-item-name">{{ item.name }}</h3>
+          <p class="magic-item-desc">{{ item.description || 'Vật phẩm chứa đựng thiên cơ, đang chờ người hữu duyên.' }}</p>
         </div>
       </div>
 
-      <!-- Quantity picker: only for consumable items -->
-      <div v-if="item.item_type === 'consumable'" class="qty-row">
-        <span class="qty-label">Số lượng</span>
+      <div v-if="item.item_type === 'consumable'" class="qty-row-divine">
+        <span class="qty-label">Số lượng luyện hóa</span>
         <div class="qty-controls">
-          <button class="qty-btn" @click="dec" :disabled="localQty <= 1">−</button>
-          <span class="qty-value">{{ localQty }}</span>
-          <button class="qty-btn" @click="inc" :disabled="localQty >= 99">+</button>
+          <button class="qty-btn-rune" @click="dec" :disabled="localQty <= 1">−</button>
+          <span class="qty-value-gold">{{ localQty }}</span>
+          <button class="qty-btn-rune" @click="inc" :disabled="localQty >= 99">+</button>
         </div>
       </div>
       
-      <div class="transaction-details">
-        <div class="detail-box">
-          <span class="label">Đơn giá</span>
-          <span class="value price">{{ (item.price || 0).toLocaleString() }} <i class="fas fa-gem"></i></span>
+      <div class="transaction-details-jade">
+        <div class="detail-box-crystal">
+          <span class="label">Hao tổn linh thạch</span>
+          <span class="value price">{{ (item.price || 0).toLocaleString() }} <i class="fas fa-gem text-amber-400"></i></span>
         </div>
-        <div class="detail-box" v-if="item.item_type === 'consumable' && localQty > 1">
-          <span class="label">Tổng cộng (x{{ localQty }})</span>
-          <span class="value price">{{ ((item.price || 0) * localQty).toLocaleString() }} <i class="fas fa-gem"></i></span>
+        <div class="detail-box-crystal" v-if="item.item_type === 'consumable' && localQty > 1">
+          <span class="label">Tổng linh thạch (x{{ localQty }})</span>
+          <span class="value price total">{{ ((item.price || 0) * localQty).toLocaleString() }} <i class="fas fa-gem text-amber-400"></i></span>
         </div>
-        <div class="detail-box">
-          <span class="label">Số dư hiện tại</span>
-          <span class="value wallet">{{ (userCurrency || 0).toLocaleString() }} <i class="fas fa-gem"></i></span>
+        <div class="detail-box-crystal">
+          <span class="label">Linh thạch trữ vị</span>
+          <span class="value wallet">{{ (userCurrency || 0).toLocaleString() }} <i class="fas fa-gem text-amber-400"></i></span>
         </div>
-        <div class="detail-box">
-          <span class="label">Số dư sau giao dịch</span>
-          <span class="value" :class="remaining < 0 ? 'insufficient' : 'wallet'">
-            {{ remaining.toLocaleString() }} <i class="fas fa-gem"></i>
+        <div class="detail-box-crystal">
+          <span class="label">Kết dư sau khế ước</span>
+          <span class="value" :class="remaining < 0 ? 'insufficient-blood' : 'wallet-safe'">
+            {{ remaining.toLocaleString() }} <i class="fas fa-gem text-amber-400"></i>
           </span>
         </div>
       </div>
 
-      <div class="modal-actions">
-        <button class="game-btn ghost" @click="handleClose">Hủy bỏ</button>
-        <button class="game-btn primary" :disabled="processing || remaining < 0" @click="$emit('confirm', localQty)">
-          <i v-if="processing" class="fas fa-spinner fa-spin"></i>
-          <template v-else>Xác Nhận Mua{{ localQty > 1 ? ` (x${localQty})` : '' }}</template>
+      <div class="modal-actions-array">
+        <button class="game-btn-rune ghost" @click="handleClose">Hủy Khế Ước</button>
+        <button class="game-btn-rune primary" :disabled="processing || remaining < 0" @click="$emit('confirm', localQty)">
+          <i v-if="processing" class="fas fa-yin-yang fa-spin"></i>
+          <template v-else>Kết Ấn Giao Dịch{{ localQty > 1 ? ` (x${localQty})` : '' }}</template>
         </button>
       </div>
     </div>
@@ -58,19 +59,11 @@
 import { ref, computed, watch } from 'vue';
 import BaseModal from '@/components/common/BaseModal.vue';
 
-const props = defineProps({
-  isOpen: Boolean,
-  item: Object,
-  userCurrency: Number,
-  processing: Boolean,
-  getItemTypeLabel: Function
-});
-
+const props = defineProps({ isOpen: Boolean, item: Object, userCurrency: Number, processing: Boolean, getItemTypeLabel: Function });
 const emit = defineEmits(['close', 'confirm']);
 
 const localQty = ref(1);
 
-// Reset quantity every time the modal opens with a new item
 watch(() => props.isOpen, (open) => { if (open) localQty.value = 1; });
 
 const inc = () => { if (localQty.value < 99) localQty.value++; };
@@ -81,93 +74,77 @@ const remaining = computed(() => {
   return (props.userCurrency || 0) - (props.item.price || 0) * localQty.value;
 });
 
-const handleClose = () => {
-  localQty.value = 1;
-  emit('close');
-};
+const handleClose = () => { localQty.value = 1; emit('close'); };
 </script>
 
 <style scoped>
-.modal-buy-content { display: flex; flex-direction: column; gap: 1.5rem; }
-.modal-item-preview { display: flex; align-items: center; gap: 1rem; }
+.modal-buy-cosmic { display: flex; flex-direction: column; gap: 1.5rem; }
 
-.item-icon-box {
-  width: 80px; height: 80px;
-  background: #020617;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
-  display: flex; align-items: center; justify-content: center;
-  position: relative;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+.modal-item-preview-array { display: flex; align-items: center; gap: 1.5rem; padding: 1rem; background: rgba(10, 15, 30, 0.4); border-radius: 16px; border: 1px dashed rgba(251, 191, 36, 0.2); }
+
+.item-icon-shrine {
+  width: 80px; height: 80px; background: radial-gradient(circle, rgba(251, 191, 36, 0.1), #050510);
+  border-radius: 16px; border: 1px solid rgba(251, 191, 36, 0.4);
+  display: flex; align-items: center; justify-content: center; position: relative;
+  box-shadow: inset 0 0 20px rgba(251, 191, 36, 0.1), 0 5px 15px rgba(0,0,0,0.5);
 }
-.item-icon-box.large { width: 120px; height: 120px; border-radius: 16px; margin-right: 1.5rem; }
-.item-icon-box img { width: 100%; height: 100%; object-fit: contain; z-index: 1; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.5)); }
+.item-icon-shrine.large { width: 110px; height: 110px; border-radius: 20px; flex-shrink: 0; }
+.item-icon-shrine img { width: 85%; height: 85%; object-fit: contain; z-index: 2; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)); }
+.shrine-glow { position: absolute; inset: 0; background: radial-gradient(circle, rgba(251, 191, 36, 0.3), transparent); border-radius: inherit; animation: pulse 2s infinite; z-index: 1; }
 
 .modal-item-info { flex: 1; }
-.modal-item-info h3 { margin: 0; color: #fff; font-size: 1.4rem; }
-.modal-item-info p { color: #94a3b8; font-size: 0.9rem; margin-top: 0.5rem; line-height: 1.5; }
+.magic-item-name { margin: 0; color: #fff; font-size: 1.5rem; font-weight: 900; text-shadow: 0 2px 5px rgba(251, 191, 36, 0.4); }
+.magic-item-desc { color: #94a3b8; font-size: 0.9rem; margin-top: 0.5rem; line-height: 1.5; }
 
-.game-tag {
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
-  padding: 0.25rem 0.5rem; border-radius: 6px;
-  background: rgba(255,255,255,0.1); color: #94a3b8;
-  margin-bottom: 0.5rem; display: inline-block;
+.game-tag-rune {
+  font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.3rem 0.6rem; border-radius: 6px; border: 1px solid rgba(251, 191, 36, 0.3);
+  background: rgba(251, 191, 36, 0.1); color: #fbbf24; margin-bottom: 0.6rem; display: inline-block;
 }
 
-.transaction-details { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 12px; }
-.detail-box { display: flex; flex-direction: column; gap: 0.25rem; }
-.detail-box .label { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
-.detail-box .value { font-size: 1.25rem; font-weight: 700; }
-.detail-box .price { color: #fff; }
-.detail-box .wallet { color: #fbbf24; }
-.detail-box .insufficient { color: #f43f5e; }
+/* Bảng Chi Tiết Giao Dịch */
+.transaction-details-jade { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: rgba(5, 5, 16, 0.8); padding: 1.2rem; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); }
+.detail-box-crystal { display: flex; flex-direction: column; gap: 0.4rem; padding: 0.5rem; background: rgba(255, 255, 255, 0.02); border-radius: 10px; }
+.detail-box-crystal .label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; }
+.detail-box-crystal .value { font-size: 1.3rem; font-weight: 900; display: flex; align-items: center; gap: 0.4rem; }
+.detail-box-crystal .price { color: #fff; }
+.detail-box-crystal .total { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
+.detail-box-crystal .wallet { color: #34d399; }
+.detail-box-crystal .wallet-safe { color: #34d399; }
+.detail-box-crystal .insufficient-blood { color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.6); }
 
-/* Quantity row */
-.qty-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255,255,255,0.07);
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
+/* Điều chỉnh số lượng */
+.qty-row-divine { display: flex; align-items: center; justify-content: space-between; background: rgba(10, 15, 30, 0.6); border: 1px solid rgba(251, 191, 36, 0.2); padding: 1rem 1.2rem; border-radius: 16px; }
+.qty-label { font-size: 0.9rem; color: #fbbf24; font-weight: 800; text-transform: uppercase; }
+.qty-controls { display: flex; align-items: center; gap: 1.5rem; }
+.qty-btn-rune {
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(251, 191, 36, 0.4); background: rgba(251, 191, 36, 0.1); color: #fbbf24;
+  font-size: 1.2rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 0 10px rgba(251, 191, 36, 0.1);
 }
-.qty-label { font-size: 0.9rem; color: #94a3b8; font-weight: 600; }
-.qty-controls { display: flex; align-items: center; gap: 1rem; }
-.qty-btn {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  border: 1px solid rgba(34, 211, 238, 0.4);
-  background: rgba(34, 211, 238, 0.1);
-  color: #22d3ee;
-  font-size: 1.2rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
-}
-.qty-btn:hover:not(:disabled) { background: rgba(34, 211, 238, 0.25); }
-.qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.qty-value { font-size: 1.4rem; font-weight: 800; color: #fff; min-width: 2.5rem; text-align: center; }
+.qty-btn-rune:hover:not(:disabled) { background: #fbbf24; color: #050510; box-shadow: 0 0 15px rgba(251, 191, 36, 0.5); transform: scale(1.1); }
+.qty-btn-rune:disabled { opacity: 0.3; cursor: not-allowed; border-color: rgba(255,255,255,0.1); color: #64748b; background: transparent; box-shadow: none; }
+.qty-value-gold { font-size: 1.6rem; font-weight: 900; color: #fff; min-width: 3rem; text-align: center; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
 
-.modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
+/* Nút Action */
+.modal-actions-array { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem; }
 
-.game-btn {
-  border: none; border-radius: 99px;
-  font-weight: 600; cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+.game-btn-rune {
+  border: none; border-radius: 50px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+  cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.9rem 1.8rem;
 }
-.game-btn.primary { background: #22d3ee; color: #020617; }
-.game-btn.primary:hover:not(:disabled) { box-shadow: 0 0 15px rgba(34, 211, 238, 0.5); transform: translateY(-1px); }
-.game-btn.ghost { background: transparent; color: #94a3b8; }
-.game-btn.ghost:hover { background: rgba(255,255,255,0.05); color: #fff; }
-.game-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.game-btn-rune.primary { background: linear-gradient(135deg, #fbbf24, #d97706); color: #050510; box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3); border: 1px solid #fef3c7; }
+.game-btn-rune.primary:hover:not(:disabled) { box-shadow: 0 0 25px rgba(251, 191, 36, 0.6); transform: translateY(-2px); }
+.game-btn-rune.ghost { background: transparent; color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
+.game-btn-rune.ghost:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.4); }
+.game-btn-rune:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(50%); box-shadow: none; }
+
+@keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } }
 
 @media (max-width: 480px) {
-  .modal-item-preview { flex-direction: column; text-align: center; }
-  .item-icon-box.large { margin-right: 0; margin-bottom: 1rem; }
-  .transaction-details { grid-template-columns: 1fr; }
+  .modal-item-preview-array { flex-direction: column; text-align: center; }
+  .item-icon-shrine.large { margin-bottom: 0.5rem; }
+  .transaction-details-jade { grid-template-columns: 1fr; }
+  .modal-actions-array { flex-direction: column-reverse; }
+  .game-btn-rune { width: 100%; }
 }
 </style>

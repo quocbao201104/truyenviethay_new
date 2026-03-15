@@ -156,6 +156,32 @@ const OnlineStatusService = {
       logger.error("Error in getTotalOnlineCount:", err);
       return 0;
     }
+  },
+
+  /**
+   * Clear all online tracking keys in Redis (called on server startup)
+   */
+  clearAllOnlineStatus: async () => {
+    try {
+      const keys = await redis.keys(`${REDIS_WORLD_USER_SOCKETS_PREFIX}*`);
+      const pipeline = redis.pipeline();
+      
+      // Clear specific tracking sets
+      pipeline.del(REDIS_ONLINE_USERS_KEY);
+      pipeline.del(REDIS_TOTAL_SESSIONS_KEY);
+      pipeline.del(REDIS_WORLD_GUESTS_KEY);
+      pipeline.del(REDIS_WORLD_USERS_KEY);
+      
+      // Clear all user socket sets
+      if (keys.length > 0) {
+        pipeline.del(...keys);
+      }
+      
+      await pipeline.exec();
+      logger.info("Cleared all online status from Redis (Startup Cleanup)");
+    } catch (err) {
+      logger.error("Error in clearAllOnlineStatus:", err);
+    }
   }
 };
 

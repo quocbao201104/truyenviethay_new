@@ -72,13 +72,13 @@ exports.login = async (req, res) => {
     try {
         const results = await User.findByUsername(username);
         if (results.length === 0) {
-            return res.status(401).json({ message: "Tai khoan hoac mat khau khong dung." });
+            return res.status(401).json({ message: "Tài khoản hoặc mật khẩu không đúng." });
         }
 
         const user = results[0];
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
-            return res.status(401).json({ message: "Tai khoan hoac mat khau khong dung." });
+            return res.status(401).json({ message: "Tài khoản hoặc mật khẩu không đúng." });
         }
 
         if (user.status === "blocked") {
@@ -88,8 +88,8 @@ exports.login = async (req, res) => {
             if (!banUntil || banUntil > now) {
                 return res.status(403).json({
                     message: banUntil
-                        ? `Tai khoan bi khoa den ${banUntil.toLocaleString()}`
-                        : "Tai khoan da bi khoa vinh vien",
+                        ? `Tài khoản bị khóa đến ${banUntil.toLocaleString()}`
+                        : "Tài khoản đã bị khóa vĩnh viễn",
                 });
             }
 
@@ -126,12 +126,12 @@ exports.login = async (req, res) => {
         });
 
         res.json({
-            message: "Dang nhap thanh cong",
+            message: "Đăng nhập thành công",
             token,
             user: decoratedUser,
         });
     } catch (err) {
-        res.status(500).json({ message: "Loi dang nhap", error: err.message });
+        res.status(500).json({ message: "Lỗi đăng nhập", error: err.message });
     }
 };
 
@@ -141,7 +141,7 @@ exports.getMe = async (req, res) => {
     try {
         const results = await User.findById(userId);
         if (results.length === 0) {
-            return res.status(404).json({ message: "Khong tim thay nguoi dung" });
+            return res.status(404).json({ message: "Không tìm thấy người dùng" });
         }
 
         const user = results[0];
@@ -169,13 +169,13 @@ exports.getMe = async (req, res) => {
         });
 
         res.json({
-            message: "Thong tin nguoi dung",
+            message: "Thông tin người dùng",
             token: newToken,
             user: decoratedUser,
         });
     } catch (err) {
         res.status(500).json({
-            message: "Loi khi lay thong tin nguoi dung",
+            message: "Lỗi khi lấy thông tin người dùng",
             error: err.message,
         });
     }
@@ -204,13 +204,13 @@ exports.updateMe = async (req, res) => {
         if (gender !== undefined) updateData.gender = gender;
 
         if (Object.keys(updateData).length === 0) {
-            return res.status(200).json({ message: "Khong co thong tin nao duoc thay doi de cap nhat." });
+            return res.status(200).json({ message: "Không có thông tin nào được thay đổi để cập nhật." });
         }
 
         const affectedRows = await User.updateUser(userId, updateData);
         if (affectedRows === 0) {
             return res.status(200).json({
-                message: "Cap nhat thanh cong nhung khong co thay doi nao duoc ghi nhan trong DB.",
+                message: "Cập nhật thành công nhưng không có thay đổi nào được ghi nhận trong DB.",
             });
         }
 
@@ -240,10 +240,10 @@ exports.updateMe = async (req, res) => {
             created_at: updatedUser.created_at,
         });
 
-        res.json({ message: "Cap nhat thong tin thanh cong!", user: decoratedUser });
+        res.json({ message: "Cập nhật thông tin thành công!", user: decoratedUser });
     } catch (err) {
         res.status(500).json({
-            message: "Loi server khi cap nhat thong tin",
+            message: "Lỗi server khi cập nhật thông tin",
             error: err.message,
         });
     }
@@ -254,24 +254,24 @@ exports.changePassword = async (req, res) => {
     const { old_password, new_password } = req.body;
 
     if (!old_password || !new_password) {
-        return res.status(400).json({ message: "Vui long nhap day du mat khau cu va mat khau moi." });
+        return res.status(400).json({ message: "Vui lòng nhập đầy đủ mật khẩu cũ và mật khẩu mới." });
     }
 
     try {
         const results = await User.findById(userId);
         if (results.length === 0) {
-            return res.status(404).json({ message: "Nguoi dung khong ton tai." });
+            return res.status(404).json({ message: "Người dùng không tồn tại." });
         }
 
         const user = results[0];
         const isMatch = await bcrypt.compare(old_password, user.password);
         if (!isMatch) {
-            return res.status(400).json({ message: "Mat khau cu khong dung." });
+            return res.status(400).json({ message: "Mật khẩu cũ không đúng." });
         }
 
         const isNewPasswordSameAsOld = await bcrypt.compare(new_password, user.password);
         if (isNewPasswordSameAsOld) {
-            return res.status(400).json({ message: "Mat khau moi khong duoc giong mat khau cu." });
+            return res.status(400).json({ message: "Mật khẩu mới không được giống mật khẩu cũ." });
         }
 
         const hashed = await bcrypt.hash(new_password, 10);
@@ -279,11 +279,11 @@ exports.changePassword = async (req, res) => {
 
         if (updatedAffectedRows === 0) {
             return res.status(400).json({
-                message: "Khong the cap nhat mat khau. Co the mat khau moi giong mat khau cu.",
+                message: "Không thể cập nhật mật khẩu. Có thể mật khẩu mới giống mật khẩu cũ.",
             });
         }
 
-        res.json({ message: "Doi mat khau thanh cong!" });
+        res.json({ message: "Đổi mật khẩu thành công!" });
     } catch (err) {
         res.status(500).json({
             message: "Loi server khi doi mat khau",
@@ -294,6 +294,11 @@ exports.changePassword = async (req, res) => {
 
 exports.googleLogin = async (req, res) => {
     const token = req.body.token || req.body.idToken || req.body.credential;
+    const clientIdsRaw = process.env.GOOGLE_CLIENT_IDS || process.env.GOOGLE_CLIENT_ID || "";
+    const clientIds = clientIdsRaw
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean);
 
     if (!token) {
         console.error("Google Login Error: Missing token in request body", req.body);
@@ -304,12 +309,55 @@ exports.googleLogin = async (req, res) => {
     }
 
     try {
-        const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+        if (!clientIds.length) {
+            console.error("Google Login Error: GOOGLE_CLIENT_ID(S) missing in env");
+            return res.status(500).json({ message: "GOOGLE_CLIENT_ID missing" });
+        }
+
+        const tokenParts = token.split(".");
+        const tokenMeta = {
+            length: token.length,
+            parts: tokenParts.length,
+            preview: `${token.slice(0, 6)}...${token.slice(-6)}`,
+        };
+
+        const decodeJwtSection = (section) => {
+            const normalized = section.replace(/-/g, "+").replace(/_/g, "/");
+            const padded = normalized + "===".slice((normalized.length + 3) % 4);
+            return Buffer.from(padded, "base64").toString("utf8");
+        };
+
+        let tokenClaims;
+        if (tokenParts.length === 3) {
+            try {
+                const payloadJson = decodeJwtSection(tokenParts[1]);
+                const payload = JSON.parse(payloadJson);
+                tokenClaims = {
+                    aud: payload.aud,
+                    azp: payload.azp,
+                    iss: payload.iss,
+                    exp: payload.exp,
+                    iat: payload.iat,
+                };
+            } catch (err) {
+                console.warn("Google Login Warning: Failed to decode token payload", err.message);
+            }
+        }
+
+        console.info("Google Login Attempt", {
+            tokenMeta,
+            clientIdsCount: clientIds.length,
+            clientIdHint: clientIds[0] ? `${clientIds[0].slice(0, 6)}...${clientIds[0].slice(-6)}` : "missing",
+            tokenClaims,
+            bodyKeys: Object.keys(req.body || {}),
+        });
+
+        const client = new OAuth2Client(clientIds[0]);
         OAuth2Client.CLOCK_SKEW_SECS_ = 10000;
 
         const ticket = await client.verifyIdToken({
             idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID,
+            audience: clientIds.length === 1 ? clientIds[0] : clientIds,
         });
 
         const payload = ticket.getPayload();
@@ -347,7 +395,7 @@ exports.googleLogin = async (req, res) => {
         }
 
         if (user.status === "blocked") {
-            return res.status(403).json({ message: "Tai khoan da bi khoa" });
+            return res.status(403).json({ message: "Tài khoản đã bị khóa" });
         }
 
         const jwtToken = jwt.sign(
@@ -378,7 +426,7 @@ exports.googleLogin = async (req, res) => {
         });
 
         res.json({
-            message: "Dang nhap Google thanh cong",
+            message: "Đăng nhập Google thành công",
             token: jwtToken,
             user: decoratedUser,
         });
@@ -386,10 +434,10 @@ exports.googleLogin = async (req, res) => {
         console.error("Google Login Verification Error:", {
             error: err.message,
             stack: err.stack,
-            clientId: process.env.GOOGLE_CLIENT_ID ? "PRESENT" : "MISSING",
+            clientIds: clientIds.length ? "PRESENT" : "MISSING",
         });
         res.status(400).json({
-            message: "Xac thuc Google that bai",
+            message: "Xác thực Google thất bại",
             error: err.message,
             debug: process.env.NODE_ENV === "development" ? err.message : undefined,
         });

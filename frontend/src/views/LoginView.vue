@@ -1,5 +1,8 @@
 <template>
-  <div class="dangnhap-container">
+  <div class="dangnhap-container portal-cosmic-bg">
+    <div class="portal-nebula-glow"></div>
+    <div class="portal-particles"></div>
+
     <main class="main-content">
       <LoginForm
         :key="formKey"
@@ -35,7 +38,7 @@ export default {
           router.push("/truyen-chu");
         }, 1500);
       } catch (error) {
-        console.error("Lỗi khi đăng nhập:", error);
+        console.error("Thiên cơ nhiễu loạn:", error);
         formKey.value += 1;
       }
     };
@@ -47,7 +50,7 @@ export default {
                 router.push("/truyen-chu");
             }, 1500);
         } catch (error) {
-            console.error("Google Login Failed", error);
+            console.error("Mượn lực Thiên Đạo thất bại", error);
         }
     };
 
@@ -61,17 +64,46 @@ export default {
 </script>
 
 <style scoped>
-/* Giữ nguyên CSS cũ */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap');
+
+/* ===== BACKGROUND (TINH TRẦN HƯ KHÔNG) ===== */
 .dangnhap-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #1a1d29;
-  color: #ffffff;
-  /* font-family: "Roboto", sans-serif; */
+  background-color: #020617; /* Midnight Blue sâu thẳm */
+  color: #f8fafc;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  position: relative;
+  overflow: hidden;
 }
 
+.portal-nebula-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80vw; height: 80vw;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, transparent 60%);
+  filter: blur(70px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.portal-particles {
+  position: absolute; inset: 0;
+  background-image: 
+    radial-gradient(circle at 70% 30%, rgba(34, 211, 238, 0.15) 1px, transparent 1px),
+    radial-gradient(circle at 10% 70%, rgba(255, 255, 255, 0.1) 1.5px, transparent 1.5px);
+  background-size: 150px 150px, 100px 100px;
+  animation: cosmicDrift 25s linear infinite;
+  z-index: 0; pointer-events: none;
+}
+
+@keyframes cosmicDrift { 0% { transform: translateY(0); } 100% { transform: translateY(-50px); } }
+
 .main-content {
+  position: relative;
+  z-index: 10;
   flex-grow: 1;
   display: flex;
   justify-content: center;

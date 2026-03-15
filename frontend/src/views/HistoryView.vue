@@ -4,16 +4,14 @@
     <main class="main-content">
       <div class="container">
         
-        <!-- THẦN THỨC HEADER -->
         <div class="section-header-aura animate-fadeIn">
-          <h2 class="section-title-xianxia">Vết Tích Tu Luyện</h2>
-          <p class="section-subtitle">Lưu lại thần thức để tiếp tục con đường trường sinh</p>
+          <h2 class="section-title-xianxia">Tuế Nguyệt Lục</h2>
+          <p class="section-subtitle">Lưu giữ tàn ảnh không gian, đọng lại dấu vết tu đạo</p>
           <div class="header-divider-spirit">
             <div class="dot"></div>
           </div>
         </div>
 
-        <!-- TRẠNG THÁI CẢM ỨNG (LOADING) -->
         <div v-if="historyStore.loading" class="loading-aura-container">
           <div class="skeleton-list-xianxia">
             <div v-for="n in 5" :key="n" class="skeleton-history-pill">
@@ -26,29 +24,25 @@
           </div>
         </div>
 
-        <!-- THIÊN CƠ NHIỄU LOẠN (ERROR) -->
         <div v-else-if="historyStore.error" class="state-box-aura error">
-          <i class="fas fa-burst text-rose-500 opacity-50"></i>
-          <p>Thiên cơ nhiễu loạn: {{ historyStore.error }}</p>
+          <i class="fas fa-hourglass-end text-rose-500 opacity-50"></i>
+          <p>Thời không nhiễu loạn: {{ historyStore.error }}</p>
         </div>
 
-        <!-- VÔ PHÁP TRUY VẾT (EMPTY STATE) -->
         <div v-else-if="historyStore.history.length === 0" class="state-box-aura empty">
-          <i class="fas fa-feather opacity-20"></i>
-          <h3>Vô Pháp Truy Vết</h3>
-          <p>Đạo hữu chưa để lại thần thức tại bất kỳ bí tịch nào trong vạn giới.</p>
-          <router-link to="/truyen-chu" class="btn-seek-destiny">
+          <i class="fas fa-scroll opacity-20"></i>
+          <h3>Dấu Chân Phai Mờ</h3>
+          <p>Đạo hữu chưa để lại thần thức tại bất kỳ linh thư nào trong vạn giới.</p>
+          <router-link to="/the-loai" class="btn-seek-destiny">
             <i class="fas fa-compass-drafting mr-2"></i>
             Tầm Tiên Lộ
           </router-link>
         </div>
 
-        <!-- DANH SÁCH THẦN THỨC (HISTORY LIST) -->
         <div v-else class="history-spirit-content animate-fadeIn">
           <div class="history-list-v2">
             <div v-for="item in historyStore.history" :key="item.truyen_id" class="history-pill-item group">
               
-              <!-- Bìa Linh Vật -->
               <router-link :to="`/truyen-chu/${item.truyen_slug}`" class="history-cover-spirit">
                 <img 
                   :src="item.anh_bia" 
@@ -59,7 +53,6 @@
                 <div class="cover-glow"></div>
               </router-link>
 
-              <!-- Thông Tin Lĩnh Hội -->
               <div class="history-info-spirit">
                 <router-link :to="`/truyen-chu/${item.truyen_slug}`" class="story-title-aura">
                   {{ item.ten_truyen }}
@@ -72,11 +65,10 @@
 
                 <div class="time-spirit-info">
                   <i class="fas fa-hourglass-half opacity-50"></i>
-                  <span>lưu dấu: {{ timeAgo(item.thoi_gian_doc) }}</span>
+                  <span>lưu ấn: {{ timeAgo(item.thoi_gian_doc) }}</span>
                 </div>
               </div>
 
-              <!-- Nút Tiếp Tục Đột Phá -->
               <div class="action-spirit-area">
                 <router-link 
                   v-if="item.chuong_slug"
@@ -91,7 +83,6 @@
             </div>
           </div>
 
-          <!-- LINH TRẬN PHÂN TRANG -->
           <div v-if="historyStore.pagination.total_pages > 1" class="xianxia-pagination">
             <button 
               class="page-nav-btn" 
@@ -153,7 +144,7 @@ const timeAgo = (date: string) => {
 /* ===== CORE THEME XIANXIA ===== */
 .history-view-container-xianxia {
   min-height: 100vh;
-  background: #0b0f19; /* Nền tối sâu đồng bộ */
+  background: #0b0f19;
   color: #cbd5e1;
   font-family: 'Be Vietnam Pro', sans-serif;
   padding-bottom: 80px;
@@ -165,7 +156,7 @@ const timeAgo = (date: string) => {
   padding: 40px 20px;
 }
 
-/* ===== HEADER SPIRIT ===== */
+/* ===== HEADER SPIRIT (Tone Vàng Hổ Phách) ===== */
 .section-header-aura {
   text-align: center;
   margin-bottom: 50px;
@@ -176,10 +167,11 @@ const timeAgo = (date: string) => {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 4px;
-  background: linear-gradient(to right, #34d399, #fff, #34d399);
+  /* Chuyển sang dải màu Lưu Kim (Amber/Gold) */
+  background: linear-gradient(to right, #fbbf24, #ffffff, #fbbf24);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.3));
+  filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.3));
 }
 
 .section-subtitle {
@@ -194,14 +186,14 @@ const timeAgo = (date: string) => {
 .header-divider-spirit {
   height: 1px;
   width: 240px;
-  background: linear-gradient(90deg, transparent, #34d399, transparent);
+  background: linear-gradient(90deg, transparent, #fbbf24, transparent);
   margin: 20px auto;
   position: relative;
 }
 
 .header-divider-spirit .dot {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg);
-  width: 8px; height: 8px; background: #34d399; box-shadow: 0 0 10px #34d399;
+  width: 8px; height: 8px; background: #fbbf24; box-shadow: 0 0 10px #fbbf24;
 }
 
 /* ===== HISTORY LIST PILL-STYLE ===== */
@@ -218,7 +210,7 @@ const timeAgo = (date: string) => {
   padding: 15px 30px 15px 15px;
   background: #131b2c;
   border: 1px solid #1e293b;
-  border-radius: 100px; /* Cực đại Pill-style */
+  border-radius: 100px; 
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
@@ -226,7 +218,8 @@ const timeAgo = (date: string) => {
 
 .history-pill-item:hover {
   transform: translateX(15px);
-  border-color: #34d39960;
+  /* Viền và nền glow màu vàng khi hover */
+  border-color: #fbbf2460;
   background: #1a2436;
   box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
@@ -235,7 +228,7 @@ const timeAgo = (date: string) => {
   content: '';
   position: absolute;
   top: 0; left: 0; width: 4px; height: 100%;
-  background: #34d399;
+  background: #fbbf24;
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -248,7 +241,7 @@ const timeAgo = (date: string) => {
 .history-cover-spirit {
   width: 70px;
   height: 95px;
-  border-radius: 50px; /* Bìa bo tròn kiểu linh bài */
+  border-radius: 50px; 
   overflow: hidden;
   flex-shrink: 0;
   border: 2px solid #1e293b;
@@ -256,12 +249,12 @@ const timeAgo = (date: string) => {
   position: relative;
 }
 
-.cover-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+.cover-img { width: 100%; height: 100%; object-fit: cover;object-position: top center; transition: transform 0.5s; }
 .history-pill-item:hover .cover-img { transform: scale(1.1); }
 
 .cover-glow {
   position: absolute; inset: 0;
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.2) 0%, transparent 80%);
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 80%);
   opacity: 0; transition: opacity 0.3s;
 }
 .history-pill-item:hover .cover-glow { opacity: 1; }
@@ -286,7 +279,7 @@ const timeAgo = (date: string) => {
   transition: color 0.3s;
 }
 
-.story-title-aura:hover { color: #34d399; }
+.story-title-aura:hover { color: #fbbf24; }
 
 .chapter-spirit-info {
   display: flex;
@@ -296,7 +289,7 @@ const timeAgo = (date: string) => {
   margin-bottom: 4px;
 }
 
-.chapter-spirit-info .chapter-name { color: #34d399; font-weight: 700; margin-left: 5px; }
+.chapter-spirit-info .chapter-name { color: #fbbf24; font-weight: 700; margin-left: 5px; }
 
 .time-spirit-info {
   display: flex;
@@ -315,7 +308,8 @@ const timeAgo = (date: string) => {
   display: inline-flex;
   align-items: center;
   padding: 12px 25px;
-  background: linear-gradient(135deg, #10b981, #059669);
+  /* Nút bấm dải màu gradient cam/vàng */
+  background: linear-gradient(135deg, #f59e0b, #d97706);
   color: #0b0f19;
   border-radius: 50px;
   font-weight: 900;
@@ -323,13 +317,13 @@ const timeAgo = (date: string) => {
   font-size: 0.75rem;
   letter-spacing: 1px;
   text-decoration: none;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
   transition: all 0.3s;
 }
 
 .btn-continue-cultivation:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
 }
 
 /* ===== EMPTY STATE AURA ===== */
@@ -341,21 +335,21 @@ const timeAgo = (date: string) => {
   border: 1px solid #1e293b;
 }
 
-.state-box-aura i { font-size: 4rem; margin-bottom: 25px; color: #34d399; }
+.state-box-aura i { font-size: 4rem; margin-bottom: 25px; color: #fbbf24; }
 
 .btn-seek-destiny {
   display: inline-flex;
   align-items: center;
   padding: 14px 35px;
   margin-top: 30px;
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
   color: #0b0f19;
   border-radius: 12px;
   font-weight: 800;
   text-transform: uppercase;
   text-decoration: none;
   letter-spacing: 1px;
-  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
 }
 
 /* ===== PAGINATION XIANXIA ===== */
@@ -371,11 +365,11 @@ const timeAgo = (date: string) => {
   background: #131b2c; border: 1px solid #1e293b; border-radius: 12px;
   color: #fff; cursor: pointer; transition: all 0.3s;
 }
-.page-nav-btn:hover:not(:disabled) { border-color: #34d399; color: #34d399; }
-.page-nav-btn:disabled { opacity: 0.2; }
+.page-nav-btn:hover:not(:disabled) { border-color: #fbbf24; color: #fbbf24; }
+.page-nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
 
 .page-counter-aura { font-weight: 700; color: #64748b; text-transform: uppercase; }
-.page-counter-aura .current { color: #34d399; font-weight: 900; }
+.page-counter-aura .current { color: #fbbf24; font-weight: 900; }
 
 /* Animations */
 @keyframes fadeIn {
@@ -391,6 +385,6 @@ const timeAgo = (date: string) => {
   .history-cover-spirit { width: 50px; height: 70px; border-radius: 12px; }
   .history-info-spirit { margin-left: 15px; }
   .story-title-aura { font-size: 1rem; }
-  .action-spirit-area { display: none; } /* Giấu nút lĩnh hội tiếp trên mobile để tiết kiệm diện tích */
+  .action-spirit-area { display: none; } 
 }
 </style>

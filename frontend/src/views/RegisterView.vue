@@ -1,24 +1,30 @@
 <template>
-  <div class="dangky-container">
+  <div class="dangky-container portal-cosmic-bg">
+    <div class="portal-nebula-glow"></div>
+    <div class="portal-particles"></div>
+
     <main class="main-content">
-      <div class="khuVucForm">
+      <div class="khuVucForm glass-panel-cyan animate-slideUp">
         <router-link to="/">
-          <img src="/logo.png" alt="Logo" class="login-logo" />
+          <img src="/logo.png" alt="Logo" class="login-logo pulse-glow" />
         </router-link>
-        <h2 class="form-title">Đăng Ký Tài Khoản</h2>
+        <h2 class="form-title-divine">TRÚC CƠ KHỞI NGUYÊN</h2>
+        <p class="form-subtitle">Ngưng tụ linh căn, bước lên Đạp Tiên Lộ</p>
 
         <RegisterForm :key="formKey" />
-        <div class="social-login">
-          <div class="divider">
-            <span>Hoặc đăng ký bằng</span>
+        
+        <div class="social-login-array">
+          <div class="divider-cyan">
+            <span>MƯỢN LỰC THIÊN ĐẠO</span>
           </div>
           <div class="google-signin-container">
             <GoogleLogin :callback="onGoogleCallback" />
           </div>
         </div>
-        <p class="login-link">
-          Đã có tài khoản?
-          <router-link to="/dang-nhap">Đăng nhập ngay</router-link>
+        
+        <p class="login-link-rune">
+          Đã có tiên tịch?
+          <router-link to="/dang-nhap" class="text-cyan-link">Quy Vị Tiên Môn</router-link>
         </p>
       </div>
     </main>
@@ -43,283 +49,103 @@ const onGoogleCallback = async (response) => {
                 router.push("/truyen-chu");
             }, 1500);
         } catch (error) {
-            console.error("Google Login Failed (Register Page)", error);
+            console.error("Thiên cơ nhiễu loạn (Register Page)", error);
         }
     }
 };
 </script>
 
-<style>
-/* Import Google Fonts cho typography */
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap');
 
-/* Container chính */
+/* ===== BACKGROUND (TINH TRẦN HƯ KHÔNG) ===== */
 .dangky-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #1a1d29;
-  color: #ffffff;
-  /* font-family: "Roboto", sans-serif; */
+  background-color: #020617; 
+  color: #f8fafc;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Nội dung chính */
+.portal-nebula-glow {
+  position: absolute;
+  top: 20%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80vw; height: 80vw;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 60%);
+  filter: blur(60px);
+  z-index: 0; pointer-events: none;
+}
+
+.portal-particles {
+  position: absolute; inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(34, 211, 238, 0.15) 1px, transparent 1px),
+    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 1.5px, transparent 1.5px);
+  background-size: 120px 120px, 180px 180px;
+  animation: cosmicDrift 30s linear infinite;
+  z-index: 0; pointer-events: none;
+}
+
+@keyframes cosmicDrift { 0% { transform: translateY(0); } 100% { transform: translateY(-50px); } }
+
 .main-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
   justify-content: center;
   align-items: center;
   flex-grow: 1;
+  padding: 40px 20px;
 }
 
-/* Container form */
-.khuVucForm {
+/* ===== GLASSMORPHISM CARD ===== */
+.glass-panel-cyan {
   width: 100%;
-  max-width: 450px;
-  margin: 0 auto;
-  padding: 20px;
-  background: #1a1d29;
-  border: 2px solid #4caf50;
-  border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  animation: slideUp 0.6s ease-out;
+  max-width: 480px;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 24px;
+  padding: 40px 30px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(6, 182, 212, 0.08);
 }
 
 /* Logo */
-.login-logo {
-  width: 100px;
-  margin: 0 auto 10px;
-  display: block;
-  transition: transform 0.3s ease;
+.login-logo { width: 90px; margin: 0 auto 20px; display: block; transition: all 0.4s; }
+.pulse-glow { filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.5)); }
+.login-logo:hover { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.8)); }
+
+/* Headers */
+.form-title-divine {
+  font-size: 1.8rem; font-weight: 900; letter-spacing: 2px;
+  text-align: center; margin: 0 0 8px;
+  background: linear-gradient(135deg, #fff 20%, #22d3ee 80%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(6, 182, 212, 0.4));
 }
 
-.login-logo:hover {
-  transform: scale(1.1);
-}
+.form-subtitle { text-align: center; color: #94a3b8; font-size: 0.85rem; margin-bottom: 25px; letter-spacing: 1px; text-transform: uppercase;}
 
-/* Tiêu đề form */
-.form-title {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #4caf50;
-  margin-bottom: 15px;
-  text-align: center;
-}
+/* Divider */
+.social-login-array { margin: 25px 0 15px; }
+.divider-cyan { display: flex; align-items: center; margin-bottom: 20px; }
+.divider-cyan::before, .divider-cyan::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.5), transparent); }
+.divider-cyan span { padding: 0 15px; font-size: 0.75rem; font-weight: 800; color: #22d3ee; letter-spacing: 0.1em; text-transform: uppercase; }
 
-/* Nhóm form */
-.nhomForm {
-  margin-bottom: 15px;
-}
+.google-signin-container { display: flex; justify-content: center; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)); }
 
-.batBuoc {
-  color: #d32f2f;
-}
+/* Links */
+.login-link-rune { text-align: center; font-size: 0.9rem; color: #94a3b8; margin-top: 25px; }
+.text-cyan-link { color: #22d3ee; font-weight: 800; text-decoration: none; transition: 0.3s; margin-left: 5px; }
+.text-cyan-link:hover { color: #fff; text-shadow: 0 0 10px #22d3ee; }
 
-/* Nhóm captcha */
-.captcha-group {
-  display: flex;
-  gap: 10px;
-  justify-content: space-between;
-}
+@keyframes slideUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+.animate-slideUp { animation: slideUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-.captcha-group .input-group {
-  flex: 1;
-}
-
-.captcha-display {
-  padding: 10px;
-  background: #4caf50;
-  border-radius: 8px;
-  font-family: "Courier New", monospace;
-  font-size: 1rem;
-  color: #fff;
-  text-align: center;
-  letter-spacing: 2px;
-  user-select: none;
-  cursor: pointer;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.captcha-display:hover {
-  background: #388e3c;
-}
-
-.refresh-icon {
-  margin-left: 6px;
-  font-size: 0.8rem;
-}
-
-/* Nhóm điều khoản */
-.terms-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.9rem;
-  color: #cccccc;
-  justify-content: center;
-  margin-bottom: 15px;
-}
-
-.terms-group input[type="checkbox"] {
-  margin: 0;
-  accent-color: #4caf50;
-}
-
-.terms-group a {
-  color: #4caf50;
-  /* Xanh lá */
-  text-decoration: none;
-}
-
-.terms-group a:hover {
-  color: #388e3c;
-  text-decoration: underline;
-}
-
-/* Nút Đăng ký */
-.login-btn {
-  width: 85%;
-  margin: 0 auto;
-  display: block;
-  padding: 12px;
-  background: linear-gradient(90deg, #4caf50, #66bb6a);
-  border: none;
-  border-radius: 8px;
-  color: #1a1a1a;
-  font-size: 1.1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.login-btn:hover {
-  background: linear-gradient(90deg, #388e3c, #4caf50);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
-}
-
-/* Đăng ký mạng xã hội */
-.social-login {
-  margin: 15px 0;
-  text-align: center;
-}
-
-.divider {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.divider::before,
-.divider::after {
-  content: "";
-  flex: 1;
-  border-bottom: 1px solid #444;
-}
-
-.divider span {
-  padding: 0 12px;
-  font-size: 0.85rem;
-  color: #999;
-  white-space: nowrap;
-}
-
-.google-signin-container {
-  display: flex;
-  justify-content: center;
-}
-
-.social-btn {
-  width: 40%;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: transparent;
-  border: 1px solid #4caf50;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: #ffffff;
-}
-
-.social-btn:hover {
-  background: #4caf50;
-  color: #1a1a1a;
-}
-
-/* Liên kết Đăng nhập */
-.login-link {
-  text-align: center;
-  font-size: 0.9rem;
-  color: #cccccc;
-  margin-top: 15px;
-}
-
-.login-link a {
-  color: #4caf50;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.login-link a:hover {
-  color: #388e3c;
-  text-decoration: underline;
-}
-
-/* Thông báo lỗi */
-.loi {
-  color: #d32f2f;
-  font-size: 0.8rem;
-  margin-top: 4px;
-  display: block;
-  text-align: center;
-}
-
-.success-message,
-.error-message {
-  text-align: center;
-  margin-top: 10px;
-  font-weight: 500;
-}
-
-.success-message {
-  color: #4caf50;
-}
-
-.error-message {
-  color: #f44336;
-}
-
-/* Hiệu ứng slide lên */
-@keyframes slideUp {
-  0% {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-  .khuVucForm {
-    padding: 15px;
-  }
-
-  .form-title {
-    font-size: 1.8rem;
-  }
-
-  .captcha-group {
-    flex-direction: column;
-    gap: 8px;
-    align-items: stretch;
-  }
-}
+@media (max-width: 480px) { .glass-panel-cyan { padding: 30px 20px; } .form-title-divine { font-size: 1.5rem; } }
 </style>

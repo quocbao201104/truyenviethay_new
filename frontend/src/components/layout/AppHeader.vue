@@ -2,7 +2,6 @@
   <header class="header-xianxia">
     <div class="header-content-aura">
       
-      <!-- TRẢI ĐẠO: LOGO & TẦM KIẾM -->
       <div class="header-left-spirit">
         <router-link to="/truyen-chu" class="logo-aura-link">
           <img
@@ -18,7 +17,7 @@
             <input
               ref="searchInputRef"
               type="text"
-              placeholder="Cảm ứng linh vật..."
+              placeholder="Tỏa thần thức tìm kiếm..."
               class="aura-search-input"
               v-model="searchQuery"
               @input="handleSearchInput"
@@ -32,19 +31,18 @@
             ></i>
           </div>
           
-          <!-- THIÊN CƠ BẢNG (Search Suggestions) -->
           <div 
             v-if="showSuggestions && searchQuery" 
-            class="spirit-suggestions-dropdown"
+            class="spirit-suggestions-dropdown cosmic-glass"
             @mousedown.prevent
           >
             <div v-if="searchLoading" class="spirit-loading">
-              <i class="fas fa-yin-yang fa-spin"></i>
+              <i class="fas fa-yin-yang fa-spin text-cyan-400 text-2xl mb-2"></i>
               <span>Đang thỉnh thiên cơ...</span>
             </div>
 
             <div v-else-if="searchResults.length === 0" class="spirit-empty">
-              <i class="fas fa-eye-slash opacity-30"></i>
+              <i class="fas fa-eye-slash opacity-30 text-3xl mb-2"></i>
               <span>Vô tung vô ảnh cho "{{ searchQuery }}"</span>
             </div>
 
@@ -79,17 +77,15 @@
         </div>
       </div>
 
-      <!-- HỮU ĐẠO: MENU & TU VI -->
       <div class="header-right-spirit">
         <nav class="spirit-nav">
-          <router-link to="/the-loai" class="nav-spirit-link">Thể Loại</router-link>
-          <router-link to="/xep-hang" class="nav-spirit-link">Xếp Hạng</router-link>
-          <router-link to="/truyen-hot" class="nav-spirit-link">Truyện Hot</router-link>
+          <router-link to="/the-loai" class="nav-spirit-link">Tàng Kinh Các</router-link>
+          <router-link to="/xep-hang" class="nav-spirit-link">Kỳ Thư</router-link>
+          <router-link to="/truyen-hot" class="nav-spirit-link">Thiên Bảng</router-link>
         </nav>
 
         <div class="aura-separator"></div>
 
-        <!-- TRUYỀN ÂM PHÙ (Notifications) -->
         <div v-if="isLoggedIn" class="notif-spirit-wrapper">
           <div class="notif-aura-trigger" @click="toggleNotification">
             <i class="fas fa-bell spirit-bell" :class="{ 'ringing': unreadCount > 0 }"></i>
@@ -105,61 +101,63 @@
           </div>
         </div>
 
-        <!-- ĐAN ĐIỀN (User Menu) -->
         <div v-if="isLoggedIn" class="user-spirit-menu">
           <div class="user-aura-trigger" @click="toggleDropdown">
-            <img
-              :src="avatarUrl"
-              class="avatar-spirit"
-              @error="handleAvatarError"
-              crossorigin="anonymous"
-            />
+            <div class="avatar-ring-glow">
+              <img
+                :src="avatarUrl"
+                class="avatar-spirit"
+                @error="handleAvatarError"
+                crossorigin="anonymous"
+              />
+            </div>
             <i class="fas fa-chevron-down caret-spirit" :class="{ 'rotate-aura': showDropdown }"></i>
           </div>
 
-          <div v-if="showDropdown" class="user-spirit-dropdown">
+          <div v-if="showDropdown" class="user-spirit-dropdown cosmic-glass">
             <div class="user-spirit-greeting">
-              <span class="greeting-aura">Chào, {{ userFullName }}!</span>
+              <span class="greeting-aura">Đạo hữu, <strong class="text-cyan-400">{{ userFullName }}</strong>!</span>
             </div>
             
-            <!-- Mobile-only nav items -->
-
+            <div class="aura-divider-horizontal"></div>
 
             <router-link to="/user/thong-tin-ca-nhan" class="spirit-dropdown-item">
-              <i class="fas fa-id-card-clip"></i> Thông Tin Cá Nhân
+              <i class="fas fa-id-card-clip"></i> Lệnh Bài Thân Phận
             </router-link>
-            <router-link to="/nhiem-vu" class="spirit-dropdown-item">
-              <i class="fas fa-fire-flame-curved"></i> Đạo Lộ Tu Luyện
+            <router-link to="/nhiem-vu" class="spirit-dropdown-item highlight-aura">
+              <i class="fas fa-meteor"></i> Động Thiên Phúc Địa
             </router-link>
             <router-link to="/user/truyen-theo-doi" class="spirit-dropdown-item">
-              <i class="fas fa-heart"></i> Truyện Theo Dõi
+              <i class="fas fa-fingerprint"></i> Thần Thức Lạc Ấn
             </router-link>
             <router-link to="/user/lich-su-doc" class="spirit-dropdown-item">
-              <i class="fas fa-clock-rotate-left"></i> Lịch Sử Đọc
+              <i class="fas fa-hourglass-half"></i> Tuế Nguyệt Lục
             </router-link>
+            
             <div class="mobile-nav-items">
-          
+              <div class="aura-divider-horizontal"></div>
               <router-link to="/xep-hang" class="spirit-dropdown-item">
-                <i class="fas fa-trophy"></i> Xếp Hạng
+                <i class="fas fa-trophy"></i> Thiên Bảng
               </router-link>
               <router-link to="/truyen-hot" class="spirit-dropdown-item">
-                <i class="fas fa-fire"></i> Truyện Hot
+                <i class="fas fa-fire"></i> Kỳ Thư
               </router-link>
               <router-link to="/the-loai" class="spirit-dropdown-item">
-                <i class="fas fa-list-ul"></i> Thể Loại
+                <i class="fas fa-book-bookmark"></i> Tàng Kinh Các
               </router-link>
-              <div class="aura-divider"></div>
             </div>
-            <div class="aura-divider"></div>
+            
+            <div class="aura-divider-horizontal"></div>
+            
             <div class="spirit-dropdown-item logout-spirit" @click="handleLogout">
-              <i class="fas fa-power-off"></i> Đăng xuất
+              <i class="fas fa-power-off"></i> Thu Hồi Thần Thức
             </div>
           </div>
         </div>
 
         <router-link v-else to="/dang-nhap" class="btn-spirit-login">
           <i class="fas fa-user-astronaut"></i>
-          <span>Nhập Môn</span>
+          <span>Quy Vị Tiên Môn</span>
         </router-link>
       </div>
     </div>
@@ -214,7 +212,7 @@ export default {
     });
 
     const isLoggedIn = computed(() => !!authStore.token && !!authStore.user);
-    const userFullName = computed(() => authStore.user?.full_name || "Đạo hữu");
+    const userFullName = computed(() => authStore.user?.full_name || "Vô Danh");
     const avatarUrl = computed(() => getAvatarUrl(authStore.user?.avatar));
 
     const handleAvatarError = (event) => { event.target.src = getAvatarUrl(null); };
@@ -228,7 +226,7 @@ export default {
     const handleLogout = () => {
       authStore.logout();
       showDropdown.value = false;
-      showSuccessToast("Hẹn gặp lại đạo hữu!");
+      showSuccessToast("Hẹn ngày tái ngộ, đạo hữu bảo trọng!");
       router.push("/truyen-chu");
     };
 
@@ -287,13 +285,6 @@ export default {
         if (showNotifications.value) showDropdown.value = false;
     };
     
-    const getNotifIcon = (type) => {
-      if ([1, 2, 3].includes(type)) return 'fas fa-comments';
-      if ([11, 12].includes(type)) return 'fas fa-scroll';
-      if ([21, 22].includes(type)) return 'fas fa-bullhorn';
-      return 'fas fa-envelope';
-    };
-
     const handleNotificationNavigation = async (notif) => {
         showNotifications.value = false;
         if (notif.target_id) {
@@ -301,7 +292,7 @@ export default {
              const res = await axios.get(`/api/truyen/${notif.target_id}`);
              if (res.data?.data?.slug) router.push(`/truyen-chu/${res.data.data.slug}`);
           } catch (err) {
-            console.error("Failed to navigate to story:", err);
+            console.error("Thiên cơ che lấp, không thể tiếp cận:", err);
           }
         }
     };
@@ -312,24 +303,28 @@ export default {
       handleSearchInput, handleSearchFocus, handleSearchBarClick, clearSearch,
       closeSuggestions, handleSearchSubmit, getStoryImageUrl, handleImageError, handleAvatarError,
       toggleNotification, showNotifications, notifications, unreadCount,
-      handleNotificationNavigation, getNotifIcon
+      handleNotificationNavigation
     };
   },
 };
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap');
+
 /* ===== CORE THEME SPIRIT ===== */
 .header-xianxia {
   position: sticky;
   top: 0;
   width: 100%;
   z-index: 1000;
-  background: rgba(11, 15, 25, 0.8); /* Nền tối đồng bộ */
+  background: rgba(2, 6, 23, 0.85); /* Midnight Blue Deep */
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(52, 211, 153, 0.1);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(34, 211, 238, 0.15); /* Viền Băng Lam */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
   height: 70px;
+  font-family: 'Be Vietnam Pro', sans-serif;
 }
 
 .header-content-aura {
@@ -342,242 +337,177 @@ export default {
   padding: 0 25px;
 }
 
-/* ===== LEFT: LOGO & SEARCH ===== */
-.header-left-spirit {
-  display: flex;
-  align-items: center;
-  gap: 30px;
+/* Kính mờ dùng chung cho dropdown */
+.cosmic-glass {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(34, 211, 238, 0.05);
 }
+
+/* ===== LEFT: LOGO & SEARCH ===== */
+.header-left-spirit { display: flex; align-items: center; gap: 30px; }
 
 .logo-spirit {
-  height: 40px;
-  transition: all 0.3s;
-  filter: drop-shadow(0 0 5px rgba(52, 211, 153, 0.2));
+  height: 40px; transition: all 0.4s;
+  filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.3));
 }
+.logo-spirit:hover { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(34, 211, 238, 0.7)); }
 
-.logo-spirit:hover {
-  transform: scale(1.05);
-  filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.5));
-}
-
-.spirit-search-container {
-  position: relative;
-  width: 320px;
-}
+.spirit-search-container { position: relative; width: 320px; }
 
 .search-aura-input-group {
-  display: flex;
-  align-items: center;
+  display: flex; align-items: center;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(52, 211, 153, 0.2);
-  border-radius: 50px;
-  padding: 8px 18px;
+  border: 1px solid rgba(34, 211, 238, 0.2);
+  border-radius: 50px; padding: 8px 18px;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-
 .search-aura-input-group:hover, .search-aura-input-group:focus-within {
-  border-color: #34d399;
-  background: rgba(52, 211, 153, 0.05);
-  box-shadow: 0 0 15px rgba(52, 211, 153, 0.2);
-  width: 360px;
+  border-color: #22d3ee; background: rgba(34, 211, 238, 0.05);
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.2); width: 380px;
 }
 
-.search-spirit-icon { color: #64748b; margin-right: 10px; font-size: 0.9rem; }
+.search-spirit-icon { color: #64748b; margin-right: 10px; font-size: 0.9rem; transition: 0.3s;}
+.search-aura-input-group:focus-within .search-spirit-icon { color: #22d3ee; }
 
 .aura-search-input {
-  background: transparent;
-  border: none;
-  outline: none;
-  color: #fff;
-  font-size: 0.85rem;
-  width: 100%;
-  font-weight: 500;
+  background: transparent; border: none; outline: none;
+  color: #fff; font-size: 0.85rem; width: 100%; font-weight: 500;
 }
+.aura-search-input::placeholder { color: #64748b; }
 
 .clear-spirit-icon { color: #475569; cursor: pointer; margin-left: 8px; font-size: 1rem; transition: color 0.3s; }
 .clear-spirit-icon:hover { color: #f43f5e; }
 
 /* Suggestions Xianxia */
 .spirit-suggestions-dropdown {
-  position: absolute;
-  top: calc(100% + 12px);
-  left: 0;
-  width: 450px;
-  background: #131b2c;
-  border: 1px solid #1e293b;
-  border-radius: 20px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-  overflow: hidden;
-  animation: slideInAura 0.3s ease-out;
+  position: absolute; top: calc(100% + 15px); left: 0;
+  width: 450px; border-radius: 20px; overflow: hidden;
+  animation: slideInAura 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.spirit-loading, .spirit-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px 20px; color: #64748b; font-size: 0.9rem; font-weight: 600;
 }
 
 .spirit-suggestion-item {
-  display: flex;
-  gap: 15px;
-  padding: 12px 20px;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-  transition: all 0.3s;
+  display: flex; gap: 15px; padding: 15px 20px; text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,0.05); transition: all 0.3s;
 }
-
-.spirit-suggestion-item:hover {
-  background: rgba(52, 211, 153, 0.05);
-  padding-left: 25px;
-}
+.spirit-suggestion-item:hover { background: rgba(34, 211, 238, 0.08); padding-left: 25px; }
 
 .suggestion-cover-wrapper img {
-  width: 45px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 6px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  width: 45px; height: 60px; object-fit: cover; border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
 }
 
-.suggestion-spirit-title { color: #f8fafc; font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
-.suggestion-spirit-author { font-size: 0.75rem; color: #64748b; }
-.suggestion-spirit-author i { font-size: 0.7rem; color: #34d39980; }
+.suggestion-spirit-title { color: #f8fafc; font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+.suggestion-spirit-author { font-size: 0.75rem; color: #94a3b8; }
+.suggestion-spirit-author i { font-size: 0.7rem; color: #22d3ee; }
 
 .spirit-see-all {
-  display: flex;
-  justify-content: center;
-  padding: 12px;
-  background: #34d399;
-  color: #0b0f19;
-  font-weight: 900;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  display: flex; justify-content: center; padding: 14px;
+  background: linear-gradient(90deg, #0ea5e9, #22d3ee);
+  color: #020617; font-weight: 900; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;
 }
 
 /* ===== RIGHT: NAV & USER ===== */
-.header-right-spirit {
-  display: flex;
-  align-items: center;
-  gap: 25px;
-}
-
-.spirit-nav {
-  display: flex;
-  gap: 20px;
-}
+.header-right-spirit { display: flex; align-items: center; gap: 25px; }
+.spirit-nav { display: flex; gap: 24px; }
 
 .nav-spirit-link {
-  color: #94a3b8;
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: all 0.3s;
-  position: relative;
+  color: #94a3b8; text-decoration: none; font-size: 0.85rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; position: relative;
 }
-
-.nav-spirit-link:hover { color: #34d399; }
+.nav-spirit-link:hover { color: #22d3ee; text-shadow: 0 0 8px rgba(34, 211, 238, 0.5); }
 .nav-spirit-link::after {
-  content: '';
-  position: absolute; bottom: -5px; left: 50%; width: 0; height: 2px;
-  background: #34d399; transition: all 0.3s; transform: translateX(-50%);
-  box-shadow: 0 0 8px #34d399;
+  content: ''; position: absolute; bottom: -6px; left: 50%; width: 0; height: 2px;
+  background: #22d3ee; transition: all 0.3s; transform: translateX(-50%); box-shadow: 0 0 8px #22d3ee;
 }
 .nav-spirit-link:hover::after { width: 100%; }
 
-.aura-separator { width: 1px; height: 20px; background: rgba(255,255,255,0.1); }
+.aura-separator { width: 1px; height: 24px; background: rgba(255,255,255,0.1); }
 
-/* Notif Spirit */
 /* Notif Spirit */
 .notif-aura-trigger { 
-  position: relative; 
-  cursor: pointer; 
-  padding: 8px;
-  border-radius: 50%;
-  transition: all 0.3s;
+  position: relative; cursor: pointer; padding: 10px; border-radius: 50%; transition: all 0.3s;
 }
-.notif-aura-trigger:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
+.notif-aura-trigger:hover { background: rgba(34, 211, 238, 0.1); }
 
-.spirit-bell { 
-  font-size: 1.2rem; 
-  color: #94a3b8; /* Chỉnh màu sáng hơn một chút */
-  transition: all 0.3s; 
-}
-.spirit-bell.ringing { 
-  color: #34d399; 
-  animation: bellSwing 2s infinite ease-in-out; 
-}
+.spirit-bell { font-size: 1.25rem; color: #cbd5e1; transition: all 0.3s; }
+.notif-aura-trigger:hover .spirit-bell { color: #22d3ee; }
+.spirit-bell.ringing { color: #fbbf24; animation: bellSwing 2s infinite ease-in-out; filter: drop-shadow(0 0 5px #fbbf24); }
 
 .spirit-badge {
-  position: absolute; 
-  top: 0px; 
-  right: 0px;
-  background: #ef4444; 
-  color: #fff; 
-  font-size: 0.65rem; 
-  font-weight: 800;
-  min-width: 18px; 
-  height: 18px; 
-  border-radius: 50%;
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
-  border: 2px solid #0b0f19;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+  position: absolute; top: 0px; right: 0px;
+  background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; 
+  font-size: 0.65rem; font-weight: 900; min-width: 18px; height: 18px; 
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 2px solid #020617; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
 }
 
-/* Dropdown Wrapper for Notification Center */
-.spirit-notif-dropdown-wrapper {
-  position: relative; /* Let NotificationCenter handle its own absolute positioning */
-}
+.spirit-notif-dropdown-wrapper { position: relative; }
 
 /* User Menu */
 .user-aura-trigger {
   display: flex; align-items: center; gap: 10px; cursor: pointer;
-  padding: 5px 12px; background: rgba(255,255,255,0.05);
-  border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);
-  transition: all 0.3s;
+  padding: 6px 14px 6px 6px; background: rgba(255,255,255,0.05);
+  border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s;
 }
+.user-aura-trigger:hover { border-color: rgba(34, 211, 238, 0.4); background: rgba(34, 211, 238, 0.05); box-shadow: 0 0 15px rgba(34, 211, 238, 0.15); }
 
-.user-aura-trigger:hover { border-color: #34d39960; background: rgba(52, 211, 153, 0.05); }
-
-.avatar-spirit {
-  width: 30px; height: 30px; border-radius: 50%;
-  border: 2px solid #34d399; object-fit: cover;
+.avatar-ring-glow {
+  width: 32px; height: 32px; border-radius: 50%;
+  padding: 2px; background: linear-gradient(135deg, #22d3ee, #3b82f6);
 }
+.avatar-spirit { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #000; }
+.caret-spirit { color: #94a3b8; font-size: 0.8rem; transition: 0.3s; }
+.rotate-aura { transform: rotate(180deg); color: #22d3ee; }
 
 .user-spirit-dropdown {
-  position: absolute; top: calc(100% + 12px); right: 25px;
-  width: 260px; background: #131b2c; border: 1px solid #1e293b;
-  border-radius: 20px; padding: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  position: absolute; top: calc(100% + 15px); right: 25px;
+  width: 280px; border-radius: 20px; padding: 15px; 
+  animation: slideInAura 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
+.user-spirit-greeting { padding: 5px 15px 10px; }
+.greeting-aura { font-size: 0.95rem; color: #f8fafc; font-weight: 600; }
+
+.aura-divider-horizontal { height: 1px; background: rgba(255,255,255,0.1); margin: 8px 0; }
 
 .spirit-dropdown-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 15px; color: #94a3b8; text-decoration: none;
-  font-size: 0.85rem; font-weight: 600; border-radius: 12px;
-  transition: all 0.3s;
+  display: flex; align-items: center; gap: 12px; padding: 12px 15px; 
+  color: #cbd5e1; text-decoration: none; font-size: 0.9rem; font-weight: 600; 
+  border-radius: 12px; transition: all 0.3s; cursor: pointer;
 }
 
-.spirit-dropdown-item:hover { background: rgba(255,255,255,0.03); color: #fff; transform: translateX(5px); }
-.spirit-dropdown-item.highlight-aura { color: #34d399; background: rgba(52, 211, 153, 0.05); }
-.logout-spirit { color: #f43f5e; margin-top: 10px; }
+.spirit-dropdown-item i { width: 20px; text-align: center; color: #64748b; transition: 0.3s; }
+.spirit-dropdown-item:hover { background: rgba(255,255,255,0.05); color: #fff; transform: translateX(5px); }
+.spirit-dropdown-item:hover i { color: #22d3ee; }
+
+.spirit-dropdown-item.highlight-aura { color: #22d3ee; background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.2); }
+.spirit-dropdown-item.highlight-aura i { color: #22d3ee; }
+.spirit-dropdown-item.highlight-aura:hover { box-shadow: 0 0 15px rgba(34, 211, 238, 0.2); }
+
+.logout-spirit { color: #f43f5e; }
+.logout-spirit i { color: #f43f5e; }
+.logout-spirit:hover { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
 
 .btn-spirit-login {
-  background: #fff; color: #0b0f19; padding: 8px 20px;
-  border-radius: 50px; font-weight: 900; text-transform: uppercase;
-  font-size: 0.75rem; display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, #0ea5e9, #22d3ee); color: #020617; 
+  padding: 10px 24px; border-radius: 50px; font-weight: 900; text-transform: uppercase;
+  font-size: 0.8rem; display: flex; align-items: center; gap: 10px;
   transition: all 0.3s; border: none; text-decoration: none;
+  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
 }
-.btn-spirit-login:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+.btn-spirit-login:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(34, 211, 238, 0.5); }
 
 /* Animations */
-@keyframes slideInAura { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes bellSwing { 
-  0%, 100% { transform: rotate(0); }
-  10%, 30% { transform: rotate(15deg); }
-  20%, 40% { transform: rotate(-15deg); }
-}
-.animate-spin-slow { animation: spin 10s linear infinite; }
-@keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+@keyframes slideInAura { from { opacity: 0; transform: scale(0.95) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes bellSwing { 0%, 100% { transform: rotate(0); } 10%, 30% { transform: rotate(15deg); } 20%, 40% { transform: rotate(-15deg); } }
 
 /* Mobile */
 @media (max-width: 768px) {
@@ -587,7 +517,5 @@ export default {
   .mobile-nav-items { display: block; }
 }
 
-@media (min-width: 769px) {
-  .mobile-nav-items { display: none; }
-}
+@media (min-width: 769px) { .mobile-nav-items { display: none; } }
 </style>

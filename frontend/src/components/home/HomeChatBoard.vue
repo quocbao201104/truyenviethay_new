@@ -74,7 +74,7 @@
 
       <div v-if="chatStore.worldMessages.length === 0" class="empty-state">
         <i class="fas fa-ghost mb-2 opacity-20 text-3xl"></i>
-        <p>Chưa có tin nhắn nào...</p>
+        <p>Cần đăng nhập để xem tin nhắn...</p>
       </div>
     </div>
 

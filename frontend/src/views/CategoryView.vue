@@ -4,21 +4,19 @@
     <main class="main-content">
       <div class="container">
         
-        <!-- THIÊN THƯ HEADER -->
         <div class="page-header animate-fadeIn">
           <h1 class="page-title-xianxia">
-            <i class="fas fa-bookmark text-emerald-400"></i>
-            Linh Anh Phân Loại
+            <i class="fas fa-bookmark text-sky-400"></i>
+           TÀNG KINH CÁC
           </h1>
           <p class="page-subtitle">Khám phá bí tịch theo căn cơ và duyên phận</p>
           <div class="header-divider"></div>
         </div>
 
-        <!-- CATEGORY SELECTION (CĂN CƠ CHIPS) -->
         <div class="category-selection-area">
           <div v-if="loadingCategories" class="categories-loading-aura">
             <i class="fas fa-yin-yang fa-spin"></i>
-            <span>Đang cảm ứng thể loại...</span>
+            <span>Đang cảm ứng thiên cơ...</span>
           </div>
 
           <div v-else class="xianxia-chips-container">
@@ -42,7 +40,6 @@
           </div>
         </div>
 
-        <!-- SELECTED INFO BANNER (LINH KHÍ BANNER) -->
         <div v-if="selectedCategoryInfo" class="category-info-aura animate-slideUp">
           <div class="aura-content">
             <div class="title-row">
@@ -68,13 +65,11 @@
           </div>
         </div>
 
-        <!-- RESULTS SECTION -->
         <section class="results-section-xianxia">
-          <!-- Filter Header -->
           <div class="filter-header-bar">
             <div class="results-info">
-              <i class="fas fa-scroll text-emerald-500"></i>
-              <span v-if="!loading">Tìm thấy <strong class="text-emerald-400">{{ totalResults }}</strong> bộ linh thư</span>
+              <i class="fas fa-scroll text-sky-500"></i>
+              <span v-if="!loading">Tìm thấy <strong class="text-sky-400">{{ totalResults }}</strong> bộ linh thư</span>
               <span v-else>Đang truy vấn...</span>
             </div>
 
@@ -89,7 +84,6 @@
             </div>
           </div>
 
-          <!-- Loading State -->
           <div v-if="loading" class="loading-grid-aura">
             <div class="skeleton-grid">
               <div v-for="n in 12" :key="n" class="skeleton-card-pill">
@@ -102,20 +96,17 @@
             </div>
           </div>
 
-          <!-- Error State -->
           <div v-else-if="error" class="state-message error">
             <i class="fas fa-exclamation-triangle"></i>
             <p>Thiên cơ nhiễu loạn: {{ error }}</p>
           </div>
 
-          <!-- Empty State -->
           <div v-else-if="stories.length === 0" class="state-message empty">
             <i class="fas fa-ghost"></i>
             <h3>Vô Thư Bảng</h3>
             <p>Thể loại này chưa có linh vật nào trú ngụ.</p>
           </div>
 
-          <!-- Stories Grid (Linh Thư Lưới) -->
           <div v-else class="stories-grid-xianxia">
             <NewStoryCard
               v-for="story in stories"
@@ -124,7 +115,6 @@
             />
           </div>
 
-          <!-- PAGINATION (PHÂN TRANG LINH TRẬN) -->
           <div v-if="totalPages > 1" class="xianxia-pagination">
             <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="nav-btn">
               <i class="fas fa-chevron-left"></i>
@@ -314,13 +304,19 @@ watch(() => route.query, () => {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 5px;
-  background: linear-gradient(to right, #34d399, #fff, #34d399);
+  background: linear-gradient(to right, #38bdf8, #ffffff, #38bdf8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  display: inline-flex;
+  
+  /* CÁC DÒNG ĐÃ SỬA DƯỚI ĐÂY */
+  display: flex; /* Đổi từ inline-flex sang flex */
+  flex-direction: column; /* Ép icon và text xếp dọc */
   align-items: center;
-  gap: 15px;
-  filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.3));
+  justify-content: center;
+  gap: 15px; /* Khoảng cách giữa icon và chữ */
+  
+  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3));
+  text-align: center; /* Đảm bảo text nếu rớt dòng cũng canh giữa */
 }
 
 .page-subtitle {
@@ -335,7 +331,8 @@ watch(() => route.query, () => {
 .header-divider {
   height: 1px;
   width: 300px;
-  background: linear-gradient(90deg, transparent, #34d399, transparent);
+  /* Phân cách màu xanh ngọc */
+  background: linear-gradient(90deg, transparent, #38bdf8, transparent);
   margin: 25px auto;
 }
 
@@ -347,7 +344,7 @@ watch(() => route.query, () => {
 .categories-loading-aura {
   text-align: center;
   padding: 30px;
-  color: #34d399;
+  color: #38bdf8;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -369,7 +366,7 @@ watch(() => route.query, () => {
   padding: 10px 22px;
   background: #0b0f19;
   border: 1px solid #334155;
-  border-radius: 50px; /* Pill Shape */
+  border-radius: 50px;
   color: #64748b;
   font-size: 0.85rem;
   font-weight: 700;
@@ -381,17 +378,17 @@ watch(() => route.query, () => {
 }
 
 .xianxia-chip:hover {
-  border-color: #34d39960;
-  color: #34d399;
+  border-color: #38bdf860;
+  color: #38bdf8;
   transform: translateY(-2px);
-  background: #34d39905;
+  background: #38bdf805;
 }
 
 .xianxia-chip.active {
-  background: #34d39915;
-  border-color: #34d399;
-  color: #34d399;
-  box-shadow: 0 0 15px rgba(52, 211, 153, 0.2);
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
 }
 
 /* ===== INFO BANNER ===== */
@@ -399,7 +396,7 @@ watch(() => route.query, () => {
   margin-bottom: 35px;
   padding: 25px;
   background: linear-gradient(135deg, #131b2c, #0b0f19);
-  border-left: 4px solid #34d399;
+  border-left: 4px solid #38bdf8;
   border-radius: 16px;
   box-shadow: 0 5px 20px rgba(0,0,0,0.3);
 }
@@ -421,9 +418,9 @@ watch(() => route.query, () => {
   font-size: 0.7rem;
   font-weight: 900;
   padding: 3px 10px;
-  background: #34d39920;
-  color: #34d399;
-  border: 1px solid #34d39940;
+  background: #38bdf820;
+  color: #38bdf8;
+  border: 1px solid #38bdf840;
   border-radius: 50px;
   text-transform: uppercase;
 }
@@ -444,19 +441,19 @@ watch(() => route.query, () => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #34d39910;
-  border: 1px solid #34d39930;
+  background: #38bdf810;
+  border: 1px solid #38bdf830;
   border-radius: 8px;
   padding: 5px 12px;
   font-size: 0.8rem;
-  color: #34d399;
+  color: #38bdf8;
   font-weight: 700;
 }
 
 .tag-remove {
   background: transparent;
   border: none;
-  color: #34d399;
+  color: #38bdf8;
   cursor: pointer;
   opacity: 0.6;
 }
@@ -538,7 +535,7 @@ watch(() => route.query, () => {
 }
 
 .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
-.nav-btn:hover:not(:disabled) { border-color: #34d399; color: #34d399; }
+.nav-btn:hover:not(:disabled) { border-color: #38bdf8; color: #38bdf8; }
 
 .num-group {
   display: flex;
@@ -554,13 +551,14 @@ watch(() => route.query, () => {
   color: #64748b;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.3s;
 }
 
 .num-btn.active {
-  background: #34d399;
+  background: #38bdf8;
   color: #0b0f19;
-  border-color: #34d399;
-  box-shadow: 0 5px 15px rgba(52, 211, 153, 0.3);
+  border-color: #38bdf8;
+  box-shadow: 0 5px 15px rgba(56, 189, 248, 0.3);
 }
 
 /* Animations */
@@ -576,11 +574,33 @@ watch(() => route.query, () => {
 }
 .animate-slideUp { animation: slideUp 0.5s ease-out; }
 
-/* Responsive */
+/* Responsive & Mobile Optimization */
 @media (max-width: 768px) {
-  .page-title-xianxia { font-size: 2rem; }
-  .xianxia-chips-container { padding: 15px; }
-  .xianxia-chip { padding: 8px 16px; font-size: 0.75rem; }
+  .page-title-xianxia { font-size: 2.2rem; /* Giảm size chữ chút xíu cho đỡ bị rớt 3 dòng */
+    gap: 10px; /* Thu hẹp khoảng cách icon và chữ trên mobile */
+    letter-spacing: 3px;
+  }
+  
+  /* Cho phép cuộn ngang (Horizontal Scroll) phần danh sách Thể loại trên Mobile */
+  .xianxia-chips-container { 
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding: 15px; 
+    border-radius: 16px;
+    -ms-overflow-style: none; /* Ẩn thanh cuộn IE/Edge */
+    scrollbar-width: none; /* Ẩn thanh cuộn Firefox */
+  }
+  .xianxia-chips-container::-webkit-scrollbar {
+    display: none; /* Ẩn thanh cuộn Chrome/Safari */
+  }
+  .xianxia-chip {
+    white-space: nowrap; /* Tránh text bị rớt dòng */
+    flex-shrink: 0; /* Tránh chip bị bóp méo */
+    padding: 8px 16px; 
+    font-size: 0.75rem; 
+  }
+
   .filter-header-bar { flex-direction: column; gap: 15px; align-items: flex-start; }
   .stories-grid-xianxia { grid-template-columns: repeat(2, 1fr); gap: 15px; }
 }

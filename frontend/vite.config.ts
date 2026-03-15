@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
         registerType: "autoUpdate",
         manifest: {
           name: "TruyenVietHay",
-          short_name: "TVH",
+          short_name: "Truyện Việt Hay",
           start_url: "/",
           display: "standalone",
           background_color: "#ffffff",
@@ -63,6 +63,13 @@ export default defineConfig(({ mode }) => {
         compress: {
           drop_console: true,
           drop_debugger: true,
+        },
+      },
+      rollupOptions: {
+        output: {
+          entryFileNames: "assets/[name].[hash].js",
+          chunkFileNames: "assets/[name].[hash].js",
+          assetFileNames: "assets/[name].[hash][extname]",
         },
       },
     },

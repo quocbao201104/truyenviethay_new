@@ -1,38 +1,50 @@
 <template>
-  <div v-if="loading" class="empty-state">Đang cảm ứng Thiên Đạo...</div>
-  <div v-else-if="!tasks || tasks.length === 0" class="empty-state">Chưa có nhiệm vụ mới.</div>
-  <div v-else class="list-layout">
+  <div v-if="loading" class="empty-state-cosmic">
+    <i class="fas fa-yin-yang fa-spin text-3xl mb-3 text-amber-400"></i>
+    <p>Đang cảm ứng Thiên Cơ...</p>
+  </div>
+  <div v-else-if="!tasks || tasks.length === 0" class="empty-state-cosmic">
+    <i class="fas fa-scroll opacity-20 text-4xl mb-3"></i>
+    <p>Tông môn hiện chưa ban bố lịch luyện mới.</p>
+  </div>
+  <div v-else class="list-layout-divine">
     <article
       v-for="task in orderedTasks"
       :key="task.task_id"
-      class="list-card"
+      class="list-card-cosmic"
       :class="{
         'is-completed': task.status === 'claimed',
         'is-claimable': task.status === 'completed',
       }"
     >
       <div class="card-content">
-        <p class="kicker">Nhiệm vụ</p>
-        <h3 class="card-title">{{ task.task_name || task.title }}</h3>
-        <p class="card-desc">{{ task.description }}</p>
-        <p v-if="task.progress_target && task.progress_target > 1" class="progress-text">
-          Tiến độ: {{ task.progress_current || 0 }}/{{ task.progress_target }}
-        </p>
+        <p class="kicker-gold">LỊCH LUYỆN</p>
+        <h3 class="card-title-divine">{{ task.task_name || task.title }}</h3>
+        <p class="card-desc-aura">{{ task.description }}</p>
+        <div v-if="task.progress_target && task.progress_target > 1" class="progress-bar-wrap">
+          <div class="progress-info">
+            <span>Tiến trình giác ngộ</span>
+            <span>{{ task.progress_current || 0 }} / {{ task.progress_target }}</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" :style="{ width: `${((task.progress_current || 0) / task.progress_target) * 100}%` }"></div>
+          </div>
+        </div>
       </div>
-      <div class="card-actions">
-        <span class="reward-text">+{{ (task.points_awarded || 0).toLocaleString() }} Tu Vi</span>
+      <div class="card-actions-array">
+        <span class="reward-text-gold">+{{ (task.points_awarded || 0).toLocaleString() }} Tu Vi</span>
 
         <button
           v-if="task.status === 'completed'"
-          class="claim-btn"
+          class="claim-btn-divine"
           :disabled="processingTaskId === task.task_id"
           @click="$emit('claim', task.task_id)"
         >
           <i v-if="processingTaskId === task.task_id" class="fas fa-spinner fa-spin"></i>
-          <template v-else>Lĩnh Thưởng</template>
+          <template v-else>Nhận Đạo Quả</template>
         </button>
 
-        <span v-else class="status-tag" :class="task.status || 'pending'">
+        <span v-else class="status-tag-rune" :class="task.status || 'pending'">
           {{ getStatusLabel(task.status) }}
         </span>
       </div>
@@ -43,139 +55,68 @@
 <script setup>
 import { computed } from 'vue';
 
-const props = defineProps({
-  tasks: Array,
-  loading: Boolean,
-  processingTaskId: [Number, String, null],
-});
-
+const props = defineProps({ tasks: Array, loading: Boolean, processingTaskId: [Number, String, null] });
 defineEmits(['claim']);
 
 const orderedTasks = computed(() => {
   const safeTasks = props.tasks || [];
-  const rank = {
-    completed: 0,
-    in_progress: 1,
-    pending: 2,
-    claimed: 3,
-    expired: 4,
-    null: 5,
-  };
-
-  return [...safeTasks].sort((a, b) => {
-    const aRank = rank[a?.status ?? 'null'] ?? 99;
-    const bRank = rank[b?.status ?? 'null'] ?? 99;
-    return aRank - bRank;
-  });
+  const rank = { completed: 0, in_progress: 1, pending: 2, claimed: 3, expired: 4, null: 5 };
+  return [...safeTasks].sort((a, b) => (rank[a?.status ?? 'null'] ?? 99) - (rank[b?.status ?? 'null'] ?? 99));
 });
 
 const getStatusLabel = (status) => {
-  if (status === 'claimed') return 'Đã nhận';
+  if (status === 'claimed') return 'Đã lĩnh ngộ';
   if (status === 'in_progress') return 'Đang tiến hành';
-  if (status === 'expired') return 'Hết hạn';
-  return 'Chưa hoàn thành';
+  if (status === 'expired') return 'Đã tiêu tán';
+  return 'Chưa đạt thành';
 };
 </script>
 
 <style scoped>
-.empty-state {
-  padding: 3rem;
-  border-radius: 16px;
-  border: 1px dashed rgba(100, 116, 139, 0.4);
-  text-align: center;
-  color: #94a3b8;
-  background: rgba(15, 23, 42, 0.2);
+.empty-state-cosmic { padding: 3rem; border-radius: 16px; border: 1px dashed rgba(251, 191, 36, 0.3); text-align: center; color: #fbbf24; background: rgba(251, 191, 36, 0.05); }
+.list-layout-divine { display: flex; flex-direction: column; gap: 1.2rem; }
+
+.list-card-cosmic {
+  display: flex; justify-content: space-between; align-items: center; gap: 1.5rem;
+  background: rgba(10, 15, 30, 0.6); border: 1px solid rgba(255,255,255,0.05);
+  padding: 1.5rem; border-radius: 20px; transition: all 0.3s;
 }
 
-.list-layout { display: flex; flex-direction: column; gap: 1rem; }
-
-.list-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
-  background: rgba(30, 41, 59, 0.4);
-  border: 1px solid rgba(255,255,255,0.05);
-  padding: 1.25rem 1.5rem;
-  border-radius: 16px;
-  transition: all 0.2s;
+.list-card-cosmic:hover { border-color: rgba(251, 191, 36, 0.2); background: rgba(15, 20, 40, 0.8); transform: translateX(5px); }
+.list-card-cosmic.is-completed { opacity: 0.5; filter: grayscale(50%); }
+.list-card-cosmic.is-claimable {
+  border-color: rgba(251, 191, 36, 0.6);
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.1), rgba(10, 15, 30, 0.8));
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.15), inset 0 0 10px rgba(251, 191, 36, 0.1);
 }
 
-.list-card:hover { border-color: rgba(255,255,255,0.1); background: rgba(51, 65, 85, 0.4); }
-.list-card.is-completed { opacity: 0.6; }
-.list-card.is-claimable {
-  border-color: rgba(251, 191, 36, 0.35);
-  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.08);
-}
+.kicker-gold { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em; color: #fbbf24; margin-bottom: 0.5rem; }
+.card-title-divine { font-size: 1.2rem; font-weight: 800; color: #fff; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.card-desc-aura { font-size: 0.9rem; color: #94a3b8; margin: 0.4rem 0 1rem; line-height: 1.5; }
 
-.card-title { font-size: 1.15rem; color: #fff; margin: 0; }
-.card-desc { font-size: 0.9rem; color: #94a3b8; margin: 0.25rem 0 0; line-height: 1.5; }
-.progress-text {
-  margin: 0.55rem 0 0;
-  color: #67e8f9;
-  font-size: 0.84rem;
-  font-weight: 700;
-}
+.progress-bar-wrap { width: 100%; max-width: 300px; }
+.progress-info { display: flex; justify-content: space-between; font-size: 0.8rem; color: #fbbf24; font-weight: 700; margin-bottom: 0.3rem; }
+.progress-track { height: 6px; background: rgba(0,0,0,0.5); border-radius: 10px; overflow: hidden; border: 1px solid rgba(251, 191, 36, 0.2); }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #d97706, #fbbf24); transition: width 0.5s ease; box-shadow: 0 0 10px #fbbf24; }
 
-.kicker {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #22d3ee;
-  margin-bottom: 0.25rem;
-}
+.card-actions-array { display: flex; flex-direction: column; align-items: flex-end; gap: 0.8rem; min-width: 150px; }
+.reward-text-gold { color: #fbbf24; font-weight: 900; font-size: 1.1rem; text-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
 
-.card-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; min-width: 140px; }
-.reward-text { color: #fbbf24; font-weight: 700; font-size: 1rem; }
+.status-tag-rune, .claim-btn-divine { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.6rem 1.2rem; border-radius: 8px; }
+.status-tag-rune { background: rgba(255,255,255,0.05); color: #64748b; border: 1px solid rgba(255,255,255,0.1); }
+.status-tag-rune.claimed { background: rgba(16, 185, 129, 0.1); color: #34d399; border-color: rgba(16, 185, 129, 0.3); }
+.status-tag-rune.in_progress { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3); }
 
-.status-tag,
-.claim-btn {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.45rem 0.75rem;
-  border-radius: 8px;
+.claim-btn-divine {
+  border: 1px solid #fbbf24;
+  background: linear-gradient(135deg, #d97706, #fbbf24); color: #050510; cursor: pointer; min-width: 140px;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.4); transition: all 0.3s;
 }
-
-.status-tag {
-  background: rgba(255,255,255,0.1);
-  color: #94a3b8;
-}
-
-.status-tag.claimed {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.status-tag.in_progress {
-  background: rgba(59, 130, 246, 0.14);
-  color: #93c5fd;
-  border: 1px solid rgba(59, 130, 246, 0.25);
-}
-
-.claim-btn {
-  border: 1px solid rgba(251, 191, 36, 0.45);
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.24));
-  color: #fde68a;
-  cursor: pointer;
-  min-width: 118px;
-}
-
-.claim-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.16);
-}
-
-.claim-btn:disabled {
-  opacity: 0.75;
-  cursor: wait;
-}
+.claim-btn-divine:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 0 25px rgba(251, 191, 36, 0.6); }
+.claim-btn-divine:disabled { opacity: 0.6; cursor: wait; }
 
 @media (max-width: 768px) {
-  .list-card { flex-direction: column; align-items: flex-start; gap: 1rem; }
-  .card-actions { align-items: flex-start; min-width: auto; }
+  .list-card-cosmic { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .card-actions-array { align-items: flex-start; min-width: auto; }
 }
 </style>
