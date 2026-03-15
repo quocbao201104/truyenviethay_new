@@ -82,9 +82,35 @@
                   <span class="spirit-note">Tranh hùng tuế nguyệt</span>
                 </h2>
               </div>
+              <div class="moon-tabs">
+                <button
+                  type="button"
+                  class="moon-tab"
+                  :class="{ active: moonTab === 'thang' }"
+                  @click="moonTab = 'thang'"
+                >
+                  Tháng
+                </button>
+                <button
+                  type="button"
+                  class="moon-tab"
+                  :class="{ active: moonTab === 'tuan' }"
+                  @click="moonTab = 'tuan'"
+                >
+                  Tuần
+                </button>
+                <button
+                  type="button"
+                  class="moon-tab"
+                  :class="{ active: moonTab === 'ngay' }"
+                  @click="moonTab = 'ngay'"
+                >
+                  Ngày
+                </button>
+              </div>
               <div class="ranking-spirit-list-mobile moon-board">
                 <div 
-                  v-for="(story, index) in topMonthlyStories.slice(0, 5)" 
+                  v-for="(story, index) in moonStories.slice(0, 5)" 
                   :key="'mb-'+story.id" 
                   @click="navigateToStory(story.slug)"
                   class="ranking-spirit-item moon-item"
@@ -92,7 +118,7 @@
                   <div class="rank-orb" :class="`top-${index + 1}`">{{ index + 1 }}</div>
                   <div class="rank-details">
                     <h4 class="rank-name">{{ story.ten_truyen }}</h4>
-                    <span class="rank-val">{{ formatNumber(story.luot_xem_thang || story.luot_xem) }} uy vọng</span>
+                    <span class="rank-val">{{ formatNumber(getMoonViews(story)) }} uy vọng</span>
                   </div>
                 </div>
               </div>
@@ -129,11 +155,37 @@
                   <i class="fas fa-moon moon-icon"></i> Nguyệt Bảng
                 </h3>
               </div>
-              <p class="moon-subtitle">Kỳ lân xuất thế - Quần hùng tranh bá trong tháng.</p>
+              <p class="moon-subtitle">{{ moonSubtitle }}</p>
+              <div class="moon-tabs">
+                <button
+                  type="button"
+                  class="moon-tab"
+                  :class="{ active: moonTab === 'thang' }"
+                  @click="moonTab = 'thang'"
+                >
+                  Tháng
+                </button>
+                <button
+                  type="button"
+                  class="moon-tab"
+                  :class="{ active: moonTab === 'tuan' }"
+                  @click="moonTab = 'tuan'"
+                >
+                  Tuần
+                </button>
+                <button
+                  type="button"
+                  class="moon-tab"
+                  :class="{ active: moonTab === 'ngay' }"
+                  @click="moonTab = 'ngay'"
+                >
+                  Ngày
+                </button>
+              </div>
               
               <div class="ranking-spirit-list">
                 <div 
-                  v-for="(story, index) in topMonthlyStories.slice(0, 5)" 
+                  v-for="(story, index) in moonStories.slice(0, 5)" 
                   :key="story.id" 
                   @click="navigateToStory(story.slug)"
                   class="ranking-spirit-item moon-item"
@@ -141,7 +193,7 @@
                   <div class="rank-orb" :class="`top-${index + 1}`">{{ index + 1 }}</div>
                   <div class="rank-details">
                     <h4 class="rank-name">{{ story.ten_truyen }}</h4>
-                    <span class="rank-val">{{ formatNumber(story.luot_xem_thang || story.luot_xem) }} uy vọng</span>
+                    <span class="rank-val">{{ formatNumber(getMoonViews(story)) }} uy vọng</span>
                   </div>
                   <i v-if="index < 3" class="fas fa-star text-slate-300 text-[10px] animate-pulse"></i>
                 </div>
@@ -175,7 +227,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { Story, getHotStories } from "@/modules/storyText/story.service";
 import type { Category } from "@/types/category";
 import NewStoryCard from "@/modules/storyText/components/NewStoryCard.vue";
@@ -198,8 +250,27 @@ const categories = ref<Category[]>([]);
 const newStories = ref<Story[]>([]);
 const hotStories = ref<Story[]>([]);
 const topMonthlyStories = ref<Story[]>([]);
+const topWeeklyStories = ref<Story[]>([]);
+const topDailyStories = ref<Story[]>([]);
 const topRatedStories = ref<Story[]>([]);
 const completedStories = ref<Story[]>([]);
+const moonTab = ref<"thang" | "tuan" | "ngay">("thang");
+
+const moonStories = computed(() => {
+  if (moonTab.value === "tuan") return topWeeklyStories.value;
+  if (moonTab.value === "ngay") return topDailyStories.value;
+  return topMonthlyStories.value;
+});
+
+const moonSubtitle = computed(() => {
+  if (moonTab.value === "tuan") {
+    return "Kỳ lân xuất thế - Quần hùng tranh bá trong tuần.";
+  }
+  if (moonTab.value === "ngay") {
+    return "Kỳ lân xuất thế - Quần hùng tranh bá trong ngày.";
+  }
+  return "Kỳ lân xuất thế - Quần hùng tranh bá trong tháng.";
+});
 
 const fetchAllData = async () => {
   try {
@@ -208,6 +279,8 @@ const fetchAllData = async () => {
       storyStore.fetchNewStories(10),
       getHotStories(5),
       storyStore.fetchTopMonthlyStories(5),
+      storyStore.fetchTopWeeklyStories(5),
+      storyStore.fetchTopDailyStories(5),
       storyStore.fetchTopRatedStories(8),
       storyStore.fetchCompletedStories(10)
     ]);
@@ -216,8 +289,10 @@ const fetchAllData = async () => {
     newStories.value = results[1];
     hotStories.value = results[2];
     topMonthlyStories.value = results[3];
-    topRatedStories.value = results[4];
-    completedStories.value = results[5];
+    topWeeklyStories.value = results[4];
+    topDailyStories.value = results[5];
+    topRatedStories.value = results[6];
+    completedStories.value = results[7];
   } catch (err) {
     console.error("Thiên cơ bị nhiễu loạn:", err);
   }
@@ -227,6 +302,12 @@ const formatNumber = (num: number) => {
   if (!num) return '0';
   if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
   return num.toString();
+};
+
+const getMoonViews = (story: Story) => {
+  if (moonTab.value === "tuan") return story.luot_xem_tuan ?? story.luot_xem ?? 0;
+  if (moonTab.value === "ngay") return story.luot_xem_ngay ?? story.luot_xem ?? 0;
+  return story.luot_xem_thang ?? story.luot_xem ?? 0;
 };
 
 onMounted(() => {
@@ -385,6 +466,39 @@ onMounted(() => {
 .spirit-header.moon .spirit-title { color: #f8fafc; text-shadow: 0 0 15px rgba(226, 232, 240, 0.3); }
 
 .moon-subtitle { font-size: 0.8rem; color: #94a3b8; margin-bottom: 20px; font-style: italic; }
+
+.moon-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.moon-tab {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(148, 163, 184, 0.08);
+  color: #cbd5e1;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.moon-tab:hover {
+  background: rgba(226, 232, 240, 0.15);
+  border-color: rgba(226, 232, 240, 0.35);
+  color: #e2e8f0;
+}
+
+.moon-tab.active {
+  background: #e2e8f0;
+  color: #0f172a;
+  border-color: #e2e8f0;
+  box-shadow: 0 0 12px rgba(226, 232, 240, 0.35);
+}
 
 /* Grid mặc định cho Desktop */
 .spirit-grid-responsive {

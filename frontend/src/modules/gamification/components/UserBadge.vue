@@ -152,39 +152,5 @@ const onImgError = () => {
     drop-shadow(0 0 3px rgba(255, 255, 255, 0.8));
 }
 
-/* ── Animations (Hiệu Ứng Tu Tiên) ──────────────────────────────────────────── */
-
-/* Tụ Khí (Pulse) — Nhịp thở linh khí */
-.anim-pulse .badge-icon-spirit { animation: badge-pulse 2.5s ease-in-out infinite; }
-@keyframes badge-pulse {
-  0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 4px var(--badge-color)); }
-  50% { transform: scale(1.05) translateY(-2px); filter: drop-shadow(0 0 15px var(--badge-color)); }
-}
-
-/* Linh Quang (Glow) — Ánh sáng dao động */
-.anim-glow .badge-icon-spirit { animation: badge-glow 2s ease-in-out infinite alternate; }
-@keyframes badge-glow {
-  from { transform: scale(1); filter: drop-shadow(0 0 5px var(--badge-color)); }
-  to { transform: scale(1.03); filter: drop-shadow(0 0 18px var(--badge-color)) drop-shadow(0 0 5px #fff); }
-}
-
-/* Tinh Tú (Sparkle) — Lấp lánh như sao trời */
-.anim-sparkle .badge-icon-spirit { animation: badge-sparkle 2s ease-in-out infinite; }
-@keyframes badge-sparkle {
-  0%, 100% { filter: drop-shadow(0 0 5px var(--badge-color)) brightness(1); transform: scale(1) rotate(0deg); }
-  25% { filter: drop-shadow(0 0 12px var(--badge-color)) brightness(1.3); transform: scale(1.03) rotate(2deg); }
-  50% { transform: scale(1.05) rotate(-2deg); }
-  75% { filter: drop-shadow(0 0 10px var(--badge-color)) brightness(1.2); transform: scale(1.02) rotate(1deg); }
-}
-
-/* Nghiệp Hỏa (Flame) — Ngọn lửa bùng cháy dữ dội */
-.anim-flame .badge-icon-spirit { animation: badge-flame 1.5s ease-in-out infinite; }
-@keyframes badge-flame {
-  0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 8px var(--badge-color)) drop-shadow(0 0 15px rgba(255, 68, 0, 0.4)); }
-  50% { transform: scale(1.06) translateY(-3px); filter: drop-shadow(0 0 12px var(--badge-color)) drop-shadow(0 0 25px rgba(255, 68, 0, 0.8)) brightness(1.2); }
-}
-
-/* Hover Lift (Tương tác vật lý) */
-.user-badge-divine:hover .badge-icon-spirit { transform: scale(1.25) translateY(-3px); z-index: 10; }
-.user-badge-divine.is-fallback:hover .badge-fallback-rune { transform: scale(1.15) translateY(-2px); }
+/* Animations and hover effects removed as requested */
 </style>

@@ -3,8 +3,6 @@
     <main class="profile-container-aura">
       
       <div v-if="userStore.isProfileLoading" class="loading-spirit-state">
-        <i class="fas fa-yin-yang fa-spin text-4xl mb-4 text-emerald-400"></i>
-        <p class="text-emerald-500 animate-pulse font-bold">Đang hội tụ linh khí, xuất lệnh bài...</p>
       </div>
 
       <div v-else-if="userStore.profileError" class="error-spirit-state">
@@ -29,13 +27,13 @@
         <section class="spirit-card-main">
           
           <div class="spirit-header-aura">
-            <div class="avatar-aura-wrapper" :class="['profile-frame-active', equippedFrameClass]">
-              <span class="aura-ring outer"></span>
-              <span class="aura-ring inner"></span>
+            <div class="spirit-array-center" :class="equippedFrameClass">
+              <div class="magic-circle-spin" v-if="equippedFrameImage"></div>
+              <div class="magic-circle-reverse" v-if="equippedFrameImage"></div>
               <img
                 :src="avatarUrl"
                 alt="User Avatar"
-                class="avatar-main item-img"
+                class="hero-avatar item-img"
                 @error="handleAvatarError"
                 crossorigin="anonymous"
               />
@@ -43,7 +41,7 @@
                 v-if="equippedFrameImage"
                 :src="equippedFrameImage"
                 alt="Avatar Frame"
-                class="avatar-frame-overlay equipped-frame"
+                class="hero-frame equipped-frame"
                 crossorigin="anonymous"
               />
               <div class="status-dot-aura"></div>
@@ -112,46 +110,90 @@
             </div>
           </div>
 
-          <div class="spirit-nav-footer">
-            <router-link to="/user/cai-dat-thong-tin" class="spirit-nav-pill">
-              <i class="fas fa-user-gear"></i>
-              <span>Khắc Lại Thông Tin</span>
-            </router-link>
+          <div class="action-sections-wrapper">
             
-            <router-link to="/user/truyen-theo-doi" class="spirit-nav-pill">
-              <i class="fas fa-book-bookmark"></i>
-              <span>Truyện Theo Dõi</span>
-            </router-link>
-            
-            <router-link to="/user/lich-su-doc" class="spirit-nav-pill">
-              <i class="fas fa-scroll"></i>
-              <span>Lịch Sử Đọc</span>
-            </router-link>
+            <div class="action-group">
+              <h3 class="group-title"><i class="fas fa-meteor text-amber-400"></i> Hành Trang Tu Luyện</h3>
+              <div class="group-grid">
+                <router-link to="/nhiem-vu" class="spirit-nav-card gold">
+                  <div class="card-icon"><i class="fas fa-fire-flame-curved"></i></div>
+                  <div class="card-text">
+                    <span class="card-name">Động Thiên Phúc Địa</span>
+                    <span class="card-desc">Nhiệm vụ, Túi đồ, Đột phá</span>
+                  </div>
+                </router-link>
 
-            <div v-if="user?.role === 'user' && userStore.applicationStatus?.status === 'pending'" class="spirit-nav-pill pending">
-              <i class="fas fa-hourglass-half"></i>
-              <span>Đang chờ thụ phong</span>
+                <router-link to="/user/truyen-theo-doi" class="spirit-nav-card emerald">
+                  <div class="card-icon"><i class="fas fa-book-bookmark"></i></div>
+                  <div class="card-text">
+                    <span class="card-name">Truyện Theo Dõi</span>
+                    <span class="card-desc">Bí tịch đang lĩnh hội</span>
+                  </div>
+                </router-link>
+
+                <router-link to="/user/tac-gia-theo-doi" class="spirit-nav-card emerald">
+                  <div class="card-icon"><i class="fas fa-user-group"></i></div>
+                  <div class="card-text">
+                    <span class="card-name">Tác Giả Theo Dõi</span>
+                    <span class="card-desc">Các bậc Tôn giả đã khắc ấn</span>
+                  </div>
+                </router-link>
+                
+                <router-link to="/user/lich-su-doc" class="spirit-nav-card cyan">
+                  <div class="card-icon"><i class="fas fa-scroll"></i></div>
+                  <div class="card-text">
+                    <span class="card-name">Lịch Sử Đọc</span>
+                    <span class="card-desc">Tuế nguyệt lục truy hồi</span>
+                  </div>
+                </router-link>
+              </div>
             </div>
-            
-            <router-link v-else-if="user?.role === 'user'" to="/user/dang-ky-tac-gia" class="spirit-nav-pill special">
-              <i class="fas fa-feather-pointed"></i>
-              <span>Xin Khai Tông Lập Phái</span>
-            </router-link>
 
-            <router-link to="/nhiem-vu" class="spirit-nav-pill special">
-              <i class="fas fa-fire-flame-curved"></i>
-              <span>Động Thiên Phúc Địa</span>
-            </router-link>
+            <div class="action-group">
+              <h3 class="group-title"><i class="fas fa-id-card-clip text-blue-400"></i> Quản Lý Thân Phận</h3>
+              <div class="group-grid">
+                <router-link to="/user/cai-dat-thong-tin" class="spirit-nav-card blue">
+                  <div class="card-icon"><i class="fas fa-user-gear"></i></div>
+                  <div class="card-text">
+                    <span class="card-name">Khắc Lại Thông Tin</span>
+                    <span class="card-desc">Thay đổi tên, mật khẩu...</span>
+                  </div>
+                </router-link>
 
-            <router-link v-if="user?.role === 'author'" to="/user/dashboard" class="spirit-nav-pill special">
-              <i class="fas fa-chart-line"></i>
-              <span>Bảng Điều Khiển</span>
-            </router-link>
+                <div v-if="user?.role === 'user' && userStore.applicationStatus?.status === 'pending'" class="spirit-nav-card gray cursor-not-allowed">
+                  <div class="card-icon"><i class="fas fa-hourglass-half"></i></div>
+                  <div class="card-text">
+                    <span class="card-name">Đang chờ thụ phong</span>
+                    <span class="card-desc">Thiên đạo đang xem xét</span>
+                  </div>
+                </div>
+                
+                <router-link v-else-if="user?.role === 'user'" to="/user/dang-ky-tac-gia" class="spirit-nav-card purple">
+                  <div class="card-icon"><i class="fas fa-feather-pointed"></i></div>
+                  <div class="card-text">
+                    <span class="card-name">Xin Khai Tông Lập Phái</span>
+                    <span class="card-desc">Đăng ký trở thành Tác giả</span>
+                  </div>
+                </router-link>
 
-            <router-link v-if="user?.role === 'admin'" to="/admin/dashboard" class="spirit-nav-pill admin">
-              <i class="fas fa-shield-halved"></i>
-              <span>Quản Trị Vạn Giới</span>
-            </router-link>
+                <router-link v-if="user?.role === 'author'" to="/user/dashboard" class="spirit-nav-card purple">
+                  <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                  <div class="card-text">
+                    <span class="card-name">Bảng Điều Khiển</span>
+                    <span class="card-desc">Quản lý truyện sáng tác</span>
+                  </div>
+                </router-link>
+
+                <router-link v-if="user?.role === 'admin'" to="/admin/dashboard" class="spirit-nav-card rose">
+                  <div class="card-icon"><i class="fas fa-shield-halved"></i></div>
+                  <div class="card-text">
+                    <span class="card-name">Quản Trị Vạn Giới</span>
+                    <span class="card-desc">Quyền hạn của Thiên Đạo</span>
+                  </div>
+                </router-link>
+              </div>
+            </div>
+
           </div>
 
           <div class="logout-aura-area">
@@ -263,7 +305,7 @@ export default {
 }
 
 .profile-container-aura {
-  max-width: 900px; /* Thu gọn lại để giống một tấm lệnh bài hơn */
+  max-width: 900px;
   margin: 0 auto;
   padding: 40px 20px;
 }
@@ -286,6 +328,7 @@ export default {
   letter-spacing: 6px;
   background: linear-gradient(to right, #10b981, #ffffff, #10b981);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.4));
 }
@@ -299,10 +342,7 @@ export default {
   border: 1px solid rgba(16, 185, 129, 0.2);
   border-radius: 24px;
   padding: 50px 40px;
-  /* Shadow tạo cảm giác khối ngọc dày dặn */
-  box-shadow: 
-    0 20px 50px rgba(0,0,0,0.6), 
-    inset 0 0 30px rgba(16, 185, 129, 0.05);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 30px rgba(16, 185, 129, 0.05);
   position: relative;
   overflow: hidden;
 }
@@ -318,53 +358,50 @@ export default {
   display: flex; flex-direction: column; align-items: center; gap: 25px; margin-bottom: 50px; text-align: center;
 }
 
-.avatar-aura-wrapper {
+/* ===== SPIRIT ARRAY AVATAR ===== */
+.spirit-array-center {
   position: relative; width: 160px; height: 160px; flex-shrink: 0;
-  --avatar-frame-scale: 1.4; --avatar-frame-offset-x: 0px; --avatar-frame-offset-y: 0px;
-  --aura-primary: 16, 185, 129; --aura-speed: 10s;
+  display: flex; align-items: center; justify-content: center;
+  --aura-primary: 16, 185, 129; 
 }
 
-.avatar-aura-wrapper::after {
-  content: ""; position: absolute; inset: -12px; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle, rgba(var(--aura-primary), 0.24), transparent 70%);
-  filter: blur(10px); animation: auraBreath 3s ease-in-out infinite; z-index: 0;
+.magic-circle-spin, .magic-circle-reverse {
+  position: absolute; inset: -12px; border-radius: 50%;
+  border: 2px dashed rgba(var(--aura-primary), 0.4);
+  animation: spinArray 20s linear infinite; pointer-events: none;
+}
+.magic-circle-reverse {
+  inset: -20px; border: 1px dotted rgba(var(--aura-primary), 0.6);
+  animation: spinArrayReverse 15s linear infinite;
 }
 
-.aura-ring { position: absolute; border-radius: 50%; }
-.aura-ring.outer { inset: -10px; z-index: 4; }
-.aura-ring.inner { inset: -3px; border: 1px solid rgba(var(--aura-primary), 0.38); z-index: 4; }
-
-.avatar-main {
+.hero-avatar {
   position: relative; z-index: 2; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
-  border: 3px solid rgba(var(--aura-primary), 0.8);
-  box-shadow: 0 0 0 6px rgba(var(--aura-primary), 0.15), 0 0 26px rgba(var(--aura-primary), 0.2);
-  transform: scale(0.85);
+  border: 4px solid rgba(var(--aura-primary), 0.8); background: #000;
+  box-shadow: 0 0 30px rgba(var(--aura-primary), 0.5), inset 0 0 20px rgba(var(--aura-primary), 0.8);
+  transform: scale(0.80);
+}
+ 
+.hero-frame {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+  transform: scale(1.45); z-index: 3; pointer-events: none; filter: drop-shadow(0 0 15px rgba(var(--aura-primary), 0.4));
 }
 
-.avatar-frame-overlay {
-  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none;
-  transform: translate(var(--avatar-frame-offset-x), var(--avatar-frame-offset-y)) scale(var(--avatar-frame-scale));
-  transform-origin: center; filter: drop-shadow(0 0 18px rgba(251, 191, 36, 0.28)); z-index: 3;
-}
+/* Frame specific aura colors */
+.spirit-array-center.frame-phoenix-fire { --aura-primary: 239, 68, 68; }
+.spirit-array-center.frame-bang-tinh { --aura-primary: 56, 189, 248; }
+.spirit-array-center.frame-thien-thanh { --aura-primary: 234, 179, 8; }
+.spirit-array-center.frame-nine-tails-purple { --aura-primary: 168, 85, 247; }
+.spirit-array-center.frame-chan-long { --aura-primary: 251, 191, 36; }
+.spirit-array-center.frame-van-kiem { --aura-primary: 148, 163, 184; }
+.spirit-array-center.frame-ma-ton { --aura-primary: 225, 29, 72; }
+.spirit-array-center.frame-bang-long { --aura-primary: 30, 209, 219; }
+.spirit-array-center.frame-thien-co { --aura-primary: 217, 70, 239; }
+.spirit-array-center.frame-that-sac { --aura-primary: 255, 107, 107; }
 
-/* Giữ nguyên các class Frame Avatar của bạn */
-.avatar-aura-wrapper.frame-default-aura { --aura-primary: 16, 185, 129; }
-.avatar-aura-wrapper.frame-phoenix-fire { --aura-primary: 249, 115, 22; --aura-speed: 3.4s; --avatar-frame-scale: 1.76; }
-.avatar-aura-wrapper.frame-phoenix-fire::after { background: radial-gradient(circle, rgba(249, 115, 22, 0.34), rgba(239, 68, 68, 0.15), transparent 70%); animation: auraBreath 2.2s ease-in-out infinite, flameFlicker 1.5s linear infinite; }
-.avatar-aura-wrapper.frame-phoenix-fire .aura-ring.outer { border: none; background: conic-gradient(from 0deg, rgba(245, 158, 11, 0.95), rgba(249, 115, 22, 0.95), rgba(239, 68, 68, 0.95), rgba(245, 158, 11, 0.95)); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)); mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)); }
-.avatar-aura-wrapper.frame-phoenix-fire .aura-ring.inner { border-color: rgba(249, 115, 22, 0.55); }
-.avatar-aura-wrapper.frame-bang-tinh { --aura-primary: 125, 211, 252; --aura-speed: 8s; --avatar-frame-scale: 1.5; }
-.avatar-aura-wrapper.frame-bang-tinh::after { background: radial-gradient(circle, rgba(125, 211, 252, 0.22), rgba(59, 130, 246, 0.12), transparent 70%); }
-.avatar-aura-wrapper.frame-bang-tinh .aura-ring.outer { border-style: solid; border-color: rgba(125, 211, 252, 0.62); box-shadow: 0 0 8px rgba(125, 211, 252, 0.46), 0 0 20px rgba(59, 130, 246, 0.2); }
-.avatar-aura-wrapper.frame-thien-thanh { --aura-primary: 250, 204, 21; --aura-speed: 6.5s; --avatar-frame-scale: 1.56; }
-.avatar-aura-wrapper.frame-thien-thanh::after { background: radial-gradient(circle, rgba(250, 204, 21, 0.24), rgba(251, 191, 36, 0.1), transparent 70%); }
-.avatar-aura-wrapper.frame-thien-thanh .aura-ring.outer { border-style: solid; border-color: rgba(250, 204, 21, 0.62); box-shadow: 0 0 16px rgba(250, 204, 21, 0.34); }
-.avatar-aura-wrapper.frame-nine-tails-purple { --aura-primary: 192, 132, 252; --aura-speed: 5.8s; --avatar-frame-scale: 1.62; }
-.avatar-aura-wrapper.frame-nine-tails-purple::after { background: radial-gradient(circle, rgba(192, 132, 252, 0.3), rgba(168, 85, 247, 0.12), transparent 70%); }
-.avatar-aura-wrapper.frame-nine-tails-purple .aura-ring.outer { border: none; background: conic-gradient(from 0deg, rgba(216, 180, 254, 0.95), rgba(192, 132, 252, 0.95), rgba(168, 85, 247, 0.95), rgba(216, 180, 254, 0.95)); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)); mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px)); }
-.avatar-aura-wrapper.frame-nine-tails-purple .aura-ring.inner { border-color: rgba(192, 132, 252, 0.58); }
+@keyframes spinArray { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spinArrayReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
 
-.avatar-aura-wrapper.profile-frame-active { filter: drop-shadow(0 0 22px rgba(255, 255, 255, 0.05)); }
 .status-dot-aura { position: absolute; bottom: 20px; right: 20px; width: 18px; height: 18px; background: #10b981; border: 3px solid #131b2c; border-radius: 50%; box-shadow: 0 0 10px #10b981; z-index: 5; }
 
 /* Name Plate */
@@ -391,28 +428,22 @@ export default {
 .magic-badge-glow { animation: badge-pulse 2s infinite ease-in-out alternate; }
 .spirit-handle { font-size: 0.95rem; color: #64748b; font-weight: 600; letter-spacing: 1px;}
 
-/* KHU VỰC KHẮC CHỮ (Info Grid) - Dạng rãnh khắc trên Lệnh Bài */
+/* KHU VỰC KHẮC CHỮ (Info Grid) */
 .spirit-details-grid {
   display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 40px;
 }
 .detail-crystal {
   display: flex; align-items: center; gap: 15px; padding: 18px 20px;
-  /* Hiệu ứng rãnh khắc (engraved) */
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(16, 185, 129, 0.1);
-  border-radius: 16px;
-  box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
-  transition: all 0.3s;
+  background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(16, 185, 129, 0.1);
+  border-radius: 16px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); transition: all 0.3s;
 }
 @media (hover: hover) { .detail-crystal:hover { background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.3); } }
 
 .icon-wrapper {
   width: 40px; height: 40px; border-radius: 10px; background: rgba(16, 185, 129, 0.1);
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  display: flex; align-items: center; justify-content: center; border: 1px solid rgba(16, 185, 129, 0.2);
 }
 .icon-aura { font-size: 1.2rem; color: #10b981; }
-
 .icon-wrapper.gold { background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.2); }
 .icon-wrapper.gold .icon-aura { color: #fbbf24; }
 .icon-wrapper.emerald { background: rgba(52, 211, 153, 0.1); border-color: rgba(52, 211, 153, 0.2); }
@@ -422,52 +453,129 @@ export default {
 .text-group .label { font-size: 0.7rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;}
 .text-group .value { font-size: 0.95rem; color: #e2e8f0; font-weight: 700; }
 
-/* KHU VỰC ĐIỀU HƯỚNG BÊN TRONG (Nav Footer) */
-.spirit-nav-footer {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  padding-top: 35px;
+
+/* =======================================================
+   KHU VỰC BẢNG ĐIỀU KHIỂN (Nhóm Nút Mới)
+   ======================================================= */
+.action-sections-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding-top: 30px;
   border-top: 1px dashed rgba(16, 185, 129, 0.2);
 }
 
-.spirit-nav-pill {
-  padding: 15px 10px;
-  background: rgba(16, 185, 129, 0.05);
-  border: 1px solid rgba(16, 185, 129, 0.15);
-  border-radius: 12px;
-  color: #94a3b8;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 0.85rem;
+.action-group {
   display: flex;
   flex-direction: column;
+  gap: 15px;
+}
+
+.group-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.group-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+/* Giao diện Thẻ Nút Bấm */
+.spirit-nav-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 16px 20px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.spirit-nav-card:hover {
+  transform: translateY(-3px);
+  background: rgba(30, 41, 59, 0.8);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+/* Icon Box */
+.card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  transition: all 0.3s;
-  text-align: center;
+  font-size: 1.2rem;
+  background: rgba(255, 255, 255, 0.05);
+  transition: 0.3s;
 }
 
-.spirit-nav-pill i { font-size: 1.4rem; color: #10b981; opacity: 0.8; transition: 0.3s;}
-
-@media (hover: hover) {
-  .spirit-nav-pill:hover { background: #10b981; color: #000; border-color: #10b981; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3); }
-  .spirit-nav-pill:hover i { color: #000; opacity: 1; transform: scale(1.1); }
+.card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-/* Các trạng thái Nav Pill đặc biệt */
-.spirit-nav-pill.special { grid-column: span 3; flex-direction: row; background: rgba(251, 191, 36, 0.05); border-color: rgba(251, 191, 36, 0.2); }
-.spirit-nav-pill.special i { color: #fbbf24; }
-.spirit-nav-pill.special:hover { background: #fbbf24; color: #000; border-color: #fbbf24; }
+.card-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
 
-.spirit-nav-pill.pending { grid-column: span 3; flex-direction: row; background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.3); color: #64748b; cursor: not-allowed; }
-.spirit-nav-pill.pending i { color: #64748b; }
+.card-desc {
+  font-size: 0.75rem;
+  color: #64748b;
+}
 
-.spirit-nav-pill.admin { grid-column: span 3; flex-direction: row; background: rgba(244, 63, 94, 0.05); border-color: rgba(244, 63, 94, 0.2); }
-.spirit-nav-pill.admin i { color: #f43f5e; }
-.spirit-nav-pill.admin:hover { background: #f43f5e; color: #fff; border-color: #f43f5e; }
-.spirit-nav-pill.admin:hover i { color: #fff; }
+/* Biến thể Màu Sắc cho Thẻ */
+/* Vàng Kim (Nhiệm Vụ) */
+.spirit-nav-card.gold:hover { border-color: #fbbf24; }
+.spirit-nav-card.gold .card-icon { color: #fbbf24; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2); }
+.spirit-nav-card.gold:hover .card-icon { background: #fbbf24; color: #000; box-shadow: 0 0 15px rgba(251, 191, 36, 0.5); }
+
+/* Lục Bảo (Theo dõi) */
+.spirit-nav-card.emerald:hover { border-color: #34d399; }
+.spirit-nav-card.emerald .card-icon { color: #34d399; background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.2); }
+.spirit-nav-card.emerald:hover .card-icon { background: #34d399; color: #000; box-shadow: 0 0 15px rgba(52, 211, 153, 0.5); }
+
+/* Băng Lam (Lịch sử) */
+.spirit-nav-card.cyan:hover { border-color: #22d3ee; }
+.spirit-nav-card.cyan .card-icon { color: #22d3ee; background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.2); }
+.spirit-nav-card.cyan:hover .card-icon { background: #22d3ee; color: #000; box-shadow: 0 0 15px rgba(34, 211, 238, 0.5); }
+
+/* Xanh Dương (Cài đặt) */
+.spirit-nav-card.blue:hover { border-color: #3b82f6; }
+.spirit-nav-card.blue .card-icon { color: #60a5fa; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); }
+.spirit-nav-card.blue:hover .card-icon { background: #3b82f6; color: #fff; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+
+/* Tím (Tác giả) */
+.spirit-nav-card.purple:hover { border-color: #a855f7; }
+.spirit-nav-card.purple .card-icon { color: #c084fc; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); }
+.spirit-nav-card.purple:hover .card-icon { background: #a855f7; color: #fff; box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
+
+/* Đỏ (Admin) */
+.spirit-nav-card.rose:hover { border-color: #f43f5e; }
+.spirit-nav-card.rose .card-icon { color: #fb7185; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.2); }
+.spirit-nav-card.rose:hover .card-icon { background: #f43f5e; color: #fff; box-shadow: 0 0 15px rgba(244, 63, 94, 0.5); }
+
+/* Xám (Pending) */
+.spirit-nav-card.gray { border-color: rgba(100, 116, 139, 0.3); opacity: 0.6; cursor: not-allowed; }
+.spirit-nav-card.gray .card-icon { color: #94a3b8; background: rgba(100, 116, 139, 0.1); }
+.spirit-nav-card.gray:hover { transform: none; box-shadow: none; }
+
 
 /* Logout Area */
 .logout-aura-area { margin-top: 40px; text-align: center; }
@@ -477,8 +585,6 @@ export default {
 /* Animations */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes spiritual-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-@keyframes auraBreath { 0%,100% { opacity: 0.68; transform: scale(0.98); } 50% { opacity: 1; transform: scale(1.03); } }
-@keyframes flameFlicker { 0%,100% { filter: blur(10px) saturate(1); } 50% { filter: blur(12px) saturate(1.22); } }
 @keyframes badge-pulse { from { filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 8px var(--badge-color, rgba(16, 185, 129, 0.3))); } to { filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 15px var(--badge-color, rgba(16, 185, 129, 0.8))); transform: scale(1.05); } }
 
 /* Responsive */
@@ -487,8 +593,11 @@ export default {
   .title-spirit { font-size: 2rem; }
   .spirit-details-grid { grid-template-columns: 1fr; }
   .display-name { font-size: 1.5rem; }
-  .spirit-nav-footer { grid-template-columns: 1fr; } /* Chuyển menu thành 1 cột trên mobile */
-  .spirit-nav-pill, .spirit-nav-pill.special, .spirit-nav-pill.pending, .spirit-nav-pill.admin { grid-column: span 1; flex-direction: row; justify-content: flex-start; padding: 15px 20px; text-align: left; }
-  .spirit-nav-pill i { font-size: 1.2rem; width: 24px; text-align: center; }
+  
+  /* Đưa các Thẻ Nút về 1 cột trên Mobile để dễ bấm nhất */
+  .group-grid { grid-template-columns: 1fr; }
+  
+  .spirit-nav-card { padding: 14px 16px; }
+  .card-icon { width: 40px; height: 40px; font-size: 1.1rem; }
 }
 </style>

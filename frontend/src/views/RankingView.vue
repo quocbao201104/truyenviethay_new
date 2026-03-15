@@ -10,12 +10,64 @@
              <h2 class="section-title">Thanh Vân Bảng</h2>
           </div>
           <p class="section-subtitle">Cửu Thiên Khai Mở - Đạp Nguyệt Đăng Vân</p>
+          <div class="rank-tabs">
+            <button
+              type="button"
+              class="rank-tab"
+              :class="{ active: activeTab === 'stories' }"
+              @click="activeTab = 'stories'"
+            >
+              Top Truyện
+            </button>
+            <button
+              type="button"
+              class="rank-tab"
+              :class="{ active: activeTab === 'authors' }"
+              @click="activeTab = 'authors'"
+            >
+              Top Tác Giả
+            </button>
+          </div>
+          <div v-if="activeTab === 'authors'" class="rank-subtabs">
+            <button
+              type="button"
+              class="rank-subtab"
+              :class="{ active: authorType === 'weekly' }"
+              @click="authorType = 'weekly'"
+            >
+              Tuần
+            </button>
+            <button
+              type="button"
+              class="rank-subtab"
+              :class="{ active: authorType === 'monthly' }"
+              @click="authorType = 'monthly'"
+            >
+              Tháng
+            </button>
+            <button
+              type="button"
+              class="rank-subtab"
+              :class="{ active: authorType === 'potential' }"
+              @click="authorType = 'potential'"
+            >
+              Tiềm Năng
+            </button>
+            <button
+              type="button"
+              class="rank-subtab"
+              :class="{ active: authorType === 'all' }"
+              @click="authorType = 'all'"
+            >
+              Uy Tín
+            </button>
+          </div>
           <div class="section-divider-aura-cloud">
             <div class="divider-dot-cloud"></div>
           </div>
         </div>
 
-        <div v-if="rankingStore.loading" class="loading-container">
+        <div v-if="activeTab === 'stories' && rankingStore.loading" class="loading-container">
           <div class="skeleton-list">
             <div v-for="n in 10" :key="n" class="skeleton-item-pill">
               <div class="skeleton-rank-circle"></div>
@@ -28,35 +80,28 @@
           </div>
         </div>
 
-        <div v-else-if="rankingStore.error" class="error-message-aura-cloud">
+        <div v-else-if="activeTab === 'stories' && rankingStore.error" class="error-message-aura-cloud">
           <i class="fas fa-wind"></i>
           <p>Thiên cơ nhiễu loạn: {{ rankingStore.error }}</p>
         </div>
 
-        <div v-else-if="rankingStore.topRatedStories.length === 0" class="empty-state-aura-cloud">
+        <div v-else-if="activeTab === 'stories' && rankingStore.hotStories.length === 0" class="empty-state-aura-cloud">
           <i class="fas fa-cloud-moon"></i>
           <h3>Thanh Vân Tĩnh Lặng</h3>
           <p>Bầu trời quang đãng, chưa có cường giả nào đạp mây bước lên.</p>
         </div>
 
-        <div v-else class="ranking-content">
+        <div v-else-if="activeTab === 'stories'" class="ranking-content">
           <div class="ranking-list-v2">
             <div 
-              v-for="(story, index) in rankingStore.topRatedStories" 
+              v-for="(story, index) in rankingStore.hotStories" 
               :key="story.id" 
               class="ranking-pill mây-cap"
               :class="getRankClass(index)"
             >
               <div v-if="index < 3" class="rank-aura-glow-cloud"></div>
 
-              <div class="rank-indicator">
-                <div class="circle-inner">
-                  <span class="rank-num">{{ index + 1 }}</span>
-                  <i v-if="index < 3" class="fas fa-feather-alt mini-feather"></i>
-                </div>
-              </div>
-
-              <router-link :to="`/truyen-chu/${story.slug}`" class="story-cover-pill">
+              <router-link :to="`/truyen-chu/${story.slug}`" class="story-cover-pill first-element">
                 <img 
                   :src="getImageUrl(story.anh_bia)" 
                   :alt="story.ten_truyen"
@@ -65,32 +110,127 @@
                 />
               </router-link>
 
+              <div class="rank-tag-corner">
+                <span class="rank-text">{{ index + 1 }}</span>
+                <span class="rank-suffix">{{ getRankSuffix(index + 1) }}</span>
+              </div>
+
               <div class="story-details">
                 <router-link :to="`/truyen-chu/${story.slug}`" class="title-link">
-                  {{ story.ten_truyen }}
+                  <span class="story-name">{{ story.ten_truyen }}</span>
                 </router-link>
                 
                 <div class="meta-row meta-row-cloud">
                   <span class="author-tag">
-                    <i class="fas fa-pen-nib text-sky-400"></i> {{ story.tac_gia }}
+                    <i class="fas fa-pen-nib text-sky-400"></i>
+                    <span class="author-name-text">{{ story.tac_gia }}</span>
                   </span>
                   <span class="stat-tag">
                     <i class="fas fa-eye text-cyan-400"></i> {{ formatNumber(story.luot_xem) }}
                   </span>
-                  <span v-if="story.total_ratings" class="stat-tag">
-                    <i class="fas fa-comment-dots text-indigo-400"></i> {{ formatNumber(story.total_ratings) }}
+                  <span v-if="story.rating_count || story.total_ratings" class="stat-tag">
+                    <i class="fas fa-comment-dots text-indigo-400"></i> {{ formatNumber(story.rating_count || story.total_ratings || 0) }}
                   </span>
                 </div>
               </div>
 
               <div class="score-crystal-cloud">
                 <div class="star-row">
-                   <i class="fas fa-star animate-pulse-slow"></i>
-                   <span class="val">{{ Number(story.avg_rating).toFixed(1) }}</span>
+                   <i class="fas fa-fire animate-pulse-slow"></i>
+                   <span class="val">{{ formatScore(story.hot_score) }}</span>
                 </div>
-                <span class="total">/ 5.0</span>
+                <span class="total">HOT SCORE</span>
               </div>
 
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="activeTab === 'authors' && authorLoading" class="loading-container">
+          <div class="skeleton-list">
+            <div v-for="n in 8" :key="n" class="skeleton-item-pill">
+              <div class="skeleton-rank-circle"></div>
+              <div class="skeleton-cover-v2"></div>
+              <div class="skeleton-content-v2">
+                <div class="shimmer-line"></div>
+                <div class="shimmer-line short"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="activeTab === 'authors' && authorError" class="error-message-aura-cloud">
+          <i class="fas fa-wind"></i>
+          <p>Thiên cơ nhiễu loạn: {{ authorError }}</p>
+        </div>
+
+        <div v-else-if="activeTab === 'authors' && authorList.length === 0" class="empty-state-aura-cloud">
+          <i class="fas fa-cloud-moon"></i>
+          <h3>Thanh Vân Tĩnh Lặng</h3>
+          <p>Chưa có tác giả nào đạt chuẩn bảng xếp hạng.</p>
+        </div>
+
+        <div v-else-if="activeTab === 'authors'" class="ranking-content">
+          <div class="ranking-list-v2">
+            <div 
+              v-for="(author, index) in authorList" 
+              :key="author.id" 
+              class="ranking-pill mây-cap author-pill"
+              :class="getRankClass(index)"
+              @click="navigateToAuthor(author.id)"
+            >
+              <div v-if="index < 3" class="rank-aura-glow-cloud"></div>
+
+              <div class="author-avatar-ranking first-element">
+                <div class="spirit-array-center" :class="author.equipped_frame?.css_class">
+                  <div class="magic-circle-spin" v-if="author.equipped_frame"></div>
+                  <div class="magic-circle-reverse" v-if="author.equipped_frame"></div>
+                  <img
+                    :src="getAvatarUrl(author.avatar || author.user_avatar)"
+                    :alt="author.pen_name"
+                    class="hero-avatar item-img"
+                    crossorigin="anonymous"
+                  />
+                  <img
+                    v-if="author.equipped_frame"
+                    :src="getImageUrl(author.equipped_frame.image_url)"
+                    alt="Avatar Frame"
+                    class="hero-frame"
+                    crossorigin="anonymous"
+                  />
+                </div>
+              </div>
+
+              <div class="rank-tag-corner">
+                <span class="rank-text">{{ index + 1 }}</span>
+                <span class="rank-suffix">{{ getRankSuffix(index + 1) }}</span>
+              </div>
+
+              <div class="story-details">
+                <div class="title-link author-name-plate">
+                  <span class="author-name-text">{{ author.pen_name }}</span>
+                </div>
+                
+                <div class="meta-row meta-row-cloud">
+                  <span class="author-tag">
+                    <i class="fas fa-user text-sky-400"></i> {{ formatNumber(author.follower_count) }} theo dõi
+                  </span>
+                  <span class="stat-tag">
+                    <i class="fas fa-book-open text-cyan-400"></i> {{ formatNumber(author.total_stories) }} truyện
+                  </span>
+                  <span class="stat-tag">
+                    <i class="fas fa-eye text-indigo-400"></i> {{ formatNumber(author.total_views) }} lượt xem
+                  </span>
+                </div>
+              </div>
+
+              <div class="score-crystal-cloud">
+                <div class="star-row">
+                   <i class="fas fa-crown animate-pulse-slow"></i>
+                   <span class="val">{{ formatNumber(getAuthorScore(author)) }}</span>
+                </div>
+                <span class="total">{{ authorScoreLabel }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -100,15 +240,49 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 import { useRankingStore } from '@/modules/ranking/ranking.store';
-import { getImageUrl } from "@/config/constants";
+import { getAvatarUrl, getImageUrl } from "@/config/constants";
+import { getTopAuthors, type AuthorRankType, type AuthorPublic } from "@/modules/author/author.api";
+import { useRouter } from "vue-router";
 
 const rankingStore = useRankingStore();
+const router = useRouter();
+
+const activeTab = ref<"stories" | "authors">("stories");
+const authorType = ref<AuthorRankType>("monthly");
+const authorList = ref<AuthorPublic[]>([]);
+const authorLoading = ref(false);
+const authorError = ref<string | null>(null);
 
 onMounted(() => {
-  rankingStore.fetchTopRated();
+  rankingStore.fetchHotStories();
 });
+
+const fetchAuthors = async () => {
+  authorLoading.value = true;
+  authorError.value = null;
+  try {
+    authorList.value = await getTopAuthors(authorType.value, 30);
+  } catch (err: any) {
+    authorError.value = err.message || "Failed to load authors";
+  } finally {
+    authorLoading.value = false;
+  }
+};
+
+watch([activeTab, authorType], ([tab]) => {
+  if (tab === "authors") {
+    fetchAuthors();
+  }
+});
+
+const getRankSuffix = (rank: number): string => {
+  if (rank === 1) return 'ST';
+  if (rank === 2) return 'ND';
+  if (rank === 3) return 'RD';
+  return 'TH';
+};
 
 const getRankClass = (index: number): string => {
   if (index === 0) return 'rank-cloud-1'; // Lưu Ly (Trắng sáng tinh khiết)
@@ -121,6 +295,32 @@ const formatNumber = (num: number): string => {
   if (!num) return '0';
   if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
   return num.toString();
+};
+
+const formatScore = (score?: number): string => {
+  if (!score && score !== 0) return '0.0';
+  return Number(score).toFixed(1);
+};
+
+const getAuthorScore = (author: AuthorPublic) => {
+  if (authorType.value === "weekly") return author.weekly_score;
+  if (authorType.value === "potential") return author.potential_score;
+  if (authorType.value === "all") return author.author_score;
+  return author.monthly_score;
+};
+
+const authorScoreLabel = computed(() => {
+  if (authorType.value === "weekly") return "Điểm Tuần";
+  if (authorType.value === "potential") return "Tiềm Năng";
+  if (authorType.value === "all") return "Uy Tín";
+  return "Điểm Tháng";
+});
+
+const navigateToAuthor = (authorId: number) => {
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
+  router.push(`/tac-gia/${authorId}`);
 };
 
 const handleImageError = (event: Event) => {
@@ -186,6 +386,96 @@ const handleImageError = (event: Event) => {
   margin-top: 10px;
 }
 
+.rank-tabs {
+  display: inline-flex;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.rank-tab {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.rank-tab:hover {
+  background: rgba(56, 189, 248, 0.12);
+  color: #e2e8f0;
+}
+
+.rank-tab.active {
+  background: #38bdf8;
+  color: #04111f;
+  border-color: #38bdf8;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+}
+
+.rank-subtabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.rank-subtab {
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: rgba(30, 41, 59, 0.6);
+  color: #cbd5e1;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.rank-subtab:hover {
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #e2e8f0;
+}
+
+.rank-subtab.active {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: rgba(56, 189, 248, 0.6);
+  color: #e2e8f0;
+}
+
+.author-pill {
+  cursor: pointer;
+}
+
+.author-avatar-pill {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-left: 10px;
+  flex-shrink: 0;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  border: 1px solid #334155;
+}
+
+.author-avatar-pill .cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .section-divider-aura-cloud {
   height: 1px;
   width: 300px;
@@ -218,7 +508,7 @@ const handleImageError = (event: Event) => {
   background: #0f172a;
   border: 1px solid #1e293b;
   border-radius: 50px;
-  padding: 10px 25px 10px 10px;
+  padding: 10px 85px 10px 25px; /* Tăng padding left và right để cân đối */
   position: relative;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -323,8 +613,124 @@ const handleImageError = (event: Event) => {
 }
 
 .ranking-pill.mây-cap:hover .cover-img {
-  transform: scale(1.1) rotate(-2deg); /* Lượn nhẹ mây */
+  transform: scale(1.1) rotate(-1deg); /* Lượn nhẹ mây */
 }
+
+/* ===== SPIRIT ARRAY AVATAR (Ranking Version) ===== */
+.author-avatar-ranking {
+  margin-left: 15px;
+  flex-shrink: 0;
+}
+
+.spirit-array-center {
+  position: relative; width: 68px; height: 68px;
+  display: flex; align-items: center; justify-content: center;
+  --aura-primary: 56, 189, 248; 
+}
+
+.magic-circle-spin, .magic-circle-reverse {
+  position: absolute; inset: -4px; border-radius: 50%;
+  border: 1.5px dashed rgba(var(--aura-primary), 0.4);
+  animation: spinArray 20s linear infinite; pointer-events: none;
+}
+.magic-circle-reverse {
+  inset: -7px; border: 1px dotted rgba(var(--aura-primary), 0.6);
+  animation: spinArrayReverse 15s linear infinite;
+}
+
+.hero-avatar {
+  position: relative; z-index: 2; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+  border: 2px solid rgba(var(--aura-primary), 0.8); background: #000;
+  box-shadow: 0 0 15px rgba(var(--aura-primary), 0.3);
+  transform: scale(0.80);
+}
+ 
+.hero-frame {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+  transform: scale(1.45); z-index: 3; pointer-events: none; filter: drop-shadow(0 0 10px rgba(var(--aura-primary), 0.4));
+}
+
+/* Corner Rank Tag */
+.rank-tag-corner {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  padding: 5px 15px;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  z-index: 10;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-top: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.rank-text {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #64748b;
+}
+
+.rank-suffix {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #475569;
+}
+
+/* Rank Styling Overrides */
+.rank-cloud-1 .rank-tag-corner {
+  background: linear-gradient(135deg, #fef08a, #eab308);
+  border-color: #fef08a;
+}
+.rank-cloud-1 .rank-text { color: #0f172a; }
+.rank-cloud-1 .rank-suffix { color: rgba(15, 23, 42, 0.7); }
+
+.rank-cloud-2 .rank-tag-corner {
+  background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+  border-color: #e2e8f0;
+}
+.rank-cloud-2 .rank-text { color: #0f172a; }
+.rank-cloud-2 .rank-suffix { color: rgba(15, 23, 42, 0.7); }
+
+.rank-cloud-3 .rank-tag-corner {
+  background: linear-gradient(135deg, #f97316, #c2410c);
+  border-color: #ffedd5;
+}
+.rank-cloud-3 .rank-text { color: #ffffff; }
+.rank-cloud-3 .rank-suffix { color: rgba(255, 255, 255, 0.8); }
+
+/* Layout Adjustments */
+.first-element {
+  margin-left: 5px !important;
+  position: relative;
+  z-index: 5;
+}
+
+.story-details {
+  flex-grow: 1;
+  margin-left: 20px;
+  min-width: 0;
+  padding-top: 15px; /* Offset for corner tag */
+}
+
+/* Frame specific aura colors */
+.spirit-array-center.frame-phoenix-fire { --aura-primary: 239, 68, 68; }
+.spirit-array-center.frame-bang-tinh { --aura-primary: 56, 189, 248; }
+.spirit-array-center.frame-thien-thanh { --aura-primary: 234, 179, 8; }
+.spirit-array-center.frame-nine-tails-purple { --aura-primary: 168, 85, 247; }
+.spirit-array-center.frame-chan-long { --aura-primary: 251, 191, 36; }
+
+@keyframes spinArray { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spinArrayReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+
+/* Badge Alignment in List */
+.author-name-plate { display: flex; align-items: center; gap: 8px; }
+.mini-badge { transform: scale(0.8); transform-origin: left; }
+.author-name-text { font-weight: 800; }
+.story-name { font-weight: 800; font-size: 1.2rem; }
 
 /* Story Details */
 .story-details {

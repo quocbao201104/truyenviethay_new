@@ -18,6 +18,7 @@ import SearchView from "@/views/SearchView.vue";
 import RankingView from "@/views/RankingView.vue";
 import TasksView from "@/views/TasksView.vue";
 import AuthorProfileView from "@/views/AuthorProfileView.vue";
+import FollowedAuthorsView from "@/views/FollowedAuthorsView.vue";
 
 import { useAuthStore } from "@/modules/auth/auth.store";
 import StoryDetailView from "@/views/StoryDetailView.vue";
@@ -104,6 +105,12 @@ const routes: Array<RouteRecordRaw> = [
     path: "/user/lich-su-doc",
     name: "History",
     component: HistoryView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/user/tac-gia-theo-doi",
+    name: "FollowedAuthors",
+    component: FollowedAuthorsView,
     meta: { requiresAuth: true },
   },
   {

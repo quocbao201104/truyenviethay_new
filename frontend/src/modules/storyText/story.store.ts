@@ -10,6 +10,7 @@ import {
     getTopMonthlyStories,
     getTopWeeklyStories,
     getTopDailyStories,
+    getStorySampleChapter as getStorySampleChapterApi,
     Story,
 } from "./story.service";
 import { getAllCategories } from "@/modules/category/category.service";
@@ -230,6 +231,15 @@ export const useStoryStore = defineStore("story", () => {
         }
     };
 
+    const getStorySampleChapter = async (storyId: number) => {
+        try {
+            return await getStorySampleChapterApi(storyId);
+        } catch (err: any) {
+            console.error("Failed to fetch sample chapter", err);
+            throw err;
+        }
+    };
+
     const deleteStory = async (storyId: number) => {
         loading.value = true;
         try {
@@ -419,6 +429,7 @@ export const useStoryStore = defineStore("story", () => {
         clearData,
         fetchLikeStatus,
         toggleLike,
+        getStorySampleChapter,
         // Cached homepage methods
         fetchCategories,
         fetchTopViewStories,

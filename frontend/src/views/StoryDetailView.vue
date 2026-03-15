@@ -59,7 +59,14 @@
             <h1 class="story-title-main">{{ story.ten_truyen }}</h1>
             
             <div class="meta-row">
-              <span class="author-link">
+              <router-link
+                v-if="story.author_id"
+                :to="`/tac-gia/${story.author_id}`"
+                class="author-link"
+              >
+                <i class="fas fa-feather-pointed text-cyan-400"></i> {{ story.tac_gia || 'Ẩn Danh' }}
+              </router-link>
+              <span v-else class="author-link">
                 <i class="fas fa-feather-pointed text-cyan-400"></i> {{ story.tac_gia || 'Ẩn Danh' }}
               </span>
               
@@ -116,14 +123,6 @@
                   <span>{{ isLiked ? 'Tâm Đắc' : 'Tán Thưởng' }}</span>
                 </button>
 
-                <button 
-                  v-if="story.user_id" 
-                  @click="chatStore.joinAuthorRoom(story.user_id, story.tac_gia || 'Động Phủ')" 
-                  class="btn-action-spirit group-btn"
-                >
-                  <i class="fas fa-users-viewfinder"></i>
-                  <span>Tiên Động</span>
-                </button>
               </div>
             </div>
 
@@ -220,7 +219,6 @@ import { useChapterStore } from '@/modules/storyText/chapter/chapter.store';
 import { useFavoriteStore } from '@/modules/favorite/favorite.store'; 
 import { useRatingStore } from '@/modules/rating/rating.store';
 import { useHistoryStore } from '@/modules/history/history.store';
-import { useChatStore } from '@/modules/chat/chat.store';
 import CommentList from '@/modules/comment/CommentList.vue';
 import SkeletonLoader from '@/components/common/SkeletonLoader.vue';
 import { getImageUrl } from "@/config/constants";
@@ -231,7 +229,6 @@ const chapterStore = useChapterStore();
 const favoriteStore = useFavoriteStore();
 const ratingStore = useRatingStore();
 const historyStore = useHistoryStore();
-const chatStore = useChatStore();
 
 const hoverRating = ref(0);
 const userRating = computed(() => ratingStore.userRating);
@@ -489,7 +486,9 @@ watch(() => route.params.slug, () => { if (route.name === 'StoryDetail') fetchDa
 .story-title-main {
   font-size: 2.2rem; font-weight: 900; margin: 0 0 12px 0; line-height: 1.3;
   background: linear-gradient(135deg, #fff 20%, #22d3ee 80%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 2px 4px rgba(34, 211, 238, 0.4));
 }
 

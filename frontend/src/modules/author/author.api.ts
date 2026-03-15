@@ -34,6 +34,9 @@ export interface AuthorPublic {
   full_name?: string | null;
   user_avatar?: string | null;
   is_followed?: boolean;
+  level_id?: number | null;
+  badge?: any | null;
+  equipped_frame?: any | null;
 }
 
 export type AuthorRankType = "weekly" | "monthly" | "potential" | "all";
@@ -58,4 +61,15 @@ export const toggleFollowAuthor = async (authorId: number) => {
     `/api/authors/${authorId}/follow`,
   );
   return res.data;
+};
+
+export const updateMyAuthorProfile = async (payload: {
+  pen_name?: string;
+  bio?: string | null;
+}): Promise<AuthorPublic> => {
+  const res = await axios.patch<{ data: AuthorPublic }>(
+    "/api/authors/me",
+    payload,
+  );
+  return res.data.data;
 };

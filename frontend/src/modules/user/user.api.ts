@@ -81,6 +81,26 @@ export async function getAuthorApplicationStatusApi(): Promise<any> {
     return response.data;
 }
 
+export interface FollowedAuthorsResponse {
+    success: boolean;
+    data: any[];
+    pagination: {
+        current_page: number;
+        total_pages: number;
+        total: number;
+        limit: number;
+    };
+}
+
+/**
+ * Lấy danh sách tác giả đang theo dõi của user hiện tại.
+ * Endpoint: GET /api/user/me/followed-authors
+ */
+export async function getMyFollowedAuthorsApi(params: { page?: number; limit?: number } = {}): Promise<FollowedAuthorsResponse> {
+    const response = await axios.get<FollowedAuthorsResponse>("/api/user/me/followed-authors", { params });
+    return response.data;
+}
+
 // ===============================================
 // API cho Admin quản lý người dùng
 // ===============================================

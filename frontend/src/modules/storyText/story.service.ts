@@ -51,6 +51,27 @@ export interface Story {
   /** Khi đăng nhập: backend trả thêm */
   is_followed?: boolean;
   last_read_chuong_id?: number | null;
+  badge?: any;
+  equipped_frame?: any;
+}
+
+export interface PublicStoriesParams {
+  page?: number;
+  limit?: number;
+  sort_by?: string;
+  order?: "ASC" | "DESC" | string;
+  keyword?: string;
+  author_id?: number | null;
+  trang_thai?: string;
+}
+
+export interface AdminStoriesParams {
+  page?: number;
+  limit?: number;
+  trang_thai_kiem_duyet?: string;
+  keyword?: string;
+  author_id?: number | null;
+  category_id?: number | null;
 }
 
 // --- Chapter APIs ---
@@ -89,7 +110,7 @@ export const getPublicStories = async ({
   keyword = "",
   author_id = null,
   trang_thai = "",
-}) => {
+}: PublicStoriesParams = {}) => {
   const res = await axios.get(`/api/truyen/public`, {
     params: { page, limit, sort_by, order, keyword, author_id, trang_thai },
   });
@@ -103,7 +124,7 @@ export const getAdminStories = async ({
   keyword = "",
   author_id = null,
   category_id = null,
-}) => {
+}: AdminStoriesParams = {}) => {
   const res = await axios.get(`/api/truyen`, {
     params: {
       page,
@@ -117,9 +138,14 @@ export const getAdminStories = async ({
   return res.data;
 };
 
-export const getStoryById = async (storyId: number) => {
-  const res = await axios.get(`/api/truyen/${storyId}`);
-  return res.data;
+export const getStoryById = async (id: number) => {
+  const response = await axios.get(`/api/truyen/${id}`);
+  return response.data;
+};
+
+export const getStorySampleChapter = async (id: number) => {
+  const response = await axios.get(`/api/truyen/${id}/sample-chapter`);
+  return response.data;
 };
 
 export const getStoryBySlug = async (slug: string) => {

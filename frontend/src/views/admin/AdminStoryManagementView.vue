@@ -282,7 +282,18 @@ const handleViewDetails = async (storyId: number) => {
   currentStoryDetails.value = null; 
   try {
     const story = await storyStore.fetchStoryById(storyId); 
-    if (story) currentStoryDetails.value = { ...story, anh_bia_url: getImageUrl(story.anh_bia) };
+    if (story) {
+      currentStoryDetails.value = { ...story, anh_bia_url: getImageUrl(story.anh_bia) };
+      // Fetch sample chapter separately
+      try {
+        const sampleData = await storyStore.getStorySampleChapter(storyId);
+        if (currentStoryDetails.value && currentStoryDetails.value.id === storyId) {
+          currentStoryDetails.value.sample_chapter_content = sampleData.sample_chapter_content;
+        }
+      } catch (err) {
+        console.error("Lỗi khi tải chương mẫu:", err);
+      }
+    }
     else { toast.error("Không tìm thấy thiên thư."); isViewDetailsModalOpen.value = false; }
   } catch (error) {
     toast.error("Thiên cơ nhiễu loạn, không thể tải dữ liệu.");

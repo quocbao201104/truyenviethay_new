@@ -26,10 +26,12 @@
         </h1>
 
         <div class="realm-badge-container">
-          <div class="realm-badge">
-            <UserBadge v-if="equippedBadge" :badge="equippedBadge" size="md" class="magic-badge-glow" />
-            <i v-else class="fas fa-yin-yang aura-spin"></i>
-            <span class="realm-name">{{ currentLevel.name }}</span>
+          <div class="plate-magic-wrapper" :style="{ '--badge-color': equippedBadge?.color || '#fbbf24' }">
+            <div class="plate-inner">
+              <UserBadge v-if="equippedBadge" :badge="equippedBadge" size="md" class="magic-badge-glow" />
+              <i v-else class="fas fa-yin-yang aura-spin"></i>
+              <span class="realm-name">{{ currentLevel.name }}</span>
+            </div>
           </div>
           
           <button
@@ -194,7 +196,10 @@ const frameEffectClass = computed(() => {
 .hero-kicker {
   margin: 0; font-size: 1.2rem; font-weight: 900; letter-spacing: 0.4em;
   background: linear-gradient(90deg, #fbbf24 0%, #fef3c7 50%, #fbbf24 100%);
-  background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   animation: goldShine 3s linear infinite; text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
 }
 
@@ -205,14 +210,23 @@ const frameEffectClass = computed(() => {
 
 .realm-badge-container { display: flex; align-items: center; gap: 1.5rem; margin-top: 1rem; margin-bottom: 2rem; }
 
-.realm-badge {
-  padding: 0.6rem 2rem; border-radius: 50px; display: flex; align-items: center; gap: 1rem;
-  background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.4);
-  box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+.plate-magic-wrapper {
+  position: relative; display: inline-flex; padding: 2px; border-radius: 50px;
+  background: linear-gradient(135deg, var(--badge-color), transparent, var(--badge-color));
+  background-size: 200% 200%; animation: spiritual-flow 6s ease infinite; z-index: 1;
+}
+.plate-magic-wrapper::after {
+  content: ""; position: absolute; inset: -2px; background: inherit; filter: blur(3px); opacity: 0.3; z-index: -1; border-radius: 50px; animation: spiritual-flow 6s ease infinite;
+}
+.plate-inner {
+  display: inline-flex; align-items: center; justify-content: center; gap: 15px; padding: 6px 25px;
+  background: #0b0f19; border-radius: 50px; z-index: 2; box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(var(--aura-gold), 0.2);
 }
 
 .realm-name { font-size: 1.3rem; font-weight: 900; color: #fbbf24; text-transform: uppercase; letter-spacing: 2px; }
 .aura-spin { font-size: 1.4rem; color: #fbbf24; animation: spinArray 4s linear infinite; }
+/* .magic-badge-glow { animation: badge-pulse 2s infinite ease-in-out alternate; } */
 
 /* Nút Đột Phá Thiên Kiếp */
 .tribulation-breakthrough-btn {
@@ -296,6 +310,8 @@ const frameEffectClass = computed(() => {
 @keyframes energyFlow { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 @keyframes goldShine { to { background-position: 200% center; } }
 @keyframes lightningFlash { 0%, 100% { filter: blur(10px); opacity: 0.6; } 50% { filter: blur(20px); opacity: 1; } }
+@keyframes spiritual-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes badge-pulse { from { filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 8px var(--badge-color, rgba(16, 185, 129, 0.3))); } to { filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 15px var(--badge-color, rgba(16, 185, 129, 0.8))); transform: scale(1.05); } }
 
 /* ===== MOBILE ADAPTATION ===== */
 @media (max-width: 1024px) {

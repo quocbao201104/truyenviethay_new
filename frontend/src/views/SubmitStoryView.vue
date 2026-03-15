@@ -77,8 +77,8 @@
             </div>
           </div>
 
-          <!-- CHƯƠNG MẪU (SAMPLE CONTENT) -->
-          <div class="form-spirit-section">
+          <!-- CHƯƠNG MẪU (SAMPLE CONTENT) - Chỉ hiện khi ĐĂNG MỚI -->
+          <div v-if="!route.params.id" class="form-spirit-section">
             <h3 class="section-spirit-title"><i class="fas fa-feather-pointed mr-2 text-emerald-400"></i> Bản Thảo Khởi Đầu</h3>
             <div class="spirit-group">
               <textarea
@@ -219,8 +219,11 @@ const handleSubmit = async () => {
   formData.append('trang_thai', story.value.trang_thai);
   formData.append('link_nguon', story.value.link_nguon);
   formData.append('age_rating', story.value.age_rating);
-  formData.append('chuong_mau', story.value.chuong_mau);
   formData.append('user_id', story.value.user_id);
+  
+  if (!isEditMode) {
+    formData.append('chuong_mau', story.value.chuong_mau);
+  }
   
   if (story.value.anh_bia) {
     formData.append('anh_bia', story.value.anh_bia);
@@ -271,7 +274,7 @@ onMounted(() => {
                 trang_thai: data.trang_thai || 'dang_ra',
                 link_nguon: data.link_nguon || '',
                 age_rating: data.age_rating || 1,
-                chuong_mau: data.sample_chapter_content || '',
+                chuong_mau: '', // No longer needed for update
                 anh_bia: null,
                 anh_bia_url: data.anh_bia ? getImageUrl(data.anh_bia) : null,
                 user_id: authStore.user?.id,
