@@ -77,6 +77,7 @@ app.use("/api/currency", require("./routes/currency.routes"));
 app.use("/api/badges", require("./routes/badge.routes"));
 app.use("/api/inventory", require("./routes/inventory.routes"));
 app.use("/api/author", require("./routes/author.routes"));
+app.use("/api/authors", require("./routes/authors.routes"));
 app.use("/api/admin", require("./routes/admin.cache.routes"));
 app.use("/api/chat", require("./routes/chat.routes"));
 app.use("/api/shop", require("./routes/shop.routes"));

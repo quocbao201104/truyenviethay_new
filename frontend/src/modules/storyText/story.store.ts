@@ -8,6 +8,8 @@ import {
     updateStoryAdmin,
     deleteStoryAdmin,
     getTopMonthlyStories,
+    getTopWeeklyStories,
+    getTopDailyStories,
     Story,
 } from "./story.service";
 import { getAllCategories } from "@/modules/category/category.service";
@@ -299,6 +301,28 @@ export const useStoryStore = defineStore("story", () => {
     };
 
     /**
+     * Fetch top weekly stories with 10-minute cache
+     */
+    const fetchTopWeeklyStories = async (limit: number = 5) => {
+        return getCachedOrFetch(
+            `topWeekly:${limit}`,
+            () => getTopWeeklyStories(limit),
+            10 * 60 * 1000 // 10 minutes
+        );
+    };
+
+    /**
+     * Fetch top daily stories with 5-minute cache
+     */
+    const fetchTopDailyStories = async (limit: number = 5) => {
+        return getCachedOrFetch(
+            `topDaily:${limit}`,
+            () => getTopDailyStories(limit),
+            5 * 60 * 1000 // 5 minutes
+        );
+    };
+
+    /**
      * Fetch top rated stories with 10-minute cache
      */
     const fetchTopRatedStories = async (limit: number = 5) => {
@@ -399,6 +423,8 @@ export const useStoryStore = defineStore("story", () => {
         fetchCategories,
         fetchTopViewStories,
         fetchTopMonthlyStories,
+        fetchTopWeeklyStories,
+        fetchTopDailyStories,
         fetchTopRatedStories,
         fetchNewStories,
         fetchCompletedStories,

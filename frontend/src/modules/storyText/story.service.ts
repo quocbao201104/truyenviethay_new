@@ -29,11 +29,18 @@ export interface Story {
   mo_ta: string;
   luot_xem: number;
   luot_xem_thang?: number;
+  luot_xem_tuan?: number;
+  luot_xem_ngay?: number;
   trang_thai: string;
   thoi_gian_cap_nhat: string;
   the_loai_chinh?: string;
   luot_thich?: number;
+  luot_theo_doi?: number;
+  rating?: number;
+  rating_count?: number;
+  hot_score?: number;
   user_id?: number;
+  author_id?: number;
   genres?: Array<{
     id_theloai: number;
     ten_theloai: string;
@@ -80,10 +87,11 @@ export const getPublicStories = async ({
   sort_by = "thoi_gian_cap_nhat",
   order = "DESC",
   keyword = "",
+  author_id = null,
   trang_thai = "",
 }) => {
   const res = await axios.get(`/api/truyen/public`, {
-    params: { page, limit, sort_by, order, keyword, trang_thai },
+    params: { page, limit, sort_by, order, keyword, author_id, trang_thai },
   });
   return res.data;
 };
@@ -153,6 +161,20 @@ export const getMyStories = async (params: any) => {
 
 export const getTopMonthlyStories = async (limit: number = 10) => {
   const response = await axios.get<{ data: Story[] }>("/api/truyen/top-thang", {
+    params: { limit },
+  });
+  return response.data.data ?? response.data;
+};
+
+export const getTopWeeklyStories = async (limit: number = 10) => {
+  const response = await axios.get<{ data: Story[] }>("/api/truyen/top-tuan", {
+    params: { limit },
+  });
+  return response.data.data ?? response.data;
+};
+
+export const getTopDailyStories = async (limit: number = 10) => {
+  const response = await axios.get<{ data: Story[] }>("/api/truyen/top-ngay", {
     params: { limit },
   });
   return response.data.data ?? response.data;

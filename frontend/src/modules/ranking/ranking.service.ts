@@ -9,3 +9,10 @@ export const getTopRatedStories = async (limit = 50): Promise<Story[]> => {
     });
     return response.data.data;
 };
+
+export const getHotStories = async (limit = 50): Promise<Story[]> => {
+    const response = await axios.get("/api/truyen/hot-stories", {
+        params: { limit }
+    });
+    return response.data.data ?? response.data;
+};

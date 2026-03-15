@@ -1,28 +1,28 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { getTopRatedStories, type Story } from "./ranking.service";
+import { getHotStories, type Story } from "./ranking.service";
 
 export const useRankingStore = defineStore("ranking", () => {
-    const topRatedStories = ref<Story[]>([]);
+    const hotStories = ref<Story[]>([]);
     const loading = ref(false);
     const error = ref<string | null>(null);
 
-    const fetchTopRated = async () => {
+    const fetchHotStories = async () => {
         loading.value = true;
         error.value = null;
         try {
-            topRatedStories.value = await getTopRatedStories();
+            hotStories.value = await getHotStories();
         } catch (err: any) {
-            error.value = err.message || "Failed to load top rated stories";
+            error.value = err.message || "Failed to load hot stories";
         } finally {
             loading.value = false;
         }
     };
 
     return {
-        topRatedStories,
+        hotStories,
         loading,
         error,
-        fetchTopRated,
+        fetchHotStories,
     };
 });

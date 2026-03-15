@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { authenticateToken } = require("../middleware/auth");
 const authController = require("../controllers/auth.controller");
+const authorFollowController = require("../controllers/authorFollow.controller");
 const uploadAvatar = require("../middleware/upload_img"); 
 
 router.put(
@@ -19,6 +20,7 @@ router.post(
 );
 
 router.get("/me", authenticateToken, authController.getMe);
+router.get("/me/followed-authors", authenticateToken, authorFollowController.getMyFollowedAuthors);
 router.put(
   "/change-password",
   authenticateToken,

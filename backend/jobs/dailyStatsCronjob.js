@@ -2,7 +2,7 @@
  * Daily Stats Cronjob
  *
  * Chạy cuối mỗi ngày (ví dụ: 23:55) để aggregate dữ liệu từ:
- * - truyen_views (ngay_xem, so_luot_xem) -> views_count
+ * - daily_stats (views_count) -> views_count
  * - comments (truyen_id, created_at) -> comments_count
  *
  * INSERT hoặc ON DUPLICATE KEY UPDATE vào bảng daily_stats.
@@ -19,7 +19,7 @@ const CRON_SCHEDULE = "55 23 * * *";
 
 /**
  * Aggregate và upsert daily_stats cho một ngày cụ thể
- * Nguồn: truyen_views.so_luot_xem, comments (count theo ngày)
+ * Nguồn: daily_stats.views_count, comments (count theo ngày)
  *
  * @param {string} targetDate - 'YYYY-MM-DD'
  */
@@ -30,30 +30,17 @@ async function aggregateAndUpsertForDate(targetDate) {
     await connection.beginTransaction();
 
     // Bước 1: Lấy tất cả novel_id có dữ liệu trong ngày targetDate
-    // từ truyen_views (views) và comments (count). Merge 2 nguồn.
-
-    // Subquery: Views per novel for targetDate
-    const [viewRows] = await connection.query(
-      `SELECT truyen_id AS novel_id, COALESCE(SUM(so_luot_xem), 0) AS views_count
-       FROM truyen_views
-       WHERE ngay_xem = ?
-       GROUP BY truyen_id`,
-      [targetDate]
-    );
-
-    // Subquery: Comments per novel for targetDate (exclude soft-deleted)
+    // từ daily_stats (views) và comments (count). Merge 2 nguồn.    // Subquery: Comments per novel for targetDate (exclude soft-deleted)
     const [commentRows] = await connection.query(
       `SELECT truyen_id AS novel_id, COUNT(*) AS comments_count
        FROM comments
        WHERE DATE(created_at) = ? AND (is_deleted = 0 OR is_deleted IS NULL)
        GROUP BY truyen_id`,
       [targetDate]
-    );
-
-    const viewMap = new Map(viewRows.map((r) => [r.novel_id, r.views_count]));
+    );
     const commentMap = new Map(commentRows.map((r) => [r.novel_id, r.comments_count]));
 
-    const allNovelIds = new Set([...viewMap.keys(), ...commentMap.keys()]);
+    const allNovelIds = new Set([...commentMap.keys()]);
 
     if (allNovelIds.size === 0) {
       await connection.commit();
@@ -62,17 +49,15 @@ async function aggregateAndUpsertForDate(targetDate) {
 
     let upsertCount = 0;
 
-    for (const novelId of allNovelIds) {
-      const views = viewMap.get(novelId) || 0;
+    for (const novelId of allNovelIds) {
       const comments = commentMap.get(novelId) || 0;
 
       await connection.query(
         `INSERT INTO daily_stats (novel_id, date, views_count, comments_count)
-         VALUES (?, ?, ?, ?)
+         VALUES (?, ?, 0, ?)
          ON DUPLICATE KEY UPDATE
-           views_count = VALUES(views_count),
            comments_count = VALUES(comments_count)`,
-        [novelId, targetDate, views, comments]
+        [novelId, targetDate, comments]
       );
       upsertCount++;
     }
@@ -122,3 +107,5 @@ module.exports = {
   startDailyStatsCron,
   CRON_SCHEDULE,
 };
+
+

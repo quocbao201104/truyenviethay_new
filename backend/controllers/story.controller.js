@@ -3,6 +3,7 @@ const TheLoaiModel = require("../models/category.model");
 const storyService = require("../services/story.services");
 const followModel = require("../models/follow.model");
 const readingStateModel = require("../models/readingState.model");
+const InventoryModel = require("../models/inventory.model");
 const generateSlug = require("../utils/slugify"); 
 const db = require("../config/db"); // Import DB connection 
 const { getOrSet, invalidate } = require("../utils/cache");
@@ -90,6 +91,7 @@ const getPublicStories = async (req, res) => {
       order, 
       keyword, 
       category_ids, // Expecting comma-separated string or array
+      author_id,
       trang_thai,
       min_views,
       max_views,
@@ -104,6 +106,7 @@ const getPublicStories = async (req, res) => {
       order,
       keyword,
       category_ids,
+      author_id,
       trang_thai,
       min_views,
       max_views,
@@ -123,6 +126,26 @@ const attachUserContext = async (story, userId) => {
   const readingState = await readingStateModel.getByUserAndStory(userId, story.id);
   story.is_followed = (rows?.length || 0) > 0;
   story.last_read_chuong_id = readingState?.last_read_chuong_id ?? null;
+};
+
+const attachAuthorRewards = async (stories) => {
+  if (!Array.isArray(stories) || stories.length === 0) return;
+  const userIds = stories
+    .map((story) => story.user_id)
+    .filter((id) => Number.isFinite(parseInt(id, 10)));
+
+  if (userIds.length === 0) return;
+
+  const [equippedBadgesMap, equippedFramesMap] = await Promise.all([
+    InventoryModel.getEquippedBadgesForUsers(userIds),
+    InventoryModel.getEquippedAvatarFramesForUsers(userIds),
+  ]);
+
+  for (const story of stories) {
+    const userId = story.user_id;
+    story.badge = equippedBadgesMap.get(userId) || null;
+    story.equipped_frame = equippedFramesMap.get(userId) || null;
+  }
 };
 
 const getStoryById = async (req, res) => {
@@ -180,6 +203,17 @@ const getStoryBySlug = async (req, res) => {
   }
 };
 
+const getStorySampleChapter = async (req, res) => {
+  try {
+    const storyId = req.params.id;
+    const sampleContent = await StoryModel.getSampleChapter(storyId);
+    res.json({ sample_chapter_content: sampleContent });
+  } catch (error) {
+    console.error("Lỗi khi lấy chương mẫu:", error);
+    res.status(500).json({ message: "Lỗi khi lấy chương mẫu" });
+  }
+};
+
 const updateStory = async (req, res) => {
   const storyId = req.params.id;
   const { 
@@ -195,17 +229,13 @@ const updateStory = async (req, res) => {
   try {
     const existingStory = await StoryModel.getById(storyId);
     if (!existingStory) {
-      return res
-        .status(404)
-        .json({ message: "Không tìm thấy truyện để cập nhật" });
+      return res.status(404).json({ message: "Không tìm thấy truyện để cập nhật" });
     }
 
     // Authorization check
     const user = req.user;
     if (user.role !== "admin" && user.id !== existingStory.user_id) {
-      return res
-        .status(403)
-        .json({ message: "Bạn không có quyền sửa truyện này" });
+      return res.status(403).json({ message: "Bạn không có quyền sửa truyện này" });
     }
 
     // Generate slug from story name
@@ -238,8 +268,6 @@ const updateStory = async (req, res) => {
     updatedData.link_nguon = link_nguon || null;
     updatedData.age_rating = age_rating || 1;
 
-    // console.log("Updating story data:", updatedData); // Removed for production
-
     const affectedRows = await StoryModel.update(storyId, updatedData);
     
     // Update categories (genres) if provided
@@ -266,12 +294,10 @@ const updateStory = async (req, res) => {
       if (slug && slug !== existingStory?.slug) await invalidate(storyDetailSlugKey(slug));
       return res.status(200).json({ message: "Cập nhật truyện thành công" });
     } else {
-      return res
-        .status(400)
-        .json({ message: "Không có thay đổi nào được lưu lại" });
+      return res.status(400).json({ message: "Không có thay đổi nào được lưu lại" });
     }
   } catch (error) {
-    console.error("Lỗi khi cập nhật truyện:", error); // This will show detailed SQL error in server console
+    console.error("Lỗi khi cập nhật truyện:", error);
     res.status(500).json({ message: "Lỗi khi cập nhật truyện: " + error.message });
   }
 };
@@ -350,9 +376,6 @@ const getMyStories = async (req, res) => {
        keyword,
        author_id: userId, // Enforce author_id from token
        category_id: parseInt(category_id),
-       // Note: StoryModel.getAll needs to be updated if it doesn't support sort params, 
-       // but typically it defaults to updated_at. 
-       // If you need specific sort, you might need to update getAll too.
     });
 
     res.status(200).json(result);
@@ -386,10 +409,35 @@ const getTopMonthlyStories = async (req, res) => {
   try {
     const limit = req.query.limit;
     const result = await StoryModel.getTopMonthlyStories(limit);
+    if (result.data) await attachAuthorRewards(result.data);
     res.json({ success: true, data: result.data, pagination: result.pagination });
   } catch (error) {
     console.error("getTopMonthlyStories error:", error);
     res.status(500).json({ message: "Lỗi server khi lấy top tháng" });
+  }
+};
+
+const getTopWeeklyStories = async (req, res) => {
+  try {
+    const limit = req.query.limit;
+    const result = await StoryModel.getTopWeeklyStories(limit);
+    if (result.data) await attachAuthorRewards(result.data);
+    res.json({ success: true, data: result.data, pagination: result.pagination });
+  } catch (error) {
+    console.error("getTopWeeklyStories error:", error);
+    res.status(500).json({ message: "Lỗi server khi lấy top tuần" });
+  }
+};
+
+const getTopDailyStories = async (req, res) => {
+  try {
+    const limit = req.query.limit;
+    const result = await StoryModel.getTopDailyStories(limit);
+    if (result.data) await attachAuthorRewards(result.data);
+    res.json({ success: true, data: result.data, pagination: result.pagination });
+  } catch (error) {
+    console.error("getTopDailyStories error:", error);
+    res.status(500).json({ message: "Lỗi server khi lấy top ngày" });
   }
 };
 
@@ -415,6 +463,9 @@ module.exports = {
   getMyStories,
   getStoryBySlug,
   getPublicStories,
+  getStorySampleChapter,
   getTopMonthlyStories,
+  getTopWeeklyStories,
+  getTopDailyStories,
   getHotStories,
 };

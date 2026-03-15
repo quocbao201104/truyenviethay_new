@@ -5,13 +5,18 @@ const uploadStoryController = require("../controllers/up_story.controller.js");
 const { authenticateToken, authorizeRoles, optionalAuthenticateToken } = require("../middleware/auth");
 const upload = require("../middleware/upload_img"); 
 
-// Lấy tất cả truyện
+// Lấy tất cả truyện (Dành cho Admin hoặc tham khảo)
 router.get("/", storyController.getAllStories);
+
 // Lấy truyện public đã duyệt (dành cho frontend)
 router.get("/public", storyController.getPublicStories);
 
 // Top tháng
 router.get("/top-thang", storyController.getTopMonthlyStories);
+// Top tuần
+router.get("/top-tuan", storyController.getTopWeeklyStories);
+// Top ngày
+router.get("/top-ngay", storyController.getTopDailyStories);
 
 // Hot stories (dùng cho Banner/HeroGrid - order by hot_score)
 router.get("/hot-stories", storyController.getHotStories);
@@ -32,10 +37,21 @@ router.get(
   storyController.getMyStories
 );
 
-// Lấy truyện theo ID (optional auth → is_followed, last_read_chuong_id khi đăng nhập)
+// Lấy truyện chờ duyệt (Admin)
+router.get(
+  "/cho-duyet",
+  authenticateToken,
+  authorizeRoles("admin"),
+  storyController.getPendingApproval
+);
+
+// Lấy truyện theo ID (optional auth)
 router.get("/:id", optionalAuthenticateToken, storyController.getStoryById);
 
-// Lấy truyện theo slug (cho frontend)
+// Lấy chương mẫu của truyện
+router.get("/:id/sample-chapter", storyController.getStorySampleChapter);
+
+// Lấy truyện theo slug
 router.get("/slug/:slug", optionalAuthenticateToken, storyController.getStoryBySlug);
 
 // Cập nhật truyện
@@ -43,22 +59,16 @@ router.put(
   "/:id",
   authenticateToken,
   authorizeRoles("admin", "author"),
-  upload.single('anh_bia'), // Add multer middleware for file upload
+  upload.single('anh_bia'),
   storyController.updateStory
 );
+
 // Xoá truyện
 router.delete(
   "/:id",
   authenticateToken,
   authorizeRoles("admin", "author"),
   storyController.deleteStory
-);
-// Lấy danh sách truyện chờ duyệt (Admin)
-router.get(
-  "/cho-duyet",
-  authenticateToken,
-  authorizeRoles("admin"),
-  storyController.getPendingApproval
 );
 
 // Duyệt hoặc từ chối truyện (Admin)
@@ -68,7 +78,6 @@ router.put(
   authorizeRoles("admin"),
   storyController.approveOrRejectStory
 );
-
 
 // Định nghĩa route ĐĂNG TRUYỆN MỚI
 router.post(

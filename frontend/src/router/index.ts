@@ -17,6 +17,7 @@ import TopView from "@/views/TopView.vue";
 import SearchView from "@/views/SearchView.vue";
 import RankingView from "@/views/RankingView.vue";
 import TasksView from "@/views/TasksView.vue";
+import AuthorProfileView from "@/views/AuthorProfileView.vue";
 
 import { useAuthStore } from "@/modules/auth/auth.store";
 import StoryDetailView from "@/views/StoryDetailView.vue";
@@ -114,6 +115,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/xep-hang",
     name: "Ranking",
     component: RankingView,
+  },
+  {
+    path: "/tac-gia/:authorId",
+    name: "AuthorProfile",
+    component: AuthorProfileView,
   },
   {
     path: "/tim-kiem",

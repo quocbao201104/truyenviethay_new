@@ -130,16 +130,24 @@ const StoryModel = {
   },
 
   getById: async (id) => {
-    // Lấy tất cả các cột từ truyen_new và noi_dung_chuong_mau từ bảng chuong
     const [rows] = await db.query(
-      `SELECT tn.*, c.noi_dung_chuong_mau AS sample_chapter_content,
-        tn.so_luong_chuong
+      `SELECT tn.*, tn.so_luong_chuong
        FROM truyen_new tn
-       LEFT JOIN chuong c ON tn.id = c.truyen_id AND c.is_chuong_mau = 1
        WHERE tn.id = ?`,
       [id]
     );
     return rows[0]; 
+  },
+
+  getSampleChapter: async (storyId) => {
+    const [rows] = await db.query(
+      `SELECT noi_dung_chuong_mau 
+       FROM chuong 
+       WHERE truyen_id = ? AND is_chuong_mau = 1 
+       LIMIT 1`,
+      [storyId]
+    );
+    return rows[0]?.noi_dung_chuong_mau || null;
   },
 
   getBySlug: async (slug) => {
@@ -238,6 +246,8 @@ const StoryModel = {
   invalidateStoryListCache: async () => {
     await invalidate("hotStories");
     await invalidate("topMonthly");
+    await invalidate("topWeekly");
+    await invalidate("topDaily");
     await invalidate("storyList");
     await invalidate("topRated");
   },
@@ -250,6 +260,7 @@ const StoryModel = {
       order = "DESC",
       keyword = "",
       category_ids = null,
+      author_id = null,
       trang_thai = "",
       min_views = null,
       max_views = null,
@@ -258,7 +269,7 @@ const StoryModel = {
     } = opts;
     const safePage = Math.max(1, parseInt(page, 10) || 1);
     const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
-    const hasFilters = !!(keyword?.trim() || category_ids || trang_thai || min_views != null || max_views != null || min_chapters != null || max_chapters != null);
+    const hasFilters = !!(keyword?.trim() || category_ids || author_id || trang_thai || min_views != null || max_views != null || min_chapters != null || max_chapters != null);
     const cacheable = !hasFilters && safePage === 1;
     const cacheKey = cacheable ? `storyList:${sort_by}:${order}:${safeLimit}` : null;
 
@@ -278,6 +289,7 @@ const StoryModel = {
     order = "DESC",
     keyword = "",
     category_ids = null,
+    author_id = null,
     trang_thai = "",
     min_views = null,
     max_views = null,
@@ -342,6 +354,15 @@ if (ids.length > 0) {
     if (trang_thai) {
         whereConditions.push(`tn.trang_thai = ?`);
         params.push(trang_thai);
+    }
+
+    // Filter by Author (public)
+    if (author_id) {
+        const parsedAuthorId = parseInt(author_id, 10);
+        if (!isNaN(parsedAuthorId)) {
+            whereConditions.push(`tn.author_id = ?`);
+            params.push(parsedAuthorId);
+        }
     }
 
     // Filter by Views
@@ -460,13 +481,88 @@ if (ids.length > 0) {
       1200,
       async () => {
         const [r] = await db.query(
-          `SELECT tn.*, IFNULL(SUM(tv.so_luot_xem), 0) as luot_xem_thang
+          `SELECT tn.*, tn.user_id, stats.luot_xem_thang
            FROM truyen_new tn
-           JOIN truyen_views tv ON tn.id = tv.truyen_id
-           WHERE tv.ngay_xem >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-             AND tn.trang_thai_kiem_duyet = 'duyet'
-           GROUP BY tn.id
-           ORDER BY luot_xem_thang DESC
+           JOIN (
+             SELECT ds.novel_id, SUM(ds.views_count) AS luot_xem_thang
+             FROM daily_stats ds
+             WHERE ds.date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+             GROUP BY ds.novel_id
+           ) stats ON tn.id = stats.novel_id
+           WHERE tn.trang_thai_kiem_duyet = 'duyet'
+           ORDER BY stats.luot_xem_thang DESC
+           LIMIT ?`,
+          [safeLimit]
+        );
+        return r;
+      }
+    );
+    return {
+      data: rows,
+      pagination: {
+        current_page: 1,
+        total_pages: rows.length > 0 ? 1 : 0,
+        total: rows.length,
+        limit: safeLimit,
+      },
+    };
+  },
+
+  getTopWeeklyStories: async (limit = 10) => {
+    const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
+    const cacheKey = `topWeekly:${safeLimit}`;
+
+    const rows = await getOrSet(
+      cacheKey,
+      1200,
+      async () => {
+        const [r] = await db.query(
+          `SELECT tn.*, tn.user_id, stats.luot_xem_tuan
+           FROM truyen_new tn
+           JOIN (
+             SELECT ds.novel_id, SUM(ds.views_count) AS luot_xem_tuan
+             FROM daily_stats ds
+             WHERE ds.date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+             GROUP BY ds.novel_id
+           ) stats ON tn.id = stats.novel_id
+           WHERE tn.trang_thai_kiem_duyet = 'duyet'
+           ORDER BY stats.luot_xem_tuan DESC
+           LIMIT ?`,
+          [safeLimit]
+        );
+        return r;
+      }
+    );
+    return {
+      data: rows,
+      pagination: {
+        current_page: 1,
+        total_pages: rows.length > 0 ? 1 : 0,
+        total: rows.length,
+        limit: safeLimit,
+      },
+    };
+  },
+
+  getTopDailyStories: async (limit = 10) => {
+    const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 10));
+    const cacheKey = `topDaily:${safeLimit}`;
+
+    const rows = await getOrSet(
+      cacheKey,
+      600,
+      async () => {
+        const [r] = await db.query(
+          `SELECT tn.*, tn.user_id, stats.luot_xem_ngay
+           FROM truyen_new tn
+           JOIN (
+             SELECT ds.novel_id, SUM(ds.views_count) AS luot_xem_ngay
+             FROM daily_stats ds
+             WHERE ds.date = CURDATE()
+             GROUP BY ds.novel_id
+           ) stats ON tn.id = stats.novel_id
+           WHERE tn.trang_thai_kiem_duyet = 'duyet'
+           ORDER BY stats.luot_xem_ngay DESC
            LIMIT ?`,
           [safeLimit]
         );
@@ -492,7 +588,7 @@ if (ids.length > 0) {
       600,
       async () => {
         const [r] = await db.query(
-          `SELECT id, ten_truyen, slug, anh_bia, tac_gia, mo_ta,
+          `SELECT id, ten_truyen, slug, anh_bia, tac_gia, user_id, mo_ta,
                   luot_xem, luot_thich, luot_theo_doi, rating, rating_count, hot_score,
                   so_luong_chuong, so_luong_chuong AS so_chuong, chuong_moi
            FROM truyen_new

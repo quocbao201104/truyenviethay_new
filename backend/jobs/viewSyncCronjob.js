@@ -4,7 +4,7 @@
  * Chạy định kỳ mỗi 1 phút để:
  * 1. Lấy toàn bộ view counts từ node-cache (buffer)
  * 2. Bulk update vào MySQL (truyen_new.luot_xem, chuong.luot_xem)
- * 3. Cập nhật truyen_views (lượt xem theo ngày)
+ * 3. Cập nhật daily_stats (lượt xem theo ngày)
  * 4. Reset buffer trong cache sau khi sync thành công
  *
  * Xử lý lỗi: Nếu MySQL fail, KHÔNG reset buffer để tránh mất dữ liệu.
@@ -59,15 +59,15 @@ async function bulkUpdateNovelViews(novelCounts) {
 }
 
 /**
- * Cập nhật truyen_views (lượt xem theo ngày) - upsert
+ * Cập nhật daily_stats (lượt xem theo ngày) - upsert
  */
-async function bulkUpdateDailyViews(novelCounts) {
+async function bulkUpsertDailyStatsViews(novelCounts) {
   await processInBatches(novelCounts, 100, async (connection, novelId, count) => {
     await connection.query(
-      `INSERT INTO truyen_views (truyen_id, ngay_xem, so_luot_xem) 
-       VALUES (?, CURDATE(), ?) 
-       ON DUPLICATE KEY UPDATE so_luot_xem = so_luot_xem + ?`,
-      [novelId, count, count]
+      `INSERT INTO daily_stats (novel_id, date, views_count, comments_count)
+       VALUES (?, CURDATE(), ?, 0)
+       ON DUPLICATE KEY UPDATE views_count = views_count + VALUES(views_count)`,
+      [novelId, count]
     );
   });
 }
@@ -105,8 +105,8 @@ async function runViewSync() {
     // 1. Update truyen_new (luot_xem + hot_score)
     await bulkUpdateNovelViews(novels);
 
-    // 2. Update truyen_views (daily views)
-    await bulkUpdateDailyViews(novels);
+    // 2. Update daily_stats (daily views)
+    await bulkUpsertDailyStatsViews(novels);
 
     // 3. Update chuong (luot_xem)
     await bulkUpdateChapterViews(chapters);
@@ -141,3 +141,4 @@ module.exports = {
   startViewSyncCron,
   CRON_SCHEDULE,
 };
+

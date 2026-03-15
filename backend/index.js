@@ -19,6 +19,8 @@ if (process.env.NODE_ENV !== "test") {
   startCleanupHistoryCron();
   const { startReconcileAggregatesCron } = require("./jobs/reconcileAggregatesCronjob");
   startReconcileAggregatesCron();
+  const { startAuthorRankingCron } = require("./jobs/authorRankingCronjob");
+  startAuthorRankingCron();
   const { startNotificationWorker } = require("./services/notification.services");
   startNotificationWorker();
 }
