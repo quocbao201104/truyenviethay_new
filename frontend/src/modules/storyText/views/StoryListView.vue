@@ -30,9 +30,11 @@
             
             <div class="spirit-grid-responsive">
               <NewStoryCard 
-                v-for="story in newStories" 
+                v-for="(story, index) in newStories" 
                 :key="story.id" 
-                :story="story" 
+                :story="story"
+                v-memo="[story]"
+                :animateStatus="index < 3"
               />
             </div>
           </section>
@@ -49,9 +51,11 @@
             
             <div class="spirit-grid-responsive">
               <NewStoryCard 
-                v-for="story in topRatedStories.slice(0, 8)" 
+                v-for="(story, index) in topRatedStories.slice(0, 8)" 
                 :key="story.id" 
-                :story="story" 
+                :story="story"
+                v-memo="[story]"
+                :animateStatus="index < 3"
               />
             </div>
           </section>
@@ -67,9 +71,11 @@
             </div>
             <div class="spirit-grid-responsive">
               <NewStoryCard 
-                v-for="story in completedStories.slice(0, 8)" 
+                v-for="(story, index) in completedStories.slice(0, 8)" 
                 :key="story.id" 
-                :story="story" 
+                :story="story"
+                v-memo="[story]"
+                :animateStatus="index < 3"
               />
             </div>
           </section>
@@ -112,6 +118,7 @@
                 <div 
                   v-for="(story, index) in moonStories.slice(0, 5)" 
                   :key="'mb-'+story.id" 
+                  v-memo="[story, moonTab]"
                   @click="navigateToStory(story.slug)"
                   class="ranking-spirit-item moon-item"
                 >
@@ -136,6 +143,7 @@
                 <router-link 
                   v-for="cat in categories" 
                   :key="cat.id_theloai"
+                  v-memo="[cat]"
                   :to="`/the-loai?categories=${cat.id_theloai}`"
                   class="tag-pill-spirit fire-pill"
                 >
@@ -187,6 +195,7 @@
                 <div 
                   v-for="(story, index) in moonStories.slice(0, 5)" 
                   :key="story.id" 
+                  v-memo="[story, moonTab]"
                   @click="navigateToStory(story.slug)"
                   class="ranking-spirit-item moon-item"
                 >
@@ -211,6 +220,7 @@
                 <router-link 
                   v-for="cat in categories" 
                   :key="cat.id_theloai"
+                  v-memo="[cat]"
                   :to="`/the-loai?categories=${cat.id_theloai}`"
                   class="tag-pill-spirit fire-pill"
                 >
@@ -222,13 +232,14 @@
           </div>
         </aside>
       </div>
+      <div ref="prefetchSentinel" class="prefetch-sentinel" aria-hidden="true"></div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
-import { Story, getHotStories } from "@/modules/storyText/story.service";
+import { ref, shallowRef, onMounted, onBeforeUnmount, computed } from "vue";
+import { Story, getHotStories, prefetchPublicStories } from "@/modules/storyText/story.service";
 import type { Category } from "@/types/category";
 import NewStoryCard from "@/modules/storyText/components/NewStoryCard.vue";
 import HeroGrid from "@/components/home/HeroGrid.vue"; 
@@ -246,14 +257,14 @@ const navigateToStory = (slug: string) => {
     router.push(`/truyen-chu/${slug}`);
 };
 
-const categories = ref<Category[]>([]);
-const newStories = ref<Story[]>([]);
-const hotStories = ref<Story[]>([]);
-const topMonthlyStories = ref<Story[]>([]);
-const topWeeklyStories = ref<Story[]>([]);
-const topDailyStories = ref<Story[]>([]);
-const topRatedStories = ref<Story[]>([]);
-const completedStories = ref<Story[]>([]);
+const categories = shallowRef<Category[]>([]);
+const newStories = shallowRef<Story[]>([]);
+const hotStories = shallowRef<Story[]>([]);
+const topMonthlyStories = shallowRef<Story[]>([]);
+const topWeeklyStories = shallowRef<Story[]>([]);
+const topDailyStories = shallowRef<Story[]>([]);
+const topRatedStories = shallowRef<Story[]>([]);
+const completedStories = shallowRef<Story[]>([]);
 const moonTab = ref<"thang" | "tuan" | "ngay">("thang");
 
 const moonStories = computed(() => {
@@ -261,6 +272,8 @@ const moonStories = computed(() => {
   if (moonTab.value === "ngay") return topDailyStories.value;
   return topMonthlyStories.value;
 });
+
+const freezeList = <T extends object>(list: T[] = []) => Object.freeze(list.map((item) => Object.freeze(item)));
 
 const moonSubtitle = computed(() => {
   if (moonTab.value === "tuan") {
@@ -285,15 +298,16 @@ const fetchAllData = async () => {
       storyStore.fetchCompletedStories(10)
     ]);
 
-    categories.value = results[0];
-    newStories.value = results[1];
-    hotStories.value = results[2];
-    topMonthlyStories.value = results[3];
-    topWeeklyStories.value = results[4];
-    topDailyStories.value = results[5];
-    topRatedStories.value = results[6];
-    completedStories.value = results[7];
+    categories.value = freezeList(results[0] || []);
+    newStories.value = freezeList(results[1] || []);
+    hotStories.value = freezeList(results[2] || []);
+    topMonthlyStories.value = freezeList(results[3] || []);
+    topWeeklyStories.value = freezeList(results[4] || []);
+    topDailyStories.value = freezeList(results[5] || []);
+    topRatedStories.value = freezeList(results[6] || []);
+    completedStories.value = freezeList(results[7] || []);
   } catch (err) {
+    if ((err as any)?.code === "ERR_CANCELED") return;
     console.error("Thiên cơ bị nhiễu loạn:", err);
   }
 };
@@ -310,8 +324,39 @@ const getMoonViews = (story: Story) => {
   return story.luot_xem_thang ?? story.luot_xem ?? 0;
 };
 
+const prefetchSentinel = ref<HTMLElement | null>(null);
+let prefetchObserver: IntersectionObserver | null = null;
+let prefetchPage = 2;
+let prefetching = false;
+
+const setupPrefetchObserver = () => {
+  if (!prefetchSentinel.value) return;
+  prefetchObserver = new IntersectionObserver(
+    ([entry]) => {
+      if (!entry.isIntersecting || prefetching) return;
+      prefetching = true;
+      prefetchPublicStories({
+        page: prefetchPage,
+        limit: 20,
+        sort_by: "thoi_gian_cap_nhat",
+        order: "DESC",
+      }).finally(() => {
+        prefetchPage += 1;
+        prefetching = false;
+      });
+    },
+    { root: null, rootMargin: "0px 0px 40% 0px", threshold: 0 },
+  );
+  prefetchObserver.observe(prefetchSentinel.value);
+};
+
 onMounted(() => {
   fetchAllData();
+  setupPrefetchObserver();
+});
+
+onBeforeUnmount(() => {
+  if (prefetchObserver) prefetchObserver.disconnect();
 });
 </script>
 
@@ -596,6 +641,11 @@ onMounted(() => {
 }
 
 .mobile-extra-aura { display: none; }
+
+.prefetch-sentinel {
+  height: 1px;
+  width: 100%;
+}
 
 /* ===== MOBILE OPTIMIZATION ===== */
 @media (max-width: 1024px) {

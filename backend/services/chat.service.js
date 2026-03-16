@@ -107,21 +107,8 @@ const ChatService = {
     const chatColor = chatProfile?.equipped_chat_color || null;
     const badge = chatProfile?.badge || null;
     const level = chatProfile?.level || null;
-    const messageData = {
-      userId,
-      username: username || displayName,
-      fullName: displayName,
-      avatar,
-      equipped_frame: frame,
-      equipped_chat_color: chatColor,
-      badge,
-      level,
-      content: text,
-      timestamp: Date.now(),
-      isMegaphone,
-    };
-
     // Persist to unified chat_messages with style snapshot
+    let insertedId = null;
     try {
       const styleSnapshot = JSON.stringify({
         equipped_frame: frame,
@@ -131,7 +118,7 @@ const ChatService = {
       });
       const roomType = room.room_type === "world" ? "world" : "author";
       const roomIdentifier = room.room_type === "world" ? 1 : room.owner_id || room.id;
-      await ChatMessageModel.create(
+      insertedId = await ChatMessageModel.create(
         {
           room_type: roomType,
           room_id: roomIdentifier,
@@ -145,6 +132,21 @@ const ChatService = {
     } catch (persistErr) {
       logger.error("Failed to persist chat message:", persistErr);
     }
+
+    const messageData = {
+      id: insertedId,
+      userId,
+      username: username || displayName,
+      fullName: displayName,
+      avatar,
+      equipped_frame: frame,
+      equipped_chat_color: chatColor,
+      badge,
+      level,
+      content: text,
+      timestamp: Date.now(),
+      isMegaphone,
+    };
 
     // World chat history now comes from chat_messages; Redis used only for non-world buffers
     if (room.room_type !== "world") {
@@ -292,6 +294,7 @@ const ChatService = {
               }
             }
             return {
+              id: row.id,
               userId: row.user_id,
               content: row.content,
               isMegaphone: !!row.is_megaphone,
@@ -319,6 +322,7 @@ const ChatService = {
           timestamp = timestamp - row.created_at.getTimezoneOffset() * 60000;
         }
         return {
+          id: row.id,
           userId: row.userId,
           fullName: row.full_name || row.username || "Anonymous",
           username: row.username,
@@ -439,7 +443,29 @@ const ChatService = {
     const chatColor = chatProfile?.equipped_chat_color || null;
     const badge = chatProfile?.badge || null;
     const level = chatProfile?.level || null;
+    // Persist to unified chat_messages with style snapshot
+    let insertedId = null;
+    try {
+      const styleSnapshot = JSON.stringify({
+        equipped_frame: frame,
+        equipped_chat_color: chatColor,
+        badge,
+        level,
+      });
+      insertedId = await ChatMessageModel.create({
+        room_type: "author",
+        room_id: Number(authorId),
+        user_id: userId,
+        content: text,
+        style_snapshot: styleSnapshot,
+        is_megaphone: false,
+      });
+    } catch (persistErr) {
+      logger.error("Failed to persist author chat message:", persistErr);
+    }
+
     const messageData = {
+      id: insertedId,
       userId,
       username: username || displayName,
       fullName: displayName,
@@ -452,31 +478,6 @@ const ChatService = {
       timestamp: Date.now(),
       author_id: authorId,
     };
-
-    const bufferKey = `${REDIS_AUTHOR_ROOM_PREFIX}${authorId}:messages`;
-    await redis.lpush(bufferKey, JSON.stringify(messageData));
-    await redis.ltrim(bufferKey, 0, MESSAGE_BUFFER_LIMIT - 1);
-    await redis.set(cooldownKey, "1", "EX", COOLDOWN_SECONDS);
-
-    // Persist to unified chat_messages with style snapshot
-    try {
-      const styleSnapshot = JSON.stringify({
-        equipped_frame: frame,
-        equipped_chat_color: chatColor,
-        badge,
-        level,
-      });
-      await ChatMessageModel.create({
-        room_type: "author",
-        room_id: Number(authorId),
-        user_id: userId,
-        content: text,
-        style_snapshot: styleSnapshot,
-        is_megaphone: false,
-      });
-    } catch (persistErr) {
-      logger.error("Failed to persist author chat message:", persistErr);
-    }
 
     const io = getIO();
     io.to(`author_room_${authorId}`).emit("new_author_message", messageData);
@@ -507,6 +508,7 @@ const ChatService = {
           }
         }
         return {
+          id: row.id,
           userId: row.user_id,
           content: row.content,
           author_id: String(authorId),

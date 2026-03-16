@@ -20,7 +20,8 @@
     <div class="message-container scrollbar-spirit" ref="msgList">
       <div
         v-for="(msg, index) in chatStore.worldMessages"
-        :key="index"
+        :key="(msg.id ?? msg.timestamp ?? index)"
+        v-memo="[msg]"
         :class="['chat-msg-item', { 'is-megaphone': msg.isMegaphone }]"
       >
         <div class="avatar-frame-zone" :class="msg.equipped_frame?.css_class">
@@ -72,6 +73,8 @@
         </div>
       </div>
 
+      <div ref="endAnchor" class="scroll-anchor"></div>
+
       <div v-if="chatStore.worldMessages.length === 0" class="empty-state">
         <i class="fas fa-ghost mb-2 opacity-20 text-3xl"></i>
         <p>Cần đăng nhập để xem tin nhắn...</p>
@@ -88,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import { useChatStore } from "@/modules/chat/chat.store";
 import { getAvatarUrl } from "@/config/constants";
 import UserBadge from "@/modules/gamification/components/UserBadge.vue";
@@ -97,6 +100,10 @@ import { vi } from "date-fns/locale";
 
 const chatStore = useChatStore();
 const msgList = ref<HTMLElement | null>(null);
+const endAnchor = ref<HTMLElement | null>(null);
+let isAtBottom = true;
+let scrollRaf = 0;
+let anchorObserver: IntersectionObserver | null = null;
 
 const formatTime = (timestamp: number) => {
   try {
@@ -110,21 +117,46 @@ const formatTime = (timestamp: number) => {
 };
 
 const scrollToEnd = () => {
-  if (msgList.value) {
-    msgList.value.scrollTop = msgList.value.scrollHeight;
-  }
+  if (!msgList.value || !isAtBottom) return;
+  msgList.value.scrollTop = msgList.value.scrollHeight;
+};
+
+const scheduleScrollToEnd = () => {
+  if (scrollRaf) return;
+  scrollRaf = requestAnimationFrame(() => {
+    scrollRaf = 0;
+    scrollToEnd();
+  });
+};
+
+const setupAnchorObserver = () => {
+  if (!msgList.value || !endAnchor.value) return;
+  anchorObserver = new IntersectionObserver(
+    ([entry]) => {
+      isAtBottom = entry.isIntersecting;
+    },
+    { root: msgList.value, threshold: 0.9 },
+  );
+  anchorObserver.observe(endAnchor.value);
 };
 
 watch(
   () => chatStore.worldMessages.length,
   () => {
-    nextTick(() => scrollToEnd());
+    scheduleScrollToEnd();
   },
+  { flush: "post" },
 );
 
 onMounted(() => {
   chatStore.initListeners();
-  nextTick(() => scrollToEnd());
+  setupAnchorObserver();
+  scheduleScrollToEnd();
+});
+
+onBeforeUnmount(() => {
+  if (anchorObserver) anchorObserver.disconnect();
+  if (scrollRaf) cancelAnimationFrame(scrollRaf);
 });
 </script>
 
@@ -155,6 +187,11 @@ onMounted(() => {
   background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.05), transparent 50%);
   pointer-events: none;
   z-index: 0;
+}
+
+.scroll-anchor {
+  height: 1px;
+  width: 100%;
 }
 
 /* ===== HEADER ===== */
@@ -250,10 +287,12 @@ onMounted(() => {
   gap: 16px; /* Tăng gap để chữ xa avatar hơn một chút */
   transition: transform 0.3s ease;
   animation: fadeInMsg 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  contain: paint;
 }
 
 .chat-msg-item:hover {
   transform: translateX(4px);
+  will-change: transform;
 }
 
 /* Avatar Zone - Tăng kích thước bao ngoài để Frame rộng đường bay lượn */

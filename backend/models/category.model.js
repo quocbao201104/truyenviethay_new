@@ -3,7 +3,7 @@ const db = require("../config/db");
 
 const TheLoaiModel = {
   getAll: async () => {
-    const [rows] = await db.query(`SELECT id_theloai, ten_theloai, thumbnail_url FROM theloai_new`);
+    const [rows] = await db.query(`SELECT id_theloai, ten_theloai FROM theloai_new`);
     return rows;
   },
   // Lấy thể loại theo truyện

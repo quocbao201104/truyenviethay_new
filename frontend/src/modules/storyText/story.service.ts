@@ -1,4 +1,5 @@
 import axios from "@/utils/axios";
+import { cachedGet, prefetchGet } from "@/utils/requestCache";
 
 // TypeScript Interfaces
 export interface Chapter {
@@ -80,10 +81,11 @@ export const getChapterBySlug = async (
   slug: string,
   storySlug: string,
 ): Promise<Chapter> => {
-  const response = await axios.get<Chapter>(
+  return await cachedGet<Chapter>(
     `/api/chuong/slug/${storySlug}/${slug}`,
+    {},
+    { ttlMs: 60000, dedupe: true, abortKey: `chapter:${storySlug}:${slug}` },
   );
-  return response.data;
 };
 
 export const getChaptersByStoryId = async (
@@ -91,13 +93,11 @@ export const getChaptersByStoryId = async (
   page = 1,
   limit = 1000,
 ): Promise<ChapterListResponse> => {
-  const response = await axios.get<ChapterListResponse>(
+  return await cachedGet<ChapterListResponse>(
     `/api/chuong/truyen/${storyId}`,
-    {
-      params: { page, limit },
-    },
+    { params: { page, limit } },
+    { ttlMs: 60000, dedupe: true, abortKey: `chapters:${storyId}` },
   );
-  return response.data;
 };
 
 // --- Story APIs (Merged from legacy) ---
@@ -111,10 +111,12 @@ export const getPublicStories = async ({
   author_id = null,
   trang_thai = "",
 }: PublicStoriesParams = {}) => {
-  const res = await axios.get(`/api/truyen/public`, {
-    params: { page, limit, sort_by, order, keyword, author_id, trang_thai },
-  });
-  return res.data;
+  const abortKey = `publicStories:${page}:${limit}:${sort_by}:${order}:${keyword}:${author_id ?? ""}:${trang_thai ?? ""}`;
+  return await cachedGet<any>(
+    `/api/truyen/public`,
+    { params: { page, limit, sort_by, order, keyword, author_id, trang_thai } },
+    { ttlMs: 30000, dedupe: true, abortKey },
+  );
 };
 
 export const getAdminStories = async ({
@@ -139,18 +141,27 @@ export const getAdminStories = async ({
 };
 
 export const getStoryById = async (id: number) => {
-  const response = await axios.get(`/api/truyen/${id}`);
-  return response.data;
+  return await cachedGet<any>(
+    `/api/truyen/${id}`,
+    {},
+    { ttlMs: 60000, dedupe: true, abortKey: `story:${id}` },
+  );
 };
 
 export const getStorySampleChapter = async (id: number) => {
-  const response = await axios.get(`/api/truyen/${id}/sample-chapter`);
-  return response.data;
+  return await cachedGet<any>(
+    `/api/truyen/${id}/sample-chapter`,
+    {},
+    { ttlMs: 60000, dedupe: true, abortKey: `storySample:${id}` },
+  );
 };
 
 export const getStoryBySlug = async (slug: string) => {
-  const res = await axios.get(`/api/truyen/slug/${slug}`);
-  return res.data;
+  return await cachedGet<any>(
+    `/api/truyen/slug/${slug}`,
+    {},
+    { ttlMs: 60000, dedupe: true, abortKey: `storySlug:${slug}` },
+  );
 };
 
 export const approveOrRejectStoryApi = async (
@@ -186,24 +197,49 @@ export const getMyStories = async (params: any) => {
 };
 
 export const getTopMonthlyStories = async (limit: number = 10) => {
-  const response = await axios.get<{ data: Story[] }>("/api/truyen/top-thang", {
-    params: { limit },
-  });
-  return response.data.data ?? response.data;
+  const response = await cachedGet<{ data: Story[] }>(
+    "/api/truyen/top-thang",
+    { params: { limit } },
+    { ttlMs: 60000, dedupe: true },
+  );
+  return (response as any).data ?? response;
 };
 
 export const getTopWeeklyStories = async (limit: number = 10) => {
-  const response = await axios.get<{ data: Story[] }>("/api/truyen/top-tuan", {
-    params: { limit },
-  });
-  return response.data.data ?? response.data;
+  const response = await cachedGet<{ data: Story[] }>(
+    "/api/truyen/top-tuan",
+    { params: { limit } },
+    { ttlMs: 60000, dedupe: true },
+  );
+  return (response as any).data ?? response;
 };
 
 export const getTopDailyStories = async (limit: number = 10) => {
-  const response = await axios.get<{ data: Story[] }>("/api/truyen/top-ngay", {
-    params: { limit },
-  });
-  return response.data.data ?? response.data;
+  const response = await cachedGet<{ data: Story[] }>(
+    "/api/truyen/top-ngay",
+    { params: { limit } },
+    { ttlMs: 60000, dedupe: true },
+  );
+  return (response as any).data ?? response;
+};
+
+// --- Prefetch helpers ---
+export const prefetchPublicStories = async (params: PublicStoriesParams = {}) => {
+  await prefetchGet(`/api/truyen/public`, { params }, { ttlMs: 30000, dedupe: true });
+};
+
+export const prefetchStoryBySlug = async (slug: string) => {
+  if (!slug) return;
+  await prefetchGet(`/api/truyen/slug/${slug}`, {}, { ttlMs: 60000, dedupe: true });
+};
+
+export const prefetchChaptersByStoryId = async (storyId: number, page = 1, limit = 200) => {
+  if (!storyId) return;
+  await prefetchGet(
+    `/api/chuong/truyen/${storyId}`,
+    { params: { page, limit } },
+    { ttlMs: 60000, dedupe: true },
+  );
 };
 
 export const getLikeStatus = async (storyId: number) => {

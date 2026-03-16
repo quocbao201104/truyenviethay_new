@@ -7,6 +7,7 @@ import type { AvatarFrame } from "@/types/shop";
 import type { Badge } from "@/types/badge";
 
 export interface Message {
+  id?: number | string;
   userId: number;
   username?: string;
   fullName?: string;
@@ -59,6 +60,7 @@ export const useChatStore = defineStore("chat", () => {
   const authorRoomsList = computed(() => Array.from(joinedAuthorRooms.value.values()));
 
   const normalizeMessage = (msg: any): Message => ({
+    id: msg?.id || undefined,
     userId: Number(msg?.userId),
     username: msg?.username || "",
     fullName: msg?.fullName || msg?.full_name || msg?.username || "Anonymous",
