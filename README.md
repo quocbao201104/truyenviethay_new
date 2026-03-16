@@ -18,8 +18,8 @@
 
 | Môi trường | URL |
 | --- | --- |
-| Frontend (Production) | [https://truyen-viet-hay.vercel.app](https://truyen-viet-hay.vercel.app) |
-| Backend API | [https://truyenviethay-backend-zjfg.onrender.com](https://truyenviethay-backend-zjfg.onrender.com) |
+| Frontend (Production) | [https://truyen-viet-hay.vercel.app](https://truyenviethay.id.vn/) |
+| Backend API | [https://truyenviethay-backend-zjfg.onrender.com](https://api.truyenviethay.id.vn/) |
 
 ---
 
