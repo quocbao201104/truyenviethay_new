@@ -88,13 +88,15 @@ cd<template>
           class="message-row"
           :class="{ mine: isMine(msg), 'megaphone-row': msg.isMegaphone }"
         >
-          <div class="avatar-shell" :class="msg.equipped_frame?.css_class || ''" v-if="!isMine(msg)">
-            <div class="avatar-container">
+          <div v-if="!isMine(msg)" class="spirit-array-center chat-mini" :class="msg.equipped_frame?.css_class">
+            <div class="magic-circle-spin" v-if="msg.equipped_frame"></div>
+            <div class="magic-circle-reverse" v-if="msg.equipped_frame"></div>
+            <div class="avatar-wrapper">
               <img class="avatar item-img" :src="getAvatarUrl(msg.avatar)" alt="avatar" />
               <img
                 v-if="msg.equipped_frame?.image_url"
-                class="avatar-frame-overlay equipped-frame"
-                :src="msg.equipped_frame.image_url"
+                class="hero-frame"
+                :src="getImageUrl(msg.equipped_frame.image_url)"
                 :alt="msg.equipped_frame.name"
               />
             </div>
@@ -181,7 +183,7 @@ cd<template>
 import { ref, onMounted, onUnmounted, nextTick, computed, watch } from "vue";
 import { useAuthStore } from "@/modules/auth/auth.store";
 import { useChatStore, type Message } from "@/modules/chat/chat.store";
-import { getAvatarUrl } from "@/config/constants";
+import { getAvatarUrl, getImageUrl } from "@/config/constants";
 import UserBadge from "@/modules/gamification/components/UserBadge.vue";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -203,6 +205,7 @@ const formatTime = (timestamp: number) => {
     return "vừa xong";
   }
 };
+
 let cooldownInterval: any = null;
 const hasMegaphoneItem = ref(false);
 
@@ -614,27 +617,70 @@ onUnmounted(() => {
   flex-direction: row-reverse;
 }
 
-.avatar-shell {
-  width: 36px;
-  height: 36px;
+/* Avatar Tụ Linh Trận (Scaled for Sidebar/Unified Chat) */
+.spirit-array-center.chat-mini {
+  position: relative; 
+  width: 42px; 
+  height: 42px; 
   flex-shrink: 0;
-  position: relative;
-  --avatar-frame-scale: 1.45;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  overflow: visible;
+  --aura-primary: 56, 189, 248;
 }
 
-.avatar-container {
-  width: 100%;
-  height: 100%;
+.spirit-array-center.frame-phoenix-fire { --aura-primary: 239, 68, 68; }
+.spirit-array-center.frame-bang-tinh { --aura-primary: 56, 189, 248; }
+.spirit-array-center.frame-thien-thanh { --aura-primary: 234, 179, 8; }
+.spirit-array-center.frame-nine-tails-purple { --aura-primary: 168, 85, 247; }
+.spirit-array-center.frame-chan-long { --aura-primary: 251, 191, 36; }
+
+.magic-circle-spin, .magic-circle-reverse {
+  position: absolute; 
+  inset: -2px; 
+  border-radius: 50%;
+  border: 1.5px dashed rgba(var(--aura-primary), 0.4);
+  animation: spinArray 20s linear infinite; 
+  pointer-events: none;
+  z-index: 0;
+  filter: drop-shadow(0 0 5px rgba(var(--aura-primary), 0.4));
+}
+.magic-circle-reverse {
+  inset: -5px; 
+  border: 1px dotted rgba(var(--aura-primary), 0.6);
+  animation: spinArrayReverse 15s linear infinite;
+}
+
+.avatar-wrapper {
   position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  z-index: 1;
 }
 
 .avatar {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
+  border-radius: 50%; 
+  border: 2px solid rgba(var(--aura-primary), 0.8);
+  background: #000;
+  z-index: 2;
   object-fit: cover;
-  transform: scale(0.85);
-  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 0 8px rgba(var(--aura-primary), 0.2);
+  transform: scale(0.8); /* Exact HeroPanel scale */
+}
+
+.hero-frame {
+  position: absolute; 
+  inset: 0; 
+  width: 100%; 
+  height: 100%; 
+  object-fit: contain;
+  transform: scale(1.45); 
+  z-index: 3; 
+  pointer-events: none; 
 }
 
 .bubble-wrap {
@@ -856,6 +902,9 @@ onUnmounted(() => {
 .scrollbar-custom::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
 
 /* ===== ANIMATIONS ===== */
+@keyframes spinArray { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spinArrayReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+
 @keyframes slideIn {
   from { transform: translateY(20px) scale(0.95); opacity: 0; }
   to { transform: translateY(0) scale(1); opacity: 1; }
@@ -877,18 +926,5 @@ onUnmounted(() => {
 }
 
 /* ===== GITHUB/TU TIEN FRAME EFFECTS ===== */
-/* Giữ nguyên các hiệu ứng Frame Tu Tiên cũ của bạn ở dưới này... */
-.avatar-frame-overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
-  transform: scale(var(--avatar-frame-scale));
-  transform-origin: center;
-}
-
-.avatar-shell.frame-phoenix-fire { --avatar-frame-scale: 1.72; }
-/* ... (Giữ lại các css frame cũ) */
+/* Frame effects logic handled by spirit-array-center classes */
 </style>

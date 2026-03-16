@@ -41,7 +41,7 @@
                 v-if="equippedFrameImage"
                 :src="equippedFrameImage"
                 alt="Avatar Frame"
-                class="hero-frame equipped-frame"
+                class="hero-frame"
                 crossorigin="anonymous"
               />
               <div class="status-dot-aura"></div>
@@ -212,7 +212,7 @@
 import { computed, onMounted, watch } from "vue";
 import { useAuthStore } from "@/modules/auth/auth.store";
 import { useUserStore } from "@/modules/user/user.store";
-import { getAvatarUrl } from "@/config/constants";
+import { getAvatarUrl, getImageUrl } from "@/config/constants";
 
 import UserBadge from "@/components/gamification/UserBadge.vue";
 import { useGamification } from "@/composables/useGamification";
@@ -246,7 +246,10 @@ export default {
 
     const user = computed(() => userStore.getUserProfile);
     const avatarUrl = computed(() => getAvatarUrl(user.value?.avatar));
-    const equippedFrameImage = computed(() => user.value?.equipped_frame?.image_url || null);
+    const equippedFrameImage = computed(() => {
+      const raw = user.value?.equipped_frame?.image_url;
+      return raw ? getImageUrl(raw) : null;
+    });
     
     const DEFAULT_PROFILE_FRAME_CLASS = "frame-default-aura";
     const SUPPORTED_PROFILE_FRAME_CLASSES = [
@@ -369,6 +372,7 @@ export default {
   position: absolute; inset: -12px; border-radius: 50%;
   border: 2px dashed rgba(var(--aura-primary), 0.4);
   animation: spinArray 20s linear infinite; pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(var(--aura-primary), 0.5));
 }
 .magic-circle-reverse {
   inset: -20px; border: 1px dotted rgba(var(--aura-primary), 0.6);
@@ -378,13 +382,13 @@ export default {
 .hero-avatar {
   position: relative; z-index: 2; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
   border: 4px solid rgba(var(--aura-primary), 0.8); background: #000;
-  box-shadow: 0 0 30px rgba(var(--aura-primary), 0.5), inset 0 0 20px rgba(var(--aura-primary), 0.8);
+  box-shadow: 0 0 20px rgba(var(--aura-primary), 0.3);
   transform: scale(0.80);
 }
  
 .hero-frame {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
-  transform: scale(1.45); z-index: 3; pointer-events: none; filter: drop-shadow(0 0 15px rgba(var(--aura-primary), 0.4));
+  transform: scale(1.45); z-index: 3; pointer-events: none;
 }
 
 /* Frame specific aura colors */

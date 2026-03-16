@@ -17,7 +17,7 @@
               :class="{ active: activeTab === 'stories' }"
               @click="activeTab = 'stories'"
             >
-              Top Truyện
+              Top Bí Tịch
             </button>
             <button
               type="button"
@@ -25,7 +25,7 @@
               :class="{ active: activeTab === 'authors' }"
               @click="activeTab = 'authors'"
             >
-              Top Tác Giả
+              Top Đại Thần
             </button>
           </div>
           <div v-if="activeTab === 'authors'" class="rank-subtabs">
@@ -106,14 +106,10 @@
                   :src="getImageUrl(story.anh_bia)" 
                   :alt="story.ten_truyen"
                   class="cover-img"
+                  loading="lazy"
                   @error="handleImageError"
                 />
               </router-link>
-
-              <div class="rank-tag-corner">
-                <span class="rank-text">{{ index + 1 }}</span>
-                <span class="rank-suffix">{{ getRankSuffix(index + 1) }}</span>
-              </div>
 
               <div class="story-details">
                 <router-link :to="`/truyen-chu/${story.slug}`" class="title-link">
@@ -124,12 +120,6 @@
                   <span class="author-tag">
                     <i class="fas fa-pen-nib text-sky-400"></i>
                     <span class="author-name-text">{{ story.tac_gia }}</span>
-                  </span>
-                  <span class="stat-tag">
-                    <i class="fas fa-eye text-cyan-400"></i> {{ formatNumber(story.luot_xem) }}
-                  </span>
-                  <span v-if="story.rating_count || story.total_ratings" class="stat-tag">
-                    <i class="fas fa-comment-dots text-indigo-400"></i> {{ formatNumber(story.rating_count || story.total_ratings || 0) }}
                   </span>
                 </div>
               </div>
@@ -189,6 +179,7 @@
                     :src="getAvatarUrl(author.avatar || author.user_avatar)"
                     :alt="author.pen_name"
                     class="hero-avatar item-img"
+                    loading="lazy"
                     crossorigin="anonymous"
                   />
                   <img
@@ -196,14 +187,10 @@
                     :src="getImageUrl(author.equipped_frame.image_url)"
                     alt="Avatar Frame"
                     class="hero-frame"
+                    loading="lazy"
                     crossorigin="anonymous"
                   />
                 </div>
-              </div>
-
-              <div class="rank-tag-corner">
-                <span class="rank-text">{{ index + 1 }}</span>
-                <span class="rank-suffix">{{ getRankSuffix(index + 1) }}</span>
               </div>
 
               <div class="story-details">
@@ -260,7 +247,9 @@ onMounted(() => {
 });
 
 const fetchAuthors = async () => {
-  authorLoading.value = true;
+  if (authorList.value.length === 0) {
+    authorLoading.value = true;
+  }
   authorError.value = null;
   try {
     authorList.value = await getTopAuthors(authorType.value, 30);
@@ -277,17 +266,10 @@ watch([activeTab, authorType], ([tab]) => {
   }
 });
 
-const getRankSuffix = (rank: number): string => {
-  if (rank === 1) return 'ST';
-  if (rank === 2) return 'ND';
-  if (rank === 3) return 'RD';
-  return 'TH';
-};
-
 const getRankClass = (index: number): string => {
-  if (index === 0) return 'rank-cloud-1'; // Lưu Ly (Trắng sáng tinh khiết)
-  if (index === 1) return 'rank-cloud-2'; // Bích Không (Xanh da trời trong)
-  if (index === 2) return 'rank-cloud-3'; // Thanh Lam (Xanh ngọc bích)
+  if (index === 0) return 'rank-cloud-1'; // Lưu Ly (Trắng sáng tinh khiết / Vàng kim)
+  if (index === 1) return 'rank-cloud-2'; // Bích Không (Bạc)
+  if (index === 2) return 'rank-cloud-3'; // Thanh Lam (Đồng)
   return '';
 };
 
@@ -333,7 +315,7 @@ const handleImageError = (event: Event) => {
 /* ===== CORE THEME - THANH VÂN (MÂY XANH) ===== */
 .ranking-container.thanh-van-theme {
   min-height: 100vh;
-  background: #081121; /* Nền xanh đêm huyền ảo, bớt đen hơn */
+  background: #081121;
   color: #cbd5e1;
   font-family: 'Be Vietnam Pro', sans-serif;
   padding-bottom: 50px;
@@ -358,7 +340,7 @@ const handleImageError = (event: Event) => {
 
 .cloud-main {
   font-size: 2.5rem;
-  color: #38bdf8; /* Sky 400 */
+  color: #38bdf8;
   filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.6));
   margin-bottom: 10px;
   animation: float-cloud 3s ease-in-out infinite;
@@ -369,7 +351,6 @@ const handleImageError = (event: Event) => {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 5px;
-  /* Dải màu bầu trời: Trắng, Xanh thiên thanh, Xanh ngọc */
   background: linear-gradient(to right, #e0f2fe, #38bdf8, #2dd4bf);
   -webkit-background-clip: text;
   background-clip: text;
@@ -459,23 +440,6 @@ const handleImageError = (event: Event) => {
   cursor: pointer;
 }
 
-.author-avatar-pill {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-left: 10px;
-  flex-shrink: 0;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-  border: 1px solid #334155;
-}
-
-.author-avatar-pill .cover-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .section-divider-aura-cloud {
   height: 1px;
   width: 300px;
@@ -508,45 +472,16 @@ const handleImageError = (event: Event) => {
   background: #0f172a;
   border: 1px solid #1e293b;
   border-radius: 50px;
-  padding: 10px 85px 10px 25px; /* Tăng padding left và right để cân đối */
+  padding: 10px 25px;
   position: relative;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .ranking-pill.mây-cap:hover {
-  transform: translateY(-5px); /* Hiệu ứng lơ lửng bay lên thay vì trượt ngang */
+  transform: translateY(-5px);
   border-color: #38bdf860;
   background: #152033;
   box-shadow: 0 10px 25px rgba(56, 189, 248, 0.1);
-}
-
-/* Rank Indicator (Circle) */
-.rank-indicator {
-  width: 60px;
-  height: 60px;
-  flex-shrink: 0;
-  padding: 3px;
-  background: #1e293b;
-  border-radius: 50%;
-  z-index: 5;
-}
-
-.circle-inner {
-  width: 100%;
-  height: 100%;
-  background: #081121;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #334155;
-  position: relative;
-}
-
-.rank-num {
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: #475569;
 }
 
 /* Aura Glow Mây Xanh */
@@ -564,33 +499,30 @@ const handleImageError = (event: Event) => {
   opacity: 0.2;
 }
 
-/* Top 1 - Lưu Ly (Sáng rực) */
-.rank-cloud-1 { border-color: #bae6fd80; }
-.rank-cloud-1 .circle-inner { border-color: #bae6fd; background: rgba(186, 230, 253, 0.15); }
-.rank-cloud-1 .rank-num { color: #bae6fd; }
-.rank-cloud-1 .rank-aura-glow-cloud { background: #bae6fd; }
-.rank-cloud-1 .mini-feather { color: #bae6fd; }
-
-/* Top 2 - Bích Không (Xanh trời) */
-.rank-cloud-2 { border-color: #38bdf880; }
-.rank-cloud-2 .circle-inner { border-color: #38bdf8; background: rgba(56, 189, 248, 0.15); }
-.rank-cloud-2 .rank-num { color: #38bdf8; }
-.rank-cloud-2 .rank-aura-glow-cloud { background: #38bdf8; }
-.rank-cloud-2 .mini-feather { color: #38bdf8; }
-
-/* Top 3 - Thanh Lam (Xanh ngọc) */
-.rank-cloud-3 { border-color: #2dd4bf80; }
-.rank-cloud-3 .circle-inner { border-color: #2dd4bf; background: rgba(45, 212, 191, 0.15); }
-.rank-cloud-3 .rank-num { color: #2dd4bf; }
-.rank-cloud-3 .rank-aura-glow-cloud { background: #2dd4bf; }
-.rank-cloud-3 .mini-feather { color: #2dd4bf; }
-
-.mini-feather {
-  position: absolute;
-  top: -10px;
-  font-size: 0.85rem;
-  animation: float-cloud 3s ease-in-out infinite;
+/* ===== STYLE CHO 3 THẺ TOP ĐẦU ===== */
+/* Top 1 - Ánh Kim / Lưu Ly */
+.ranking-pill.rank-cloud-1 { 
+  border-color: rgba(234, 179, 8, 0.6); 
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), #0f172a);
+  box-shadow: 0 4px 20px rgba(234, 179, 8, 0.1);
 }
+.rank-cloud-1 .rank-aura-glow-cloud { background: #eab308; }
+
+/* Top 2 - Ánh Bạc / Bích Không */
+.ranking-pill.rank-cloud-2 { 
+  border-color: rgba(148, 163, 184, 0.6); 
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.15), #0f172a);
+  box-shadow: 0 4px 20px rgba(148, 163, 184, 0.1);
+}
+.rank-cloud-2 .rank-aura-glow-cloud { background: #94a3b8; }
+
+/* Top 3 - Ánh Đồng / Thanh Lam */
+.ranking-pill.rank-cloud-3 { 
+  border-color: rgba(194, 65, 12, 0.6); 
+  background: linear-gradient(135deg, rgba(194, 65, 12, 0.15), #0f172a);
+  box-shadow: 0 4px 20px rgba(194, 65, 12, 0.1);
+}
+.rank-cloud-3 .rank-aura-glow-cloud { background: #c2410c; }
 
 /* Story Cover */
 .story-cover-pill {
@@ -602,6 +534,7 @@ const handleImageError = (event: Event) => {
   flex-shrink: 0;
   box-shadow: 0 5px 15px rgba(0,0,0,0.4);
   border: 1px solid #334155;
+  position: relative;
 }
 
 .cover-img {
@@ -613,7 +546,7 @@ const handleImageError = (event: Event) => {
 }
 
 .ranking-pill.mây-cap:hover .cover-img {
-  transform: scale(1.1) rotate(-1deg); /* Lượn nhẹ mây */
+  transform: scale(1.1) rotate(-1deg);
 }
 
 /* ===== SPIRIT ARRAY AVATAR (Ranking Version) ===== */
@@ -632,6 +565,7 @@ const handleImageError = (event: Event) => {
   position: absolute; inset: -4px; border-radius: 50%;
   border: 1.5px dashed rgba(var(--aura-primary), 0.4);
   animation: spinArray 20s linear infinite; pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(var(--aura-primary), 0.5));
 }
 .magic-circle-reverse {
   inset: -7px; border: 1px dotted rgba(var(--aura-primary), 0.6);
@@ -641,96 +575,20 @@ const handleImageError = (event: Event) => {
 .hero-avatar {
   position: relative; z-index: 2; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
   border: 2px solid rgba(var(--aura-primary), 0.8); background: #000;
-  box-shadow: 0 0 15px rgba(var(--aura-primary), 0.3);
+  box-shadow: 0 0 15px rgba(var(--aura-primary), 0.2);
   transform: scale(0.80);
 }
  
 .hero-frame {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
-  transform: scale(1.45); z-index: 3; pointer-events: none; filter: drop-shadow(0 0 10px rgba(var(--aura-primary), 0.4));
+  transform: scale(1.45); z-index: 3; pointer-events: none;
 }
 
-/* Corner Rank Tag */
-.rank-tag-corner {
-  position: absolute;
-  top: 0;
-  right: 25px;
-  background: linear-gradient(135deg, #1e293b, #0f172a);
-  padding: 5px 15px;
-  border-bottom-left-radius: 15px;
-  border-bottom-right-radius: 15px;
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-  z-index: 10;
-  border: 1px solid rgba(56, 189, 248, 0.2);
-  border-top: none;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-.rank-text {
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: #64748b;
-}
-
-.rank-suffix {
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: #475569;
-}
-
-/* Rank Styling Overrides */
-.rank-cloud-1 .rank-tag-corner {
-  background: linear-gradient(135deg, #fef08a, #eab308);
-  border-color: #fef08a;
-}
-.rank-cloud-1 .rank-text { color: #0f172a; }
-.rank-cloud-1 .rank-suffix { color: rgba(15, 23, 42, 0.7); }
-
-.rank-cloud-2 .rank-tag-corner {
-  background: linear-gradient(135deg, #e2e8f0, #94a3b8);
-  border-color: #e2e8f0;
-}
-.rank-cloud-2 .rank-text { color: #0f172a; }
-.rank-cloud-2 .rank-suffix { color: rgba(15, 23, 42, 0.7); }
-
-.rank-cloud-3 .rank-tag-corner {
-  background: linear-gradient(135deg, #f97316, #c2410c);
-  border-color: #ffedd5;
-}
-.rank-cloud-3 .rank-text { color: #ffffff; }
-.rank-cloud-3 .rank-suffix { color: rgba(255, 255, 255, 0.8); }
-
-/* Layout Adjustments */
 .first-element {
   margin-left: 5px !important;
   position: relative;
   z-index: 5;
 }
-
-.story-details {
-  flex-grow: 1;
-  margin-left: 20px;
-  min-width: 0;
-  padding-top: 15px; /* Offset for corner tag */
-}
-
-/* Frame specific aura colors */
-.spirit-array-center.frame-phoenix-fire { --aura-primary: 239, 68, 68; }
-.spirit-array-center.frame-bang-tinh { --aura-primary: 56, 189, 248; }
-.spirit-array-center.frame-thien-thanh { --aura-primary: 234, 179, 8; }
-.spirit-array-center.frame-nine-tails-purple { --aura-primary: 168, 85, 247; }
-.spirit-array-center.frame-chan-long { --aura-primary: 251, 191, 36; }
-
-@keyframes spinArray { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes spinArrayReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-
-/* Badge Alignment in List */
-.author-name-plate { display: flex; align-items: center; gap: 8px; }
-.mini-badge { transform: scale(0.8); transform-origin: left; }
-.author-name-text { font-weight: 800; }
-.story-name { font-weight: 800; font-size: 1.2rem; }
 
 /* Story Details */
 .story-details {
@@ -755,6 +613,10 @@ const handleImageError = (event: Event) => {
 .title-link:hover {
   color: #38bdf8;
 }
+
+.author-name-plate { display: flex; align-items: center; gap: 8px; }
+.author-name-text { font-weight: 800; }
+.story-name { font-weight: 800; font-size: 1.2rem; }
 
 .meta-row.meta-row-cloud {
   display: flex;
@@ -785,7 +647,7 @@ const handleImageError = (event: Event) => {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  color: #38bdf8; /* Đổi sao vàng thành sao băng xanh */
+  color: #38bdf8;
 }
 
 .star-row .val {
@@ -863,37 +725,41 @@ const handleImageError = (event: Event) => {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Frame specific aura colors */
+.spirit-array-center.frame-phoenix-fire { --aura-primary: 239, 68, 68; }
+.spirit-array-center.frame-bang-tinh { --aura-primary: 56, 189, 248; }
+.spirit-array-center.frame-thien-thanh { --aura-primary: 234, 179, 8; }
+.spirit-array-center.frame-nine-tails-purple { --aura-primary: 168, 85, 247; }
+.spirit-array-center.frame-chan-long { --aura-primary: 251, 191, 36; }
+
+@keyframes spinArray { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spinArrayReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+
 /* ===== RESPONSIVE ===== */
-/* Giữ nguyên như cũ, chỉ cập nhật tên class tương ứng */
 @media (max-width: 768px) {
+  .container {
+    padding-left: 15px;
+    padding-right: 15px;
+    overflow-x: hidden;
+  }
+
   .section-title { font-size: 1.8rem; letter-spacing: 2px; }
   
   .ranking-list-v2 {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 15px;
   }
   
   .ranking-pill.mây-cap {
     flex-direction: row;
     border-radius: 12px;
-    padding: 10px;
+    padding: 12px;
     height: auto;
     align-items: center;
     text-align: left;
     gap: 12px;
   }
-  
-  .rank-indicator {
-    position: absolute;
-    top: -8px;
-    left: -8px;
-    width: 35px;
-    height: 35px;
-    z-index: 10;
-  }
-  
-  .rank-num { font-size: 0.9rem; }
   
   .story-cover-pill {
     width: 65px;

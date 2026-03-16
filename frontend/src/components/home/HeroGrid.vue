@@ -117,12 +117,12 @@ const navigateToStory = (slug: string) => {
 
 const props = defineProps({
   stories: {
-    type: Array as () => any[],
+    type: Array as () => readonly any[],
     required: true,
     default: () => [],
   },
   trendingStories: {
-    type: Array as () => any[],
+    type: Array as () => readonly any[],
     required: false,
     default: () => [],
   },
@@ -266,8 +266,8 @@ const truncateText = (text: string, length: number) => {
   font-weight: 900;
   line-height: 1.2;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, #fff 20%, #22d3ee 80%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 2px 10px rgba(34, 211, 238, 0.3));
   display: -webkit-box;

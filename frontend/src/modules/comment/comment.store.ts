@@ -28,9 +28,22 @@ export const useCommentStore = defineStore("comment", () => {
         }
         
         try {
-            await createComment({ truyen_id: storyId, content, parent_id: parentId });
-            // Refresh comments after successful creation
-            await fetchComments(storyId); 
+            const res = await createComment({ truyen_id: storyId, content, parent_id: parentId });
+            const newComment = res.data;
+
+            if (newComment) {
+                if (!parentId) {
+                    // Prepend new top-level comment
+                    comments.value = [newComment, ...comments.value];
+                } else {
+                    // Append reply to parent
+                    const parent = comments.value.find(c => c.id === parentId);
+                    if (parent) {
+                        if (!parent.replies) parent.replies = [];
+                        parent.replies.push(newComment);
+                    }
+                }
+            }
         } catch (err: any) {
             throw err;
         }

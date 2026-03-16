@@ -64,7 +64,9 @@ export interface PublicStoriesParams {
   keyword?: string;
   author_id?: number | null;
   trang_thai?: string;
+  min_days_ago?: number | null;
 }
+
 
 export interface AdminStoriesParams {
   page?: number;
@@ -110,11 +112,12 @@ export const getPublicStories = async ({
   keyword = "",
   author_id = null,
   trang_thai = "",
+  min_days_ago = null,
 }: PublicStoriesParams = {}) => {
-  const abortKey = `publicStories:${page}:${limit}:${sort_by}:${order}:${keyword}:${author_id ?? ""}:${trang_thai ?? ""}`;
+  const abortKey = `publicStories:${page}:${limit}:${sort_by}:${order}:${keyword}:${author_id ?? ""}:${trang_thai ?? ""}:${min_days_ago ?? ""}`;
   return await cachedGet<any>(
     `/api/truyen/public`,
-    { params: { page, limit, sort_by, order, keyword, author_id, trang_thai } },
+    { params: { page, limit, sort_by, order, keyword, author_id, trang_thai, min_days_ago } },
     { ttlMs: 30000, dedupe: true, abortKey },
   );
 };

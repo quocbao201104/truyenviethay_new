@@ -41,9 +41,9 @@ export const getChapterBySlug = async (slug: string, storySlug: string): Promise
   return response.data;
 };
 
-export const getChaptersByStoryId = async (storyId: number, page = 1, limit = 1000): Promise<ChapterListResponse> => {
+export const getChaptersByStoryId = async (storyId: number, page = 1, limit = 1000, min_no?: number): Promise<ChapterListResponse> => {
   const response = await axios.get<ChapterListResponse>(`/api/chuong/truyen/${storyId}`, {
-      params: { page, limit }
+      params: { page, limit, min_no }
   });
   return response.data;
 };

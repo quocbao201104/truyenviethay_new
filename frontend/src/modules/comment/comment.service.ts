@@ -39,7 +39,7 @@ export const getCommentsByStory = async (storyId: number, page = 1): Promise<Com
     return response.data;
 };
 
-export const createComment = async (payload: CreateCommentPayload): Promise<{ success: boolean }> => {
+export const createComment = async (payload: CreateCommentPayload): Promise<{ success: boolean; data: Comment }> => {
     const response = await axios.post("/api/comments", payload);
     return response.data;
 };

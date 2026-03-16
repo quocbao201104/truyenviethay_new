@@ -335,10 +335,10 @@ export const useStoryStore = defineStore("story", () => {
     /**
      * Fetch top rated stories with 10-minute cache
      */
-    const fetchTopRatedStories = async (limit: number = 5) => {
+    const fetchTopRatedStories = async (page: number = 1, limit: number = 8) => {
         return getCachedOrFetch(
-            `topRated:${limit}`,
-            () => getTopRatedStories(limit),
+            `topRated:${page}:${limit}`,
+            () => getTopRatedStories(page, limit),
             10 * 60 * 1000 // 10 minutes
         );
     };
@@ -346,17 +346,18 @@ export const useStoryStore = defineStore("story", () => {
     /**
      * Fetch new stories with 3-minute cache
      */
-    const fetchNewStories = async (limit: number = 10) => {
+    const fetchNewStories = async (page: number = 1, limit: number = 10) => {
         return getCachedOrFetch(
-            `newStories:${limit}`,
+            `newStories:${page}:${limit}`,
             async () => {
                 const res = await getPublicStories({
-                    page: 1,
+                    page,
                     limit,
-                    sort_by: "thoi_gian_cap_nhat",
+                    min_days_ago: 30,
+                    sort_by: "luot_xem",
                     order: "DESC"
                 });
-                return res.data;
+                return res;
             },
             3 * 60 * 1000 // 3 minutes
         );
@@ -365,18 +366,18 @@ export const useStoryStore = defineStore("story", () => {
     /**
      * Fetch completed stories with 5-minute cache
      */
-    const fetchCompletedStories = async (limit: number = 10) => {
+    const fetchCompletedStories = async (page: number = 1, limit: number = 8) => {
         return getCachedOrFetch(
-            `completedStories:${limit}`,
+            `completedStories:${page}:${limit}`,
             async () => {
                 const res = await getPublicStories({
-                    page: 1,
+                    page,
                     limit,
                     trang_thai: "hoan_thanh",
-                    sort_by: "thoi_gian_cap_nhat",
+                    sort_by: "luot_xem",
                     order: "DESC"
                 });
-                return res.data;
+                return res;
             },
             5 * 60 * 1000 // 5 minutes
         );

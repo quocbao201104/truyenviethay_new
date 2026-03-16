@@ -21,11 +21,27 @@
               <h2 class="spirit-title">
                 <i class="fas fa-seedling"></i>
                 Tân Tú Bảng
-                <span class="spirit-note">Kỳ tài mới nổi</span>
+                <span class="spirit-note">Kỳ tài mới nổi trong tháng</span>
               </h2>
-              <router-link to="/tim-kiem" class="view-all-spirit emerald">
-                Xem thêm <i class="fas fa-arrow-right-long ml-1"></i>
-              </router-link>
+              <div class="header-actions">
+                <div class="spirit-pagination">
+                  <button 
+                    class="pag-btn prev" 
+                    :disabled="newStoriesPage <= 1 || isNewStoriesLoading"
+                    @click="fetchNewStoriesPage(newStoriesPage - 1)"
+                  >
+                    <i class="fas fa-chevron-left"></i>
+                  </button>
+                  <span class="page-info">{{ newStoriesPage }}</span>
+                  <button 
+                    class="pag-btn next" 
+                    :disabled="newStoriesPage >= newStoriesTotalPages || isNewStoriesLoading"
+                    @click="fetchNewStoriesPage(newStoriesPage + 1)"
+                  >
+                    <i class="fas fa-chevron-right"></i>
+                  </button>
+                </div>
+              </div>
             </div>
             
             <div class="spirit-grid-responsive">
@@ -37,6 +53,12 @@
                 :animateStatus="index < 3"
               />
             </div>
+            
+            <div class="spirit-footer">
+              <router-link to="/tim-kiem" class="view-all-spirit emerald">
+                Xem thêm <i class="fas fa-arrow-right-long ml-1"></i>
+              </router-link>
+            </div>
           </section>
 
           <section class="spirit-block">  
@@ -46,7 +68,25 @@
                 Lệnh Bài Bảng
                 <span class="spirit-note">Vạn người tín ngưỡng</span>
               </h2>
-              <router-link to="/xep-hang" class="view-all-spirit gold">Xem thêm</router-link>
+              <div class="header-actions">
+                <div class="spirit-pagination">
+                  <button 
+                    class="pag-btn prev" 
+                    :disabled="topRatedStoriesPage <= 1 || isTopRatedStoriesLoading"
+                    @click="fetchTopRatedStoriesPage(topRatedStoriesPage - 1)"
+                  >
+                    <i class="fas fa-chevron-left"></i>
+                  </button>
+                  <span class="page-info">{{ topRatedStoriesPage }}</span>
+                  <button 
+                    class="pag-btn next" 
+                    :disabled="topRatedStoriesPage >= topRatedStoriesTotalPages || isTopRatedStoriesLoading"
+                    @click="fetchTopRatedStoriesPage(topRatedStoriesPage + 1)"
+                  >
+                    <i class="fas fa-chevron-right"></i>
+                  </button>
+                </div>
+              </div>
             </div>
             
             <div class="spirit-grid-responsive">
@@ -58,6 +98,12 @@
                 :animateStatus="index < 3"
               />
             </div>
+
+            <div class="spirit-footer">
+              <router-link to="/xep-hang" class="view-all-spirit gold">
+                Xem thêm <i class="fas fa-arrow-right-long ml-1"></i>
+              </router-link>
+            </div>
           </section>
 
           <section class="spirit-block">
@@ -67,8 +113,27 @@
                 Đại Viên Mãn
                 <span class="spirit-note">Công đức tròn đầy</span>
               </h2>
-              <router-link to="/tim-kiem?status=hoan_thanh" class="view-all-spirit purple">Toàn Thư</router-link>
+              <div class="header-actions">
+                <div class="spirit-pagination">
+                  <button 
+                    class="pag-btn prev" 
+                    :disabled="completedStoriesPage <= 1 || isCompletedStoriesLoading"
+                    @click="fetchCompletedStoriesPage(completedStoriesPage - 1)"
+                  >
+                    <i class="fas fa-chevron-left"></i>
+                  </button>
+                  <span class="page-info">{{ completedStoriesPage }}</span>
+                  <button 
+                    class="pag-btn next" 
+                    :disabled="completedStoriesPage >= completedStoriesTotalPages || isCompletedStoriesLoading"
+                    @click="fetchCompletedStoriesPage(completedStoriesPage + 1)"
+                  >
+                    <i class="fas fa-chevron-right"></i>
+                  </button>
+                </div>
+              </div>
             </div>
+
             <div class="spirit-grid-responsive">
               <NewStoryCard 
                 v-for="(story, index) in completedStories.slice(0, 8)" 
@@ -77,6 +142,12 @@
                 v-memo="[story]"
                 :animateStatus="index < 3"
               />
+            </div>
+
+            <div class="spirit-footer">
+              <router-link to="/tim-kiem?status=hoan_thanh" class="view-all-spirit purple">
+                Toàn Thư <i class="fas fa-arrow-right-long ml-1"></i>
+              </router-link>
             </div>
           </section>
 
@@ -257,15 +328,27 @@ const navigateToStory = (slug: string) => {
     router.push(`/truyen-chu/${slug}`);
 };
 
-const categories = shallowRef<Category[]>([]);
-const newStories = shallowRef<Story[]>([]);
-const hotStories = shallowRef<Story[]>([]);
-const topMonthlyStories = shallowRef<Story[]>([]);
-const topWeeklyStories = shallowRef<Story[]>([]);
-const topDailyStories = shallowRef<Story[]>([]);
-const topRatedStories = shallowRef<Story[]>([]);
-const completedStories = shallowRef<Story[]>([]);
+const categories = shallowRef<readonly Category[]>([]);
+const newStories = shallowRef<readonly Story[]>([]);
+const hotStories = shallowRef<readonly Story[]>([]);
+const topMonthlyStories = shallowRef<readonly Story[]>([]);
+const topWeeklyStories = shallowRef<readonly Story[]>([]);
+const topDailyStories = shallowRef<readonly Story[]>([]);
+const topRatedStories = shallowRef<readonly Story[]>([]);
+const completedStories = shallowRef<readonly Story[]>([]);
 const moonTab = ref<"thang" | "tuan" | "ngay">("thang");
+
+// Pagination state
+const newStoriesPage = ref(1);
+const newStoriesTotalPages = ref(1);
+const topRatedStoriesPage = ref(1);
+const topRatedStoriesTotalPages = ref(1);
+const completedStoriesPage = ref(1);
+const completedStoriesTotalPages = ref(1);
+
+const isNewStoriesLoading = ref(false);
+const isTopRatedStoriesLoading = ref(false);
+const isCompletedStoriesLoading = ref(false);
 
 const moonStories = computed(() => {
   if (moonTab.value === "tuan") return topWeeklyStories.value;
@@ -289,27 +372,73 @@ const fetchAllData = async () => {
   try {
     const results = await Promise.all([
       storyStore.fetchCategories(),
-      storyStore.fetchNewStories(10),
+      storyStore.fetchNewStories(1, 10),
       getHotStories(5),
       storyStore.fetchTopMonthlyStories(5),
       storyStore.fetchTopWeeklyStories(5),
       storyStore.fetchTopDailyStories(5),
-      storyStore.fetchTopRatedStories(8),
-      storyStore.fetchCompletedStories(10)
+      storyStore.fetchTopRatedStories(1, 8),
+      storyStore.fetchCompletedStories(1, 8)
     ]);
 
     categories.value = freezeList(results[0] || []);
-    newStories.value = freezeList(results[1] || []);
+    
+    const newStoriesResult = results[1];
+    newStories.value = freezeList(newStoriesResult?.data || []);
+    newStoriesTotalPages.value = newStoriesResult?.pagination?.total_pages || 1;
+
     hotStories.value = freezeList(results[2] || []);
     topMonthlyStories.value = freezeList(results[3] || []);
     topWeeklyStories.value = freezeList(results[4] || []);
     topDailyStories.value = freezeList(results[5] || []);
-    topRatedStories.value = freezeList(results[6] || []);
-    completedStories.value = freezeList(results[7] || []);
+    
+    const topRatedResult = results[6];
+    topRatedStories.value = freezeList(topRatedResult?.data || []);
+    topRatedStoriesTotalPages.value = topRatedResult?.pagination?.total_pages || 1;
+
+    const completedResult = results[7];
+    completedStories.value = freezeList(completedResult?.data || []);
+    completedStoriesTotalPages.value = completedResult?.pagination?.total_pages || 1;
   } catch (err) {
     if ((err as any)?.code === "ERR_CANCELED") return;
     console.error("Thiên cơ bị nhiễu loạn:", err);
   }
+};
+
+const fetchNewStoriesPage = async (page: number) => {
+    if (page < 1 || page > newStoriesTotalPages.value || isNewStoriesLoading.value) return;
+    isNewStoriesLoading.value = true;
+    try {
+        const res = await storyStore.fetchNewStories(page, 10);
+        newStories.value = freezeList(res.data);
+        newStoriesPage.value = page;
+    } finally {
+        isNewStoriesLoading.value = false;
+    }
+};
+
+const fetchTopRatedStoriesPage = async (page: number) => {
+    if (page < 1 || page > topRatedStoriesTotalPages.value || isTopRatedStoriesLoading.value) return;
+    isTopRatedStoriesLoading.value = true;
+    try {
+        const res = await storyStore.fetchTopRatedStories(page, 8);
+        topRatedStories.value = freezeList(res.data);
+        topRatedStoriesPage.value = page;
+    } finally {
+        isTopRatedStoriesLoading.value = false;
+    }
+};
+
+const fetchCompletedStoriesPage = async (page: number) => {
+    if (page < 1 || page > completedStoriesTotalPages.value || isCompletedStoriesLoading.value) return;
+    isCompletedStoriesLoading.value = true;
+    try {
+        const res = await storyStore.fetchCompletedStories(page, 8);
+        completedStories.value = freezeList(res.data);
+        completedStoriesPage.value = page;
+    } finally {
+        isCompletedStoriesLoading.value = false;
+    }
 };
 
 const formatNumber = (num: number) => {
@@ -455,6 +584,60 @@ onBeforeUnmount(() => {
 .spirit-header.emerald .spirit-title i { color: #34d399; filter: drop-shadow(0 0 8px #34d399); }
 .view-all-spirit.emerald { color: #34d399; background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.2); }
 .view-all-spirit.emerald:hover { background: #34d399; color: #05080f; box-shadow: 0 0 15px rgba(52, 211, 153, 0.4); transform: translateY(-2px); }
+
+.spirit-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.spirit-pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(11, 15, 25, 0.4);
+  padding: 4px 8px;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pag-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.pag-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+.pag-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  min-width: 15px;
+  text-align: center;
+}
 
 /* 2. GOLD (Lệnh Bài - Hoàng Kim) */
 .spirit-header.gold { border-bottom: 1px solid rgba(251, 191, 36, 0.15); }

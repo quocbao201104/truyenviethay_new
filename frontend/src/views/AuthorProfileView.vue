@@ -464,6 +464,7 @@ watch(
   position: absolute; inset: -12px; border-radius: 50%;
   border: 2px dashed rgba(var(--aura-gold), 0.4);
   animation: spinArray 20s linear infinite; pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(var(--aura-gold), 0.5));
 }
 .magic-circle-reverse {
   inset: -20px; border: 1px dotted rgba(var(--aura-gold), 0.6);
@@ -473,13 +474,13 @@ watch(
 .hero-avatar {
   position: relative; z-index: 2; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
   border: 4px solid rgba(var(--aura-gold), 0.8); background: #000;
-  box-shadow: 0 0 30px rgba(var(--aura-gold), 0.5), inset 0 0 20px rgba(var(--aura-gold), 0.8);
+  box-shadow: 0 0 20px rgba(var(--aura-gold), 0.3);
   transform: scale(0.80);
 }
  
 .hero-frame {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
-  transform: scale(1.45 ); z-index: 3; pointer-events: none; filter: drop-shadow(0 0 15px rgba(var(--aura-gold), 0.4));
+  transform: scale(1.45 ); z-index: 3; pointer-events: none;
 }
 
 /* ===== NAME SPIRIT PLATE (From ProfileView) ===== */

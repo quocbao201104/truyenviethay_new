@@ -177,14 +177,14 @@ export const useChapterStore = defineStore("chapter", () => {
         }
     };
 
-    const fetchChapterList = async (storyId: number) => {
+    const fetchChapterList = async (storyId: number, page = 1, limit = 1000, min_no?: number) => {
         try {
-            // Fetch all chapters to build navigation
-            const res = await getChaptersByStoryId(storyId, 1, 100000);
-            // Backend returns { chapters: [...] }
+            // Fetch chapters based on provided pagination/seek params
+            const res = await getChaptersByStoryId(storyId, page, limit, min_no);
+            // Replace list (standard behavior for Story Detail)
             chapterList.value = res.chapters.sort((a: Chapter, b: Chapter) => a.so_chuong - b.so_chuong);
         } catch (error) {
-            console.error("Failed to load chapter list for navigation:", error);
+            console.error("Failed to load chapter list:", error);
         }
     };
 

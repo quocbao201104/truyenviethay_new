@@ -109,7 +109,7 @@
                   query: { storyId: story.id, chapterId: readTarget.id } 
                 }" 
                 class="btn-primary"
-              > {{ hasHistory ? 'TIẾP TỤC LĨNH HỘI' : 'LĨNH HỘI NGAY' }}
+              > {{ hasHistory ? 'TIẾP TỤC' : 'LĨNH HỘI' }}
               </router-link>
               
               <div class="secondary-actions">
@@ -167,9 +167,16 @@
 
         <div v-if="currentTab === 'chapters'" class="content-panel cosmic-glass chapters">
              <div class="panel-header-row">
+                <!-- Range Selector for Seek Pagination -->
+                <div class="chapter-range-selector" v-if="story && (story.so_luong_chuong || 0) > itemsPerPage">
+                  <span class="range-label">Chọn:</span>
+                  <select v-model="selectedRange" class="range-select">
+                    <option v-for="range in availableRanges" :key="range.min" :value="range">
+                      Chương {{ range.min + 1 }} - {{ Math.min(range.min + rangeLimit, story.so_luong_chuong || 0) }}
+                    </option>
+                  </select>
+                </div>
                <div class="panel-title-group">
-                 <h3 class="panel-title"><i class="fas fa-list-ul text-cyan-400"></i> Danh Sách Chương</h3>
-                 <span class="text-sm text-slate-400">{{ chapters.length }} chương</span>
                </div>
                <button @click="isReverse = !isReverse" class="btn-sort-spirit" :title="isReverse ? 'Cũ nhất trước' : 'Mới nhất trước'">
                  <i class="fas" :class="isReverse ? 'fa-sort-amount-up' : 'fa-sort-amount-down'"></i>
@@ -249,8 +256,28 @@ const isLiked = computed(() => storyStore.isLiked);
 const chapters = computed(() => chapterStore.chapterList);
 const chapterLoading = computed(() => chapterStore.loading);
 
-// Phân trang & Sắp xếp
-const isReverse = ref(true);
+// Seek Pagination Ranges
+const rangeLimit = 100;
+const selectedRange = ref({ min: 0 });
+const availableRanges = computed(() => {
+    const ranges = [];
+    if (!story.value) return [{ min: 0 }];
+    const total = story.value.so_luong_chuong || 0;
+    for (let i = 0; i < total; i += rangeLimit) {
+        ranges.push({ min: i });
+    }
+    return ranges.length > 0 ? ranges : [{ min: 0 }];
+});
+
+watch(selectedRange, async (newVal) => {
+    if (story.value) {
+        await chapterStore.fetchChapterList(story.value.id, 1, rangeLimit, newVal.min);
+        currentPage.value = 1;
+    }
+});
+
+// PhĂ¢n trang & Sáº¯p xáº¿p local cho range hiá»‡n táº¡i
+const isReverse = ref(false); // Default to OLDest first within a range for better reading flow
 const sortedChapters = computed(() => isReverse.value ? [...chapters.value].reverse() : [...chapters.value]);
 
 const currentPage = ref(1);
@@ -355,8 +382,9 @@ const fetchData = async () => {
     if (lastFetchSlug !== slug) return;
 
     if (story.value) {
+        // Initial fetch: first range
         await Promise.all([
-            chapterStore.fetchChapterList(story.value.id),
+            chapterStore.fetchChapterList(story.value.id, 1, rangeLimit, 0),
             favoriteStore.fetchFavorites(),
             storyStore.fetchLikeStatus(story.value.id),
             ratingStore.fetchRatings(story.value.id),
@@ -580,6 +608,41 @@ watch(() => route.params.slug, () => { if (route.name === 'StoryDetail') fetchDa
 .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .page-text { font-weight: 700; color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; }
 
+/* Range Selector Styles */
+.chapter-range-selector {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(34, 211, 238, 0.05);
+  padding: 10px 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(34, 211, 238, 0.1);
+}
+
+.range-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.range-select {
+  background: #0f172a;
+  color: #22d3ee;
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.range-select:focus {
+  border-color: #22d3ee;
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
+}
+
 /* ===== TỐI ƯU MOBILE ===== */
 @media (max-width: 768px) {
   .detail-container { padding: 15px 12px; }
@@ -593,20 +656,26 @@ watch(() => route.params.slug, () => { if (route.name === 'StoryDetail') fetchDa
   .stat-box { min-width: 0; flex: 1; padding: 10px 5px; border-radius: 8px; }
   .stat-box .value { font-size: 1.1rem; }
   .stat-box .label { font-size: 0.6rem; }
-  .actions-row { width: 100%; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-  .btn-primary { width: 100%; justify-content: center; padding: 14px; order: 1; }
-  .secondary-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; order: 2; }
-  .btn-action-spirit { width: 100%; justify-content: center; padding: 12px 5px; }
+  .actions-row { width: 100%; flex-direction: row; gap: 10px; margin-bottom: 20px; align-items: stretch; }
+  .btn-primary { flex: 1; justify-content: center; padding: 12px; order: 1; font-size: 0.85rem; }
+  .secondary-actions { display: flex; gap: 8px; width: auto; order: 2; flex-shrink: 0; }
+  .btn-action-spirit { width: 44px; height: 44px; padding: 0; justify-content: center; border-radius: 8px; }
   .btn-action-spirit span { display: none; } 
-  .btn-action-spirit i { font-size: 1.3rem; }
+  .btn-action-spirit i { font-size: 1.1rem; }
   .rating-input-box { flex-direction: column; gap: 8px; padding-top: 15px; }
   .tabs-nav-clean { gap: 15px; overflow-x: auto; white-space: nowrap; padding-bottom: 2px; }
   .tab-item { font-size: 0.9rem; padding: 12px 10px; }
   .content-panel { padding: 20px 15px; border-radius: 16px; }
   .panel-title { font-size: 1.1rem; }
   .description-text { font-size: 0.95rem; }
+  .panel-header-row { flex-direction: row; flex-wrap: wrap; gap: 10px; padding-bottom: 20px; align-items: center; justify-content: space-between; }
+  .chapter-range-selector { margin-bottom: 0; padding: 6px 12px; flex: 1; min-width: 140px; justify-content: space-between; order: 1; }
+  .range-select { flex: 1; font-size: 0.85rem; padding: 4px 8px; border-radius: 6px; }
+  .btn-sort-spirit { padding: 10px 14px; order: 2; height: 40px; }
   .chapter-grid { grid-template-columns: 1fr; } 
   .chapter-item { padding: 12px 15px; }
+  /* Ensure space for select dropdown */
+  .chapters { padding-bottom: 120px; }
 }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }

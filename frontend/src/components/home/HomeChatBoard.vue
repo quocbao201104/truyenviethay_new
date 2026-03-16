@@ -24,20 +24,20 @@
         v-memo="[msg]"
         :class="['chat-msg-item', { 'is-megaphone': msg.isMegaphone }]"
       >
-        <div class="avatar-frame-zone" :class="msg.equipped_frame?.css_class">
+        <div class="spirit-array-center small" :class="msg.equipped_frame?.css_class">
+          <div class="magic-circle-spin" v-if="msg.equipped_frame"></div>
+          <div class="magic-circle-reverse" v-if="msg.equipped_frame"></div>
           <div class="avatar-wrapper">
-            <span v-if="msg.equipped_frame" class="aura-ring outer"></span>
-            <span v-if="msg.equipped_frame" class="aura-ring inner"></span>
             <img
-              class="msg-avatar"
+              class="msg-avatar hero-avatar item-img"
               :src="getAvatarUrl(msg.avatar)"
               alt="avatar"
               crossorigin="anonymous"
             />
             <img
               v-if="msg.equipped_frame?.image_url"
-              :src="msg.equipped_frame.image_url"
-              class="avatar-frame-overlay"
+              :src="getImageUrl(msg.equipped_frame.image_url)"
+              class="hero-frame"
               alt="frame"
               crossorigin="anonymous"
             />
@@ -93,7 +93,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import { useChatStore } from "@/modules/chat/chat.store";
-import { getAvatarUrl } from "@/config/constants";
+import { getAvatarUrl, getImageUrl } from "@/config/constants";
 import UserBadge from "@/modules/gamification/components/UserBadge.vue";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -287,7 +287,6 @@ onBeforeUnmount(() => {
   gap: 16px; /* Tăng gap để chữ xa avatar hơn một chút */
   transition: transform 0.3s ease;
   animation: fadeInMsg 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  contain: paint;
 }
 
 .chat-msg-item:hover {
@@ -296,19 +295,47 @@ onBeforeUnmount(() => {
 }
 
 /* Avatar Zone - Tăng kích thước bao ngoài để Frame rộng đường bay lượn */
-.avatar-frame-zone {
+/* Avatar Tụ Linh Trận (Scaled down for Chat) */
+.spirit-array-center {
+  position: relative; 
+  width: 48px; 
+  height: 48px; 
   flex-shrink: 0;
-  width: 60px; /* Tăng từ 48px -> 60px để chứa Khung Cửu Vĩ / Phượng Hoàng */
-  display: flex;
+  display: flex; 
+  align-items: center; 
   justify-content: center;
-  padding-top: 4px;
+  overflow: visible;
+  --aura-primary: 56, 189, 248; /* Default blue for chat */
+}
+
+.spirit-array-center.frame-phoenix-fire { --aura-primary: 239, 68, 68; }
+.spirit-array-center.frame-bang-tinh { --aura-primary: 56, 189, 248; }
+.spirit-array-center.frame-thien-thanh { --aura-primary: 234, 179, 8; }
+.spirit-array-center.frame-nine-tails-purple { --aura-primary: 168, 85, 247; }
+.spirit-array-center.frame-chan-long { --aura-primary: 251, 191, 36; }
+
+.magic-circle-spin, .magic-circle-reverse {
+  position: absolute; 
+  inset: -3px; 
+  border-radius: 50%;
+  border: 1.5px dashed rgba(var(--aura-primary), 0.4);
+  animation: spinArray 20s linear infinite; 
+  pointer-events: none;
+  z-index: 0;
+  filter: drop-shadow(0 0 5px rgba(var(--aura-primary), 0.4));
+}
+.magic-circle-reverse {
+  inset: -6px; 
+  border: 1px dotted rgba(var(--aura-primary), 0.6);
+  animation: spinArrayReverse 15s linear infinite;
 }
 
 .avatar-wrapper {
   position: relative;
-  width: 44px; /* Tăng nhẹ đường kính avatar 40px -> 44px */
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
+  z-index: 1;
 }
 
 .msg-avatar {
@@ -316,32 +343,33 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   border-radius: 50%; 
-  border: 2px solid rgba(56, 189, 248, 0.3);
-  background: #1e293b;
+  border: 2px solid rgba(var(--aura-primary), 0.8);
+  background: #000;
   z-index: 2;
   object-fit: cover;
+  box-shadow: 0 0 10px rgba(var(--aura-primary), 0.2);
+  transform: scale(0.80); /* Match Ranking */
 }
 
-.avatar-frame-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(1.5); /* Scale to để che phủ tốt hơn */
-  width: 100%;
-  height: 100%;
+.hero-frame {
+  position: absolute; 
+  inset: 0; 
+  width: 100%; 
+  height: 100%; 
   object-fit: contain;
-  z-index: 3;
-  pointer-events: none;
+  transform: scale(1.45); 
+  z-index: 3; 
+  pointer-events: none; 
 }
 
 .crown-icon {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  font-size: 14px;
+  top: -4px;
+  right: -4px;
+  font-size: 11px;
   color: #fbbf24;
   z-index: 4;
-  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.9));
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.9));
   transform: rotate(15deg);
 }
 
@@ -529,11 +557,8 @@ onBeforeUnmount(() => {
   font-size: 0.9rem;
 }
 
-@keyframes pulse-spirit {
-  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
-  70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-}
+@keyframes spinArray { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spinArrayReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
 
 @keyframes fadeInMsg {
   from { opacity: 0; transform: translateY(10px); }

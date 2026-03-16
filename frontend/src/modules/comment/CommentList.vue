@@ -48,19 +48,21 @@
       <div v-for="comment in comments" :key="comment.id" class="fb-comment">
 
         <!-- Avatar -->
-        <div class="fb-avatar-shell" :class="comment.author_frame?.css_class || ''">
-          <div class="fb-avatar">
+        <div class="spirit-array-center comment-main" :class="comment.author_frame?.css_class">
+          <div class="magic-circle-spin" v-if="comment.author_frame"></div>
+          <div class="magic-circle-reverse" v-if="comment.author_frame"></div>
+          <div class="avatar-wrapper">
             <img
               :src="getAvatarUrl(comment.author_avatar)"
               :alt="comment.author_name"
-              class="avatar-img"
+              class="avatar-img item-img"
               @error="onAvatarError"
             />
             <img
               v-if="comment.author_frame?.image_url"
-              :src="comment.author_frame.image_url"
+              :src="getImageUrl(comment.author_frame.image_url)"
               :alt="comment.author_frame.name"
-              class="avatar-frame-overlay"
+              class="hero-frame"
             />
           </div>
         </div>
@@ -115,19 +117,21 @@
             <!-- Replies list (expanded) -->
             <div v-else class="fb-replies">
               <div v-for="reply in comment.replies" :key="reply.id" class="fb-reply">
-                <div class="fb-avatar-shell sm" :class="reply.author_frame?.css_class || ''">
-                  <div class="fb-avatar sm">
+                <div class="spirit-array-center comment-reply" :class="reply.author_frame?.css_class">
+                  <div class="magic-circle-spin" v-if="reply.author_frame"></div>
+                  <div class="magic-circle-reverse" v-if="reply.author_frame"></div>
+                  <div class="avatar-wrapper">
                     <img
                       :src="getAvatarUrl(reply.author_avatar)"
                       :alt="reply.author_name"
-                      class="avatar-img sm"
+                      class="avatar-img item-img"
                       @error="onAvatarError"
                     />
                     <img
                       v-if="reply.author_frame?.image_url"
-                      :src="reply.author_frame.image_url"
+                      :src="getImageUrl(reply.author_frame.image_url)"
                       :alt="reply.author_frame.name"
-                      class="avatar-frame-overlay sm"
+                      class="hero-frame"
                     />
                   </div>
                 </div>
@@ -144,7 +148,6 @@
                         {{ reply.author_name || 'ẩn danh' }}
                       </span>
                       <UserBadge :badge="reply.author_badge" size="sm" />
-                      <span v-if="reply.user_id === props.storyAuthorId" class="author-badge-tag">Tác giả</span>
                     </div>
                     <p class="comment-text">{{ reply.content }}</p>
                     <button
@@ -210,7 +213,7 @@ import { useCommentStore } from "./comment.store";
 import { useAuthStore } from "@/modules/auth/auth.store";
 import type { Comment } from "./comment.service";
 import UserBadge from "@/components/gamification/UserBadge.vue";
-import { getAvatarUrl } from "@/config/constants";
+import { getAvatarUrl, getImageUrl } from "@/config/constants";
 
 const props = withDefaults(
   defineProps<{
@@ -446,53 +449,82 @@ const onAvatarError = (e: Event) => {
 
 .fb-body { flex: 1; min-width: 0; }
 
-.fb-avatar-shell {
-  position: relative;
-  width: 42px;
-  height: 42px;
+/* Avatar Tụ Linh Trận (Scaled for Comments) */
+.spirit-array-center {
+  position: relative; 
   flex-shrink: 0;
-  --avatar-frame-scale: 1.32;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  overflow: visible;
+  --aura-primary: 1, 216, 245; /* Default cyan for comments */
 }
 
-.fb-avatar-shell.sm {
-  width: 32px;
-  height: 32px;
-}
+.spirit-array-center.comment-main { width: 50px; height: 50px; }
+.spirit-array-center.comment-reply { width: 36px; height: 36px; }
 
-.fb-avatar {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
+.spirit-array-center.frame-phoenix-fire { --aura-primary: 239, 68, 68; }
+.spirit-array-center.frame-bang-tinh { --aura-primary: 56, 189, 248; }
+.spirit-array-center.frame-thien-thanh { --aura-primary: 234, 179, 8; }
+.spirit-array-center.frame-nine-tails-purple { --aura-primary: 168, 85, 247; }
+.spirit-array-center.frame-chan-long { --aura-primary: 251, 191, 36; }
 
-.avatar-frame-overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
+.magic-circle-spin, .magic-circle-reverse {
+  position: absolute; 
+  inset: -3px; 
+  border-radius: 50%;
+  border: 1.5px dashed rgba(var(--aura-primary), 0.4);
+  animation: spinArray 20s linear infinite; 
   pointer-events: none;
-  transform: scale(var(--avatar-frame-scale));
-  transform-origin: center;
-  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.24));
+  z-index: 0;
+  filter: drop-shadow(0 0 6px rgba(var(--aura-primary), 0.4));
 }
+.spirit-array-center.comment-reply .magic-circle-spin { border-width: 0.8px; inset: -2.5px; }
 
-.avatar-frame-overlay.sm {
-  width: 100%;
-  height: 100%;
+.magic-circle-reverse {
+  inset: -6px; 
+  border: 1px dotted rgba(var(--aura-primary), 0.6);
+  animation: spinArrayReverse 15s linear infinite;
 }
+.spirit-array-center.comment-reply .magic-circle-reverse { border-width: 0.5px; inset: -4.5px; }
+
+.avatar-wrapper {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  z-index: 1;
+}
+.spirit-array-center.comment-reply .avatar-wrapper { width: 36px; height: 36px; }
 
 .avatar-img {
-  width: 42px; height: 42px;
-  border-radius: 50%;
+  border-radius: 50%; 
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: #000;
+  z-index: 2;
   object-fit: cover;
-  border: 2px solid var(--border-light);
-  flex-shrink: 0;
-  background: #1e293b;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  transition: all 0.3s;
 }
-.avatar-img.form-av-img { border-color: var(--aura-primary); }
+
+.spirit-array-center .avatar-img {
+  width: 100% !important; 
+  height: 100% !important;
+  border: 2px solid rgba(var(--aura-primary), 0.8) !important;
+  box-shadow: 0 0 10px rgba(var(--aura-primary), 0.2);
+  transform: scale(0.8); /* Exact HeroPanel scale */
+}
+
+.hero-frame {
+  position: absolute; 
+  inset: 0; 
+  width: 100%; 
+  height: 100%; 
+  object-fit: contain;
+  transform: scale(1.45); 
+  z-index: 3; 
+  pointer-events: none; 
+}
+.avatar-img.form-av-img { width: 42px; height: 42px; border-color: var(--aura-primary); }
 .avatar-img.sm { width: 32px; height: 32px; }
 
 .fb-bubble {
@@ -649,75 +681,10 @@ const onAvatarError = (e: Event) => {
 }
 
 
-.fb-avatar-shell.frame-phoenix-fire {
-  --avatar-frame-scale: 1.72;
-}
+/* Phoenix specific removal - handled by frame classes */
 
-.fb-avatar-shell.frame-bang-tinh {
-  --avatar-frame-scale: 1.22;
-}
-
-.fb-avatar-shell.frame-thien-thanh {
-  --avatar-frame-scale: 1.24;
-}
-
-.fb-avatar-shell.frame-phoenix-fire .avatar-frame-overlay,
-.fb-bubble.frame-phoenix-fire {
-  filter: drop-shadow(0 0 10px rgba(251, 146, 60, 0.5));
-}
-
-.fb-bubble.frame-phoenix-fire {
-  background:
-    radial-gradient(circle at top left, rgba(251, 191, 36, 0.22), transparent 38%),
-    linear-gradient(135deg, rgba(74, 29, 18, 0.92), rgba(124, 45, 18, 0.88), rgba(67, 20, 7, 0.94));
-  border-color: rgba(251, 146, 60, 0.42);
-  box-shadow: 0 0 24px rgba(249, 115, 22, 0.18), inset 0 0 20px rgba(255, 237, 213, 0.04);
-  animation: phoenixCommentPulse 3s ease-in-out infinite;
-}
-
-.fb-avatar-shell.frame-phoenix-fire::after {
-  content: '';
-  position: absolute;
-  inset: -7px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(251, 113, 133, 0.18), transparent 70%);
-  filter: blur(7px);
-  pointer-events: none;
-  animation: phoenixHalo 3s ease-in-out infinite;
-}
-
-.fb-bubble.frame-bang-tinh {
-  background:
-    radial-gradient(circle at top left, rgba(186, 230, 253, 0.22), transparent 36%),
-    linear-gradient(135deg, rgba(8, 47, 73, 0.92), rgba(15, 61, 94, 0.88), rgba(23, 37, 84, 0.94));
-  border-color: rgba(125, 211, 252, 0.32);
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
-}
-
-.fb-bubble.frame-thien-thanh {
-  background:
-    radial-gradient(circle at top left, rgba(216, 180, 254, 0.24), transparent 40%),
-    linear-gradient(135deg, rgba(49, 46, 129, 0.92), rgba(76, 29, 149, 0.88), rgba(30, 27, 75, 0.94));
-  border-color: rgba(196, 181, 253, 0.34);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.16);
-}
-
-@keyframes phoenixCommentPulse {
-  0%, 100% {
-    box-shadow: 0 0 18px rgba(249, 115, 22, 0.14), inset 0 0 18px rgba(255, 237, 213, 0.03);
-    transform: translateY(0);
-  }
-  50% {
-    box-shadow: 0 0 26px rgba(249, 115, 22, 0.28), inset 0 0 24px rgba(254, 215, 170, 0.07);
-    transform: translateY(-1px);
-  }
-}
-
-@keyframes phoenixHalo {
-  0%, 100% { opacity: 0.35; transform: scale(0.96); }
-  50% { opacity: 0.8; transform: scale(1.05); }
-}
-
+@keyframes spinArray { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spinArrayReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
 @keyframes plate-shine { 0% { transform: translateX(-160%); } 30%, 100% { transform: translateX(160%); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -747,4 +714,3 @@ const onAvatarError = (e: Event) => {
   letter-spacing: 0.5px;
 }
 </style>
-
