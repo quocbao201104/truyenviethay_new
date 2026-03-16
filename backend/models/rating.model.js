@@ -73,12 +73,15 @@ const Rating = {
   },
 
   //Lấy tất cả truyện có rating, sắp xếp theo rating trung bình
-  getAllTopRatedStories: async (limit = 50) => {
-    const cacheKey = `topRated:${limit}`;
+  getAllTopRatedStories: async ({ page = 1, limit = 50 } = {}) => {
+    const safePage = Math.max(1, parseInt(page, 10) || 1);
+    const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 50));
+    const offset = (safePage - 1) * safeLimit;
+    const cacheKey = `topRated:${safePage}:${safeLimit}`;
     
     return getOrSet(
       cacheKey,
-      600, // 10 minutes TTL (expensive aggregation with JOIN)
+      600, // 10 minutes TTL
       async () => {
         const [rows] = await db.query(
           `SELECT 
@@ -97,15 +100,30 @@ const Rating = {
             t.rating AS avg_rating,
             t.rating_count AS total_ratings
            FROM truyen_new t
-           WHERE t.trang_thai_kiem_duyet = 'duyet' AND t.rating_count > 0
+           WHERE t.trang_thai_kiem_duyet = 'duyet' AND t.rating_count >= 1
            ORDER BY t.rating DESC, t.rating_count DESC
-           LIMIT ?`,
-          [limit]
+           LIMIT ? OFFSET ?`,
+          [safeLimit, offset]
         );
-        return rows;
+
+        const [countResult] = await db.query(
+          `SELECT COUNT(*) as total FROM truyen_new t 
+           WHERE t.trang_thai_kiem_duyet = 'duyet' AND t.rating_count >= 1`
+        );
+
+        return {
+          data: rows,
+          pagination: {
+            total: countResult[0]?.total || 0,
+            current_page: safePage,
+            total_pages: Math.ceil((countResult[0]?.total || 0) / safeLimit) || 1,
+            limit: safeLimit,
+          }
+        };
       }
     );
   },
+
 };
 
 module.exports = Rating;

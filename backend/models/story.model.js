@@ -266,10 +266,11 @@ const StoryModel = {
       max_views = null,
       min_chapters = null,
       max_chapters = null,
+      min_days_ago = null,
     } = opts;
     const safePage = Math.max(1, parseInt(page, 10) || 1);
     const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
-    const hasFilters = !!(keyword?.trim() || category_ids || author_id || trang_thai || min_views != null || max_views != null || min_chapters != null || max_chapters != null);
+    const hasFilters = !!(keyword?.trim() || category_ids || author_id || trang_thai || min_views != null || max_views != null || min_chapters != null || max_chapters != null || min_days_ago != null);
     const cacheable = !hasFilters && safePage === 1;
     const cacheKey = cacheable ? `storyList:${sort_by}:${order}:${safeLimit}` : null;
 
@@ -295,6 +296,7 @@ const StoryModel = {
     max_views = null,
     min_chapters = null,
     max_chapters = null,
+    min_days_ago = null,
   }) => {
     const safePage = Math.max(1, parseInt(page, 10) || 1);
     const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
@@ -302,6 +304,8 @@ const StoryModel = {
     const allowedSort = ["ten_truyen", "luot_xem", "thoi_gian_cap_nhat", "hot_score", "thoi_gian_tao"];
     const sortField = allowedSort.includes(sort_by) ? `tn.${sort_by}` : "tn.thoi_gian_cap_nhat";
     const sortOrder = order.toUpperCase() === "ASC" ? "ASC" : "DESC";
+    // Secondary sort for fairness: if sorting by views, secondary sort by update time.
+    const secondarySort = (sort_by === "luot_xem" || sort_by === "hot_score") ? ", tn.thoi_gian_cap_nhat DESC" : "";
 
     let selectQuery = `SELECT tn.id, tn.ten_truyen, tn.tac_gia, tn.slug, tn.mo_ta, tn.anh_bia, tn.luot_xem, tn.thoi_gian_cap_nhat, tn.trang_thai,
                        tn.so_luong_chuong, tn.so_luong_chuong AS so_chuong, tn.chuong_moi
@@ -384,6 +388,10 @@ if (ids.length > 0) {
         whereConditions.push(`tn.so_luong_chuong <= ?`);
         params.push(parseInt(max_chapters));
     }
+    if (min_days_ago !== null && min_days_ago !== undefined && min_days_ago !== "") {
+        whereConditions.push(`tn.thoi_gian_tao >= DATE_SUB(NOW(), INTERVAL ? DAY)`);
+        params.push(parseInt(min_days_ago));
+    }
 
     const whereClause = `WHERE ${whereConditions.join(" AND ")}`;
     const havingClause = havingConditions.length > 0 ? `HAVING ${havingConditions.join(" AND ")}` : "";
@@ -393,7 +401,7 @@ if (ids.length > 0) {
        ${selectQuery}
        ${whereClause}
        ${havingClause}
-       ORDER BY ${sortField} ${sortOrder}
+       ORDER BY ${sortField} ${sortOrder}${secondarySort}
        LIMIT ? OFFSET ?
     `;
 

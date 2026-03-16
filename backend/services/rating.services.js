@@ -16,8 +16,8 @@ const RatingService = {
     return await Rating.getAverageRating(truyenId);
   },
 
-  getTopRatedStories: async (limit) => {
-    return await Rating.getAllTopRatedStories(limit);
+  getTopRatedStories: async (page, limit) => {
+    return await Rating.getAllTopRatedStories({ page, limit });
   },
 };
 

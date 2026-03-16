@@ -13,7 +13,7 @@ const updateChuongMoiNhat = async (truyen_id) => {
     [truyen_id, truyen_id]
   );
 
-  const chuongMoiString = info.max_so ? `Chương ${info.max_so}` : "Hiện tại chưa có chương tương ứng";
+  const chuongMoiString = info.max_so ? `Chương ${info.max_so}` : "0";
 
   await db.query(
     `UPDATE truyen_new SET chuong_moi = ?, so_luong_chuong = ? WHERE id = ?`,
@@ -42,15 +42,22 @@ const ChapterModel = {
     return { chapter_id: result.insertId };
   },
 
-  getChaptersByStoryId: async (truyen_id, limit, offset) => {
-    const [rows] = await db.query(
-      `SELECT id, truyen_id, so_chuong, tieu_de, slug, thoi_gian_dang, luot_xem
+  getChaptersByStoryId: async (truyen_id, limit, offset, min_no = null) => {
+    let query = `SELECT id, truyen_id, so_chuong, tieu_de, slug, thoi_gian_dang, luot_xem
         FROM chuong 
-        WHERE truyen_id = ? AND is_chuong_mau = 0 AND trang_thai = 'da_duyet'
-        ORDER BY so_chuong ASC
-        LIMIT ? OFFSET ?`,
-      [truyen_id, limit, offset]
-    );
+        WHERE truyen_id = ? AND is_chuong_mau = 0 AND trang_thai = 'da_duyet'`;
+    
+    const params = [truyen_id];
+
+    if (min_no !== null && min_no !== undefined) {
+      query += ` AND so_chuong > ? ORDER BY so_chuong ASC LIMIT ?`;
+      params.push(Number(min_no), Number(limit));
+    } else {
+      query += ` ORDER BY so_chuong ASC LIMIT ? OFFSET ?`;
+      params.push(Number(limit), Number(offset));
+    }
+
+    const [rows] = await db.query(query, params);
     return rows;
   },
 

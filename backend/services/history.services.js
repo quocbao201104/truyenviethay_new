@@ -71,7 +71,9 @@ exports.getReadingHistory = async (userId, page = 1, limit = DEFAULT_LIMIT) => {
       chuong_moi_nhat_so_chuong: so_chuong,
       chuong_slug: row.chuong_slug,
       last_read_chuong_id: row.chuong_id,
-      thoi_gian_doc: row.thoi_gian_doc,
+      thoi_gian_doc: row.thoi_gian_doc && typeof row.thoi_gian_doc === 'string' 
+        ? row.thoi_gian_doc.replace(" ", "T") + "Z" 
+        : row.thoi_gian_doc,
     });
   }
   return {

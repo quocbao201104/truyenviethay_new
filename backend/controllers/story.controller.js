@@ -45,6 +45,22 @@ const allStoriesCacheKey = (params) => {
   ].join(":");
 };
 
+const normalizeStory = (story) => {
+  if (!story) return story;
+  if (story.thoi_gian_cap_nhat && typeof story.thoi_gian_cap_nhat === 'string') {
+    story.thoi_gian_cap_nhat = story.thoi_gian_cap_nhat.replace(" ", "T") + "Z";
+  }
+  if (story.thoi_gian_tao && typeof story.thoi_gian_tao === 'string') {
+    story.thoi_gian_tao = story.thoi_gian_tao.replace(" ", "T") + "Z";
+  }
+  return story;
+};
+
+const normalizeStories = (stories) => {
+  if (!Array.isArray(stories)) return stories;
+  return stories.map(normalizeStory);
+};
+
 const getAllStories = async (req, res) => {
   try {
     const {
@@ -71,10 +87,12 @@ const getAllStories = async (req, res) => {
       order,
     };
 
-    const cacheKey = allStoriesCacheKey(params);
     const result = await getOrSet(cacheKey, ALL_STORIES_CACHE_TTL_SECONDS, () =>
       StoryModel.getAll(params)
     );
+    if (result && result.data) {
+      result.data = normalizeStories(result.data);
+    }
     res.status(200).json(result);
   } catch (error) {
     console.error("Lỗi khi lấy danh sách truyện (Admin):", error);
@@ -96,7 +114,8 @@ const getPublicStories = async (req, res) => {
       min_views,
       max_views,
       min_chapters,
-      max_chapters
+      max_chapters,
+      min_days_ago
     } = req.query;
 
     const result = await StoryModel.getPublicStories({
@@ -112,7 +131,11 @@ const getPublicStories = async (req, res) => {
       max_views,
       min_chapters,
       max_chapters,
+      min_days_ago,
     });
+    if (result && result.data) {
+      result.data = normalizeStories(result.data);
+    }
     res.json(result);
   } catch (err) {
     console.error("Lỗi khi lấy truyện public:", err);
@@ -169,7 +192,7 @@ const getStoryById = async (req, res) => {
     };
     if (req.user?.id) await attachUserContext(story, req.user.id);
 
-    res.status(200).json(story);
+    res.status(200).json(normalizeStory(story));
   } catch (error) {
     console.error("Lỗi khi lấy truyện theo ID:", error);
     res.status(500).json({ message: "Lỗi khi lấy truyện" });
@@ -197,7 +220,7 @@ const getStoryBySlug = async (req, res) => {
     };
     if (req.user?.id) await attachUserContext(story, req.user.id);
 
-    res.json(story);
+    res.json(normalizeStory(story));
   } catch (error) {
     res.status(500).json({ message: "Lỗi server", error });
   }
@@ -329,10 +352,10 @@ const deleteStory = async (req, res) => {
   }
 };
 
-const getPendingApproval = async (req, res) => {
+const getPendingApprovalNormalized = async (req, res) => {
   try {
     const stories = await StoryModel.getPendingApproval();
-    res.status(200).json(stories);
+    res.status(200).json(normalizeStories(stories));
   } catch (err) {
     console.error("Lỗi khi lấy truyện chờ duyệt:", err);
     res
@@ -378,6 +401,10 @@ const getMyStories = async (req, res) => {
        category_id: parseInt(category_id),
     });
 
+    if (result && result.data) {
+      result.data = normalizeStories(result.data);
+    }
+
     res.status(200).json(result);
   } catch (err) {
     console.error("Lỗi khi lấy truyện cá nhân:", err);
@@ -398,7 +425,7 @@ const getStoriesByUserId = async (req, res) => {
         .status(200)
         .json({ message: "Người dùng này chưa đăng truyện nào." });
     }
-    res.json(stories);
+    res.json(normalizeStories(stories));
   } catch (err) {
     console.error("Lỗi khi lấy truyện theo user:", err);
     res.status(500).json({ message: "Lỗi server" });
@@ -409,7 +436,10 @@ const getTopMonthlyStories = async (req, res) => {
   try {
     const limit = req.query.limit;
     const result = await StoryModel.getTopMonthlyStories(limit);
-    if (result.data) await attachAuthorRewards(result.data);
+    if (result.data) {
+      await attachAuthorRewards(result.data);
+      result.data = normalizeStories(result.data);
+    }
     res.json({ success: true, data: result.data, pagination: result.pagination });
   } catch (error) {
     console.error("getTopMonthlyStories error:", error);
@@ -421,7 +451,10 @@ const getTopWeeklyStories = async (req, res) => {
   try {
     const limit = req.query.limit;
     const result = await StoryModel.getTopWeeklyStories(limit);
-    if (result.data) await attachAuthorRewards(result.data);
+    if (result.data) {
+      await attachAuthorRewards(result.data);
+      result.data = normalizeStories(result.data);
+    }
     res.json({ success: true, data: result.data, pagination: result.pagination });
   } catch (error) {
     console.error("getTopWeeklyStories error:", error);
@@ -433,7 +466,10 @@ const getTopDailyStories = async (req, res) => {
   try {
     const limit = req.query.limit;
     const result = await StoryModel.getTopDailyStories(limit);
-    if (result.data) await attachAuthorRewards(result.data);
+    if (result.data) {
+      await attachAuthorRewards(result.data);
+      result.data = normalizeStories(result.data);
+    }
     res.json({ success: true, data: result.data, pagination: result.pagination });
   } catch (error) {
     console.error("getTopDailyStories error:", error);
@@ -445,6 +481,9 @@ const getHotStories = async (req, res) => {
   try {
     const limit = req.query.limit;
     const result = await StoryModel.getHotStories(limit);
+    if (result && result.data) {
+      result.data = normalizeStories(result.data);
+    }
     res.json({ success: true, data: result.data, pagination: result.pagination });
   } catch (error) {
     console.error("getHotStories error:", error);
@@ -457,7 +496,7 @@ module.exports = {
   getStoryById,
   updateStory,
   deleteStory,
-  getPendingApproval,
+  getPendingApproval: getPendingApprovalNormalized,
   approveOrRejectStory,
   getStoriesByUserId,
   getMyStories,

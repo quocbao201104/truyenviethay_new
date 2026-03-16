@@ -26,9 +26,10 @@ const RatingController = {
 
   getTopRated: async (req, res) => {
     try {
+      const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 50;
-      const stories = await RatingService.getTopRatedStories(limit);
-      res.status(200).json({ success: true, data: stories });
+      const result = await RatingService.getTopRatedStories(page, limit);
+      res.status(200).json(result);
     } catch (error) {
       res.status(error.status ?? 400).json({ error: error.message || "Lỗi khi lấy xếp hạng" });
     }

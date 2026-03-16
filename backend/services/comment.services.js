@@ -11,6 +11,38 @@ const COMMENT_CACHE_TTL = 60;
 const cacheKey = (truyenId, page) => `comments:${truyenId}:${page}`;
 const countCacheKey = (truyenId) => `comments:count:${truyenId}`;
 
+const fetchSingleComment = async (commentId) => {
+  const [rows] = await db.query(
+    `
+    SELECT c.*, COALESCE(NULLIF(u.full_name, ''), u.username) AS author_name, u.avatar AS author_avatar
+    FROM comments c
+    JOIN users_new u ON c.user_id = u.id
+    WHERE c.id = ?
+    `,
+    [commentId]
+  );
+  if (rows.length === 0) return null;
+  
+  const comment = rows[0];
+  const userId = comment.user_id;
+
+  const [levelMap, badgeMap, frameMap] = await Promise.all([
+    UserLevelHistory.getCurrentLevelsForUsers([userId]),
+    InventoryModel.getEquippedBadgesForUsers([userId]),
+    InventoryModel.getEquippedAvatarFramesForUsers([userId]),
+  ]);
+
+  comment.author_level_id = levelMap.get(userId) ?? null;
+  comment.author_badge = badgeMap.get(userId) ?? null;
+  comment.author_frame = frameMap.get(userId) ?? null;
+  if (comment.created_at && typeof comment.created_at === 'string') {
+    comment.created_at = comment.created_at.replace(" ", "T") + "Z";
+  }
+  comment.replies = [];
+
+  return comment;
+};
+
 const fetchComments = async (truyenId, page) => {
   const offset = (page - 1) * LIMIT;
   const comments = await commentModel.getCommentsByTruyen(truyenId, LIMIT, offset);
@@ -35,7 +67,10 @@ const fetchComments = async (truyenId, page) => {
     obj.author_level_id = levelMap.get(obj.user_id) ?? null;
     obj.author_badge = badgeMap.get(obj.user_id) ?? null;
     obj.author_frame = frameMap.get(obj.user_id) ?? null;
-    obj.content = obj.is_deleted ? "[Binh luan da bi xoa]" : obj.content;
+    obj.content = obj.is_deleted ? "[Bình luận đã bị xóa]" : obj.content;
+    if (obj.created_at && typeof obj.created_at === 'string' && !obj.created_at.endsWith('Z')) {
+      obj.created_at = obj.created_at.replace(" ", "T") + "Z";
+    }
     return obj;
   };
 
@@ -66,7 +101,9 @@ exports.addComment = async (userId, truyenId, content, parentId) => {
   const insertId = await commentModel.createComment(truyenId, userId, content, parentId);
   invalidate(`comments:${truyenId}`);
   invalidate(countCacheKey(truyenId));
-  return insertId;
+  
+  // Return the full comment object for instant frontend update
+  return await fetchSingleComment(insertId);
 };
 
 /** Kiểm tra quyền xóa: admin | author của truyện | chủ comment (trong 15p hoặc chưa có reply) */

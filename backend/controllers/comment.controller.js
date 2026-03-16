@@ -4,7 +4,7 @@ exports.createComment = async (req, res) => {
   try {
     const userId = req.user.id;
     const { truyen_id, content, parent_id } = req.body;
-    const commentId = await commentService.addComment(userId, truyen_id, content, parent_id);
+    const newComment = await commentService.addComment(userId, truyen_id, content, parent_id);
 
     // GAMIFICATION TRIGGER: Comment
     try {
@@ -20,7 +20,7 @@ exports.createComment = async (req, res) => {
         console.error("Gamification Setup Error:", e.message);
     }
 
-    res.json({ success: true });
+    res.json({ success: true, data: newComment });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

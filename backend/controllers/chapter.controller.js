@@ -5,6 +5,20 @@ const slugify = require("../utils/slugify");
 const { uploadChapterJson } = require("../services/r2ChapterStorage.service");
 const { getOrSet, invalidate } = require("../utils/cache");
 
+const normalizeChapter = (chapter) => {
+  if (!chapter) return chapter;
+  if (chapter.thoi_gian_dang && typeof chapter.thoi_gian_dang === 'string') {
+    chapter.thoi_gian_dang = chapter.thoi_gian_dang.replace(" ", "T") + "Z";
+  }
+  return chapter;
+};
+
+const normalizeChapters = (chapters) => {
+  if (!Array.isArray(chapters)) return chapters;
+  return chapters.map(normalizeChapter);
+};
+
+
 const CHAPTER_LIST_CACHE_TTL_SECONDS = 600; // 10 phút
 
 const chaptersByStoryKey = (storyId, page, limit) =>
@@ -94,18 +108,21 @@ const getChaptersByStoryId = async (req, res) => {
   try {
     const truyen_id = parseInt(req.params.id); 
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
+    const limit = Math.min(1000, Math.max(1, parseInt(req.query.limit, 10) || 20));
+    const min_no = req.query.min_no !== undefined ? parseInt(req.query.min_no, 10) : null;
     const offset = (page - 1) * limit;
 
     if (!truyen_id) {
       return res.status(400).json({ message: "Thiếu ID truyện!" });
     }
 
-    const cacheKey = chaptersByStoryKey(truyen_id, page, limit);
+    const cacheKey = min_no !== null 
+      ? `chaptersByStory:${truyen_id}:start:${min_no}:l:${limit}`
+      : chaptersByStoryKey(truyen_id, page, limit);
     const chapters = await getOrSet(cacheKey, CHAPTER_LIST_CACHE_TTL_SECONDS, () =>
-      ChapterModel.getChaptersByStoryId(truyen_id, limit, offset)
+      ChapterModel.getChaptersByStoryId(truyen_id, limit, offset, min_no)
     );
-    res.json({ chapters });
+    res.json({ chapters: normalizeChapters(chapters) });
   } catch (error) {
     console.error("getChaptersByStoryId error:", error);
     res.status(500).json({ message: "Lỗi server khi lấy danh sách chương." });
@@ -129,7 +146,7 @@ const getAdminChaptersByStoryId = async (req, res) => {
       limit,
       offset
     );
-    res.json({ chapters });
+    res.json({ chapters: normalizeChapters(chapters) });
   } catch (error) {
     console.error("getAdminChaptersByStoryId error:", error);
     res.status(500).json({ message: "Lỗi server khi lấy danh sách chương cho admin." });
@@ -146,7 +163,7 @@ const getChapterById = async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy chương!" });
     }
 
-    res.json(chapter);
+    res.json(normalizeChapter(chapter));
   } catch (error) {
     console.error("getChapterById error:", error);
     res.status(500).json({ message: "Lỗi server khi lấy chi tiết chương." });
@@ -195,7 +212,7 @@ const getChapterBySlug = async (req, res) => {
       }
     }
 
-    res.json(chapter);
+    res.json(normalizeChapter(chapter));
 
   } catch (error) {
     console.error("getChapterBySlug error:", error);

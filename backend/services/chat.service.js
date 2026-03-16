@@ -298,7 +298,7 @@ const ChatService = {
               userId: row.user_id,
               content: row.content,
               isMegaphone: !!row.is_megaphone,
-              timestamp: new Date(row.created_at).getTime(),
+              timestamp: new Date(String(row.created_at).replace(" ", "T") + "Z").getTime(),
               equipped_frame: snapshot.equipped_frame || null,
               equipped_chat_color: snapshot.equipped_chat_color || null,
               badge: snapshot.badge || null,
@@ -317,7 +317,7 @@ const ChatService = {
          LIMIT 50`,
       );
       const legacyMessages = rows.reverse().map((row) => {
-        let timestamp = new Date(row.created_at).getTime();
+        let timestamp = new Date(String(row.created_at).replace(" ", "T") + "Z").getTime();
         if (row.created_at instanceof Date) {
           timestamp = timestamp - row.created_at.getTimezoneOffset() * 60000;
         }
@@ -512,7 +512,7 @@ const ChatService = {
           userId: row.user_id,
           content: row.content,
           author_id: String(authorId),
-          timestamp: new Date(row.created_at).getTime(),
+          timestamp: new Date(String(row.created_at).replace(" ", "T") + "Z").getTime(),
           equipped_frame: snapshot.equipped_frame || null,
           equipped_chat_color: snapshot.equipped_chat_color || null,
           badge: snapshot.badge || null,
