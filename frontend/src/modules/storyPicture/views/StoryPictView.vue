@@ -7,11 +7,11 @@
           <i class="fas fa-palette dev-icon"></i>
         </div>
         
-        <h1 class="dev-title">Giao Diện Truyện Tranh</h1>
+        <h1 class="dev-title">Giao Diện Truyện Audio</h1>
         <h2 class="dev-subtitle">Tính năng đang được phát triển</h2>
         
         <p class="dev-message">
-          Các họa sư của chúng tôi đang ngày đêm tu luyện để mang đến trải nghiệm đọc truyện tranh tuyệt vời nhất. 
+          Các chuyên gia của chúng tôi đang ngày đêm tu luyện để mang đến trải nghiệm nghe truyện audio tuyệt vời nhất. 
           Đạo hữu vui lòng chờ và quay lại sau nhé!
         </p>
         

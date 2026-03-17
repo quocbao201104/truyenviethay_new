@@ -27,8 +27,8 @@
             <router-link to="/truyen-chu" class="btn-spirit emerald">
               <i class="fas fa-book-open mr-2"></i> Truyện Chữ
             </router-link>
-            <router-link to="/truyen-tranh" class="btn-spirit azure">
-              <i class="fas fa-image mr-2"></i> Truyện Tranh
+            <router-link to="/truyen-audio" class="btn-spirit azure">
+              <i class="fas fa-image mr-2"></i> Truyện Audio
             </router-link>
           </div>
         </div>
@@ -129,7 +129,7 @@ export default {
 
 .trang-chu-xianxia {
   font-family: "Be Vietnam Pro", sans-serif;
-  background-color: #05080f; /* Nền tối sâu */
+  background-color: #101724;
   color: #cbd5e1;
   min-height: 100vh;
   overflow-x: hidden;
@@ -146,14 +146,14 @@ export default {
 /* ===== TỐI ƯU ÁNH SÁNG HERO BANNER ===== */
 .hero-gate {
   position: relative;
-  min-height: 90vh; /* Tăng chiều cao để thấy rõ background */
+  min-height: 88vh;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   overflow: hidden;
   /* Thêm một lớp màu nền Indigo sâu làm gốc để tránh đen tuyền */
-  background-color: #050b18; 
+  background-color: #101724; 
 }
 
 .hero-bg-wrapper {
@@ -168,7 +168,7 @@ export default {
   object-fit: cover;
   object-position: center 30%;
   /* Giảm Blur xuống và tăng độ sáng (brightness) nhẹ */
-  filter: blur(2px) brightness(0.7) saturate(1.1);
+  filter: blur(1px) brightness(0.76) saturate(1.02);
   transform: scale(1.02);
   animation: spiritMove 30s ease-in-out infinite alternate;
 }
@@ -179,9 +179,9 @@ export default {
   inset: 0;
   background: radial-gradient(
     circle at 50% 50%, 
-    rgba(52, 211, 153, 0.1) 0%, /* Hào quang xanh nhẹ ở tâm */
-    rgba(5, 11, 24, 0.6) 50%,    /* Mờ dần */
-    #05080f 100%                 /* Đen sâu ở rìa */
+    rgba(91, 196, 232, 0.08) 0%,
+    rgba(16, 23, 36, 0.58) 50%,
+    #101724 100%
   );
 }
 
@@ -206,10 +206,10 @@ export default {
   width: 280px;
   height: auto;
   margin: 0 auto;
-  filter: drop-shadow(0 0 15px rgba(52, 211, 153, 0.4));
+  filter: drop-shadow(0 0 10px rgba(91, 196, 232, 0.18));
   transition: transform 0.4s ease;
 }
-.logo-spirit:hover { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(52, 211, 153, 0.6)); }
+.logo-spirit:hover { transform: scale(1.03); filter: drop-shadow(0 0 14px rgba(91, 196, 232, 0.24)); }
 
 .slogan-spirit {
   font-size: 1.2rem;
@@ -227,7 +227,7 @@ export default {
   margin: 0 auto 40px;
   color: #f8fafc;
   line-height: 1.5;
-  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
 }
 .text-highlight {
   background: linear-gradient(to right, #34d399, #60a5fa);
@@ -253,28 +253,28 @@ export default {
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 1px;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-spirit.emerald {
   background: linear-gradient(135deg, #10b981, #34d399);
   color: #05080f;
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 10px 22px rgba(4, 10, 20, 0.22);
 }
-.btn-spirit.emerald:hover { background: linear-gradient(135deg, #34d399, #6ee7b7); box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6); transform: translateY(-3px); }
+.btn-spirit.emerald:hover { background: linear-gradient(135deg, #34d399, #6ee7b7); box-shadow: 0 12px 24px rgba(4, 10, 20, 0.26); transform: translateY(-1px); }
 
 .btn-spirit.azure {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #f8fafc;
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
 }
-.btn-spirit.azure:hover { background: rgba(255, 255, 255, 0.1); border-color: #60a5fa; color: #60a5fa; box-shadow: 0 8px 30px rgba(96, 165, 250, 0.3); transform: translateY(-3px); }
+.btn-spirit.azure:hover { background: rgba(255, 255, 255, 0.08); border-color: #60a5fa; color: #60a5fa; box-shadow: none; transform: translateY(-1px); }
 
 /* ===== PHẦN GIỚI THIỆU ===== */
 .gioi-thieu-sect {
   padding: 80px 0;
-  background-image: radial-gradient(circle at 50% 100%, rgba(52, 211, 153, 0.03) 0%, transparent 60%);
+  background-image: radial-gradient(circle at 50% 100%, rgba(91, 196, 232, 0.04) 0%, transparent 60%);
 }
 
 .section-header-spirit {
@@ -303,28 +303,28 @@ export default {
 .stats-grid-aura {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
-  margin-bottom: 70px;
+  gap: 24px;
+  margin-bottom: 74px;
 }
 
 .stat-card {
-  background: rgba(11, 15, 25, 0.6);
-  border: 1px solid rgba(52, 211, 153, 0.1);
-  border-radius: 20px;
-  padding: 30px 20px;
+  background: rgba(21, 31, 47, 0.88);
+  border: 1px solid var(--app-border);
+  border-radius: 18px;
+  padding: 30px 22px;
   text-align: center;
-  backdrop-filter: blur(10px);
-  transition: transform 0.3s;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  backdrop-filter: none;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  box-shadow: var(--app-shadow-1);
 }
-.stat-card:hover { transform: translateY(-5px); border-color: rgba(52, 211, 153, 0.3); }
+.stat-card:hover { transform: translateY(-2px); border-color: rgba(91, 196, 232, 0.2); }
 
 .stat-icon { font-size: 2.5rem; margin-bottom: 15px; display: block; }
-.stat-icon.emerald { color: #34d399; filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.5)); }
-.stat-icon.azure { color: #60a5fa; filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.5)); }
-.stat-icon.gold { color: #fbbf24; filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5)); }
+.stat-icon.emerald { color: #34d399; filter: none; }
+.stat-icon.azure { color: #60a5fa; filter: none; }
+.stat-icon.gold { color: #fbbf24; filter: none; }
 
-.con-so { display: block; font-size: 2.5rem; font-weight: 900; color: #f8fafc; margin-bottom: 5px; text-shadow: 0 2px 10px rgba(255,255,255,0.2); }
+.con-so { display: block; font-size: 2.5rem; font-weight: 900; color: #f8fafc; margin-bottom: 5px; text-shadow: none; }
 .mo-ta { font-size: 1rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
 
 /* Features Grid */
@@ -336,18 +336,18 @@ export default {
 .features-grid-spirit {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 25px;
-  margin-bottom: 60px;
+  gap: 22px;
+  margin-bottom: 68px;
 }
 
 .feature-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(21, 31, 47, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   padding: 30px;
-  border-radius: 16px;
-  transition: all 0.3s ease;
+  border-radius: 18px;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
-.feature-card:hover { background: rgba(52, 211, 153, 0.05); border-color: rgba(52, 211, 153, 0.3); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+.feature-card:hover { background: rgba(91, 196, 232, 0.05); border-color: rgba(91, 196, 232, 0.18); transform: translateY(-2px); box-shadow: var(--app-shadow-1); }
 
 .feature-icon {
   width: 50px; height: 50px; border-radius: 12px;
@@ -361,7 +361,7 @@ export default {
 
 /* Kết thúc box */
 .ket-thuc-box {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 8, 15, 0));
+  background: linear-gradient(135deg, rgba(91, 196, 232, 0.08), rgba(5, 8, 15, 0));
   border-left: 4px solid #34d399;
   padding: 30px;
   border-radius: 0 16px 16px 0;

@@ -27,9 +27,9 @@
             <div class="btn-aura-sm"></div>
             <span class="btn-inner-sm">TRUYỆN CHỮ</span>
           </router-link>
-          <router-link to="/truyen-tranh" class="spirit-btn-sm dark-glass">
+          <router-link to="/truyen-audio" class="spirit-btn-sm dark-glass">
             <div class="btn-aura-sm"></div>
-            <span class="btn-inner-sm">TRUYỆN TRANH</span>
+            <span class="btn-inner-sm">TRUYỆN AUDIO</span>
           </router-link>
         </div>
       </div>
@@ -166,45 +166,38 @@ const truncateText = (text: string, length: number) => {
   grid-template-columns: 2fr 1fr;
   gap: 24px;
   height: 480px;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
   font-family: "Be Vietnam Pro", sans-serif;
   align-items: stretch;
 }
 
 /* Nền kính mờ (Đồng bộ Tinh Trần Hư Không) */
 .cosmic-glass {
-  background: rgba(2, 6, 23, 0.85);
-  border: 1px solid rgba(34, 211, 238, 0.2);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(34, 211, 238, 0.05);
+  background: rgba(18, 26, 39, 0.9);
+  border: 1px solid var(--app-border);
+  box-shadow: var(--app-shadow-2);
 }
 
 .main-highlight {
   position: relative;
-  border-radius: 20px;
+  border-radius: var(--app-radius-lg);
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 @media (hover: hover) {
   .main-highlight:hover {
-    transform: translateY(-4px);
-    border-color: rgba(34, 211, 238, 0.4);
-    box-shadow:
-      0 25px 50px rgba(34, 211, 238, 0.15),
-      inset 0 0 20px rgba(34, 211, 238, 0.1);
+    transform: translateY(-3px);
+    border-color: var(--app-border-accent);
+    box-shadow: var(--app-shadow-3);
   }
 
   .main-highlight:hover .book-cover-3d {
-    transform: perspective(1000px) rotateY(-5deg) scale(1.05);
-    box-shadow:
-      -20px 20px 40px rgba(0, 0, 0, 0.8),
-      0 0 50px rgba(34, 211, 238, 0.4);
+    transform: perspective(1000px) rotateY(-5deg) scale(1.03);
+    box-shadow: -18px 18px 34px rgba(3, 8, 18, 0.45);
   }
   
-  .main-highlight:hover .book-glow-aura {
-    opacity: 1;
-    transform: scale(1.1);
-  }
+  .main-highlight:hover .book-glow-aura { opacity: 0.5; transform: scale(1.03); }
 }
 
 .highlight-content {
@@ -212,7 +205,7 @@ const truncateText = (text: string, length: number) => {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  padding: 40px 50px;
+  padding: 42px 46px;
   display: flex;
   align-items: center;
   border-radius: inherit;
@@ -225,14 +218,14 @@ const truncateText = (text: string, length: number) => {
   width: 100%; height: 100%;
   object-fit: cover;
   object-position: top center;
-  filter: blur(45px) brightness(0.4) saturate(1.2);
+  filter: blur(22px) brightness(0.48) saturate(1.02);
   z-index: 1;
   transform: scale(1.1);
 }
 
 .overlay-gradient {
   position: absolute; inset: 0;
-  background: linear-gradient(90deg, rgba(2, 6, 23, 0.95) 0%, rgba(2, 6, 23, 0.8) 50%, transparent 100%);
+  background: linear-gradient(90deg, rgba(12, 18, 29, 0.92) 0%, rgba(12, 18, 29, 0.8) 54%, rgba(12, 18, 29, 0.18) 100%);
   z-index: 2;
 }
 
@@ -258,7 +251,7 @@ const truncateText = (text: string, length: number) => {
   margin-bottom: 20px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
+  box-shadow: none;
 }
 
 .main-title {
@@ -269,7 +262,7 @@ const truncateText = (text: string, length: number) => {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 10px rgba(34, 211, 238, 0.3));
+  filter: none;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -284,17 +277,17 @@ const truncateText = (text: string, length: number) => {
 .main-meta i { color: #22d3ee; } 
 
 .main-summary {
-  color: #cbd5e1; line-height: 1.7; margin-bottom: 35px; font-size: 1.05rem;
+  color: var(--app-text-muted); line-height: 1.8; margin-bottom: 35px; font-size: 1rem;
   display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical;
-  overflow: hidden; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
 }
 
 /* Nút Action */
 .actions { display: flex; gap: 16px; }
 
 .btn-cultivate-now {
-  background: linear-gradient(135deg, #0ea5e9, #22d3ee);
-  color: #020617;
+  background: linear-gradient(135deg, #4db8dc, #76daf0);
+  color: #08111a;
   padding: 12px 32px;
   border-radius: 12px;
   font-weight: 900;
@@ -302,32 +295,32 @@ const truncateText = (text: string, length: number) => {
   letter-spacing: 1px;
   display: flex; align-items: center; gap: 8px;
   transition: all 0.3s; cursor: pointer;
-  box-shadow: 0 6px 20px rgba(34, 211, 238, 0.3);
+  box-shadow: 0 10px 22px rgba(4, 10, 20, 0.22);
   border: 1px solid rgba(255,255,255,0.3);
 }
 
 .btn-cultivate-now:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(34, 211, 238, 0.6);
-  background: linear-gradient(135deg, #38bdf8, #7dd3fc);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(4, 10, 20, 0.26);
+  background: linear-gradient(135deg, #66cbe8, #88dff3);
 }
 
 .btn-info-glass {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--app-border);
   color: #e2e8f0;
   padding: 12px 28px;
   border-radius: 12px;
   font-weight: 700;
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
   transition: all 0.3s; cursor: pointer;
 }
 
 .btn-info-glass:hover {
-  background: rgba(34, 211, 238, 0.1);
-  border-color: rgba(34, 211, 238, 0.4);
-  color: #22d3ee;
-  box-shadow: 0 0 15px rgba(34, 211, 238, 0.2);
+  background: rgba(91, 196, 232, 0.08);
+  border-color: var(--app-border-accent);
+  color: var(--app-accent);
+  box-shadow: none;
 }
 
 /* Sách 3D */
@@ -340,26 +333,27 @@ const truncateText = (text: string, length: number) => {
   width: 100%; height: 100%; object-fit: cover; 
   object-position: top center;
   border-radius: 12px;
-  box-shadow: -15px 15px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(34, 211, 238, 0.2);
+  box-shadow: -15px 15px 30px rgba(3, 8, 18, 0.45);
   transform: perspective(1000px) rotateY(-15deg);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative; z-index: 2;
 }
 
 .book-glow-aura {
-  position: absolute; inset: -20px; background: radial-gradient(circle, rgba(34, 211, 238, 0.4) 0%, transparent 70%);
-  filter: blur(20px); opacity: 0; transition: all 0.5s; z-index: 1;
+  position: absolute; inset: -12px; background: radial-gradient(circle, rgba(91, 196, 232, 0.14) 0%, transparent 70%);
+  filter: blur(12px); opacity: 0; transition: all 0.35s ease; z-index: 1;
 }
 
 /* Chat Board Sidebar */
 .side-trending {
-  background: rgba(2, 6, 23, 0.75);
-  border-radius: 20px;
+  background: rgba(18, 26, 39, 0.82);
+  border-radius: var(--app-radius-lg);
   padding: 24px 20px;
-  border: 1px solid rgba(34, 211, 238, 0.15); 
+  border: 1px solid var(--app-border); 
   display: flex; flex-direction: column;
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: var(--app-shadow-2);
   height: 100%; box-sizing: border-box;
   min-height: 0;
   overflow: hidden;

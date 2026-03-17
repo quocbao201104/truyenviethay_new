@@ -214,6 +214,32 @@ Tối thiểu nên có:
 
 ## Chạy local
 
+### Docker dev stack
+
+Cách nhanh và ổn định nhất cho local dev hiện tại là chạy backend/frontend trên máy local, còn MySQL + Redis bằng Docker.
+
+Tại root project:
+
+```bash
+docker compose up -d mysql redis adminer
+cp backend/.env.docker.example backend/.env
+```
+
+Mặc định:
+
+- MySQL: `127.0.0.1:3307`
+- Redis: `127.0.0.1:6380`
+- Adminer: `http://localhost:8080`
+
+Sau khi stack lên, chạy migration:
+
+```bash
+docker compose exec -T mysql sh -lc 'for f in /migrations/[0-9][0-9]_*.sql; do echo "Applying $f"; mysql -h127.0.0.1 -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" < "$f"; done'
+docker compose exec -T mysql sh -lc 'mysql -h127.0.0.1 -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" < /migrations/create_story_views.sql'
+```
+
+Xem hướng dẫn đầy đủ tại [docs/LOCAL_DOCKER_DEV.md](C:/Users/Admin/Downloads/web/truyenviethay_new/docs/LOCAL_DOCKER_DEV.md).
+
 ### 1. Backend
 
 ```bash
@@ -271,11 +297,13 @@ Khi setup môi trường mới:
 
 ### CORS / domain
 
-Hiện tại CORS HTTP trong [backend/app.js](C:/Users/Admin/Downloads/web/truyenviethay_new/backend/app.js) đang dùng danh sách origin hardcode.
+HTTP API và Socket.io hiện đọc origin từ env:
 
-Socket.io trong [backend/config/socket.js](C:/Users/Admin/Downloads/web/truyenviethay_new/backend/config/socket.js) lại dùng `CLIENT_URL`.
+- `CLIENT_URL`
+- `CLIENT_URLS`
+- `CORS_ORIGINS`
 
-Nếu thêm domain mới, cần kiểm tra cả 2 nơi.
+Nếu thêm domain frontend mới, chỉ cần cập nhật env backend.
 
 ## Scripts / jobs nền
 

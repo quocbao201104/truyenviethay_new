@@ -42,7 +42,7 @@ const enrichMessagesWithFullName = async (messages = []) => {
 
   const placeholders = userIds.map(() => "?").join(",");
   const [rows] = await db.query(
-    `SELECT id, full_name, username, avatar FROM users_new WHERE id IN (${placeholders})`,
+    `SELECT id, full_name, username, avatar, role FROM users_new WHERE id IN (${placeholders})`,
     userIds
   );
 
@@ -50,6 +50,7 @@ const enrichMessagesWithFullName = async (messages = []) => {
     rows.map((row) => [Number(row.id), {
       fullName: row.full_name || row.username || "Anonymous",
       avatar: row.avatar || "",
+      role: row.role || null,
     }])
   );
   const frameMap = await InventoryModel.getEquippedAvatarFramesForUsers(userIds);
@@ -62,7 +63,8 @@ const enrichMessagesWithFullName = async (messages = []) => {
     return {
       ...message,
       fullName: message?.fullName || message?.full_name || userMeta?.fullName || message?.username || "Anonymous",
-       avatar: message?.avatar || userMeta?.avatar || "",
+      avatar: message?.avatar || userMeta?.avatar || "",
+      role: message?.role || message?.user_role || userMeta?.role || null,
       equipped_frame: message?.equipped_frame || frameMap.get(uid) || null,
       equipped_chat_color: message?.equipped_chat_color || colorMap.get(uid) || null,
       badge: message?.badge || badgeMap.get(uid) || null,
@@ -76,6 +78,7 @@ const ChatService = {
     username,
     fullName,
     avatar,
+    role,
     roomId,
     text,
     isMegaphone = false,
@@ -139,6 +142,7 @@ const ChatService = {
       username: username || displayName,
       fullName: displayName,
       avatar,
+      role: role || null,
       equipped_frame: frame,
       equipped_chat_color: chatColor,
       badge,
@@ -184,7 +188,7 @@ const ChatService = {
     return messageData;
   },
 
-  sendWorldMegaphone: async (userId, username, fullName, avatar, text) => {
+  sendWorldMegaphone: async (userId, username, fullName, avatar, role, text) => {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
@@ -205,6 +209,7 @@ const ChatService = {
         username,
         fullName,
         avatar,
+        role,
         1,
         text,
         false, // <--- CHANGED: normal world chat is NOT a scrolling megaphone
@@ -221,7 +226,7 @@ const ChatService = {
     }
   },
 
-  sendWorldMegaphoneItem: async (userId, username, fullName, avatar, text) => {
+  sendWorldMegaphoneItem: async (userId, username, fullName, avatar, role, text) => {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
@@ -259,6 +264,7 @@ const ChatService = {
         username,
         fullName,
         avatar,
+        role,
         1,
         text,
         true, // <--- This one IS a scrolling megaphone
@@ -430,7 +436,7 @@ const ChatService = {
     return { success: true, onlineCount: count };
   },
 
-  sendAuthorMessage: async (userId, username, fullName, avatar, authorId, text) => {
+  sendAuthorMessage: async (userId, username, fullName, avatar, role, authorId, text) => {
     const cooldownKey = `${REDIS_COOLDOWN_PREFIX}${userId}`;
     const onCooldown = await redis.exists(cooldownKey);
     if (onCooldown) {
@@ -470,6 +476,7 @@ const ChatService = {
       username: username || displayName,
       fullName: displayName,
       avatar,
+      role: role || null,
       equipped_frame: frame,
       equipped_chat_color: chatColor,
       badge,
@@ -529,4 +536,3 @@ const ChatService = {
 };
 
 module.exports = ChatService;
-

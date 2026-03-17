@@ -70,15 +70,15 @@ body {
   height: 100%;
   width: 100%;
   overflow-x: hidden;
-  background: #1a1d29;
+  background: var(--app-bg);
 }
 
 #app {
   font-family: 'Be Vietnam Pro', Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #1a1d29;
-  color: #ffffff;
+  background: transparent;
+  color: var(--app-text);
   width: 100vw;
   min-height: 100vh;
   margin: 0;
@@ -92,7 +92,7 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: #1a1d29;
+  background: var(--app-bg);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -106,7 +106,7 @@ body {
 .loader {
   width: 48px;
   height: 48px;
-  border: 4px solid #3b82f6;
+  border: 4px solid var(--app-accent);
   border-bottom-color: transparent;
   border-radius: 50%;
   display: inline-block;
@@ -116,7 +116,7 @@ body {
 }
 
 .loader-container p {
-  color: #3b82f6;
+  color: var(--app-accent);
   font-weight: 500;
   letter-spacing: 0.05em;
   font-size: 0.9rem;

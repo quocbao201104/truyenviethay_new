@@ -27,6 +27,8 @@ import MegaphoneTicker from "@/components/common/MegaphoneTicker.vue";
 
 .main-content {
   flex: 1;
-  background-color: #1a1d29; 
+  background:
+    radial-gradient(circle at top, rgba(91, 196, 232, 0.04), transparent 20%),
+    linear-gradient(180deg, #121a27 0%, #0f1623 50%, #0b111b 100%);
 }
 </style>

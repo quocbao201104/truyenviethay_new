@@ -24,7 +24,7 @@
         v-memo="[msg]"
         :class="['chat-msg-item', { 'is-megaphone': msg.isMegaphone }]"
       >
-        <div class="spirit-array-center small" :class="msg.equipped_frame?.css_class">
+        <div v-if="!msg.isMegaphone" class="spirit-array-center small" :class="msg.equipped_frame?.css_class">
           <div class="magic-circle-spin" v-if="msg.equipped_frame"></div>
           <div class="magic-circle-reverse" v-if="msg.equipped_frame"></div>
           <div class="avatar-wrapper">
@@ -47,16 +47,40 @@
           </div>
         </div>
 
-        <div class="msg-content">
-          <div class="msg-info">
-            <div v-if="msg.level" class="level-badge" :class="['level-' + msg.level.type, 'level-id-' + msg.level.id]">
-              <i v-if="msg.level.type === 'author'" class="fas fa-feather-alt mr-1"></i>
-              <i v-else class="fas fa-medal mr-1"></i>
+        <div v-if="msg.isMegaphone" class="megaphone-card">
+          <div class="megaphone-label">
+            <i class="fas fa-bullhorn megaphone-icon" aria-hidden="true"></i>
+            <span class="megaphone-title">Megaphone</span>
+          </div>
+          <div class="megaphone-body">{{ msg.content }}</div>
+          <div class="megaphone-meta">
+            <div class="megaphone-sender">
+              <i
+                v-if="getRoleIcon(msg)"
+                class="msg-role-icon"
+                :class="getRoleIcon(msg)"
+                aria-hidden="true"
+              ></i>
+              <span class="megaphone-name">{{ msg.fullName || msg.username || "Anonymous" }}</span>
             </div>
-            <span class="msg-user">{{
-              msg.fullName || msg.username || "Anonymous"
-            }}</span>
-            <UserBadge v-if="msg.badge" :badge="msg.badge" size="xs" />
+            <span class="megaphone-time">{{ formatTime(msg.timestamp) }}</span>
+          </div>
+        </div>
+
+        <div v-else class="msg-content">
+          <div class="msg-info">
+            <div class="msg-nameplate" :style="getIdentityStyle(msg)">
+              <i
+                v-if="getRoleIcon(msg)"
+                class="msg-role-icon"
+                :class="getRoleIcon(msg)"
+                aria-hidden="true"
+              ></i>
+              <span class="msg-user">{{
+                msg.fullName || msg.username || "Anonymous"
+              }}</span>
+              <UserBadge v-if="msg.badge" :badge="msg.badge" size="xs" />
+            </div>
             <span class="msg-time">{{ formatTime(msg.timestamp) }}</span>
           </div>
           <div class="msg-text-wrapper" :class="msg.equipped_chat_color?.css_class">
@@ -116,6 +140,26 @@ const formatTime = (timestamp: number) => {
   }
 };
 
+const getRoleAccent = (msg: any) => {
+  const role = String(msg.role || "").toUpperCase();
+  if (role === "ADMIN") return "#f0b7c2";
+  if (role === "MOD" || role === "MODERATOR") return "#9ed6ec";
+  if (msg.level?.type === "author") return "#e9cd84";
+  return "#8fa8c2";
+};
+
+const getRoleIcon = (msg: any) => {
+  const role = String(msg.role || "").toUpperCase();
+  if (role === "ADMIN") return "fas fa-shield-halved role-admin-icon";
+  if (role === "MOD" || role === "MODERATOR") return "fas fa-user-shield role-mod-icon";
+  if (msg.level?.type === "author") return "fas fa-feather-pointed role-author-icon";
+  return null;
+};
+
+const getIdentityStyle = (msg: any) => ({
+  "--identity-accent": msg.badge?.color || getRoleAccent(msg),
+});
+
 const scrollToEnd = () => {
   if (!msgList.value || !isAtBottom) return;
   msgList.value.scrollTop = msgList.value.scrollHeight;
@@ -163,18 +207,16 @@ onBeforeUnmount(() => {
 <style scoped>
 /* ===== CORE THEME - TRẬN PHÁP TRUYỀN ÂM ===== */
 .home-chat-board {
-  background: rgba(11, 15, 25, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 20px;
-  border: 1px solid rgba(56, 189, 248, 0.15);
+  background: rgba(18, 26, 39, 0.88);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: var(--app-radius-md);
+  border: 1px solid var(--app-border);
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: var(--app-shadow-1);
   position: relative;
 }
 
@@ -184,7 +226,7 @@ onBeforeUnmount(() => {
   position: absolute;
   top: -50%; left: -50%;
   width: 200%; height: 200%;
-  background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.05), transparent 50%);
+  background: radial-gradient(circle at 50% 0%, rgba(91, 196, 232, 0.03), transparent 48%);
   pointer-events: none;
   z-index: 0;
 }
@@ -199,8 +241,8 @@ onBeforeUnmount(() => {
   position: relative;
   z-index: 1;
   padding: 16px 20px;
-  background: linear-gradient(90deg, rgba(56, 189, 248, 0.1) 0%, transparent 100%);
-  border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+  background: linear-gradient(90deg, rgba(91, 196, 232, 0.08) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -215,14 +257,15 @@ onBeforeUnmount(() => {
 .icon-box {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  background: rgba(91, 196, 232, 0.12);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--app-accent);
   font-size: 1.1rem;
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  box-shadow: none;
+  border: 1px solid rgba(91, 196, 232, 0.18);
 }
 
 .board-title {
@@ -232,7 +275,7 @@ onBeforeUnmount(() => {
   text-transform: uppercase;
   letter-spacing: 1px;
   margin: 0;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  text-shadow: none;
 }
 
 .online-indicator {
@@ -243,7 +286,7 @@ onBeforeUnmount(() => {
   padding: 6px 12px;
   border-radius: 20px;
   border: 1px solid rgba(16, 185, 129, 0.2);
-  box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.05);
+  box-shadow: none;
 }
 
 .count {
@@ -264,7 +307,7 @@ onBeforeUnmount(() => {
   height: 6px;
   background: #10b981;
   border-radius: 50%;
-  animation: pulse-spirit 2s infinite;
+  animation: none;
 }
 
 /* ===== MESSAGE LIST ===== */
@@ -276,22 +319,26 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 20px; /* Tăng khoảng cách các dòng chat cho thoáng */
-  mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 100%);
+  gap: 16px;
+  mask-image: none;
+  -webkit-mask-image: none;
 }
 
 .chat-msg-item {
   display: flex;
   align-items: flex-start;
-  gap: 16px; /* Tăng gap để chữ xa avatar hơn một chút */
-  transition: transform 0.3s ease;
-  animation: fadeInMsg 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  gap: 14px;
+  transition: transform 0.2s ease;
+  animation: fadeInMsg 0.25s ease-out;
 }
 
 .chat-msg-item:hover {
-  transform: translateX(4px);
+  transform: translateX(2px);
   will-change: transform;
+}
+
+.chat-msg-item.is-megaphone {
+  display: block;
 }
 
 /* Avatar Zone - Tăng kích thước bao ngoài để Frame rộng đường bay lượn */
@@ -322,7 +369,7 @@ onBeforeUnmount(() => {
   animation: spinArray 20s linear infinite; 
   pointer-events: none;
   z-index: 0;
-  filter: drop-shadow(0 0 5px rgba(var(--aura-primary), 0.4));
+  filter: none;
 }
 .magic-circle-reverse {
   inset: -6px; 
@@ -347,7 +394,7 @@ onBeforeUnmount(() => {
   background: #000;
   z-index: 2;
   object-fit: cover;
-  box-shadow: 0 0 10px rgba(var(--aura-primary), 0.2);
+  box-shadow: none;
   transform: scale(0.80); /* Match Ranking */
 }
 
@@ -369,7 +416,7 @@ onBeforeUnmount(() => {
   font-size: 11px;
   color: #fbbf24;
   z-index: 4;
-  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.9));
+  filter: none;
   transform: rotate(15deg);
 }
 
@@ -382,6 +429,63 @@ onBeforeUnmount(() => {
   padding-top: 2px; /* Hạ thấp nội dung xuống xíu cho cân với avatar */
 }
 
+.megaphone-card {
+  position: relative;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(231, 189, 112, 0.12);
+  background: linear-gradient(180deg, rgba(73, 53, 26, 0.12), rgba(24, 30, 42, 0.88));
+}
+
+.megaphone-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  border-radius: 999px;
+  background: rgba(231, 189, 112, 0.52);
+}
+
+.megaphone-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(243, 209, 139, 0.82);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.megaphone-icon {
+  font-size: 10px;
+  color: #f0c97d;
+}
+
+.megaphone-title {
+  color: rgba(244, 213, 149, 0.9);
+}
+
+.megaphone-name {
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #d9e4ef;
+}
+
+.megaphone-body {
+  color: #f5f7fb;
+  font-size: 15px;
+  line-height: 1.68;
+  word-break: break-word;
+}
+
 .msg-info {
   display: flex;
   align-items: center;
@@ -390,24 +494,52 @@ onBeforeUnmount(() => {
   flex-wrap: wrap;
 }
 
-.level-badge {
+.msg-nameplate {
   display: inline-flex;
   align-items: center;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  gap: 6px;
+  min-width: 0;
+  max-width: min(100%, 290px);
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--identity-accent, #8fa8c2) 34%, rgba(255, 255, 255, 0.06));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--identity-accent, #8fa8c2) 16%, rgba(255, 255, 255, 0.04)),
+      rgba(255, 255, 255, 0.02)
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.level-user { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
-.level-author { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+.msg-role-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  opacity: 0.92;
+  flex-shrink: 0;
+}
+
+.role-admin-icon {
+  color: #f0b7c2;
+}
+
+.role-mod-icon {
+  color: #c6e7f5;
+}
+
+.role-author-icon {
+  color: #efd89d;
+}
 
 .msg-user {
   font-size: 0.9rem; /* Tên to hơn chút */
   font-weight: 800;
-  color: #e2e8f0;
+  color: #eef4fb;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .msg-time {
@@ -415,6 +547,34 @@ onBeforeUnmount(() => {
   color: #94a3b8; /* Tăng độ sáng (Màu cũ tối quá khó đọc) */
   margin-left: auto;
   font-style: italic; /* Nghiêng nhẹ tạo sự tách biệt */
+}
+
+.megaphone-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  color: rgba(209, 218, 230, 0.6);
+  flex-wrap: wrap;
+}
+
+.megaphone-sender {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.megaphone-sender .msg-role-icon {
+  font-size: 9px;
+  opacity: 0.84;
+}
+
+.megaphone-time {
+  color: rgba(209, 218, 230, 0.48);
+  font-size: 10px;
+  white-space: nowrap;
 }
 
 .msg-text-wrapper {
@@ -439,15 +599,15 @@ onBeforeUnmount(() => {
 
 /* 1. Tin nhắn thường (Truyền Âm Phù - Blue Glow) */
 .chat-msg-item:not(.is-megaphone) {
-  background: rgba(15, 23, 42, 0.4); /* Nền cực nhẹ để đỡ bị rối */
+  background: rgba(15, 23, 42, 0.42);
   padding: 14px;
-  border-radius: 16px;
+  border-radius: 14px;
   border-left: 3px solid #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.1); /* Thêm viền mờ */
+  border: 1px solid rgba(148, 163, 184, 0.08);
 }
 
 .chat-msg-item:not(.is-megaphone) .msg-user {
-  color: #38bdf8;
+  color: #eef4fb;
 }
 
 .msg-text {
@@ -470,17 +630,16 @@ onBeforeUnmount(() => {
 
 /* 2. Tin nhắn Megaphone (Loa Truyền Âm - Fire/Gold Glow) */
 .is-megaphone {
-  background: linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, rgba(15, 23, 42, 0.4) 100%);
-  padding: 14px;
-  border-radius: 16px;
-  border-left: 3px solid #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.2); /* Thêm viền lửa */
-  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.1);
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
 }
 
 .is-megaphone .msg-user {
-  color: #fbbf24;
-  text-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+  color: #eef4fb;
+  text-shadow: none;
 }
 
 /* BỎ MÀU NỀN CAM ĐẶC KỊT, CHỈ DÙNG CHỮ MÀU VÀNG KIM */
@@ -504,18 +663,17 @@ onBeforeUnmount(() => {
   position: relative;
   z-index: 1;
   padding: 16px 20px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.12);
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .join-chat-btn {
   width: 100%;
   height: 48px;
-  /* Đổi màu Xanh Công Nghiệp -> Gradient Xanh Ngọc Huyền Ảo Tiên Hiệp */
-  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-  border: 1px solid rgba(56, 189, 248, 0.3);
+  background: rgba(91, 196, 232, 0.14);
+  border: 1px solid rgba(91, 196, 232, 0.2);
   border-radius: 14px;
-  color: #fff;
+  color: #eaf4fd;
   font-weight: 800;
   font-size: 0.9rem;
   letter-spacing: 1px;
@@ -524,13 +682,13 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 6px 15px rgba(14, 165, 233, 0.3), inset 0 2px 0 rgba(255,255,255,0.1);
+  box-shadow: none;
 }
 
 .join-chat-btn:hover {
-  transform: translateY(-3px);
-  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
-  box-shadow: 0 10px 25px rgba(14, 165, 233, 0.5), inset 0 2px 0 rgba(255,255,255,0.2);
+  transform: translateY(-1px);
+  background: rgba(91, 196, 232, 0.2);
+  box-shadow: none;
 }
 
 .join-chat-btn:active {

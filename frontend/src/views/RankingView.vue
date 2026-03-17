@@ -329,10 +329,10 @@ const handleImageError = (event: Event) => {
 /* ===== CORE THEME - THANH VÂN (MÂY XANH) ===== */
 .ranking-container.thanh-van-theme {
   min-height: 100vh;
-  background: #081121;
+  background: #101724;
   color: #cbd5e1;
   font-family: 'Be Vietnam Pro', sans-serif;
-  padding-bottom: 50px;
+  padding: 24px 0 68px;
 }
 
 .container {
@@ -343,7 +343,7 @@ const handleImageError = (event: Event) => {
 /* ===== HEADER TU TIEN - THANH VÂN ===== */
 .section-header-block {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 52px;
 }
 
 .title-wrapper {
@@ -355,7 +355,7 @@ const handleImageError = (event: Event) => {
 .cloud-main {
   font-size: 2.5rem;
   color: #38bdf8;
-  filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.6));
+  filter: none;
   margin-bottom: 10px;
   animation: float-cloud 3s ease-in-out infinite;
 }
@@ -369,7 +369,7 @@ const handleImageError = (event: Event) => {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3));
+  filter: none;
 }
 
 .section-subtitle {
@@ -387,8 +387,8 @@ const handleImageError = (event: Event) => {
   margin-top: 18px;
   padding: 6px;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: rgba(18, 26, 39, 0.82);
+  border: 1px solid var(--app-border);
 }
 
 .rank-tab {
@@ -411,10 +411,10 @@ const handleImageError = (event: Event) => {
 }
 
 .rank-tab.active {
-  background: #38bdf8;
-  color: #04111f;
-  border-color: #38bdf8;
-  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+  background: rgba(91, 196, 232, 0.18);
+  color: #e9f7fd;
+  border-color: rgba(91, 196, 232, 0.28);
+  box-shadow: none;
 }
 
 .rank-subtabs {
@@ -426,8 +426,8 @@ const handleImageError = (event: Event) => {
 }
 
 .rank-subtab {
-  border: 1px solid rgba(56, 189, 248, 0.2);
-  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(91, 196, 232, 0.16);
+  background: rgba(21, 31, 47, 0.75);
   color: #cbd5e1;
   font-size: 0.7rem;
   font-weight: 800;
@@ -445,8 +445,8 @@ const handleImageError = (event: Event) => {
 }
 
 .rank-subtab.active {
-  background: rgba(56, 189, 248, 0.2);
-  border-color: rgba(56, 189, 248, 0.6);
+  background: rgba(91, 196, 232, 0.14);
+  border-color: rgba(91, 196, 232, 0.28);
   color: #e2e8f0;
 }
 
@@ -470,32 +470,42 @@ const handleImageError = (event: Event) => {
   width: 8px;
   height: 8px;
   background: #38bdf8;
-  box-shadow: 0 0 10px #38bdf8;
+  box-shadow: none;
 }
 
 /* ===== RANKING PILL (LỆNH BÀI THANH VÂN) ===== */
 .ranking-list-v2 {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .ranking-pill.mây-cap {
   display: flex;
   align-items: center;
-  background: #0f172a;
-  border: 1px solid #1e293b;
-  border-radius: 50px;
-  padding: 10px 25px 10px 10px;
+  background: rgba(21, 31, 47, 0.9);
+  border: 1px solid var(--app-border);
+  border-radius: 24px;
+  padding: 12px 22px 12px 12px;
   position: relative;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+  box-shadow: var(--app-shadow-1);
+}
+
+.ranking-pill.rank-cloud-1 {
+  transform: scale(1.025);
+  transform-origin: center;
 }
 
 .ranking-pill.mây-cap:hover {
-  transform: translateY(-5px);
-  border-color: #38bdf860;
-  background: #152033;
-  box-shadow: 0 10px 25px rgba(56, 189, 248, 0.1);
+  transform: translateY(-2px);
+  border-color: rgba(91, 196, 232, 0.24);
+  background: rgba(24, 35, 52, 0.95);
+  box-shadow: var(--app-shadow-2);
+}
+
+.ranking-pill.rank-cloud-1:hover {
+  transform: scale(1.025) translateY(-2px);
 }
 
 .rank-indicator {
@@ -503,7 +513,7 @@ const handleImageError = (event: Event) => {
   height: 60px;
   flex-shrink: 0;
   padding: 3px;
-  background: #1e293b;
+  background: rgba(148, 163, 184, 0.12);
   border-radius: 50%;
   z-index: 5;
 }
@@ -511,7 +521,7 @@ const handleImageError = (event: Event) => {
 .circle-inner {
   width: 100%;
   height: 100%;
-  background: #081121;
+  background: #101724;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -537,45 +547,45 @@ const handleImageError = (event: Event) => {
 .rank-aura-glow-cloud {
   position: absolute;
   inset: 0;
-  border-radius: 50px;
+  border-radius: 24px;
   opacity: 0;
-  filter: blur(20px);
+  filter: blur(10px);
   transition: opacity 0.4s;
   pointer-events: none;
 }
 
 .ranking-pill.mây-cap:hover .rank-aura-glow-cloud {
-  opacity: 0.2;
+  opacity: 0.12;
 }
 
 /* ===== STYLE CHO 3 THẺ TOP ĐẦU ===== */
 /* Top 1 - Ánh Kim / Lưu Ly */
 .ranking-pill.rank-cloud-1 { 
-  border-color: rgba(234, 179, 8, 0.6); 
-  background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), #0f172a);
-  box-shadow: 0 4px 20px rgba(234, 179, 8, 0.1);
+  border-color: rgba(243, 201, 107, 0.38); 
+  background: linear-gradient(135deg, rgba(243, 201, 107, 0.12), rgba(21, 31, 47, 0.92));
+  box-shadow: var(--app-shadow-1);
 }
-.rank-cloud-1 .rank-aura-glow-cloud { background: #eab308; }
+.rank-cloud-1 .rank-aura-glow-cloud { background: rgba(243, 201, 107, 0.85); }
 .rank-cloud-1 .circle-inner { border-color: #eab308; background: rgba(234, 179, 8, 0.12); }
 .rank-cloud-1 .rank-num { color: #eab308; }
 
 /* Top 2 - Ánh Bạc / Bích Không */
 .ranking-pill.rank-cloud-2 { 
-  border-color: rgba(148, 163, 184, 0.6); 
-  background: linear-gradient(135deg, rgba(148, 163, 184, 0.15), #0f172a);
-  box-shadow: 0 4px 20px rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.34); 
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.12), rgba(21, 31, 47, 0.92));
+  box-shadow: var(--app-shadow-1);
 }
-.rank-cloud-2 .rank-aura-glow-cloud { background: #94a3b8; }
+.rank-cloud-2 .rank-aura-glow-cloud { background: rgba(148, 163, 184, 0.7); }
 .rank-cloud-2 .circle-inner { border-color: #94a3b8; background: rgba(148, 163, 184, 0.12); }
 .rank-cloud-2 .rank-num { color: #cbd5e1; }
 
 /* Top 3 - Ánh Đồng / Thanh Lam */
 .ranking-pill.rank-cloud-3 { 
-  border-color: rgba(194, 65, 12, 0.6); 
-  background: linear-gradient(135deg, rgba(194, 65, 12, 0.15), #0f172a);
-  box-shadow: 0 4px 20px rgba(194, 65, 12, 0.1);
+  border-color: rgba(224, 129, 79, 0.36); 
+  background: linear-gradient(135deg, rgba(224, 129, 79, 0.12), rgba(21, 31, 47, 0.92));
+  box-shadow: var(--app-shadow-1);
 }
-.rank-cloud-3 .rank-aura-glow-cloud { background: #c2410c; }
+.rank-cloud-3 .rank-aura-glow-cloud { background: rgba(224, 129, 79, 0.75); }
 .rank-cloud-3 .circle-inner { border-color: #c2410c; background: rgba(194, 65, 12, 0.12); }
 .rank-cloud-3 .rank-num { color: #fb923c; }
 
@@ -587,8 +597,8 @@ const handleImageError = (event: Event) => {
   overflow: hidden;
   margin-left: 10px;
   flex-shrink: 0;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-  border: 1px solid #334155;
+  box-shadow: 0 8px 18px rgba(2, 8, 18, 0.24);
+  border: 1px solid rgba(148, 163, 184, 0.16);
   position: relative;
 }
 
@@ -601,7 +611,7 @@ const handleImageError = (event: Event) => {
 }
 
 .ranking-pill.mây-cap:hover .cover-img {
-  transform: scale(1.1) rotate(-1deg);
+  transform: scale(1.04);
 }
 
 /* ===== SPIRIT ARRAY AVATAR (Ranking Version) ===== */
@@ -620,7 +630,7 @@ const handleImageError = (event: Event) => {
   position: absolute; inset: -4px; border-radius: 50%;
   border: 1.5px dashed rgba(var(--aura-primary), 0.4);
   animation: spinArray 20s linear infinite; pointer-events: none;
-  filter: drop-shadow(0 0 8px rgba(var(--aura-primary), 0.5));
+  filter: none;
 }
 .magic-circle-reverse {
   inset: -7px; border: 1px dotted rgba(var(--aura-primary), 0.6);
@@ -630,7 +640,7 @@ const handleImageError = (event: Event) => {
 .hero-avatar {
   position: relative; z-index: 2; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
   border: 2px solid rgba(var(--aura-primary), 0.8); background: #000;
-  box-shadow: 0 0 15px rgba(var(--aura-primary), 0.2);
+  box-shadow: none;
   transform: scale(0.80);
 }
  
@@ -653,16 +663,23 @@ const handleImageError = (event: Event) => {
 }
 
 .title-link {
-  font-size: 1.3rem;
+  font-size: 1.18rem;
   font-weight: 800;
   color: #f1f5f9;
   text-decoration: none;
   display: block;
-  margin-bottom: 5px;
-  white-space: nowrap;
+  margin-bottom: 6px;
+  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.45;
+  max-height: 2.9em;
   transition: color 0.3s;
+}
+
+.rank-cloud-1 .title-link,
+.rank-cloud-1 .story-name {
+  font-weight: 900;
 }
 
 .title-link:hover {
@@ -671,13 +688,14 @@ const handleImageError = (event: Event) => {
 
 .author-name-plate { display: flex; align-items: center; gap: 8px; }
 .author-name-text { font-weight: 800; }
-.story-name { font-weight: 800; font-size: 1.2rem; }
+.story-name { font-weight: 800; font-size: 1.1rem; }
 
 .meta-row.meta-row-cloud {
   display: flex;
   gap: 15px;
-  font-size: 0.8rem;
-  color: #64748b;
+  font-size: 0.78rem;
+  color: var(--app-text-subtle);
+  flex-wrap: wrap;
 }
 
 .meta-row span {
@@ -688,13 +706,18 @@ const handleImageError = (event: Event) => {
 
 /* Score Crystal (Linh Đan Đánh Giá) */
 .score-crystal-cloud {
-  background: #081121;
-  border: 1px solid #1e293b;
-  padding: 10px 15px;
-  border-radius: 20px;
+  background: rgba(14, 20, 31, 0.52);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  padding: 10px 14px;
+  border-radius: 14px;
   text-align: center;
   min-width: 80px;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+  box-shadow: none;
+  margin-left: 16px;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .star-row {
@@ -712,7 +735,7 @@ const handleImageError = (event: Event) => {
 
 .score-crystal-cloud .total {
   font-size: 0.6rem;
-  color: #475569;
+  color: var(--app-text-subtle);
   text-transform: uppercase;
   font-weight: 700;
 }

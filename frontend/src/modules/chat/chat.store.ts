@@ -11,6 +11,7 @@ export interface Message {
   userId: number;
   username?: string;
   fullName?: string;
+  role?: string | null;
   avatar?: string;
   content: string;
   timestamp: number;
@@ -64,6 +65,7 @@ export const useChatStore = defineStore("chat", () => {
     userId: Number(msg?.userId),
     username: msg?.username || "",
     fullName: msg?.fullName || msg?.full_name || msg?.username || "Anonymous",
+    role: msg?.role || msg?.user_role || null,
     avatar: msg?.avatar || "",
     content: msg?.content || msg?.text || "",
     timestamp: Number(msg?.timestamp) || Date.now(),
@@ -246,4 +248,3 @@ export const useChatStore = defineStore("chat", () => {
     openWithMegaphone,
   };
 });
-

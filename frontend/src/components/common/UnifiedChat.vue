@@ -1,6 +1,5 @@
-cd<template>
-  <!-- Chat Bubble Floating (FAB) -->
-  <div 
+<template>
+  <div
     v-if="authStore.isLoggedIn"
     class="chat-bubble-fab"
     :class="{ hidden: chatStore.isOpen }"
@@ -35,16 +34,11 @@ cd<template>
               class="author-tab-wrap"
             >
               <button
-                :class="[
-                  'tab',
-                  { active: chatStore.activeTabId === room.authorId },
-                ]"
+                :class="['tab', { active: chatStore.activeTabId === room.authorId }]"
                 @click="chatStore.switchTab(room.authorId)"
               >
                 <i class="fas fa-at text-[10px] opacity-50"></i> {{ room.name }}
-                <span v-if="room.unreadCount > 0" class="badge">{{
-                  room.unreadCount
-                }}</span>
+                <span v-if="room.unreadCount > 0" class="badge">{{ room.unreadCount }}</span>
               </button>
               <button
                 class="close-tab-btn"
@@ -59,14 +53,14 @@ cd<template>
         <div class="header-actions">
           <button
             class="header-btn"
-            title="Thu nhỏ"
+            title="Thu nho"
             @click="chatStore.isOpen = false"
           >
             <i class="fas fa-minus"></i>
           </button>
-          <button 
-            class="header-btn close" 
-            title="Đóng"
+          <button
+            class="header-btn close"
+            title="Dong"
             @click="chatStore.isOpen = false"
           >
             <i class="fas fa-times"></i>
@@ -83,67 +77,124 @@ cd<template>
 
       <div class="message-list scrollbar-custom" ref="messageList">
         <div
-          v-for="(msg, index) in currentMessages"
-          :key="index"
+          v-for="(item, index) in groupedMessages"
+          :key="item.msg.id ?? item.msg.timestamp ?? index"
           class="message-row"
-          :class="{ mine: isMine(msg), 'megaphone-row': msg.isMegaphone }"
+          :class="[
+            { mine: item.mine, 'megaphone-row': item.msg.isMegaphone },
+            item.showIdentity ? 'group-start' : 'group-continue',
+          ]"
         >
-          <div v-if="!isMine(msg)" class="spirit-array-center chat-mini" :class="msg.equipped_frame?.css_class">
-            <div class="magic-circle-spin" v-if="msg.equipped_frame"></div>
-            <div class="magic-circle-reverse" v-if="msg.equipped_frame"></div>
-            <div class="avatar-wrapper">
-              <img class="avatar item-img" :src="getAvatarUrl(msg.avatar)" alt="avatar" />
-              <img
-                v-if="msg.equipped_frame?.image_url"
-                class="hero-frame"
-                :src="getImageUrl(msg.equipped_frame.image_url)"
-                :alt="msg.equipped_frame.name"
-              />
-            </div>
-          </div>
-
           <div class="bubble-wrap">
-            <div class="name" v-if="!isMine(msg)">
-              <span v-if="msg.level" class="[msg.level.type]">
-              </span>
-              {{ msg.fullName || msg.username }}
-              <UserBadge v-if="msg.badge" :badge="msg.badge" size="xs" />
+            <div v-if="item.msg.isMegaphone" class="megaphone-card">
+              <div class="megaphone-label">
+                <i class="fas fa-bullhorn megaphone-icon" aria-hidden="true"></i>
+                <span class="megaphone-title">Megaphone</span>
+              </div>
+              <div class="megaphone-body">
+                {{ item.msg.content }}
+              </div>
+              <div class="megaphone-meta">
+                <div class="megaphone-sender">
+                  <i
+                    v-if="getRoleIcon(item.msg)"
+                    class="identity-icon"
+                    :class="getRoleIcon(item.msg)"
+                    aria-hidden="true"
+                  ></i>
+                  <span class="megaphone-name">{{ getDisplayName(item.msg) }}</span>
+                </div>
+                <span class="megaphone-time">
+                  {{ item.msg.timestamp ? formatTime(item.msg.timestamp) : "" }}
+                </span>
+              </div>
             </div>
-            
-            <div class="bubble-content" :class="[msg.equipped_frame?.css_class || '', msg.equipped_chat_color?.css_class || '']">
+
+            <template v-else>
+            <div v-if="!item.mine && item.showIdentity" class="identity-row">
+              <div
+                class="spirit-array-center chat-mini"
+                :class="item.msg.equipped_frame?.css_class"
+              >
+                <div class="magic-circle-spin" v-if="item.msg.equipped_frame"></div>
+                <div class="magic-circle-reverse" v-if="item.msg.equipped_frame"></div>
+                <div class="avatar-wrapper">
+                  <img class="avatar item-img" :src="getAvatarUrl(item.msg.avatar)" alt="avatar" />
+                  <img
+                    v-if="item.msg.equipped_frame?.image_url"
+                    class="hero-frame"
+                    :src="getImageUrl(item.msg.equipped_frame.image_url)"
+                    :alt="item.msg.equipped_frame.name"
+                  />
+                </div>
+              </div>
+
+              <div class="identity-meta">
+                <div class="name" :style="getIdentityStyle(item.msg)">
+                  <i
+                    v-if="getRoleIcon(item.msg)"
+                    class="identity-icon"
+                    :class="getRoleIcon(item.msg)"
+                    aria-hidden="true"
+                  ></i>
+                  <span class="username-text">{{ item.msg.fullName || item.msg.username }}</span>
+                  <UserBadge v-if="item.msg.badge" :badge="item.msg.badge" size="xs" />
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="bubble-content"
+              :class="[
+                {
+                  'with-identity-offset': !item.mine,
+                  'with-header': !item.mine && item.showIdentity,
+                },
+                item.msg.equipped_frame?.css_class || '',
+                item.msg.equipped_chat_color?.css_class || '',
+              ]"
+            >
               <div class="bubble-wrapper">
                 <img
-                  v-if="msg.equipped_chat_color?.image_url"
-                  :src="msg.equipped_chat_color.image_url"
+                  v-if="item.msg.equipped_chat_color?.image_url"
+                  :src="item.msg.equipped_chat_color.image_url"
                   alt="chat frame"
                   class="chat-bg-frame"
                 />
-                <div class="bubble" :class="[{ megaphone: msg.isMegaphone }, { 'has-frame': msg.equipped_chat_color?.image_url }, msg.equipped_frame?.css_class || '', msg.equipped_chat_color?.css_class || '']">
-                  {{ msg.content }}
+                <div
+                  class="bubble"
+                  :class="[
+                    { megaphone: item.msg.isMegaphone },
+                    { 'has-frame': item.msg.equipped_chat_color?.image_url },
+                    item.msg.equipped_frame?.css_class || '',
+                    item.msg.equipped_chat_color?.css_class || ''
+                  ]"
+                >
+                  {{ item.msg.content }}
                 </div>
               </div>
-              <span class="msg-time-tip">{{
-                msg.timestamp ? formatTime(msg.timestamp) : ""
-              }}</span>
+              <span class="msg-time-tip">
+                {{ item.msg.timestamp ? formatTime(item.msg.timestamp) : "" }}
+              </span>
             </div>
+            </template>
           </div>
         </div>
 
-        <div v-if="currentMessages.length === 0" class="empty-state">
+        <div v-if="groupedMessages.length === 0" class="empty-state">
           <i class="fas fa-comments opacity-10 text-5xl mb-2"></i>
-          <p>Hãy bắt đầu cuộc trò chuyện!</p>
+          <p>Hay bat dau cuoc tro chuyen!</p>
         </div>
       </div>
 
       <div class="input-area" :class="{ disabled: !authStore.isLoggedIn }">
-        <!-- the old megaphone bar has been removed -->
         <div class="input-wrapper">
           <button
             v-if="chatStore.activeTabId === 'world'"
             class="megaphone-toggle-btn"
             :class="{ active: isMegaphoneActive }"
             @click="toggleMegaphone"
-            title="Bật/tắt Loa Truyền Âm"
+            title="Bat tat Loa Truyen Am"
           >
             <i class="fas fa-bullhorn"></i>
             <span v-if="megaphoneCooldown > 0" class="cd-overlay">{{ megaphoneCooldown }}s</span>
@@ -151,26 +202,20 @@ cd<template>
           <input
             v-model="newMessage"
             @keyup.enter="handleSendMessage"
-            :placeholder="
-              authStore.isLoggedIn ? 'Nhập nội dung...' : 'Đăng nhập để chat'
-            "
+            :placeholder="authStore.isLoggedIn ? 'Nhap noi dung...' : 'Dang nhap de chat'"
             maxlength="500"
             :disabled="!authStore.isLoggedIn || cooldown > 0"
           />
           <button
             class="send-btn"
             @click="handleSendMessage"
-            :disabled="
-              !authStore.isLoggedIn || cooldown > 0 || !newMessage.trim()
-            "
+            :disabled="!authStore.isLoggedIn || cooldown > 0 || !newMessage.trim()"
           >
             <i
               v-if="cooldown > 0"
               class="fas fa-circle-notch fa-spin text-xs"
             ></i>
-            <span v-else-if="cooldown === 0"
-              ><i class="fas fa-paper-plane"></i
-            ></span>
+            <span v-else-if="cooldown === 0"><i class="fas fa-paper-plane"></i></span>
             <span v-if="cooldown > 0" class="cd-number">{{ cooldown }}</span>
           </button>
         </div>
@@ -195,19 +240,23 @@ const chatStore = useChatStore();
 const newMessage = ref("");
 const cooldown = ref(0);
 const messageList = ref<HTMLElement | null>(null);
+const hasMegaphoneItem = ref(false);
+const isMegaphoneActive = ref(false);
+const megaphoneCooldown = ref(0);
+
+let cooldownInterval: ReturnType<typeof setInterval> | null = null;
+let megaphoneInterval: ReturnType<typeof setInterval> | null = null;
+
 const formatTime = (timestamp: number) => {
   try {
     return formatDistanceToNow(new Date(timestamp), {
       addSuffix: true,
       locale: vi,
     });
-  } catch (e) {
-    return "vừa xong";
+  } catch {
+    return "vua xong";
   }
 };
-
-let cooldownInterval: any = null;
-const hasMegaphoneItem = ref(false);
 
 const currentMessages = computed(() => {
   if (chatStore.activeTabId === "world") return chatStore.worldMessages;
@@ -216,9 +265,7 @@ const currentMessages = computed(() => {
 
 const currentOnlineCount = computed(() => {
   if (chatStore.activeTabId === "world") return chatStore.onlineCountWorld;
-  return (
-    chatStore.joinedAuthorRooms.get(chatStore.activeTabId)?.onlineCount || 0
-  );
+  return chatStore.joinedAuthorRooms.get(chatStore.activeTabId)?.onlineCount || 0;
 });
 
 const totalUnread = computed(() => {
@@ -229,43 +276,91 @@ const totalUnread = computed(() => {
   return count;
 });
 
-const isMine = (msg: Message) =>
-  Number(msg.userId) === Number(authStore.user?.id);
+const isMine = (msg: Message) => Number(msg.userId) === Number(authStore.user?.id);
 
-const scrollToEnd = () => {
-  if (messageList.value) {
-    messageList.value.scrollTo({
-      top: messageList.value.scrollHeight,
-      behavior: "smooth",
-    });
-  }
+const getDisplayName = (msg: Message) => msg.fullName || msg.username || "Anonymous";
+
+const getRoleAccent = (msg: Message) => {
+  const role = String(msg.role || "").toUpperCase();
+  if (role === "ADMIN") return "#f0b7c2";
+  if (role === "MOD" || role === "MODERATOR") return "#9ed6ec";
+  if (msg.level?.type === "author") return "#e9cd84";
+  return "#8fa8c2";
 };
 
-const isMegaphoneActive = ref(false);
+const getRoleIcon = (msg: Message) => {
+  const role = String(msg.role || "").toUpperCase();
+  if (role === "ADMIN") return "fas fa-shield-halved role-admin-icon";
+  if (role === "MOD" || role === "MODERATOR") return "fas fa-user-shield role-mod-icon";
+  if (msg.level?.type === "author") return "fas fa-feather-pointed role-author-icon";
+  return null;
+};
 
-// Auto-activate megaphone when triggered from Inventory (item ID 3 "Dùng ngay")
+const getIdentityStyle = (msg: Message) => ({
+  "--identity-accent": msg.badge?.color || getRoleAccent(msg),
+});
+
+const shouldGroupMessages = (prev?: Message | null, current?: Message | null) => {
+  if (!prev || !current) return false;
+  if (prev.isMegaphone || current.isMegaphone) return false;
+  return Number(prev.userId) === Number(current.userId);
+};
+
+const groupedMessages = computed(() =>
+  currentMessages.value.map((msg, index, list) => {
+    const prev = index > 0 ? list[index - 1] : null;
+    const next = index < list.length - 1 ? list[index + 1] : null;
+
+    return {
+      msg,
+      mine: isMine(msg),
+      showIdentity: !shouldGroupMessages(prev, msg),
+      groupEnd: !shouldGroupMessages(msg, next),
+    };
+  }),
+);
+
+const scrollToEnd = () => {
+  if (!messageList.value) return;
+  messageList.value.scrollTo({
+    top: messageList.value.scrollHeight,
+    behavior: "smooth",
+  });
+};
+
 watch(
   () => chatStore.pendingMegaphoneActivation,
   (pending) => {
-    if (pending && hasMegaphoneItem.value) {
+    if (!pending) return;
+
+    if (hasMegaphoneItem.value) {
       isMegaphoneActive.value = true;
       chatStore.pendingMegaphoneActivation = false;
-    } else if (pending && !hasMegaphoneItem.value) {
-      // Re-check access then activate
-      refreshMegaphoneAccess().then(() => {
-        if (hasMegaphoneItem.value) isMegaphoneActive.value = true;
-        chatStore.pendingMegaphoneActivation = false;
-      });
+      return;
     }
+
+    refreshMegaphoneAccess().then(() => {
+      if (hasMegaphoneItem.value) isMegaphoneActive.value = true;
+      chatStore.pendingMegaphoneActivation = false;
+    });
   },
 );
 
 const toggleMegaphone = () => {
   if (!hasMegaphoneItem.value) {
-    alert("Bạn cần mua 'Loa Truyền Âm' trong Cửa Hàng để sử dụng chức năng này!");
+    alert("Ban can mua 'Loa Truyen Am' trong Cua Hang de su dung chuc nang nay!");
     return;
   }
   isMegaphoneActive.value = !isMegaphoneActive.value;
+};
+
+const startCooldown = () => {
+  cooldown.value = 3;
+  if (cooldownInterval) clearInterval(cooldownInterval);
+  cooldownInterval = setInterval(() => {
+    cooldown.value--;
+    if (cooldown.value <= 0 && cooldownInterval) clearInterval(cooldownInterval);
+  }, 1000);
 };
 
 const handleSendMessage = async () => {
@@ -278,13 +373,12 @@ const handleSendMessage = async () => {
       if (isMegaphoneActive.value) {
         if (megaphoneCooldown.value > 0) return;
         await axios.post("/api/chat/world/megaphone", { message: text });
-        
-        // Start Megaphone cooldown
+
         megaphoneCooldown.value = 60;
         if (megaphoneInterval) clearInterval(megaphoneInterval);
         megaphoneInterval = setInterval(() => {
           megaphoneCooldown.value--;
-          if (megaphoneCooldown.value <= 0) clearInterval(megaphoneInterval);
+          if (megaphoneCooldown.value <= 0 && megaphoneInterval) clearInterval(megaphoneInterval);
         }, 1000);
       } else {
         await axios.post("/api/chat/world", { message: text });
@@ -301,27 +395,6 @@ const handleSendMessage = async () => {
   }
 };
 
-const megaphoneCooldown = ref(0);
-let megaphoneInterval: any = null;
-
-const startCooldown = () => {
-  cooldown.value = 3;
-  if (cooldownInterval) clearInterval(cooldownInterval);
-  cooldownInterval = setInterval(() => {
-    cooldown.value--;
-    if (cooldown.value <= 0) clearInterval(cooldownInterval);
-  }, 1000);
-};
-
-watch(
-  () => [currentMessages.value.length, chatStore.activeTabId, chatStore.isOpen],
-  () => {
-    if (chatStore.isOpen) {
-      nextTick(() => scrollToEnd());
-    }
-  },
-);
-
 const refreshMegaphoneAccess = async () => {
   if (!authStore.isLoggedIn) return;
   try {
@@ -332,40 +405,43 @@ const refreshMegaphoneAccess = async () => {
   }
 };
 
+watch(
+  () => [groupedMessages.value.length, chatStore.activeTabId, chatStore.isOpen],
+  () => {
+    if (chatStore.isOpen) nextTick(() => scrollToEnd());
+  },
+);
+
+watch(
+  () => chatStore.isOpen,
+  async (open) => {
+    if (open) await refreshMegaphoneAccess();
+  },
+);
+
 onMounted(async () => {
   chatStore.initListeners();
   await refreshMegaphoneAccess();
 });
 
-// Re-check every time the chat panel opens so that a recent purchase is reflected
-watch(
-  () => chatStore.isOpen,
-  async (open) => {
-    if (open) {
-      await refreshMegaphoneAccess();
-    }
-  },
-);
-
 onUnmounted(() => {
   if (cooldownInterval) clearInterval(cooldownInterval);
+  if (megaphoneInterval) clearInterval(megaphoneInterval);
 });
 </script>
 
 <style scoped>
-/* ===== COLORS & VARIABLES ===== */
 .chat-shell {
-  --chan-bg: #0b0f19; /* Nền tối sâu hơn */
-  --chan-header: #131b2c;
-  --chan-accent: #38bdf8; /* Xanh ngọc bích Thanh Vân */
-  --chan-bubble-mine: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
-  --chan-bubble-others: #1e293b;
+  --chan-bg: #111927;
+  --chan-header: #172130;
+  --chan-accent: #38bdf8;
+  --chan-bubble-mine: linear-gradient(135deg, #3aaed6 0%, #4a79cc 100%);
+  --chan-bubble-others: #202d40;
   --chan-text-main: #f8fafc;
-  --chan-text-muted: #94a3b8;
+  --chan-text-muted: #aab9cc;
   --chan-border: rgba(255, 255, 255, 0.08);
 }
 
-/* ===== FLOATING BUBBLE (FAB) ===== */
 .chat-bubble-fab {
   position: fixed;
   right: 20px;
@@ -374,71 +450,65 @@ onUnmounted(() => {
   height: 60px;
   cursor: pointer;
   z-index: 1999;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s ease;
 }
 
 .chat-bubble-fab.hidden {
-  transform: scale(0) rotate(-45deg);
+  transform: scale(0);
   opacity: 0;
   pointer-events: none;
 }
 
 .chat-bubble-fab:hover {
-  transform: scale(1.1) translateY(-5px);
+  transform: translateY(-2px);
 }
 
 .bubble-inner {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #2c99c6 0%, #3f74c3 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.5);
+  box-shadow: 0 10px 20px rgba(2, 8, 18, 0.24);
   color: white;
   font-size: 24px;
   position: relative;
-  border: 2px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .unread-badge {
   position: absolute;
   top: -4px;
   right: -4px;
-  background: #ef4444;
+  background: #d86374;
   color: white;
   font-size: 11px;
   font-weight: 900;
   padding: 2px 7px;
   border-radius: 12px;
-  border: 2px solid #0b0f19;
-  box-shadow: 0 2px 5px rgba(239, 68, 68, 0.5);
-  animation: bounce 1s infinite alternate;
+  border: 2px solid #0f1623;
 }
 
-/* ===== CHAT SHELL (GLASSMORPHISM) ===== */
 .chat-shell {
   position: fixed;
   right: 20px;
   bottom: 20px;
   width: 380px;
   max-width: calc(100vw - 40px);
-  background: rgba(11, 15, 25, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(17, 25, 39, 0.96);
   border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--chan-border);
+  box-shadow: 0 18px 36px rgba(2, 8, 18, 0.28), 0 0 0 1px var(--chan-border);
   display: flex;
   flex-direction: column;
   z-index: 2000;
   overflow: hidden;
-  animation: slideIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  animation: slideIn 0.25s ease;
 }
 
-/* ===== HEADER ===== */
 .chat-header {
-  background: rgba(19, 27, 44, 0.9);
+  background: rgba(23, 33, 48, 0.96);
   padding: 12px 16px;
   border-bottom: 1px solid var(--chan-border);
 }
@@ -467,7 +537,6 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.03);
   border-radius: 12px;
   padding-right: 8px;
-  transition: 0.3s;
   border: 1px solid transparent;
 }
 
@@ -481,35 +550,35 @@ onUnmounted(() => {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
   display: flex;
   align-items: center;
 }
 
 .tab:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.09);
   color: var(--chan-text-main);
 }
 
 .tab.active {
-  background: var(--chan-accent);
-  color: #0f172a; /* Chữ đậm trên nền sáng */
-  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+  background: rgba(91, 196, 232, 0.2);
+  color: #e6f7fd;
+  box-shadow: none;
 }
 
 .author-tab-wrap .tab {
   background: transparent !important;
   padding-right: 6px;
-  box-shadow: none;
 }
 
 .author-tab-wrap:has(.tab.active) {
-  background: var(--chan-accent);
-  border-color: rgba(255,255,255,0.2);
+  background: rgba(91, 196, 232, 0.14);
+  border-color: rgba(91, 196, 232, 0.18);
 }
 
-.author-tab-wrap:has(.tab.active) .tab {
-  color: #0f172a;
+.author-tab-wrap:has(.tab.active) .tab,
+.author-tab-wrap:has(.tab.active) .close-tab-btn {
+  color: #e6f7fd;
 }
 
 .close-tab-btn {
@@ -524,18 +593,12 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: 0.2s;
-}
-
-.author-tab-wrap:has(.tab.active) .close-tab-btn {
-  color: #0f172a;
-  opacity: 0.7;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .close-tab-btn:hover {
-  background: rgba(239, 68, 68, 0.8);
-  color: white !important;
-  opacity: 1 !important;
+  background: rgba(223, 120, 135, 0.2);
+  color: #fff !important;
 }
 
 .header-actions {
@@ -555,20 +618,18 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: 0.2s;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .header-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
   color: white;
 }
 
 .header-btn.close:hover {
-  background: #ef4444;
-  color: white;
+  background: rgba(223, 120, 135, 0.22);
 }
 
-/* ===== BODY & MESSAGES ===== */
 .chat-body {
   height: 480px;
   display: flex;
@@ -576,13 +637,13 @@ onUnmounted(() => {
 }
 
 .presence-bar {
-  padding: 6px 16px;
-  background: rgba(56, 189, 248, 0.05);
+  padding: 7px 16px;
+  background: rgba(91, 196, 232, 0.05);
   font-size: 11px;
-  color: #38bdf8;
+  color: #9fddf2;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+  border-bottom: 1px solid rgba(91, 196, 232, 0.08);
   font-weight: 600;
 }
 
@@ -592,7 +653,7 @@ onUnmounted(() => {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 18px; /* Tăng khoảng cách tin nhắn */
+  gap: 0;
 }
 
 .empty-state {
@@ -601,15 +662,26 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: rgba(255,255,255,0.2);
+  color: rgba(255, 255, 255, 0.22);
 }
 
 .message-row {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  max-width: 90%;
-  animation: fadeIn 0.3s ease;
+  max-width: 92%;
+  margin-top: 12px;
+  animation: fadeIn 0.2s ease;
+}
+
+.message-row:first-child {
+  margin-top: 0;
+}
+
+.message-row.group-start {
+  margin-top: 18px;
+}
+
+.message-row.group-continue {
+  margin-top: 6px;
 }
 
 .message-row.mine {
@@ -617,14 +689,17 @@ onUnmounted(() => {
   flex-direction: row-reverse;
 }
 
-/* Avatar Tụ Linh Trận (Scaled for Sidebar/Unified Chat) */
+.message-row.megaphone-row {
+  max-width: 100%;
+}
+
 .spirit-array-center.chat-mini {
-  position: relative; 
-  width: 42px; 
-  height: 42px; 
+  position: relative;
+  width: 42px;
+  height: 42px;
   flex-shrink: 0;
-  display: flex; 
-  align-items: center; 
+  display: flex;
+  align-items: flex-start;
   justify-content: center;
   overflow: visible;
   --aura-primary: 56, 189, 248;
@@ -636,19 +711,20 @@ onUnmounted(() => {
 .spirit-array-center.frame-nine-tails-purple { --aura-primary: 168, 85, 247; }
 .spirit-array-center.frame-chan-long { --aura-primary: 251, 191, 36; }
 
-.magic-circle-spin, .magic-circle-reverse {
-  position: absolute; 
-  inset: -2px; 
+.magic-circle-spin,
+.magic-circle-reverse {
+  position: absolute;
+  inset: -2px;
   border-radius: 50%;
-  border: 1.5px dashed rgba(var(--aura-primary), 0.4);
-  animation: spinArray 20s linear infinite; 
+  border: 1.5px dashed rgba(var(--aura-primary), 0.32);
+  animation: spinArray 20s linear infinite;
   pointer-events: none;
   z-index: 0;
-  filter: drop-shadow(0 0 5px rgba(var(--aura-primary), 0.4));
 }
+
 .magic-circle-reverse {
-  inset: -5px; 
-  border: 1px dotted rgba(var(--aura-primary), 0.6);
+  inset: -5px;
+  border: 1px dotted rgba(var(--aura-primary), 0.4);
   animation: spinArrayReverse 15s linear infinite;
 }
 
@@ -663,53 +739,185 @@ onUnmounted(() => {
 .avatar {
   width: 100%;
   height: 100%;
-  border-radius: 50%; 
-  border: 2px solid rgba(var(--aura-primary), 0.8);
+  border-radius: 50%;
+  border: 2px solid rgba(var(--aura-primary), 0.72);
   background: #000;
-  z-index: 2;
   object-fit: cover;
-  box-shadow: 0 0 8px rgba(var(--aura-primary), 0.2);
-  transform: scale(0.8); /* Exact HeroPanel scale */
+  transform: scale(0.8);
 }
 
 .hero-frame {
-  position: absolute; 
-  inset: 0; 
-  width: 100%; 
-  height: 100%; 
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  transform: scale(1.45); 
-  z-index: 3; 
-  pointer-events: none; 
+  transform: scale(1.45);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.avatar-spacer {
+  width: 42px;
+  flex-shrink: 0;
 }
 
 .bubble-wrap {
   display: flex;
   flex-direction: column;
-  min-width: 0; /* Tránh tràn layout */
+  min-width: 0;
+  width: 100%;
 }
 
 .mine .bubble-wrap {
   align-items: flex-end;
 }
 
+.megaphone-card {
+  position: relative;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(231, 189, 112, 0.12);
+  background: linear-gradient(180deg, rgba(73, 53, 26, 0.12), rgba(24, 30, 42, 0.88));
+}
+
+.megaphone-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  border-radius: 999px;
+  background: rgba(231, 189, 112, 0.52);
+}
+
+.megaphone-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(243, 209, 139, 0.82);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.megaphone-icon {
+  font-size: 10px;
+  color: #f0c97d;
+}
+
+.megaphone-title {
+  color: rgba(244, 213, 149, 0.9);
+}
+
+.megaphone-name {
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #d9e4ef;
+}
+
+.megaphone-body {
+  color: #f5f7fb;
+  font-size: 15px;
+  line-height: 1.68;
+  word-break: break-word;
+}
+
+.identity-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.identity-meta {
+  min-width: 0;
+  padding-top: 3px;
+}
+
 .name {
   font-size: 11px;
   font-weight: 800;
-  color: var(--chan-text-muted);
-  margin-bottom: 6px;
+  color: #dce7f4;
   display: flex;
   align-items: center;
   gap: 6px;
+  line-height: 1.2;
+  min-width: 0;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--identity-accent, #8fa8c2) 34%, rgba(255, 255, 255, 0.06));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--identity-accent, #8fa8c2) 16%, rgba(255, 255, 255, 0.04)),
+      rgba(255, 255, 255, 0.02)
+    );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.mine .name {
-  justify-content: flex-end;
+.username-text {
+  color: #eef4fb;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.identity-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  opacity: 0.92;
+  flex-shrink: 0;
+}
+
+.role-admin-icon {
+  color: #f0b7c2;
+}
+
+.role-mod-icon {
+  color: #c6e7f5;
+}
+
+.role-author-icon {
+  color: #efd89d;
+}
+
+.bubble-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.bubble-content.with-identity-offset {
+  margin-left: 54px;
+  width: calc(100% - 54px);
+}
+
+.bubble-content.with-header {
+  margin-top: 0;
+}
+
+.mine .bubble-content {
+  align-items: flex-end;
+  width: auto;
 }
 
 .bubble-wrapper {
   position: relative;
   display: inline-block;
+  max-width: 100%;
 }
 
 .chat-bg-frame {
@@ -720,20 +928,19 @@ onUnmounted(() => {
   height: calc(100% + 40px);
   z-index: 0;
   pointer-events: none;
-  object-fit: fill; 
+  object-fit: fill;
 }
 
-/* BUBBLE DEFAULT */
 .bubble {
   padding: 10px 16px;
   border-radius: 18px;
   font-size: 14px;
-  line-height: 1.5;
-  color: var(--chan-text-main);
+  line-height: 1.55;
+  color: #d5e0ed;
   background: var(--chan-bubble-others);
   position: relative;
   z-index: 1;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
   border: 1px solid rgba(255, 255, 255, 0.05);
   word-wrap: break-word;
 }
@@ -744,13 +951,12 @@ onUnmounted(() => {
 
 .mine .bubble {
   background: var(--chan-bubble-mine);
+  color: #f7fbff;
   border-top-right-radius: 4px;
-  border-top-left-radius: 18px; /* Fix góc chat mine */
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-left-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* FIX: NẾU CÓ FRAME THÌ XÓA NỀN CỦA TIN NHẮN THƯỜNG */
 .bubble.has-frame:not(.megaphone) {
   background: transparent !important;
   padding: 12px 18px;
@@ -758,34 +964,60 @@ onUnmounted(() => {
   box-shadow: none;
 }
 
-/* FIX: MEGAPHONE (LOA TRUYỀN ÂM) - ƯU TIÊN HIỂN THỊ LUÔN ĐẸP */
 .bubble.megaphone {
-  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%) !important;
-  color: #ffffff !important; /* Fix lỗi chữ đổi màu */
+  background: linear-gradient(135deg, #c98a35 0%, #b56636 100%) !important;
+  color: #ffffff !important;
   font-weight: 800;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); /* Giúp chữ luôn rõ trên nền cam */
-  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4), inset 0 0 10px rgba(255,255,255,0.2) !important;
-  border: 1px solid #fcd34d !important;
+  text-shadow: none;
+  box-shadow: none !important;
+  border: 1px solid rgba(239, 199, 130, 0.28) !important;
   border-radius: 18px !important;
 }
 
-/* Dành cho ai vừa dùng Loa vừa đeo Frame */
 .bubble.megaphone.has-frame {
-  padding: 14px 20px; /* Căn chỉnh lại cho cân đối với frame */
+  padding: 14px 20px;
 }
 
 .msg-time-tip {
-  font-size: 10px;
-  color: rgba(255,255,255,0.3);
-  margin-top: 6px;
+  font-size: 9px;
+  color: rgba(213, 224, 237, 0.44);
+  margin-top: 4px;
   display: block;
+  letter-spacing: 0.2px;
 }
 
 .mine .msg-time-tip {
   text-align: right;
 }
 
-/* ===== INPUT AREA ===== */
+.megaphone-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  color: rgba(209, 218, 230, 0.6);
+  flex-wrap: wrap;
+}
+
+.megaphone-sender {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.megaphone-sender .identity-icon {
+  font-size: 9px;
+  opacity: 0.84;
+}
+
+.megaphone-time {
+  color: rgba(209, 218, 230, 0.48);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
 .input-area {
   padding: 14px 16px;
   background: var(--chan-header);
@@ -795,22 +1027,22 @@ onUnmounted(() => {
 .input-wrapper {
   display: flex;
   align-items: center;
-  background: #060810;
+  background: #0b1019;
   border-radius: 16px;
   padding: 6px;
   border: 1px solid var(--chan-border);
-  transition: all 0.3s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   gap: 8px;
 }
 
 .input-wrapper:focus-within {
-  border-color: var(--chan-accent);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+  border-color: rgba(91, 196, 232, 0.24);
+  box-shadow: 0 0 0 3px rgba(91, 196, 232, 0.08);
 }
 
 .megaphone-toggle-btn {
   background: transparent;
-  color: #64748b;
+  color: #70839a;
   border: none;
   font-size: 1.1rem;
   cursor: pointer;
@@ -820,27 +1052,27 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
   position: relative;
 }
 
 .megaphone-toggle-btn:hover {
-  color: #fbbf24;
-  background: rgba(251, 191, 36, 0.1);
-  transform: scale(1.1);
+  color: #e6c47a;
+  background: rgba(230, 196, 122, 0.08);
+  transform: translateY(-1px);
 }
 
 .megaphone-toggle-btn.active {
-  color: #f59e0b;
-  background: rgba(245, 158, 11, 0.15);
-  text-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
-  animation: pulse-loa 2s infinite;
+  color: #e6c47a;
+  background: rgba(230, 196, 122, 0.12);
+  text-shadow: none;
+  animation: none;
 }
 
 .cd-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -848,7 +1080,6 @@ onUnmounted(() => {
   font-size: 0.7rem;
   font-weight: 800;
   color: white;
-  backdrop-filter: blur(2px);
 }
 
 .input-wrapper input {
@@ -862,11 +1093,11 @@ onUnmounted(() => {
 }
 
 .input-wrapper input::placeholder {
-  color: #64748b;
+  color: #6f8199;
 }
 
 .send-btn {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #3db38c 0%, #329a7a 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -876,13 +1107,13 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+  transition: transform 0.2s ease, filter 0.2s ease;
+  box-shadow: none;
 }
 
 .send-btn:hover:not(:disabled) {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+  filter: brightness(1.06);
 }
 
 .send-btn:disabled {
@@ -892,7 +1123,6 @@ onUnmounted(() => {
   cursor: not-allowed;
 }
 
-/* ===== SCROLLBAR ===== */
 .scrollbar-custom::-webkit-scrollbar { width: 5px; }
 .scrollbar-custom::-webkit-scrollbar-track { background: transparent; }
 .scrollbar-custom::-webkit-scrollbar-thumb {
@@ -901,30 +1131,8 @@ onUnmounted(() => {
 }
 .scrollbar-custom::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
 
-/* ===== ANIMATIONS ===== */
 @keyframes spinArray { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes spinArrayReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-
-@keyframes slideIn {
-  from { transform: translateY(20px) scale(0.95); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
-}
-
-@keyframes bounce {
-  to { transform: translateY(-3px); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulse-loa {
-  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-}
-
-/* ===== GITHUB/TU TIEN FRAME EFFECTS ===== */
-/* Frame effects logic handled by spirit-array-center classes */
+@keyframes slideIn { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 </style>

@@ -318,11 +318,11 @@ export default {
   top: 0;
   width: 100%;
   z-index: 1000;
-  background: rgba(2, 6, 23, 0.85); /* Midnight Blue Deep */
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(34, 211, 238, 0.15); /* Viền Băng Lam */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  background: rgba(13, 20, 31, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--app-border);
+  box-shadow: 0 8px 24px rgba(4, 10, 20, 0.22);
   height: 70px;
   font-family: 'Be Vietnam Pro', sans-serif;
 }
@@ -339,11 +339,11 @@ export default {
 
 /* Kính mờ dùng chung cho dropdown */
 .cosmic-glass {
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(34, 211, 238, 0.2);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(34, 211, 238, 0.05);
+  background: rgba(18, 26, 39, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--app-border);
+  box-shadow: var(--app-shadow-2);
 }
 
 /* ===== LEFT: LOGO & SEARCH ===== */
@@ -351,26 +351,28 @@ export default {
 
 .logo-spirit {
   height: 40px; transition: all 0.4s;
-  filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.3));
+  filter: drop-shadow(0 0 4px rgba(91, 196, 232, 0.18));
 }
-.logo-spirit:hover { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(34, 211, 238, 0.7)); }
+.logo-spirit:hover { transform: scale(1.03); filter: drop-shadow(0 0 8px rgba(91, 196, 232, 0.28)); }
 
 .spirit-search-container { position: relative; width: 320px; }
 
 .search-aura-input-group {
   display: flex; align-items: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(34, 211, 238, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--app-border);
   border-radius: 50px; padding: 8px 18px;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 .search-aura-input-group:hover, .search-aura-input-group:focus-within {
-  border-color: #22d3ee; background: rgba(34, 211, 238, 0.05);
-  box-shadow: 0 0 15px rgba(34, 211, 238, 0.2); width: 380px;
+  border-color: var(--app-border-accent);
+  background: rgba(91, 196, 232, 0.05);
+  box-shadow: 0 6px 18px rgba(4, 10, 20, 0.18);
+  width: 380px;
 }
 
 .search-spirit-icon { color: #64748b; margin-right: 10px; font-size: 0.9rem; transition: 0.3s;}
-.search-aura-input-group:focus-within .search-spirit-icon { color: #22d3ee; }
+.search-aura-input-group:focus-within .search-spirit-icon { color: var(--app-accent); }
 
 .aura-search-input {
   background: transparent; border: none; outline: none;
@@ -384,7 +386,7 @@ export default {
 /* Suggestions Xianxia */
 .spirit-suggestions-dropdown {
   position: absolute; top: calc(100% + 15px); left: 0;
-  width: 450px; border-radius: 20px; overflow: hidden;
+  width: 450px; border-radius: 18px; overflow: hidden;
   animation: slideInAura 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -395,9 +397,9 @@ export default {
 
 .spirit-suggestion-item {
   display: flex; gap: 15px; padding: 15px 20px; text-decoration: none;
-  border-bottom: 1px solid rgba(255,255,255,0.05); transition: all 0.3s;
+  border-bottom: 1px solid rgba(255,255,255,0.05); transition: background-color 0.2s ease, padding-left 0.2s ease;
 }
-.spirit-suggestion-item:hover { background: rgba(34, 211, 238, 0.08); padding-left: 25px; }
+.spirit-suggestion-item:hover { background: rgba(91, 196, 232, 0.07); padding-left: 24px; }
 
 .suggestion-cover-wrapper img {
   width: 45px; height: 60px; object-fit: cover; border-radius: 8px;
@@ -410,8 +412,9 @@ export default {
 
 .spirit-see-all {
   display: flex; justify-content: center; padding: 14px;
-  background: linear-gradient(90deg, #0ea5e9, #22d3ee);
-  color: #020617; font-weight: 900; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;
+  background: rgba(91, 196, 232, 0.12);
+  color: var(--app-text);
+  font-weight: 900; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;
 }
 
 /* ===== RIGHT: NAV & USER ===== */
@@ -422,10 +425,10 @@ export default {
   color: #94a3b8; text-decoration: none; font-size: 0.85rem; font-weight: 800;
   text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; position: relative;
 }
-.nav-spirit-link:hover { color: #22d3ee; text-shadow: 0 0 8px rgba(34, 211, 238, 0.5); }
+.nav-spirit-link:hover { color: var(--app-accent); text-shadow: none; }
 .nav-spirit-link::after {
   content: ''; position: absolute; bottom: -6px; left: 50%; width: 0; height: 2px;
-  background: #22d3ee; transition: all 0.3s; transform: translateX(-50%); box-shadow: 0 0 8px #22d3ee;
+  background: var(--app-accent); transition: all 0.3s; transform: translateX(-50%);
 }
 .nav-spirit-link:hover::after { width: 100%; }
 
@@ -435,18 +438,18 @@ export default {
 .notif-aura-trigger { 
   position: relative; cursor: pointer; padding: 10px; border-radius: 50%; transition: all 0.3s;
 }
-.notif-aura-trigger:hover { background: rgba(34, 211, 238, 0.1); }
+.notif-aura-trigger:hover { background: rgba(91, 196, 232, 0.1); }
 
 .spirit-bell { font-size: 1.25rem; color: #cbd5e1; transition: all 0.3s; }
-.notif-aura-trigger:hover .spirit-bell { color: #22d3ee; }
-.spirit-bell.ringing { color: #fbbf24; animation: bellSwing 2s infinite ease-in-out; filter: drop-shadow(0 0 5px #fbbf24); }
+.notif-aura-trigger:hover .spirit-bell { color: var(--app-accent); }
+.spirit-bell.ringing { color: var(--app-gold); animation: bellSwing 2s infinite ease-in-out; filter: none; }
 
 .spirit-badge {
   position: absolute; top: 0px; right: 0px;
   background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; 
   font-size: 0.65rem; font-weight: 900; min-width: 18px; height: 18px; 
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  border: 2px solid #020617; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+  border: 2px solid #0b111b; box-shadow: none;
 }
 
 .spirit-notif-dropdown-wrapper { position: relative; }
@@ -455,21 +458,21 @@ export default {
 .user-aura-trigger {
   display: flex; align-items: center; gap: 10px; cursor: pointer;
   padding: 6px 14px 6px 6px; background: rgba(255,255,255,0.05);
-  border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s;
+  border-radius: 50px; border: 1px solid rgba(255,255,255,0.08); transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.user-aura-trigger:hover { border-color: rgba(34, 211, 238, 0.4); background: rgba(34, 211, 238, 0.05); box-shadow: 0 0 15px rgba(34, 211, 238, 0.15); }
+.user-aura-trigger:hover { border-color: var(--app-border-accent); background: rgba(91, 196, 232, 0.05); box-shadow: 0 8px 20px rgba(4, 10, 20, 0.16); }
 
 .avatar-ring-glow {
   width: 32px; height: 32px; border-radius: 50%;
-  padding: 2px; background: linear-gradient(135deg, #22d3ee, #3b82f6);
+  padding: 2px; background: linear-gradient(135deg, rgba(91, 196, 232, 0.9), rgba(93, 122, 225, 0.9));
 }
 .avatar-spirit { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #000; }
 .caret-spirit { color: #94a3b8; font-size: 0.8rem; transition: 0.3s; }
-.rotate-aura { transform: rotate(180deg); color: #22d3ee; }
+.rotate-aura { transform: rotate(180deg); color: var(--app-accent); }
 
 .user-spirit-dropdown {
   position: absolute; top: calc(100% + 15px); right: 25px;
-  width: 280px; border-radius: 20px; padding: 15px; 
+  width: 280px; border-radius: 18px; padding: 15px; 
   animation: slideInAura 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -486,24 +489,24 @@ export default {
 
 .spirit-dropdown-item i { width: 20px; text-align: center; color: #64748b; transition: 0.3s; }
 .spirit-dropdown-item:hover { background: rgba(255,255,255,0.05); color: #fff; transform: translateX(5px); }
-.spirit-dropdown-item:hover i { color: #22d3ee; }
+.spirit-dropdown-item:hover i { color: var(--app-accent); }
 
-.spirit-dropdown-item.highlight-aura { color: #22d3ee; background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.2); }
-.spirit-dropdown-item.highlight-aura i { color: #22d3ee; }
-.spirit-dropdown-item.highlight-aura:hover { box-shadow: 0 0 15px rgba(34, 211, 238, 0.2); }
+.spirit-dropdown-item.highlight-aura { color: var(--app-accent); background: rgba(91, 196, 232, 0.09); border: 1px solid var(--app-border-accent); }
+.spirit-dropdown-item.highlight-aura i { color: var(--app-accent); }
+.spirit-dropdown-item.highlight-aura:hover { box-shadow: none; }
 
 .logout-spirit { color: #f43f5e; }
 .logout-spirit i { color: #f43f5e; }
 .logout-spirit:hover { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
 
 .btn-spirit-login {
-  background: linear-gradient(135deg, #0ea5e9, #22d3ee); color: #020617; 
+  background: linear-gradient(135deg, #36b2db, #6fd6ef); color: #08111a; 
   padding: 10px 24px; border-radius: 50px; font-weight: 900; text-transform: uppercase;
   font-size: 0.8rem; display: flex; align-items: center; gap: 10px;
   transition: all 0.3s; border: none; text-decoration: none;
-  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
+  box-shadow: 0 8px 20px rgba(4, 10, 20, 0.2);
 }
-.btn-spirit-login:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(34, 211, 238, 0.5); }
+.btn-spirit-login:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(4, 10, 20, 0.24); }
 
 /* Animations */
 @keyframes slideInAura { from { opacity: 0; transform: scale(0.95) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }

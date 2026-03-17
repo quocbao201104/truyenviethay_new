@@ -150,6 +150,69 @@ select:focus {
 }
 /* frontend/src/assets/styles/global.css */
 
+:root {
+  color-scheme: dark;
+  --app-bg: #111a28;
+  --app-bg-deep: #0d1420;
+  --app-bg-elevated: #182335;
+  --app-bg-soft: #1d2a3e;
+  --app-bg-interactive: #25354a;
+  --app-panel: rgba(21, 31, 47, 0.94);
+  --app-panel-soft: rgba(24, 36, 54, 0.88);
+  --app-panel-muted: rgba(18, 27, 40, 0.8);
+  --app-border: rgba(148, 163, 184, 0.12);
+  --app-border-strong: rgba(148, 163, 184, 0.2);
+  --app-border-accent: rgba(56, 189, 248, 0.2);
+  --app-text: #ecf3fb;
+  --app-text-muted: #b7c4d5;
+  --app-text-subtle: #8999b0;
+  --app-accent: #5bc4e8;
+  --app-accent-soft: rgba(91, 196, 232, 0.14);
+  --app-accent-strong: #74dbf3;
+  --app-emerald: #48cfa5;
+  --app-gold: #e6c47a;
+  --app-danger: #df7887;
+  --app-radius-sm: 12px;
+  --app-radius-md: 18px;
+  --app-radius-lg: 24px;
+  --app-radius-pill: 999px;
+  --app-shadow-1: 0 8px 22px rgba(2, 8, 18, 0.22);
+  --app-shadow-2: 0 14px 34px rgba(2, 8, 18, 0.28);
+  --app-shadow-3: 0 22px 48px rgba(2, 8, 18, 0.34);
+  --app-section-gap: 64px;
+  --app-card-padding: 22px;
+}
+
+html,
+body,
+#app {
+  background:
+    radial-gradient(circle at top, rgba(91, 196, 232, 0.05), transparent 28%),
+    linear-gradient(180deg, #121a27 0%, #0f1623 45%, #0b111b 100%);
+  color: var(--app-text);
+}
+
+body {
+  font-family: "Be Vietnam Pro", "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(91, 196, 232, 0.22);
+  color: #f8fbff;
+}
+
 /* --- Tùy chỉnh vị trí tổng thể (dịch xuống) --- */
 .Vue-Toastification__container.top-right {
   top: 60px !important; 
@@ -158,16 +221,16 @@ select:focus {
 
 /* --- Tùy chỉnh chung cho tất cả các toast --- */
 .Vue-Toastification__toast {
-  background-color: #2a2d3a !important; 
+  background-color: #1a2332 !important; 
   color: #ffffff !important; 
-  border-radius: 8px !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--app-shadow-2) !important;
   padding: 12px 20px !important;
   font-size: 0.95rem !important;
   display: flex !important; 
   align-items: center !important;
   min-height: auto !important;
-
+  border: 1px solid var(--app-border) !important;
   max-width: 380px;
 }
 

@@ -147,18 +147,18 @@ const buildSrcSet = (path) => {
 
 .xianxia-story-card {
   font-family: 'Be Vietnam Pro', sans-serif;
-  background: rgba(15, 23, 42, 0.6); 
-  border-radius: 16px;
-  color: #f8fafc; /* Ch??? s??ng h??n */
+  background: rgba(21, 31, 47, 0.92);
+  border-radius: var(--app-radius-md);
+  color: var(--app-text);
   transition: transform 0.25s ease, opacity 0.25s ease;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid rgba(56, 189, 248, 0.15); /* Vi???n B??ng Lam m??? */
+  border: 1px solid var(--app-border);
   height: 100%;
   cursor: pointer;
   position: relative;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  box-shadow: var(--app-shadow-1);
   content-visibility: auto;
   contain-intrinsic-size: 260px 185px;
   contain: layout paint style;
@@ -168,16 +168,14 @@ const buildSrcSet = (path) => {
 }
 
 .xianxia-story-card--rich {
-  background: rgba(30, 41, 59, 0.4);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 3px 12px rgba(0,0,0,0.45);
+  background: rgba(24, 35, 52, 0.95);
+  box-shadow: var(--app-shadow-2);
 }
 
 @media (hover: hover) {
   .xianxia-story-card:hover {
-    transform: translateY(-6px);
-    border-color: rgba(56, 189, 248, 0.6);
+    transform: translateY(-4px);
+    border-color: var(--app-border-accent);
     will-change: transform;
   }
 
@@ -188,7 +186,7 @@ const buildSrcSet = (path) => {
 
   .xianxia-story-card--rich:hover .aura-overlay { opacity: 1; }
   .xianxia-story-card--rich:hover .read-btn-spirit { transform: translateY(0); will-change: transform; }
-  .xianxia-story-card:hover .story-title-main { color: #38bdf8; } /* ?????i text hover sang B??ng Lam */
+  .xianxia-story-card:hover .story-title-main { color: var(--app-accent); }
 }
 
 .cover-aura-wrapper {
@@ -226,7 +224,7 @@ const buildSrcSet = (path) => {
 .bottom-vignette {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(15, 23, 42, 0.9) 0%, transparent 40%);
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.78) 0%, transparent 42%);
   pointer-events: none;
   z-index: 1;
 }
@@ -235,7 +233,7 @@ const buildSrcSet = (path) => {
 .aura-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(2, 6, 23, 0.5);
+  background: rgba(10, 16, 27, 0.36);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -245,15 +243,15 @@ const buildSrcSet = (path) => {
 }
 
 .read-btn-spirit {
-  background: linear-gradient(135deg, #0ea5e9, #38bdf8); /* Màu Băng Lam */
-  color: #020617;
+  background: linear-gradient(135deg, #4cb6db, #74d7ef);
+  color: #08111a;
   padding: 8px 20px;
   border-radius: 50px;
   font-weight: 800;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  box-shadow: 0 2px 6px rgba(56, 189, 248, 0.35);
+  box-shadow: 0 8px 18px rgba(4, 10, 20, 0.2);
   transform: translateY(10px);
   transition: transform 0.2s ease;
 }
@@ -263,18 +261,18 @@ const buildSrcSet = (path) => {
   position: absolute;
   bottom: 8px;
   right: 8px;
-  background: rgba(15, 23, 42, 0.85); /* Tối ưu nền badge */
+  background: rgba(15, 23, 42, 0.82);
   color: #e0f2fe;
   padding: 4px 12px;
   border-radius: 50px;
   font-size: 0.7rem;
   font-weight: 700;
-  border: 1px solid rgba(56, 189, 248, 0.3);
+  border: 1px solid rgba(148, 163, 184, 0.22);
   z-index: 10;
   display: flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+  box-shadow: 0 6px 14px rgba(2, 8, 18, 0.14);
 }
 
 .jade-chapter-badge i { color: #38bdf8; }
@@ -294,62 +292,59 @@ const buildSrcSet = (path) => {
   display: flex;
   align-items: center;
   gap: 5px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  box-shadow: none;
 }
 
 /* Viên Mãn - Ngọc Bích (Giữ nguyên màu xanh lá cho trạng thái hoàn thành) */
 .status-completed { 
-  background: rgba(16, 185, 129, 0.2); 
-  border: 1px solid rgba(16, 185, 129, 0.4); 
-  color: #34d399;
-  text-shadow: 0 0 5px rgba(52, 211, 153, 0.4);
+  background: rgba(72, 207, 165, 0.14);
+  border: 1px solid rgba(72, 207, 165, 0.26);
+  color: #63deb7;
 }
 
 /* Đang Ra - Băng Lam */
 .status-on-going { 
-  background: rgba(56, 189, 248, 0.2); 
-  border: 1px solid rgba(56, 189, 248, 0.4); 
-  color: #38bdf8;
-  text-shadow: 0 0 5px rgba(56, 189, 248, 0.4);
+  background: rgba(91, 196, 232, 0.14);
+  border: 1px solid rgba(91, 196, 232, 0.28);
+  color: #74d7ef;
 }
 
 /* Đề Cử - Xích Kim */
 .status-suggested { 
-  background: rgba(245, 158, 11, 0.2); 
-  border: 1px solid rgba(245, 158, 11, 0.4); 
-  color: #fbbf24;
-  text-shadow: 0 0 5px rgba(251, 191, 36, 0.4);
+  background: rgba(243, 201, 107, 0.14);
+  border: 1px solid rgba(243, 201, 107, 0.28);
+  color: #f3c96b;
 }
 
 /* NỘI DUNG */
 .card-spirit-content {
-  padding: 14px 12px;
+  padding: 16px 15px 15px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  gap: 8px;
+  gap: 10px;
   background: transparent; /* Kế thừa nền kính mờ của card */
   min-width: 0;
 }
 
 .story-title-main {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 800;
-  color: #ffffff; /* Text trắng tinh cho sáng sủa */
-  line-height: 1.4;
+  color: #f7fbff;
+  line-height: 1.5;
   height: 2.8em;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   transition: color 0.3s;
-  text-shadow: 0 1px 1px rgba(0,0,0,0.35);
+  text-shadow: none;
 }
 
 .author-spirit {
-  font-size: 0.8rem;
-  color: #94a3b8;
+  font-size: 0.78rem;
+  color: var(--app-text-muted);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -363,17 +358,17 @@ const buildSrcSet = (path) => {
   display: flex;
   justify-content: space-between;
   margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05); /* Đổi sang vạch trắng mờ cho sáng */
+  padding-top: 13px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .stat-spirit {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  color: #94a3b8;
+  color: var(--app-text-subtle);
 }
 
 .stat-icon-blue { color: #38bdf8; }
@@ -382,9 +377,9 @@ const buildSrcSet = (path) => {
 .animate-spin-slow { animation: spin 8s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-.xianxia-story-card--rich .aura-overlay { backdrop-filter: blur(3px); }
-.xianxia-story-card--rich .jade-chapter-badge { backdrop-filter: blur(6px); }
-.xianxia-story-card--rich .sigil-status { backdrop-filter: blur(6px); }
+.xianxia-story-card--rich .aura-overlay { backdrop-filter: none; }
+.xianxia-story-card--rich .jade-chapter-badge { backdrop-filter: none; }
+.xianxia-story-card--rich .sigil-status { backdrop-filter: none; }
 
 @media (max-width: 640px) {
   .xianxia-story-card {

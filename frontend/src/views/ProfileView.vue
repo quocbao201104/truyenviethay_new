@@ -301,16 +301,16 @@ export default {
 /* ===== CORE THEME XIANXIA ===== */
 .profile-page-xianxia {
   min-height: 100vh;
-  background: #0b0f19; 
+  background: #101724; 
   color: #cbd5e1;
   font-family: 'Be Vietnam Pro', sans-serif;
-  padding-bottom: 80px;
+  padding-bottom: 92px;
 }
 
 .profile-container-aura {
   max-width: 900px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 48px 20px 24px;
 }
 
 /* Loading/Error States */
@@ -322,10 +322,10 @@ export default {
 .btn-re-login { display: inline-block; margin-top: 15px; padding: 10px 20px; background: #10b981; color: #000; border-radius: 8px; font-weight: bold; text-decoration: none; }
 
 /* Page Header */
-.page-header-xianxia { text-align: center; margin-bottom: 40px; }
+.page-header-xianxia { text-align: center; margin-bottom: 46px; }
 
 .title-spirit {
-  font-size: 2.8rem;
+  font-size: 2.5rem;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 6px;
@@ -333,19 +333,19 @@ export default {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.4));
+  filter: none;
 }
 
 .divider-spirit { height: 1px; width: 240px; background: linear-gradient(90deg, transparent, #10b981, transparent); margin: 15px auto; position: relative; }
-.divider-spirit .dot { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg); width: 8px; height: 8px; background: #10b981; box-shadow: 0 0 10px #10b981; }
+.divider-spirit .dot { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg); width: 8px; height: 8px; background: #10b981; box-shadow: none; }
 
 /* ===== MAIN CARD (NGỌC BÀI) ===== */
 .spirit-card-main {
-  background: linear-gradient(145deg, #131b2c, #0b0f19);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: 24px;
-  padding: 50px 40px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 30px rgba(16, 185, 129, 0.05);
+  background: linear-gradient(180deg, rgba(21, 31, 47, 0.96), rgba(15, 23, 35, 0.98));
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  padding: 44px 38px;
+  box-shadow: var(--app-shadow-2);
   position: relative;
   overflow: hidden;
 }
@@ -358,7 +358,11 @@ export default {
 
 /* Header Profile Area */
 .spirit-header-aura {
-  display: flex; flex-direction: column; align-items: center; gap: 25px; margin-bottom: 50px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 24px; margin-bottom: 48px; text-align: center;
+  padding: 28px 24px 30px;
+  background: rgba(17, 25, 38, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 22px;
 }
 
 /* ===== SPIRIT ARRAY AVATAR ===== */
@@ -372,7 +376,7 @@ export default {
   position: absolute; inset: -12px; border-radius: 50%;
   border: 2px dashed rgba(var(--aura-primary), 0.4);
   animation: spinArray 20s linear infinite; pointer-events: none;
-  filter: drop-shadow(0 0 10px rgba(var(--aura-primary), 0.5));
+  filter: none;
 }
 .magic-circle-reverse {
   inset: -20px; border: 1px dotted rgba(var(--aura-primary), 0.6);
@@ -382,7 +386,7 @@ export default {
 .hero-avatar {
   position: relative; z-index: 2; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
   border: 4px solid rgba(var(--aura-primary), 0.8); background: #000;
-  box-shadow: 0 0 20px rgba(var(--aura-primary), 0.3);
+  box-shadow: none;
   transform: scale(0.80);
 }
  
@@ -406,7 +410,7 @@ export default {
 @keyframes spinArray { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes spinArrayReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
 
-.status-dot-aura { position: absolute; bottom: 20px; right: 20px; width: 18px; height: 18px; background: #10b981; border: 3px solid #131b2c; border-radius: 50%; box-shadow: 0 0 10px #10b981; z-index: 5; }
+.status-dot-aura { position: absolute; bottom: 20px; right: 20px; width: 16px; height: 16px; background: #10b981; border: 3px solid #131b2c; border-radius: 50%; box-shadow: none; z-index: 5; }
 
 /* Name Plate */
 .name-spirit-plate {
@@ -414,34 +418,34 @@ export default {
 }
 .plate-magic-wrapper {
   position: relative; display: inline-flex; padding: 2px; border-radius: 50px;
-  background: linear-gradient(135deg, var(--badge-color), transparent, var(--badge-color));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--badge-color) 70%, transparent), transparent, color-mix(in srgb, var(--badge-color) 70%, transparent));
   background-size: 200% 200%; animation: spiritual-flow 6s ease infinite; margin-bottom: 5px; z-index: 1;
 }
 .plate-magic-wrapper::after {
-  content: ""; position: absolute; inset: -2px; background: inherit; filter: blur(6px); opacity: 0.5; z-index: -1; border-radius: 50px; animation: spiritual-flow 6s ease infinite;
+  content: ""; position: absolute; inset: -2px; background: inherit; filter: blur(3px); opacity: 0.28; z-index: -1; border-radius: 50px; animation: spiritual-flow 6s ease infinite;
 }
 .plate-inner {
   display: inline-flex; align-items: center; justify-content: center; gap: 15px; padding: 8px 30px;
-  background: #0b0f19; border-radius: 50px; z-index: 2; box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+  background: #101724; border-radius: 50px; z-index: 2; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
 }
 .display-name {
   font-size: 1.8rem; font-weight: 900; color: #ffffff; margin: 0; line-height: 1;
-  text-shadow: 0 0 10px rgba(16, 185, 129, 0.3); letter-spacing: 1px;
+  text-shadow: none; letter-spacing: 0.5px;
 }
 .user-badge[size="md"] { display: flex; align-items: center; }
-.magic-badge-glow { animation: badge-pulse 2s infinite ease-in-out alternate; }
+.magic-badge-glow { animation: badge-pulse 3s infinite ease-in-out alternate; }
 .spirit-handle { font-size: 0.95rem; color: #64748b; font-weight: 600; letter-spacing: 1px;}
 
 /* KHU VỰC KHẮC CHỮ (Info Grid) */
 .spirit-details-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 40px;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-bottom: 50px;
 }
 .detail-crystal {
-  display: flex; align-items: center; gap: 15px; padding: 18px 20px;
-  background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(16, 185, 129, 0.1);
-  border-radius: 16px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); transition: all 0.3s;
+  display: flex; align-items: center; gap: 15px; padding: 20px 20px;
+  background: rgba(12, 18, 29, 0.34); border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 16px; box-shadow: none; transition: background-color 0.2s ease, border-color 0.2s ease;
 }
-@media (hover: hover) { .detail-crystal:hover { background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.3); } }
+@media (hover: hover) { .detail-crystal:hover { background: rgba(72, 207, 165, 0.05); border-color: rgba(72, 207, 165, 0.22); } }
 
 .icon-wrapper {
   width: 40px; height: 40px; border-radius: 10px; background: rgba(16, 185, 129, 0.1);
@@ -454,8 +458,8 @@ export default {
 .icon-wrapper.emerald .icon-aura { color: #34d399; }
 
 .text-group { display: flex; flex-direction: column; }
-.text-group .label { font-size: 0.7rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;}
-.text-group .value { font-size: 0.95rem; color: #e2e8f0; font-weight: 700; }
+.text-group .label { font-size: 0.7rem; color: #7d8da5; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.6px;}
+.text-group .value { font-size: 0.98rem; color: #e8eff8; font-weight: 700; line-height: 1.45; }
 
 
 /* =======================================================
@@ -464,15 +468,15 @@ export default {
 .action-sections-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 30px;
-  padding-top: 30px;
-  border-top: 1px dashed rgba(16, 185, 129, 0.2);
+  gap: 34px;
+  padding-top: 34px;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
 }
 
 .action-group {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
 }
 
 .group-title {
@@ -490,7 +494,7 @@ export default {
 .group-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
+  gap: 18px;
 }
 
 /* Giao diện Thẻ Nút Bấm */
@@ -498,20 +502,19 @@ export default {
   display: flex;
   align-items: center;
   gap: 15px;
-  padding: 16px 20px;
-  background: rgba(15, 23, 42, 0.6);
+  padding: 18px 20px;
+  background: rgba(15, 23, 42, 0.42);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  box-shadow: none;
 }
 
 .spirit-nav-card:hover {
-  transform: translateY(-3px);
-  background: rgba(30, 41, 59, 0.8);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  transform: translateY(-2px);
+  background: rgba(30, 41, 59, 0.58);
 }
 
 /* Icon Box */
@@ -524,7 +527,7 @@ export default {
   justify-content: center;
   font-size: 1.2rem;
   background: rgba(255, 255, 255, 0.05);
-  transition: 0.3s;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .card-text {
@@ -534,46 +537,48 @@ export default {
 }
 
 .card-name {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #f1f5f9;
+  line-height: 1.4;
 }
 
 .card-desc {
-  font-size: 0.75rem;
-  color: #64748b;
+  font-size: 0.76rem;
+  color: #8fa1b7;
+  line-height: 1.45;
 }
 
 /* Biến thể Màu Sắc cho Thẻ */
 /* Vàng Kim (Nhiệm Vụ) */
 .spirit-nav-card.gold:hover { border-color: #fbbf24; }
 .spirit-nav-card.gold .card-icon { color: #fbbf24; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2); }
-.spirit-nav-card.gold:hover .card-icon { background: #fbbf24; color: #000; box-shadow: 0 0 15px rgba(251, 191, 36, 0.5); }
+.spirit-nav-card.gold:hover .card-icon { background: rgba(251, 191, 36, 0.16); color: #fbd580; box-shadow: none; }
 
 /* Lục Bảo (Theo dõi) */
 .spirit-nav-card.emerald:hover { border-color: #34d399; }
 .spirit-nav-card.emerald .card-icon { color: #34d399; background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.2); }
-.spirit-nav-card.emerald:hover .card-icon { background: #34d399; color: #000; box-shadow: 0 0 15px rgba(52, 211, 153, 0.5); }
+.spirit-nav-card.emerald:hover .card-icon { background: rgba(52, 211, 153, 0.16); color: #7be7c2; box-shadow: none; }
 
 /* Băng Lam (Lịch sử) */
 .spirit-nav-card.cyan:hover { border-color: #22d3ee; }
 .spirit-nav-card.cyan .card-icon { color: #22d3ee; background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.2); }
-.spirit-nav-card.cyan:hover .card-icon { background: #22d3ee; color: #000; box-shadow: 0 0 15px rgba(34, 211, 238, 0.5); }
+.spirit-nav-card.cyan:hover .card-icon { background: rgba(34, 211, 238, 0.16); color: #7edff1; box-shadow: none; }
 
 /* Xanh Dương (Cài đặt) */
 .spirit-nav-card.blue:hover { border-color: #3b82f6; }
 .spirit-nav-card.blue .card-icon { color: #60a5fa; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); }
-.spirit-nav-card.blue:hover .card-icon { background: #3b82f6; color: #fff; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+.spirit-nav-card.blue:hover .card-icon { background: rgba(59, 130, 246, 0.16); color: #92c0ff; box-shadow: none; }
 
 /* Tím (Tác giả) */
 .spirit-nav-card.purple:hover { border-color: #a855f7; }
 .spirit-nav-card.purple .card-icon { color: #c084fc; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); }
-.spirit-nav-card.purple:hover .card-icon { background: #a855f7; color: #fff; box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); }
+.spirit-nav-card.purple:hover .card-icon { background: rgba(168, 85, 247, 0.16); color: #ddb7ff; box-shadow: none; }
 
 /* Đỏ (Admin) */
 .spirit-nav-card.rose:hover { border-color: #f43f5e; }
 .spirit-nav-card.rose .card-icon { color: #fb7185; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.2); }
-.spirit-nav-card.rose:hover .card-icon { background: #f43f5e; color: #fff; box-shadow: 0 0 15px rgba(244, 63, 94, 0.5); }
+.spirit-nav-card.rose:hover .card-icon { background: rgba(244, 63, 94, 0.16); color: #ff9aac; box-shadow: none; }
 
 /* Xám (Pending) */
 .spirit-nav-card.gray { border-color: rgba(100, 116, 139, 0.3); opacity: 0.6; cursor: not-allowed; }
@@ -582,14 +587,14 @@ export default {
 
 
 /* Logout Area */
-.logout-aura-area { margin-top: 40px; text-align: center; }
+.logout-aura-area { margin-top: 48px; text-align: center; }
 .btn-logout-spirit { background: transparent; border: 1px solid #f43f5e50; color: #f43f5e; padding: 12px 30px; border-radius: 50px; font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1px;}
-@media (hover: hover) { .btn-logout-spirit:hover { background: #f43f5e; color: #fff; box-shadow: 0 0 20px rgba(244, 63, 94, 0.4); transform: translateY(-2px); } }
+@media (hover: hover) { .btn-logout-spirit:hover { background: rgba(244, 63, 94, 0.14); color: #ffb7c2; box-shadow: none; transform: translateY(-1px); } }
 
 /* Animations */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes spiritual-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-@keyframes badge-pulse { from { filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 8px var(--badge-color, rgba(16, 185, 129, 0.3))); } to { filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 15px var(--badge-color, rgba(16, 185, 129, 0.8))); transform: scale(1.05); } }
+@keyframes badge-pulse { from { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.3)) drop-shadow(0 0 5px var(--badge-color, rgba(16, 185, 129, 0.18))); } to { filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 8px var(--badge-color, rgba(16, 185, 129, 0.28))); transform: scale(1.02); } }
 
 /* Responsive */
 @media (max-width: 768px) {
