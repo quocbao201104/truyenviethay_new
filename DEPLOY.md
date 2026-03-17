@@ -1,97 +1,369 @@
-# Hướng Dẫn Deploy (Deployment Guide)
+# Deployment Guide
 
-Tài liệu này hướng dẫn chi tiết quy trình đưa ứng dụng **TruyenVietHay** lên môi trường Production.
+Tài liệu này phản ánh kiến trúc deploy hiện tại của TruyenVietHay:
 
-## 🏗 Chuẩn Bị
-Trước khi deploy, hãy đảm bảo bạn đã có tài khoản tại các dịch vụ:
-1.  **Vercel** (Frontend Hosting)
-2.  **Render** (Backend Hosting)
-3.  **Aiven** (MySQL Database)
-4.  **Cloudinary** (Media Storage)
+- frontend build tĩnh trên Vercel
+- backend Node.js/Express chạy riêng
+- MySQL cho dữ liệu nghiệp vụ
+- Redis cho cache, queue, socket presence/state
+- Cloudinary cho ảnh
+- R2 hoặc S3-compatible object storage cho nội dung chương
+- CDN/public domain đứng trước bucket chương
 
----
+Điểm khác biệt lớn so với tài liệu cũ:
 
-## 🚀 Bước 1: Deploy Database & Cloudinary
+- frontend không đọc nội dung chương qua backend nữa
+- frontend lấy metadata chương từ API, sau đó fetch JSON chương trực tiếp từ CDN
+- backend upload file chương `.json.gz` lên R2/S3-compatible storage và lưu metadata trong DB
 
-### 1.1. Aiven MySQL
-*   Tạo service MySQL trên Aiven.
-*   Lấy thông tin connection (`Host`, `Port`, `User`, `Password`, `Database`).
-*   **Quan trọng**: Vào tab "Advanced configuration" hoặc "Connection pools" để đảm bảo `ssl-mode` được hỗ trợ (Project đã cấu hình `require` SSL nhưng tắt `rejectUnauthorized`).
+## 1. Sơ đồ triển khai
 
-### 1.2. Cloudinary
-*   Lấy `Cloud Name`, `API Key`, `API Secret` từ Dashboard.
-*   Vào Settings > Upload > Add upload preset (nếu cần), nhưng Backend hiện tại dùng cấu hình mặc định global.
-*   **Lưu ý**: Đảm bảo "Strict Transformations" đang tắt hoặc đã cấu hình allowed transformations.
+```text
+Browser
+  ├─ Frontend app (Vercel / static hosting)
+  ├─ API requests -> Backend (Express)
+  └─ Chapter content requests -> CDN domain -> R2/S3-compatible bucket
 
----
+Backend
+  ├─ MySQL
+  ├─ Redis
+  ├─ Cloudinary
+  └─ R2/S3-compatible object storage
+```
 
-## 🚀 Bước 2: Deploy Backend (Render)
+Luồng đọc chương:
 
-1.  Truy cập [Render Dashboard](https://dashboard.render.com).
-2.  Chọn **New +** -> **Web Service**.
-3.  Kết nối với repo GitHub của dự án.
-4.  Điền thông tin:
-    *   **Name**: `truyenviethay-backend`
-    *   **Root Directory**: `backend` (Rất quan trọng!)
-    *   **Environment**: `Node`
-    *   **Build Command**: `npm install`
-    *   **Start Command**: `node index.js`
-5.  **Environment Variables** (Mục Advanced):
-    *   `NODE_ENV`: `production`
-    *   `PORT`: `3000` (Render sẽ tự override, nhưng cứ để)
-    *   `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`: (Điền thông tin từ Aiven)
-    *   `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`: (Điền thông tin Cloudinary)
-    *   `JWT_SECRET`: (Điền chuỗi bảo mật ngẫu nhiên)
-    *   `CLIENT_URL`: `*` (Tạm thời để `*` để test, sau khi có domain Frontend sẽ cập nhật lại sau).
-6.  Nhấn **Create Web Service**.
-7.  Chờ deploy thành công. Copy **URL Backend** (ví dụ: `https://truyenviethay-backend.onrender.com`).
+1. FE gọi API lấy metadata chương.
+2. FE build URL CDN bằng `storyId`, `chapterId`, `content_hash`.
+3. FE fetch trực tiếp file JSON chương từ CDN.
 
----
+## 2. Dịch vụ cần chuẩn bị
 
-## 🚀 Bước 3: Deploy Frontend (Vercel)
+- Frontend hosting: Vercel hoặc static host tương đương
+- Backend hosting: Render/Railway/Fly.io/VM
+- MySQL 8+
+- Redis
+- Cloudinary
+- Cloudflare R2 hoặc storage S3-compatible có public endpoint/CDN
+- Google OAuth client nếu dùng đăng nhập Google
 
-1.  Truy cập [Vercel Dashboard](https://vercel.com).
-2.  Chọn **Add New...** -> **Project**.
-3.  Import repo GitHub.
-4.  Cấu hình Project:
-    *   **Framework Preset**: Vite
-    *   **Root Directory**: Chọn `Edit` -> chọn thư mục `frontend`.
-    *   **Build Command**: `npm run build` (Mặc định)
-    *   **Output Directory**: `dist` (Mặc định)
-5.  **Environment Variables**:
-    *   `VITE_API_URL`: Dán URL Backend đã copy ở Bước 2 (Ví dụ: `https://truyenviethay-backend.onrender.com`). **Lưu ý**: Không có dấu `/` ở cuối.
-6.  Nhấn **Deploy**.
-7.  Chờ kết quả. Copy **URL Frontend** (ví dụ: `https://truyenviethay.vercel.app`).
+## 3. Biến môi trường
 
----
+## Backend
 
-## 🚀 Bước 4: Cập Nhật Security (Quan Trọng)
+Tối thiểu:
 
-1.  Quay lại **Render Dashboard** (Backend).
-2.  Vào mục **Environment**.
-3.  Sửa biến `CLIENT_URL` thành URL Frontend vừa tạo (ví dụ: `https://truyenviethay.vercel.app`).
-4.  Lưu lại. Render sẽ tự động redeploy.
-5.  Việc này giúp ngăn chặn các trang web khác gọi trộm API của bạn (CORS Policy).
+```env
+NODE_ENV=production
+PORT=3000
 
----
+DB_HOST=
+DB_PORT=3306
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
 
-## ✅ Post-Deploy Checklist
+JWT_SECRET=
+REDIS_URL=
+BASE_URL=https://api.truyenviethay.id.vn
 
-1.  [ ] **Kiểm tra Frontend**: Truy cập trang web, các hình ảnh, icon load tốt không?
-2.  [ ] **Kiểm tra API**: Thử đăng nhập/đăng ký. Nếu lỗi Network Error -> Kiểm tra `VITE_API_URL`. Nếu lỗi CORS -> Kiểm tra `CLIENT_URL` trên Render.
-3.  [ ] **Kiểm tra Database**: Thử đọc một truyện, nội dung có hiện không?
-4.  [ ] **Kiểm tra Upload**: Thử (nếu có quyền) upload ảnh avatar hoặc ảnh truyện -> Check Cloudinary xem ảnh có lên không.
-5.  [ ] **Page Refresh**: Vào một trang con (ví dụ `/story/1`) và nhấn F5 (Refresh). Nếu lỗi 404 -> Vercel cần file `vercel.json` rewrite source.
-    *   *Note*: Vite Project trên Vercel thường tự xử lý SPA rewrite. Nếu lỗi, tạo file `vercel.json` ở thư mục `frontend/` với nội dung:
-        ```json
-        {
-          "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
-        }
-        ```
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 
-## ⚠️ Các Lỗi Thường Gặp
+R2_ENDPOINT=
+R2_REGION=auto
+R2_BUCKET=
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_PUBLIC_BASE_URL=https://cdn.truyenviethay.id.vn
 
-*   **Lỗi CORS**: Check kỹ `CLIENT_URL` ở Backend và `VITE_API_URL` ở Frontend. Đảm bảo không có dấu `/` thừa ở cuối.
-*   **Lỗi DB Connection**: Kiểm tra IP Whitelist trên Aiven (nếu có bật), đảm bảo `0.0.0.0/0` hoặc IP của Render được phép.
-*   **Lỗi 502 Bad Gateway**: Server Backend crash. Check tab "Logs" trên Render để xem lỗi (thường do sai tên biến môi trường hoặc lỗi code).
-*   **Lỗi "Command not found"**: Check lại Root Directory khi deploy.
+CLIENT_URL=https://truyenviethay.id.vn
+GOOGLE_CLIENT_ID=
+```
+
+Biến tùy chọn hay dùng:
+
+```env
+LOG_LEVEL=info
+LOG_DIR=logs
+LOG_CACHE_HIT_MISS=0
+CACHE_DEBUG=0
+HISTORY_CAP_PER_USER=200
+```
+
+## Frontend
+
+```env
+VITE_API_URL=https://api.truyenviethay.id.vn
+VITE_APP_IMAGE_URL=https://api.truyenviethay.id.vn
+VITE_CDN_BASE_URL=https://cdn.truyenviethay.id.vn
+VITE_GOOGLE_CLIENT_ID=
+```
+
+## 4. Database
+
+### Yêu cầu
+
+- chạy toàn bộ migration trong `backend/migrations/`
+- kiểm tra các bảng/cột quan trọng:
+  - `truyen_new.is_deleted`
+  - `truyen_new.so_luong_chuong`
+  - `chuong.content_url`
+  - `chuong.content_hash`
+  - `chuong.content_length`
+  - `daily_stats`
+  - `author` related tables
+
+### Ghi chú
+
+- author ranking, dashboard, hot score và story listings phụ thuộc vào `daily_stats`, `hot_score`, `is_deleted`
+- nếu database thiếu các migration phase mới, list/ranking có thể sai
+
+## 5. Redis
+
+Redis hiện được dùng cho:
+
+- app cache
+- notification queue/worker
+- world chat / author room presence
+- online status
+- view tracking buffer trước khi sync về MySQL
+
+Nếu thiếu Redis:
+
+- app vẫn có thể chạy ở mức hạn chế ở vài chỗ fallback
+- nhưng cache, socket state, queue và một số job sẽ không vận hành đúng
+
+## 6. R2 / CDN cho nội dung chương
+
+Đây là phần cần cấu hình đúng nhất.
+
+### Backend đang upload gì
+
+File [backend/services/r2ChapterStorage.service.js](C:/Users/Admin/Downloads/web/truyenviethay_new/backend/services/r2ChapterStorage.service.js) hiện:
+
+- build key: `chapters/{storyId}/{chapterId}.json`
+- tạo payload JSON gồm `id`, `story_id`, `title`, `content`, `updated_at`
+- gzip payload trước khi upload
+- set:
+  - `Content-Type: application/json`
+  - `Content-Encoding: gzip`
+  - `Cache-Control: public, max-age=604800, stale-while-revalidate=86400`
+
+### Cần đảm bảo
+
+- bucket/public domain cho phép GET công khai file chương
+- CDN không strip query string
+- CDN không đổi `Content-Encoding`
+- CDN không ép tải file về dạng attachment
+- CDN path phải map đúng tới prefix `chapters/...`
+
+### Frontend đang build URL như thế nào
+
+File [frontend/src/utils/chapterCdn.ts](C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/utils/chapterCdn.ts):
+
+```ts
+{VITE_CDN_BASE_URL}/chapters/{storyId}/{chapterId}.json?v={content_hash}
+```
+
+Lưu ý:
+
+- query `v=` là cơ chế bust cache khi nội dung chương đổi
+- nếu CDN bỏ qua query string trong cache key, người dùng sẽ dễ thấy nội dung cũ
+
+## 7. Deploy backend
+
+Ví dụ với Render:
+
+1. tạo Web Service trỏ root `backend`
+2. build command:
+
+```bash
+npm install
+```
+
+3. start command:
+
+```bash
+node index.js
+```
+
+4. inject các env vars backend
+5. xác nhận port nội bộ khớp `PORT`
+
+### Việc backend tự khởi động khi chạy production
+
+Trong [backend/index.js](C:/Users/Admin/Downloads/web/truyenviethay_new/backend/index.js), app sẽ:
+
+- start HTTP server
+- init Socket.io
+- clear online status cũ
+- start toàn bộ cron jobs và notification worker khi `NODE_ENV !== test`
+
+Nếu deploy nhiều replica backend:
+
+- cron jobs và worker sẽ chạy trên mọi replica nếu không tách riêng
+- nên cân nhắc:
+  - 1 worker/backend chính cho cron
+  - các replica còn lại chỉ serve traffic
+
+## 8. Deploy frontend
+
+Ví dụ với Vercel:
+
+1. import project với root `frontend`
+2. framework: Vite
+3. build command:
+
+```bash
+npm run build
+```
+
+4. output dir:
+
+```bash
+dist
+```
+
+5. inject env vars frontend
+
+### File cấu hình có sẵn
+
+- [frontend/vite.config.ts](C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/vite.config.ts)
+- [frontend/vercel.json](C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/vercel.json)
+
+`vercel.json` hiện đã có:
+
+- SPA rewrite về `index.html`
+- `no-store` cho HTML/routes
+- cache immutable cho assets build
+
+## 9. CORS và domain
+
+Hiện có 2 nơi cần kiểm tra:
+
+### HTTP API
+
+[backend/app.js](C:/Users/Admin/Downloads/web/truyenviethay_new/backend/app.js) đang hardcode danh sách origin.
+
+Nếu đổi domain frontend, cần sửa file này hoặc refactor sang env-driven CORS.
+
+### Socket
+
+[backend/config/socket.js](C:/Users/Admin/Downloads/web/truyenviethay_new/backend/config/socket.js) dùng `CLIENT_URL`.
+
+Nếu đổi domain frontend, cần đồng bộ cả app HTTP lẫn socket.
+
+## 10. Cloudinary
+
+Cloudinary vẫn là nơi lưu:
+
+- ảnh bìa
+- avatar
+- badge assets
+- shop assets
+
+Frontend lấy ảnh qua `VITE_APP_IMAGE_URL` hoặc fallback `VITE_API_URL`.
+
+Nếu bạn muốn tách hẳn image domain riêng, cần cập nhật:
+
+- env frontend
+- helper ở `frontend/src/config/constants.ts`
+- chính sách CORS/cache nếu ảnh đi qua domain mới
+
+## 11. Checklist sau deploy
+
+- frontend load được ở domain chính
+- API `/healthcheck` trả `OK`
+- login/logout hoạt động
+- socket notification/chat kết nối được
+- upload ảnh bìa/avatar hoạt động
+- mở một chương:
+  - metadata API trả OK
+  - request JSON chương đi trực tiếp tới CDN
+  - response có `Content-Type: application/json`
+  - response có `Content-Encoding: gzip` nếu CDN pass-through
+- tạo/chỉnh sửa chương:
+  - DB cập nhật `content_url`, `content_hash`, `content_length`
+  - bucket có file mới đúng path
+  - URL mới có thể đọc qua CDN
+- ranking/hot stories hiển thị đúng
+- cron jobs có log startup và chạy bình thường
+
+## 12. Cache strategy hiện tại
+
+### Frontend build
+
+- HTML / app route: `no-store`
+- assets hash: immutable cache dài hạn
+
+### Story/chapter metadata
+
+- backend dùng Redis cache cho nhiều list/detail
+- khi update story/chapter/approval sẽ invalidate key liên quan
+
+### Chapter content
+
+- cache dài hạn ở CDN/object storage
+- bust cache bằng `content_hash` trong query string
+- frontend dùng `force-cache`
+- có prefetch chương tiếp theo để warm cache
+
+## 13. Những lỗi hay gặp
+
+### Chương vẫn hiện nội dung cũ sau khi sửa
+
+Nguyên nhân thường gặp:
+
+- CDN ignore query string
+- metadata chưa cập nhật `content_hash`
+- file mới chưa upload thành công lên bucket
+
+### Mở chương 404 dù metadata có
+
+Kiểm tra:
+
+- `R2_PUBLIC_BASE_URL`
+- bucket path `chapters/{storyId}/{chapterId}.json`
+- public access policy / custom domain mapping
+
+### Ảnh không hiện
+
+Kiểm tra:
+
+- `VITE_APP_IMAGE_URL`
+- Cloudinary URL/path
+- helper trong `frontend/src/config/constants.ts`
+
+### Frontend gọi API được nhưng socket fail
+
+Kiểm tra:
+
+- `CLIENT_URL`
+- CORS config trong `backend/app.js`
+- websocket support ở provider backend/proxy
+
+### Cron chạy lặp nhiều lần
+
+Nguyên nhân:
+
+- đang chạy nhiều backend replica cùng lúc
+
+Giải pháp:
+
+- tách worker/cron process riêng
+- hoặc chỉ giữ cron ở 1 service duy nhất
+
+## 14. Khuyến nghị vận hành
+
+- giữ `cdn` riêng cho chapter content
+- không để backend serve nội dung chương public ở production
+- không strip query string trên CDN path chương
+- tách backend API và worker nếu scale nhiều instance
+- theo dõi Redis memory vì app cache + chat + queue + presence cùng dùng chung
+- định kỳ kiểm tra cron logs cho:
+  - view sync
+  - daily stats
+  - author ranking
+  - reconcile aggregates
