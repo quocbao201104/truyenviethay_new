@@ -156,11 +156,42 @@ const handleUnfollow = async (storyId: number) => {
 }
 
 /* ===== FAVORITES GRID ===== */
+
 .favorites-grid-xianxia {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 25px;
   margin-bottom: 50px;
+}
+
+.story-aura-wrapper {
+  position: relative;
+  height: 100%;
+  min-width: 0;
+  /* Prevent card content from overflowing on small screens */
+  overflow: hidden;
+}
+
+/* Responsive improvements for mobile */
+@media (max-width: 768px) {
+  .section-title-xianxia { font-size: 1.8rem; }
+  .favorites-grid-xianxia {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .story-aura-wrapper {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .btn-sever-bond { width: 30px; height: 30px; font-size: 0.8rem; }
+}
+
+@media (max-width: 480px) {
+  .favorites-grid-xianxia {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }
 
 .story-aura-wrapper {

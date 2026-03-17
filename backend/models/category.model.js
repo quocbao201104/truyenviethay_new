@@ -27,6 +27,7 @@ const TheLoaiModel = {
       JOIN truyen_theloai tt ON t.id = tt.truyen_id
       WHERE tt.theloai_id IN (${placeholders})
         AND t.trang_thai_kiem_duyet = 'duyet'
+        AND (t.is_deleted = 0 OR t.is_deleted IS NULL)
       GROUP BY t.id
       HAVING COUNT(DISTINCT tt.theloai_id) = ?
       ORDER BY t.thoi_gian_cap_nhat DESC

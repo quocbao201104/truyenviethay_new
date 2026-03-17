@@ -67,7 +67,6 @@ const fetchComments = async (truyenId, page) => {
     obj.author_level_id = levelMap.get(obj.user_id) ?? null;
     obj.author_badge = badgeMap.get(obj.user_id) ?? null;
     obj.author_frame = frameMap.get(obj.user_id) ?? null;
-    obj.content = obj.is_deleted ? "[Bình luận đã bị xóa]" : obj.content;
     if (obj.created_at && typeof obj.created_at === 'string' && !obj.created_at.endsWith('Z')) {
       obj.created_at = obj.created_at.replace(" ", "T") + "Z";
     }

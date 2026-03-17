@@ -12,7 +12,8 @@ const approveChapter = async (chapter_id, action, reason) => {
       `SELECT c.truyen_id, c.trang_thai AS trang_thai_kiem_duyet, t.user_id, t.ten_truyen AS ten_truyen, t.slug AS truyen_slug
        FROM chuong c
        JOIN truyen_new t ON c.truyen_id = t.id
-       WHERE c.id = ?`,
+       WHERE c.id = ?
+         AND (t.is_deleted = 0 OR t.is_deleted IS NULL)`,
       [chapter_id]
     );
     const chapter = rows[0];

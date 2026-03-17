@@ -1,4 +1,6 @@
 const db = require("../config/db");
+const ACTIVE_STORY_CLAUSE = `(tn.is_deleted = 0 OR tn.is_deleted IS NULL)`;
+const ACTIVE_STORY_CLAUSE_NO_ALIAS = `(is_deleted = 0 OR is_deleted IS NULL)`;
 const { getOrSet, invalidate } = require("../utils/cache");
 
 const STORY_LIST_CACHE_TTL = 600; // 10 phút
@@ -53,7 +55,7 @@ const StoryModel = {
     `;
     const params = [];
     const countParams = [];
-    const whereClauses = [];
+    const whereClauses = [ACTIVE_STORY_CLAUSE];
 
     if (trang_thai_kiem_duyet) {
       whereClauses.push(`tn.trang_thai_kiem_duyet = ?`);
@@ -133,7 +135,8 @@ const StoryModel = {
     const [rows] = await db.query(
       `SELECT tn.*, tn.so_luong_chuong
        FROM truyen_new tn
-       WHERE tn.id = ?`,
+       WHERE tn.id = ?
+         AND ${ACTIVE_STORY_CLAUSE}`,
       [id]
     );
     return rows[0]; 
@@ -155,7 +158,8 @@ const StoryModel = {
       `SELECT tn.*, 
         tn.so_luong_chuong
        FROM truyen_new tn 
-       WHERE slug = ?`, 
+       WHERE tn.slug = ?
+         AND ${ACTIVE_STORY_CLAUSE}`, 
       [slug]
     );
     return rows[0];
@@ -196,7 +200,9 @@ const StoryModel = {
   },
   getPendingApproval: async () => {
     const [rows] = await db.query(
-      `SELECT * FROM truyen_new WHERE trang_thai_kiem_duyet = 'cho_duyet'`
+      `SELECT * FROM truyen_new
+       WHERE trang_thai_kiem_duyet = 'cho_duyet'
+         AND ${ACTIVE_STORY_CLAUSE_NO_ALIAS}`
     );
     return rows;
   },
@@ -206,30 +212,23 @@ const StoryModel = {
       throw new Error("ID người dùng không hợp lệ");
     }
     const [rows] = await db.query(
-      `SELECT * FROM truyen_new WHERE user_id = ?`,
+      `SELECT * FROM truyen_new
+       WHERE user_id = ?
+         AND ${ACTIVE_STORY_CLAUSE_NO_ALIAS}`,
       [userId]
     );
     return rows;
   },
  delete: async (id) => {
-    const connection = await db.getConnection();
-    try {
-        await connection.beginTransaction();
-        await connection.query(`DELETE FROM thong_bao WHERE target_id = ? AND type IN (11, 12)`, [id]);
-        await connection.query(`DELETE FROM truyen_theloai WHERE truyen_id = ?`, [id]);
-        await connection.query(`DELETE FROM chuong WHERE truyen_id = ?`, [id]);
-        await connection.query(`DELETE FROM theo_doi WHERE truyen_id = ?`, [id]);
-        await connection.query(`DELETE FROM ratings WHERE truyen_id = ?`, [id]);
-        const [result] = await connection.query(`DELETE FROM truyen_new WHERE id = ?`, [id]);
-        
-        await connection.commit();
-        return result.affectedRows;
-    } catch (error) {
-        await connection.rollback();
-        throw error;
-    } finally {
-        connection.release();
-    }
+    const [result] = await db.query(
+      `UPDATE truyen_new
+       SET is_deleted = 1,
+           thoi_gian_cap_nhat = NOW()
+       WHERE id = ?
+         AND ${ACTIVE_STORY_CLAUSE_NO_ALIAS}`,
+      [id]
+    );
+    return result.affectedRows;
 },
   addGenresForStory: async (truyenId, theloaiIds) => {
     const values = theloaiIds.map((id) => [truyenId, id]);
@@ -249,6 +248,7 @@ const StoryModel = {
     await invalidate("topWeekly");
     await invalidate("topDaily");
     await invalidate("storyList");
+    await invalidate("storyListAll");
     await invalidate("topRated");
   },
 
@@ -315,7 +315,10 @@ const StoryModel = {
     // We will use a subquery approach for counting total if HAVING is involved, or build dynamically.
     // For simplicity with HAVING, we often do: SELECT COUNT(*) FROM (SELECT tn.id ... HAVING ...) as t
     
-    let whereConditions = [`tn.trang_thai_kiem_duyet = 'duyet'`];
+    let whereConditions = [
+      `tn.trang_thai_kiem_duyet = 'duyet'`,
+      ACTIVE_STORY_CLAUSE,
+    ];
     let params = [];
     
     // Only add keyword filter if keyword is provided
@@ -498,6 +501,7 @@ if (ids.length > 0) {
              GROUP BY ds.novel_id
            ) stats ON tn.id = stats.novel_id
            WHERE tn.trang_thai_kiem_duyet = 'duyet'
+             AND ${ACTIVE_STORY_CLAUSE}
            ORDER BY stats.luot_xem_thang DESC
            LIMIT ?`,
           [safeLimit]
@@ -534,6 +538,7 @@ if (ids.length > 0) {
              GROUP BY ds.novel_id
            ) stats ON tn.id = stats.novel_id
            WHERE tn.trang_thai_kiem_duyet = 'duyet'
+             AND ${ACTIVE_STORY_CLAUSE}
            ORDER BY stats.luot_xem_tuan DESC
            LIMIT ?`,
           [safeLimit]
@@ -570,6 +575,7 @@ if (ids.length > 0) {
              GROUP BY ds.novel_id
            ) stats ON tn.id = stats.novel_id
            WHERE tn.trang_thai_kiem_duyet = 'duyet'
+             AND ${ACTIVE_STORY_CLAUSE}
            ORDER BY stats.luot_xem_ngay DESC
            LIMIT ?`,
           [safeLimit]
@@ -601,6 +607,7 @@ if (ids.length > 0) {
                   so_luong_chuong, so_luong_chuong AS so_chuong, chuong_moi
            FROM truyen_new
            WHERE trang_thai_kiem_duyet = 'duyet'
+             AND ${ACTIVE_STORY_CLAUSE_NO_ALIAS}
            ORDER BY hot_score DESC
            LIMIT ?`,
           [safeLimit]

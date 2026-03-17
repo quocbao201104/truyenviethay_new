@@ -528,6 +528,11 @@ onBeforeUnmount(() => {
   gap: 40px;
 }
 
+.main-col-spirit,
+.spirit-block {
+  min-width: 0;
+}
+
 .spirit-block { margin-bottom: 55px; }
 
 /* ===== LINH KHÍ TRẬN (SECTION HEADERS CHUNG) ===== */
@@ -733,6 +738,7 @@ onBeforeUnmount(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
   gap: 28px 24px;
+  min-width: 0;
 }
 
 /* ===== SIDEBAR - GLASSMORPHISM ===== */
@@ -838,7 +844,7 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 640px) {
-  .main-content-spirit { padding: 15px 12px 60px; }
+  .main-content-spirit { padding: 15px 14px 60px; }
   .hero-aura-wrapper { margin-bottom: 30px; border-radius: 16px; }
   .continue-cultivation-area { margin-bottom: 40px; }
   .spirit-block { margin-bottom: 40px; }
@@ -846,7 +852,10 @@ onBeforeUnmount(() => {
   .spirit-title { font-size: 1.3rem; }
   .spirit-note { display: none; /* Ẩn note phụ trên mobile cho gọn */ }
 
-  .spirit-grid-responsive { grid-template-columns: repeat(2, 1fr); gap: 16px 12px; }
+  .spirit-grid-responsive {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 10px;
+  }
 
   .ranking-spirit-list-mobile { padding: 15px; border-radius: 16px; }
 }

@@ -37,15 +37,18 @@ const DashboardModel = {
    */
   getAuthorTotals: async (authorId) => {
     const [rows] = await db.query(
-      `SELECT
+       `SELECT
          COALESCE(SUM(tn.luot_xem), 0) AS total_views,
          COALESCE((
            SELECT COUNT(*) FROM comments c
            JOIN truyen_new t ON c.truyen_id = t.id
-           WHERE t.user_id = ? AND (c.is_deleted = 0 OR c.is_deleted IS NULL)
+           WHERE t.user_id = ?
+             AND (t.is_deleted = 0 OR t.is_deleted IS NULL)
+             AND (c.is_deleted = 0 OR c.is_deleted IS NULL)
          ), 0) AS total_comments
        FROM truyen_new tn
-       WHERE tn.user_id = ?`,
+       WHERE tn.user_id = ?
+         AND (tn.is_deleted = 0 OR tn.is_deleted IS NULL)`,
       [authorId, authorId]
     );
     return rows[0];
@@ -65,6 +68,7 @@ const DashboardModel = {
        FROM daily_stats ds
        JOIN truyen_new tn ON ds.novel_id = tn.id
        WHERE tn.user_id = ?
+         AND (tn.is_deleted = 0 OR tn.is_deleted IS NULL)
          AND ds.date BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE()
        GROUP BY ds.date
        ORDER BY ds.date ASC`,
@@ -106,8 +110,8 @@ const DashboardModel = {
   getAdminOverview: async () => {
     const [rows] = await db.query(
       `SELECT
-         (SELECT COALESCE(SUM(luot_xem), 0) FROM truyen_new) AS total_views,
-         (SELECT COUNT(*) FROM truyen_new) AS total_novels,
+         (SELECT COALESCE(SUM(luot_xem), 0) FROM truyen_new WHERE (is_deleted = 0 OR is_deleted IS NULL)) AS total_views,
+         (SELECT COUNT(*) FROM truyen_new WHERE (is_deleted = 0 OR is_deleted IS NULL)) AS total_novels,
          (SELECT COUNT(*) FROM users_new) AS total_users`
     );
     return rows[0];
@@ -163,6 +167,7 @@ const DashboardModel = {
     const [rows] = await db.query(
       `SELECT id, ten_truyen, slug, luot_xem, tac_gia, anh_bia
        FROM truyen_new
+       WHERE (is_deleted = 0 OR is_deleted IS NULL)
        ORDER BY luot_xem DESC
        LIMIT 10`
     );

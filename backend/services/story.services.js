@@ -5,7 +5,10 @@ const db = require("../config/db");
 const approveStory = async (story_id, action) => {
   try {
     const [rows] = await db.query(
-      "SELECT user_id, ten_truyen, trang_thai_kiem_duyet FROM truyen_new WHERE id = ?",
+      `SELECT user_id, ten_truyen, trang_thai_kiem_duyet
+       FROM truyen_new
+       WHERE id = ?
+         AND (is_deleted = 0 OR is_deleted IS NULL)`,
       [story_id]
     );
     const story = rows[0];
@@ -25,7 +28,10 @@ const approveStory = async (story_id, action) => {
 
     const newStatus = action === "duyet" ? "duyet" : "tu_choi";
     await db.query(
-      "UPDATE truyen_new SET trang_thai_kiem_duyet = ? WHERE id = ?",
+      `UPDATE truyen_new
+       SET trang_thai_kiem_duyet = ?
+       WHERE id = ?
+         AND (is_deleted = 0 OR is_deleted IS NULL)`,
       [newStatus, story_id]
     );
 

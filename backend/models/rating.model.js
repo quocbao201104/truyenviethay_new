@@ -55,8 +55,11 @@ const Rating = {
   getRatingsByTruyenId: async (truyenId) => {
     const [rows] = await db.query(
       `SELECT r.*, u.full_name FROM ratings r
+       JOIN truyen_new t ON r.truyen_id = t.id
        JOIN users_new u ON r.user_id = u.id
-       WHERE r.truyen_id = ? ORDER BY r.created_at DESC`,
+       WHERE r.truyen_id = ?
+         AND (t.is_deleted = 0 OR t.is_deleted IS NULL)
+       ORDER BY r.created_at DESC`,
       [truyenId]
     );
     return rows;
@@ -66,7 +69,9 @@ const Rating = {
   getAverageRating: async (truyenId) => {
     const [rows] = await db.query(
       `SELECT rating AS avg_rating, rating_count AS total_ratings
-       FROM truyen_new WHERE id = ?`,
+       FROM truyen_new
+       WHERE id = ?
+         AND (is_deleted = 0 OR is_deleted IS NULL)`,
       [truyenId]
     );
     return rows[0];
@@ -100,7 +105,9 @@ const Rating = {
             t.rating AS avg_rating,
             t.rating_count AS total_ratings
            FROM truyen_new t
-           WHERE t.trang_thai_kiem_duyet = 'duyet' AND t.rating_count >= 1
+           WHERE t.trang_thai_kiem_duyet = 'duyet'
+             AND (t.is_deleted = 0 OR t.is_deleted IS NULL)
+             AND t.rating_count >= 1
            ORDER BY t.rating DESC, t.rating_count DESC
            LIMIT ? OFFSET ?`,
           [safeLimit, offset]
@@ -108,7 +115,9 @@ const Rating = {
 
         const [countResult] = await db.query(
           `SELECT COUNT(*) as total FROM truyen_new t 
-           WHERE t.trang_thai_kiem_duyet = 'duyet' AND t.rating_count >= 1`
+           WHERE t.trang_thai_kiem_duyet = 'duyet'
+             AND (t.is_deleted = 0 OR t.is_deleted IS NULL)
+             AND t.rating_count >= 1`
         );
 
         return {

@@ -60,6 +60,7 @@ exports.getFollowedStories = (userId, offset, limit) => {
     FROM truyen_new t
     JOIN theo_doi td ON t.id = td.truyen_id
     WHERE td.user_id = ?
+      AND (t.is_deleted = 0 OR t.is_deleted IS NULL)
     ORDER BY td.ngay_theo_doi DESC
     LIMIT ? OFFSET ?
   `,
@@ -73,7 +74,9 @@ exports.getFollowCount = (userId) => {
     `
     SELECT COUNT(*) as count
     FROM theo_doi td
+    JOIN truyen_new t ON t.id = td.truyen_id
     WHERE td.user_id = ?
+      AND (t.is_deleted = 0 OR t.is_deleted IS NULL)
   `,
     [userId]
   );

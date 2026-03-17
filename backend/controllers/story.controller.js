@@ -87,6 +87,7 @@ const getAllStories = async (req, res) => {
       order,
     };
 
+    const cacheKey = allStoriesCacheKey(params);
     const result = await getOrSet(cacheKey, ALL_STORIES_CACHE_TTL_SECONDS, () =>
       StoryModel.getAll(params)
     );
@@ -229,6 +230,10 @@ const getStoryBySlug = async (req, res) => {
 const getStorySampleChapter = async (req, res) => {
   try {
     const storyId = req.params.id;
+    const story = await StoryModel.getById(storyId);
+    if (!story) {
+      return res.status(404).json({ message: "KhÃ´ng tÃ¬m tháº¥y truyá»‡n" });
+    }
     const sampleContent = await StoryModel.getSampleChapter(storyId);
     res.json({ sample_chapter_content: sampleContent });
   } catch (error) {

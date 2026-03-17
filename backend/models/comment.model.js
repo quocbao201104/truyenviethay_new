@@ -12,7 +12,11 @@ exports.getCommentById = async (commentId) => {
 /** Đếm tổng số parent comment của truyện */
 exports.countByTruyen = async (truyenId) => {
   const [rows] = await db.query(
-    `SELECT COUNT(*) AS cnt FROM comments WHERE truyen_id = ? AND parent_id IS NULL`,
+    `SELECT COUNT(*) AS cnt
+     FROM comments
+     WHERE truyen_id = ?
+       AND parent_id IS NULL
+       AND (is_deleted = 0 OR is_deleted IS NULL)`,
     [truyenId]
   );
   return rows[0]?.cnt ?? 0;
@@ -21,7 +25,10 @@ exports.countByTruyen = async (truyenId) => {
 /** Đếm số reply của comment (parent) */
 exports.countReplies = async (parentId) => {
   const [rows] = await db.query(
-    `SELECT COUNT(*) AS cnt FROM comments WHERE parent_id = ?`,
+    `SELECT COUNT(*) AS cnt
+     FROM comments
+     WHERE parent_id = ?
+       AND (is_deleted = 0 OR is_deleted IS NULL)`,
     [parentId]
   );
   return rows[0]?.cnt ?? 0;
@@ -33,7 +40,9 @@ exports.getCommentsByTruyen = async (truyenId, limit, offset) => {
       SELECT c.*, COALESCE(NULLIF(u.full_name, ''), u.username) AS author_name, u.avatar AS author_avatar
       FROM comments c
       JOIN users_new u ON c.user_id = u.id
-      WHERE c.truyen_id = ? AND c.parent_id IS NULL
+      WHERE c.truyen_id = ?
+        AND c.parent_id IS NULL
+        AND (c.is_deleted = 0 OR c.is_deleted IS NULL)
       ORDER BY c.created_at DESC
       LIMIT ? OFFSET ?
       `,
@@ -50,6 +59,7 @@ exports.getReplies = async (parentId) => {
     FROM comments c
     JOIN users_new u ON c.user_id = u.id
     WHERE c.parent_id = ?
+      AND (c.is_deleted = 0 OR c.is_deleted IS NULL)
     ORDER BY c.created_at ASC
     `,
     [parentId]

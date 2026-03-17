@@ -14,9 +14,11 @@ exports.getReadingHistory = async (userId, page = 1, limit = DEFAULT_LIMIT) => {
 
   const [countResult] = await db.query(
     `
-    SELECT COUNT(DISTINCT truyen_id) AS total 
-    FROM lich_su_doc_new 
-    WHERE user_id = ?
+    SELECT COUNT(DISTINCT lsd.truyen_id) AS total 
+    FROM lich_su_doc_new lsd
+    JOIN truyen_new t ON lsd.truyen_id = t.id
+    WHERE lsd.user_id = ?
+      AND (t.is_deleted = 0 OR t.is_deleted IS NULL)
   `,
     [userId]
   );
@@ -44,6 +46,7 @@ exports.getReadingHistory = async (userId, page = 1, limit = DEFAULT_LIMIT) => {
       GROUP BY truyen_id
     ) recent ON lsd.truyen_id = recent.truyen_id AND lsd.thoi_gian_doc = recent.max_time
     WHERE lsd.user_id = ?
+      AND (t.is_deleted = 0 OR t.is_deleted IS NULL)
     ORDER BY lsd.thoi_gian_doc DESC
     LIMIT ? OFFSET ?
     `,

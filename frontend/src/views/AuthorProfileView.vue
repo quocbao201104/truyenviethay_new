@@ -711,10 +711,46 @@ watch(
   .spirit-array-center { width: 120px; height: 120px; }
   .display-name { font-size: 1.5rem; }
   .stat-crystal { min-width: 85px; padding: 8px 12px; }
-  .follow-btn-divine { width: 100%; }
+  .author-action-area {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    align-items: stretch;
+  }
+  .follow-btn-divine,
+  .group-btn-divine,
+  .edit-profile-btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 72px;
+    padding: 14px 16px;
+    border-radius: 24px;
+    justify-content: center;
+    gap: 10px;
+    font-size: 0.88rem;
+    letter-spacing: 0.6px;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.25;
+  }
+  .story-grid, .loading-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+}
+
+@media (max-width: 420px) {
+  .author-action-area {
+    gap: 10px;
+  }
+  .follow-btn-divine,
+  .group-btn-divine,
+  .edit-profile-btn {
+    min-height: 68px;
+    padding: 12px 14px;
+    font-size: 0.82rem;
+    gap: 8px;
+  }
   .story-grid, .loading-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
 }
 </style>
-
 
 

@@ -96,6 +96,7 @@ const ChapterModel = {
       FROM chuong c 
       JOIN truyen_new t ON c.truyen_id = t.id 
       WHERE c.slug = ? AND t.slug = ? 
+      AND (t.is_deleted = 0 OR t.is_deleted IS NULL)
       AND c.trang_thai = 'da_duyet'
       LIMIT 1
     `;

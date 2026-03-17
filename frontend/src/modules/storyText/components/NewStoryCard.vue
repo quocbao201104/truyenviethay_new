@@ -162,6 +162,9 @@ const buildSrcSet = (path) => {
   content-visibility: auto;
   contain-intrinsic-size: 260px 185px;
   contain: layout paint style;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .xianxia-story-card--rich {
@@ -326,6 +329,7 @@ const buildSrcSet = (path) => {
   flex-grow: 1;
   gap: 8px;
   background: transparent; /* Kế thừa nền kính mờ của card */
+  min-width: 0;
 }
 
 .story-title-main {
@@ -383,6 +387,12 @@ const buildSrcSet = (path) => {
 .xianxia-story-card--rich .sigil-status { backdrop-filter: blur(6px); }
 
 @media (max-width: 640px) {
+  .xianxia-story-card {
+    border-radius: 15px;
+  }
+  .card-spirit-content {
+    padding: 13px 11px;
+  }
   .story-title-main { font-size: 0.95rem; }
   .sigil-status { font-size: 0.55rem; padding: 3px 8px; }
   .jade-chapter-badge { font-size: 0.65rem; padding: 3px 10px; }

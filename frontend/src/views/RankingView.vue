@@ -101,6 +101,13 @@
             >
               <div v-if="index < 3" class="rank-aura-glow-cloud"></div>
 
+              <div class="rank-indicator">
+                <div class="circle-inner">
+                  <span class="rank-num">{{ index + 1 }}</span>
+                  <i v-if="index < 3" class="fas fa-crown mini-crown"></i>
+                </div>
+              </div>
+
               <router-link :to="`/truyen-chu/${story.slug}`" class="story-cover-pill first-element">
                 <img 
                   :src="getImageUrl(story.anh_bia)" 
@@ -170,6 +177,13 @@
               @click="navigateToAuthor(author.id)"
             >
               <div v-if="index < 3" class="rank-aura-glow-cloud"></div>
+
+              <div class="rank-indicator">
+                <div class="circle-inner">
+                  <span class="rank-num">{{ index + 1 }}</span>
+                  <i v-if="index < 3" class="fas fa-crown mini-crown"></i>
+                </div>
+              </div>
 
               <div class="author-avatar-ranking first-element">
                 <div class="spirit-array-center" :class="author.equipped_frame?.css_class">
@@ -472,7 +486,7 @@ const handleImageError = (event: Event) => {
   background: #0f172a;
   border: 1px solid #1e293b;
   border-radius: 50px;
-  padding: 10px 25px;
+  padding: 10px 25px 10px 10px;
   position: relative;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -482,6 +496,41 @@ const handleImageError = (event: Event) => {
   border-color: #38bdf860;
   background: #152033;
   box-shadow: 0 10px 25px rgba(56, 189, 248, 0.1);
+}
+
+.rank-indicator {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  padding: 3px;
+  background: #1e293b;
+  border-radius: 50%;
+  z-index: 5;
+}
+
+.circle-inner {
+  width: 100%;
+  height: 100%;
+  background: #081121;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #334155;
+  position: relative;
+}
+
+.rank-num {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #475569;
+}
+
+.mini-crown {
+  position: absolute;
+  top: -8px;
+  font-size: 0.7rem;
+  color: inherit;
 }
 
 /* Aura Glow Mây Xanh */
@@ -507,6 +556,8 @@ const handleImageError = (event: Event) => {
   box-shadow: 0 4px 20px rgba(234, 179, 8, 0.1);
 }
 .rank-cloud-1 .rank-aura-glow-cloud { background: #eab308; }
+.rank-cloud-1 .circle-inner { border-color: #eab308; background: rgba(234, 179, 8, 0.12); }
+.rank-cloud-1 .rank-num { color: #eab308; }
 
 /* Top 2 - Ánh Bạc / Bích Không */
 .ranking-pill.rank-cloud-2 { 
@@ -515,6 +566,8 @@ const handleImageError = (event: Event) => {
   box-shadow: 0 4px 20px rgba(148, 163, 184, 0.1);
 }
 .rank-cloud-2 .rank-aura-glow-cloud { background: #94a3b8; }
+.rank-cloud-2 .circle-inner { border-color: #94a3b8; background: rgba(148, 163, 184, 0.12); }
+.rank-cloud-2 .rank-num { color: #cbd5e1; }
 
 /* Top 3 - Ánh Đồng / Thanh Lam */
 .ranking-pill.rank-cloud-3 { 
@@ -523,6 +576,8 @@ const handleImageError = (event: Event) => {
   box-shadow: 0 4px 20px rgba(194, 65, 12, 0.1);
 }
 .rank-cloud-3 .rank-aura-glow-cloud { background: #c2410c; }
+.rank-cloud-3 .circle-inner { border-color: #c2410c; background: rgba(194, 65, 12, 0.12); }
+.rank-cloud-3 .rank-num { color: #fb923c; }
 
 /* Story Cover */
 .story-cover-pill {
@@ -551,7 +606,7 @@ const handleImageError = (event: Event) => {
 
 /* ===== SPIRIT ARRAY AVATAR (Ranking Version) ===== */
 .author-avatar-ranking {
-  margin-left: 15px;
+  margin-left: 10px;
   flex-shrink: 0;
 }
 
@@ -760,6 +815,23 @@ const handleImageError = (event: Event) => {
     text-align: left;
     gap: 12px;
   }
+
+  .rank-indicator {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    width: 35px;
+    height: 35px;
+    z-index: 10;
+  }
+
+  .circle-inner {
+    border-width: 1.5px;
+  }
+
+  .rank-num {
+    font-size: 0.9rem;
+  }
   
   .story-cover-pill {
     width: 65px;
@@ -767,6 +839,10 @@ const handleImageError = (event: Event) => {
     margin-left: 0;
     margin-bottom: 0;
     border-radius: 8px;
+  }
+
+  .author-avatar-ranking {
+    margin-left: 0;
   }
   
   .story-details {
