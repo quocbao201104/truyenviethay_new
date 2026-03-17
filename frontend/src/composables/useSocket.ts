@@ -25,12 +25,20 @@ export function useSocket() {
     socket.value = io(apiUrl, {
       auth: { token },
       query: { token },
-      transports: ['websocket']
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      timeout: 10000,
     });
 
     socket.value.on('connect', () => {
       console.log('Connected to Spirit Realm (Socket.io)');
       socket.value?.emit('join_room', 1);
+    });
+
+    socket.value.on('connect_error', (error) => {
+      console.error('Socket connection error:', error.message);
     });
 
     socket.value.on('new_notification', (data) => {
