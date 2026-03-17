@@ -45,6 +45,7 @@ const ChatController = {
         dbUser.username,
         displayName,
         avatar,
+        req.user.role,
         message,
       );
 
@@ -95,6 +96,7 @@ const ChatController = {
         dbUser.username,
         displayName,
         avatar,
+        req.user.role,
         message,
       );
 
@@ -200,6 +202,7 @@ const ChatController = {
         dbUser.username,
         displayName,
         avatar,
+        req.user.role,
         authorId,
         message,
       );

@@ -44,3 +44,11 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# --- Docker / local infra
+/docker/mysql/dumps/*
+!/docker/mysql/dumps/.gitkeep
+/docker/**/*.sql
+/docker-compose.override.yml
+/docker-compose.local.yml
+/docker-compose.*.local.yml

@@ -1,0 +1,57 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: truyenviethay-mysql
+    restart: unless-stopped
+    command: ["mysqld", "--log-bin-trust-function-creators=1"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${LOCAL_MYSQL_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: ${LOCAL_MYSQL_DATABASE:-truyenviethay_dev}
+      MYSQL_USER: ${LOCAL_MYSQL_USER:-truyen_app}
+      MYSQL_PASSWORD: ${LOCAL_MYSQL_PASSWORD:-Truyen@2026!}
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "${LOCAL_MYSQL_PORT:-3307}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/migrations:/migrations:ro
+      - ./docker/mysql/dumps:/dumps
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: truyenviethay-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${LOCAL_REDIS_PORT:-6380}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  adminer:
+    image: adminer:4
+    container_name: truyenviethay-adminer
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "${LOCAL_ADMINER_PORT:-8080}:8080"
+
+volumes:
+  mysql_data:
+  redis_data:
