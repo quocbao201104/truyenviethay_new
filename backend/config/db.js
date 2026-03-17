@@ -1,40 +1,99 @@
 const mysql = require("mysql2");
 require("dotenv").config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306,
-  waitForConnections: true,
-  connectionLimit: 25, // Reduced from 40 to 25 to stay within Aiven limits
-  queueLimit: 0,
-  acquireTimeout: 10000,
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 10000, // Sync with server expectations
-  dateStrings: true, // Prevent involuntary date conversions
-  ssl: {
-    rejectUnauthorized: false
-  },
-  timezone: 'Z'
-});
+const DEFAULT_DB_PORT = 3306;
 
-// Error handling to prevent ECONNRESET from crashing app
-pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
-  if (err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ECONNRESET') {
-    console.log('Reconnecting to database...');
+const parseBoolean = (value, defaultValue = false) => {
+  if (value === undefined || value === null || value === "") {
+    return defaultValue;
+  }
+
+  return ["1", "true", "yes", "on"].includes(String(value).trim().toLowerCase());
+};
+
+const parseNumber = (value, fallback) => {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) ? fallback : parsed;
+};
+
+const parseDatabaseUrl = (connectionString) => {
+  const parsed = new URL(connectionString);
+
+  if (!["mysql:", "mysql2:"].includes(parsed.protocol)) {
+    throw new Error(`Unsupported database protocol: ${parsed.protocol}`);
+  }
+
+  const databaseName = decodeURIComponent(parsed.pathname.replace(/^\//, ""));
+
+  return {
+    host: parsed.hostname || "127.0.0.1",
+    port: parsed.port ? parseNumber(parsed.port, DEFAULT_DB_PORT) : DEFAULT_DB_PORT,
+    user: parsed.username ? decodeURIComponent(parsed.username) : undefined,
+    password: parsed.password ? decodeURIComponent(parsed.password) : undefined,
+    database: databaseName || undefined,
+    socketPath: parsed.searchParams.get("socketPath") || undefined,
+  };
+};
+
+const buildSslConfig = () => {
+  const shouldUseSsl = parseBoolean(process.env.DB_SSL, false);
+
+  if (!shouldUseSsl) {
+    return undefined;
+  }
+
+  return {
+    rejectUnauthorized: parseBoolean(process.env.DB_SSL_REJECT_UNAUTHORIZED, false),
+  };
+};
+
+const getDbConfig = () => {
+  const databaseUrl =
+    process.env.DATABASE_URL || process.env.MYSQL_URL || process.env.DB_URL;
+
+  const baseConfig = databaseUrl
+    ? parseDatabaseUrl(databaseUrl)
+    : {
+        host: process.env.DB_HOST || "127.0.0.1",
+        port: parseNumber(process.env.DB_PORT, DEFAULT_DB_PORT),
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        socketPath: process.env.DB_SOCKET_PATH || undefined,
+      };
+
+  const ssl = buildSslConfig();
+
+  return {
+    ...baseConfig,
+    waitForConnections: true,
+    connectionLimit: parseNumber(process.env.DB_CONNECTION_LIMIT, 25),
+    queueLimit: 0,
+    connectTimeout: parseNumber(process.env.DB_CONNECT_TIMEOUT, 10000),
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000,
+    dateStrings: true,
+    timezone: "Z",
+    ...(ssl ? { ssl } : {}),
+  };
+};
+
+const pool = mysql.createPool(getDbConfig());
+
+pool.on("error", (err) => {
+  console.error("Unexpected database pool error:", err);
+  if (err.code === "PROTOCOL_CONNECTION_LOST" || err.code === "ECONNRESET") {
+    console.log("Reconnecting to database...");
   }
 });
 
-// Test connection
 pool.getConnection((err, connection) => {
   if (err) {
-    console.error("❌ Kết nối DB thất bại: ", err);
+    console.error("Database connection failed:", err);
     return;
   }
-  console.log("✅ Kết nối DB Aiven thành công!");
+
+  console.log("Database connection established.");
   connection.release();
 });
 

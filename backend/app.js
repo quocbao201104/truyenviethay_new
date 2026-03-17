@@ -12,33 +12,35 @@ const xssClean = require("xss-clean");
 const rateLimit = require("express-rate-limit");
 const logger = require("./utils/logger");
 const errorMiddleware = require("./middleware/errorHandler");
+const { getAllowedOrigins } = require("./config/clientOrigins");
 
 const app = express();
+const allowedOrigins = getAllowedOrigins();
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Content-Length", "X-Requested-With"],
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
 
 // Trust first proxy (Cloudflare / reverse proxy) for correct IP detection
 app.set("trust proxy", 1);
 
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://truyen-viet-hay.vercel.app",
-      "https://truyenviethay.id.vn",
-      "https://www.truyenviethay.id.vn"
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Content-Length", "X-Requested-With"],
-    credentials: true,
-    optionsSuccessStatus: 200,
-  })
-);
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(compression());
 app.use(xssClean());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
-app.options("*", cors());
+app.options("*", cors(corsOptions));
 
 app.get("/healthcheck", (req, res) => res.status(200).send("OK"));
 

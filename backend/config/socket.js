@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const logger = require("../utils/logger");
 const onlineStatusService = require("../services/onlineStatus.service");
 const ChatRoomModel = require("../models/chat_room.model");
+const { getAllowedOrigins } = require("./clientOrigins");
 
 let io;
 
@@ -28,9 +29,11 @@ const socketAuthMiddleware = (socket, next) => {
 };
 
 const initSocket = (server) => {
+  const allowedOrigins = getAllowedOrigins();
+
   io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL || "http://localhost:5173",
+      origin: allowedOrigins,
       methods: ["GET", "POST"],
       credentials: true
     },
@@ -176,4 +179,3 @@ const getIO = () => {
 };
 
 module.exports = { initSocket, getIO };
-

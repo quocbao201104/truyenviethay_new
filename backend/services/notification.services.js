@@ -164,6 +164,7 @@ const startNotificationWorker = async () => {
   logger.info("Notification Worker started (Observability Enabled).");
   
   const workerRedis = redis.createRedisClient({ 
+    clientLabel: "notification-worker",
     commandTimeout: null,
     maxRetriesPerRequest: null
   });
