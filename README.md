@@ -1,384 +1,174 @@
-# TruyenVietHay
+<div align="center">
+  <img src="frontend/src/assets/images/logo.png" alt="TruyenVietHay Logo" width="250">
+  
+  <br />
+  <br />
 
-<p align="center">
-  <img src="frontend/src/assets/images/logo.png" alt="TruyenVietHay logo" width="220">
-</p>
+  <p>
+    <b>Nền tảng đọc truyện chữ và nghe audio full-stack hiện đại, tối ưu hoá cho trải nghiệm mobile & hiệu năng cao.</b>
+  </p>
+  
+  <p>
+    <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue_3-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue 3"></a>
+    <a href="https://vitejs.dev"><img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"></a>
+    <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS_4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS"></a>
+    <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js"></a>
+    <a href="https://expressjs.com"><img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express"></a>
+    <a href="https://www.mysql.com/"><img src="https://img.shields.io/badge/MySQL_8+-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL"></a>
+    <a href="https://redis.io/"><img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis"></a>
+  </p>
+</div>
 
-<p align="center">
-  <a href="https://vuejs.org"><img src="https://img.shields.io/badge/Vue-3.x-42b883?logo=vue.js" alt="Vue 3"></a>
-  <a href="https://vitejs.dev"><img src="https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite" alt="Vite"></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-20.x-339933?logo=node.js" alt="Node.js"></a>
-  <a href="https://expressjs.com"><img src="https://img.shields.io/badge/Express-4.x-000000?logo=express" alt="Express"></a>
-  <a href="https://socket.io"><img src="https://img.shields.io/badge/Socket.io-4.x-010101?logo=socket.io" alt="Socket.io"></a>
-  <a href="https://www.mysql.com/"><img src="https://img.shields.io/badge/MySQL-8%2B-4479A1?logo=mysql" alt="MySQL"></a>
-</p>
+---
 
-TruyenVietHay la nen tang truyen full-stack gom 2 nhanh chinh: truyen chu va truyen audio. He thong tap trung vao hieu nang doc/nghe, trai nghiem mobile, cache CDN, gamification, author profile/ranking va cac tinh nang tuong tac thoi gian thuc.
+## 📖 Giới thiệu
 
-TruyenVietHay là nền tảng đọc truyện chữ full-stack với trọng tâm là hiệu năng đọc chương, trải nghiệm mobile, gamification, author profile/ranking và tương tác thời gian thực.
+**TruyenVietHay** là hệ thống web app full-stack tiên tiến được xây dựng nhằm cung cấp trải nghiệm đọc truyện chữ và nghe truyện audio tốt nhất. Dự án đặc biệt chú trọng vào:
+- **Tốc độ tải trang & Hiệu năng**: Nhờ kiến trúc nạp nội dung trực tiếp qua CDN độc lập.
+- **Trải nghiệm Mobile-first**: Giao diện mượt mà như native app, hỗ trợ PWA.
+- **Tương tác thời gian thực**: Chatbox nhóm, thông báo push qua Socket.io.
+- **Gamification**: Hệ thống cấp độ, kinh nghiệm, vật phẩm, huy hiệu và cửa hàng tích hợp.
+- **Hệ sinh thái Tác giả**: Trang cá nhân, bảng xếp hạng phân tích, công cụ quản lý truyện chuyên nghiệp.
 
-## Môi trường hiện tại
+---
 
-| Thành phần | URL |
-| --- | --- |
-| Frontend | [https://truyenviethay.id.vn](https://truyenviethay.id.vn) |
-| Backend API | [https://api.truyenviethay.id.vn](https://api.truyenviethay.id.vn) |
-| Audio CDN | [https://audio.truyenviethay.id.vn](https://audio.truyenviethay.id.vn) |
-| CDN chương | [https://cdn.truyenviethay.id.vn](https://cdn.truyenviethay.id.vn) |
+## 🌟 Tính năng nổi bật
 
-## Kiến trúc hiện tại
+### 📚 Trải nghiệm Đọc Truyện & Nghe Audio
+- **Đọc truyện chữ**: Giao diện tuỳ biến bám sát nhu cầu (màu nền, font, cỡ chữ), tự động lưu vị trí (Continue Reading), tải trước chương (prefetch caching).
+- **Nghe truyện audio**: Trình phát HTML5 trực tiếp từ CDN, hệ thống playlist nhóm theo cụm, lưu tiến độ nghe chính xác tới từng giây (đồng bộ cả LocalStorage & Backend Database).
+- **Kiến trúc phân tán**: Metadata lấy cực nhanh qua API, toàn bộ nội dung chương (JSON) và MP3 được kéo độc lập qua CDN giúp tiết kiệm băng thông và tăng tốc xử lý cho server.
 
-### 1. Metadata qua API, nội dung chương qua CDN
+### 🎮 Gamification & Tương tác
+- **Hệ thống nhiệm vụ & Cấp bậc**: Đọc truyện/nghe audio tích luỹ điểm kinh nghiệm (EXP), thăng cấp nhận quà hệ thống.
+- **Shop & Túi đồ (Inventory)**: Đổi vật phẩm bằng Tu Vi / Linh Thạch ảo.
+- **Tương tác mạng xã hội**: Đánh giá đa chiều (rating), bình luận đa cấp, follow tác giả/truyện yêu thích.
+- **Hòm thư tĩnh (Mailbox)**: Nhận thưởng hệ thống và cập nhật thông báo riêng cá nhân.
 
-Đây là thay đổi quan trọng nhất so với tài liệu cũ.
+### ✍️ Dành cho Tác giả
+- Hồ sơ tác giả chuyên nghiệp, hiển thị công khai.
+- Bảng xếp hạng tác giả với huy hiệu (badge) vinh danh.
+- Dashboard thống kê cụ thể: Số lượt đọc, tổng truyện, biểu đồ followers.
 
-Luồng đọc chương hiện tại:
+### 🛡️ Quản trị (Admin Moderation)
+- Quản lý duyệt xuất bản truyện/chương nhanh chóng.
+- Hệ thống Redis Cache lớp ứng dụng gia tăng hiệu suất admin dashboard.
+- Xoá mềm (Soft Delete) giúp phân biệt truyện ẩn/xoá và đảm bảo an toàn truy xuất.
 
-1. Frontend gọi API backend để lấy metadata chương qua slug.
-2. Backend trả về metadata như `id`, `truyen_id`, `content_url`, `content_hash`, `content_length`, điều hướng trước/sau.
-3. Frontend tự build URL CDN dạng `https://cdn.../chapters/{storyId}/{chapterId}.json?v={content_hash}`.
-4. Frontend `fetch()` trực tiếp file JSON chương từ CDN với `cache: "force-cache"`.
-5. Frontend có prefetch chương tiếp theo để làm ấm cache.
+---
 
-Điều này giúp:
+## 🏗️ Kiến trúc Hệ thống
 
-- giảm tải backend khi đọc chương
-- tận dụng cache CDN cho nội dung ít thay đổi
-- dễ version hóa nội dung bằng `content_hash`
-- backend chỉ giữ metadata, không phải stream toàn bộ nội dung chương cho mọi request đọc
+1. **Phân phối Nội dung (Content Delivery)**
+   - Backend API phụ trách trả về Header truyện hoặc Hash Metadata.
+   - Frontend dùng thông tin Hash build thành request trỏ URL tải file tĩnh về từ CDN Cloudflare/AWS S3.
+2. **Xử lý Ảnh & Media**
+   - Ảnh tĩnh (Avatar, Bìa truyện, Badge, Vật phẩm) stream qua Cloudinary Image API.
+3. **Background Jobs (Cron Tasks)**
+   - Thư viện `node-cron` kết hợp **Redis** xử lý hàng loạt tiến trình nặng: Cập nhật View Count định kì gộp theo batch, thông kê Daily Stats, Reconcile Aggregates (tổng hợp lại dữ liệu), Cleanup Notifications/History, tính điểm thưởng và Ranking tác giả hằng đêm.
 
-### 2. Backend lưu metadata, storage chương nằm ngoài database
+---
 
-Khi tác giả tạo hoặc cập nhật chương:
+## 💻 Công nghệ Sử dụng
 
-- backend upload JSON chương đã gzip lên R2/S3-compatible storage
-- lưu `content_url`, `content_hash`, `content_length` trong bảng `chuong`
-- frontend dùng metadata đó để tải từ CDN/public bucket
+| Phân lớp (Tier) | Stack & Thư viện Chính |
+|--|--|
+| **Frontend** | Vue 3 (Composition API), TypeScript, Vite, Tailwind CSS 4, Pinia, Vue Router, Socket.io Client, Vite PWA, ApexCharts |
+| **Backend** | Node.js 20, Express, Socket.io, AWS SDK v3 (S3 client cho R2), Cloudinary, Multer, Winston |
+| **Database & Cache** | MySQL 8+, Redis, `ioredis` |
+| **Bảo mật & Tối ưu** | JWT Auth, Google OAuth, bcrypt, Joi, Helmet, CORS, Rate-limit, Gzip Compression |
 
-File triển khai chính:
+---
 
-- [backend/services/r2ChapterStorage.service.js](C:/Users/Admin/Downloads/web/truyenviethay_new/backend/services/r2ChapterStorage.service.js)
-- [frontend/src/utils/chapterCdn.ts](C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/utils/chapterCdn.ts)
-- [frontend/src/views/ChapterView.vue](C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/views/ChapterView.vue)
+## 🛠️ Cài đặt & Chạy Local Dev
 
-### 2b. Audio metadata qua API, file MP3 phat truc tiep tu CDN
+Hỗ trợ Setup qua Docker (Full stack) hoặc kết nối trực tiếp đến Database máy chủ qua Port-forwarding. 
+Chi tiết hướng dẫn đầy đủ vui lòng xem tại: 📘 [docs/LOCAL_DOCKER_DEV.md](./docs/LOCAL_DOCKER_DEV.md)
 
-Luong audio hien tai:
+### Yêu cầu nền tảng
+- **Node.js**: v20+
+- **Docker & Docker Compose**
 
-1. Frontend lay danh sach truyen audio tu `/api/truyen/public?has_audio=1`.
-2. Khi vao chi tiet `/truyen-audio/:slug`, frontend goi `/api/truyen/slug/:slug/audio`.
-3. Backend tra ve metadata truyen, danh sach cum/tap audio va progress cua user neu da dang nhap.
-4. Frontend phat truc tiep `audio_url` tu audio CDN, khong proxy file MP3 qua backend.
-5. Progress duoc luu 2 lop:
-   - backend luu `last_part_id` theo user de resume theo tap giua cac thiet bi
-   - frontend luu `currentTime` vao local storage de resume dung giay tren cung thiet bi
-
-Dieu nay giup:
-
-- backend nhe hon vi khong stream media
-- audio tan dung cache/range request cua CDN
-- giao dien chi tiet audio mo nhanh hon va de scale traffic nghe
-- user co the nghe tiep tu tap dang do, va tren cung thiet bi thi nghe tiep dung giay
-
-### 3. Ảnh vẫn đi qua image base / Cloudinary
-
-- Ảnh bìa, avatar, badge, shop item hiện vẫn theo hướng Cloudinary / image base.
-- Frontend lấy qua `VITE_APP_IMAGE_URL` hoặc fallback `VITE_API_URL`.
-
-### 4. Redis + cron jobs là phần lõi của vận hành
-
-Backend hiện không chỉ là REST API. Nó còn chạy:
-
-- socket server cho notification/chat
-- Redis cache app-level
-- Redis state cho online presence / chat / queue
-- cron jobs cho:
-  - sync view
-  - daily stats
-  - author ranking
-  - notification cleanup
-  - reward/inventory expiration
-  - history cleanup
-  - reconcile aggregates
-
-## Tính năng chính
-
-### Đọc truyện
-
-- đọc truyện tối ưu cho mobile
-- chapter metadata qua API, chapter content qua CDN
-- lịch sử đọc và continue reading
-- prefetch chương tiếp theo
-- sắp xếp/lọc/trạng thái/truyện hot/top/thể loại
-
-### Audio
-
-- trang danh sach audio rieng tai `/truyen-audio`
-- trang chi tiet audio rieng theo slug
-- chi lay truyen co `has_audio = 1`
-- player HTML5 phat MP3 truc tiep tu audio CDN
-- gom playlist theo cum audio, mo rong theo nhom de de chon tap
-- luu progress nghe tiep:
-  - backend luu tap cuoi dang nghe
-  - frontend luu vi tri giay tren local storage
-- bo loc audio dong bo query URL de reload/back-forward van giu state
-
-### Author system
-
-- hồ sơ tác giả công khai
-- follow tác giả
-- phòng chat riêng theo tác giả
-- bảng xếp hạng tác giả
-- thống kê views/story/follower
-
-### Tương tác
-
-- follow truyện
-- like truyện
-- rating truyện
-- comment/reply
-- soft delete comment
-
-### Gamification
-
-- level / exp / rewards
-- mailbox
-- badges
-- inventory
-- shop
-
-### Admin & moderation
-
-- duyệt truyện/chương
-- ranking và dashboard
-- cache admin
-- soft delete truyện bằng `truyen_new.is_deleted`
-
-## Công nghệ sử dụng
-
-### Frontend
-
-- Vue 3
-- TypeScript
-- Vite
-- Tailwind CSS 4
-- Pinia
-- Vue Router
-- Axios
-- Vue Toastification
-- ApexCharts
-- Swiper
-- Socket.io Client
-- Font Awesome
-- date-fns
-- Vite PWA
-
-### Backend
-
-- Node.js 20
-- Express
-- MySQL 8+
-- Redis / Upstash Redis
-- Socket.io
-- JWT + Google OAuth
-- bcrypt
-- Joi + express-validator
-- Helmet + CORS + express-rate-limit + compression
-- Cloudinary
-- Multer + multer-storage-cloudinary
-- AWS SDK S3 client cho R2/S3-compatible object storage
-- ioredis
-- Winston
-- Sharp
-- slugify
-- node-cron
-
-## Cấu trúc thư mục
-
-```text
-truyenviethay_new/
-├─ backend/
-│  ├─ app.js
-│  ├─ index.js
-│  ├─ config/
-│  ├─ controllers/
-│  ├─ middleware/
-│  ├─ migrations/
-│  ├─ jobs/
-│  ├─ models/
-│  ├─ routes/
-│  ├─ services/
-│  └─ utils/
-├─ frontend/
-│  ├─ public/
-│  ├─ src/
-│  │  ├─ components/
-│  │  ├─ composables/
-│  │  ├─ config/
-│  │  ├─ modules/
-│  │  ├─ utils/
-│  │  └─ views/
-│  ├─ vite.config.ts
-│  └─ vercel.json
-├─ DEPLOY.md
-└─ README.md
-```
-
-## Biến môi trường quan trọng
-
-### Backend
-
-Tối thiểu nên có:
-
-- `PORT`
-- `NODE_ENV`
-- `DB_HOST`
-- `DB_PORT`
-- `DB_USER`
-- `DB_PASSWORD`
-- `DB_NAME`
-- `JWT_SECRET`
-- `REDIS_URL`
-- `BASE_URL`
-- `CLOUDINARY_CLOUD_NAME`
-- `CLOUDINARY_API_KEY`
-- `CLOUDINARY_API_SECRET`
-- `R2_ENDPOINT`
-- `R2_REGION`
-- `R2_BUCKET`
-- `R2_ACCESS_KEY_ID`
-- `R2_SECRET_ACCESS_KEY`
-- `R2_PUBLIC_BASE_URL`
-- `CLIENT_URL`
-- `GOOGLE_CLIENT_ID`
-
-### Frontend
-
-- `VITE_API_URL`
-- `VITE_APP_IMAGE_URL`
-- `VITE_CDN_BASE_URL`
-- `VITE_GOOGLE_CLIENT_ID`
-
-## Chạy local
-
-### Docker dev stack / direct VPS DB
-
-Có 2 mode local dev:
-
-- debug nhanh trên data that: backend/frontend local, DB trỏ thẳng VPS, chỉ giữ Redis local
-- local full stack: backend/frontend local, MySQL + Redis bằng Docker
-
-Tại root project:
-
+### 1. Dựng Local Database & Cache
 ```bash
-docker compose up -d redis
-cp backend/.env.vps.example backend/.env
-```
-
-Mặc định:
-
-- Redis: `127.0.0.1:6380`
-
-Nếu muốn chạy cả MySQL local:
-
-```bash
+# Khởi động cụm MySQL + Redis + Adminer bằng Docker profiles:
 docker compose --profile local-db up -d mysql redis adminer
+
+# Thiết lập file môi trường cấu hình kết nối ứng với Docker local
 cp backend/.env.docker.example backend/.env
 ```
 
-Khi đó mặc định:
-
-- MySQL: `127.0.0.1:3307`
-- Adminer: `http://localhost:8080`
-
-Sau khi stack lên, chạy migration:
-
-```bash
-docker compose exec -T mysql sh -lc 'for f in /migrations/[0-9][0-9]_*.sql; do echo "Applying $f"; mysql -h127.0.0.1 -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" < "$f"; done'
-docker compose exec -T mysql sh -lc 'mysql -h127.0.0.1 -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" < /migrations/create_story_views.sql'
-```
-
-Xem hướng dẫn đầy đủ tại [docs/LOCAL_DOCKER_DEV.md](C:/Users/Admin/Downloads/web/truyenviethay_new/docs/LOCAL_DOCKER_DEV.md).
-
-### 1. Backend
-
+### 2. Cấu hình & Chạy Backend
 ```bash
 cd backend
 npm install
 npm run dev
+# Server API chạy mặc định ở http://localhost:3000
 ```
 
-Backend chạy mặc định ở `http://localhost:3000`.
-
-### 2. Frontend
-
+### 3. Cấu hình & Chạy Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
+# Vite Server chạy ở http://localhost:5173 và tự động proxy `/api` sang backend.
 ```
 
-Frontend dev chạy ở `http://localhost:5173`.
+---
 
-Vite dev server sẽ proxy:
+## 🔑 Biến Môi Trường (.env)
 
-- `/api` -> `VITE_API_URL`
-- `/uploads_img` -> `VITE_API_URL`
+Hệ thống cung cấp sẵn các file thư viện `.env.*.example`. Các nhóm biến quan trọng cần chú ý khi tự host:
 
-### 3. Database / migration
+### Backend
+- **Core Info**: `PORT`, `NODE_ENV`, `CLIENT_URL`, `BASE_URL`
+- **Database**: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+- **Tương tác**: `REDIS_URL`, `JWT_SECRET`, `GOOGLE_CLIENT_ID`
+- **Lưu trữ Cứng (Storage/CDN)**: Cụm `R2_*` cấu hình cho Cloudflare R2 bucket và `CLOUDINARY_*` cấu hình cho Ảnh tĩnh.
 
-Project dùng SQL migration trong `backend/migrations/`.
+### Frontend
+- **End-points**: `VITE_API_URL` (Domain Backend), `VITE_APP_IMAGE_URL` (Domain xử lý Ảnh), `VITE_CDN_BASE_URL` (Domain Cloudflare CDN phát JSON/Audio).
 
-Khi setup môi trường mới:
+---
 
-1. tạo schema MySQL
-2. chạy các migration theo thứ tự
-3. kiểm tra các cột quan trọng đã tồn tại:
-   - `truyen_new.is_deleted`
-   - `truyen_new.so_luong_chuong`
-   - `chuong.content_url`
-   - `chuong.content_hash`
-   - `chuong.content_length`
-   - `daily_stats`
+## 🚀 Môi trường Triển khai & Vận hành (Production)
 
-## Lưu ý vận hành
+| Dịch vụ | Domain Truy cập (Tham khảo) |
+|---|---|
+| **Frontend App** | `https://truyenviethay.id.vn` |
+| **Backend API** | `https://api.truyenviethay.id.vn` |
+| **Audio Truyền Media** | `https://audio.truyenviethay.id.vn` |
+| **Content Truyện chữ** | `https://cdn.truyenviethay.id.vn` |
 
-### Cache
+> 📚 **Tài liệu Deploy chuyên sâu cho Ubuntu/VPS:** Từng bước thiết lập Web Server Xem tại 📖 [DEPLOY.md](./DEPLOY.md)
 
-- frontend assets trên Vercel đang để immutable
-- HTML có `no-store`
-- JSON chương trên CDN cache dài hạn, backend dùng `content_hash` để bust cache
-- đừng cấu hình CDN strip query string cho route chương
+---
 
-### Soft delete
+## 📝 Cấu trúc Thư mục Chính
 
-- truyện không còn xóa cứng mặc định
-- hệ thống đã dùng `truyen_new.is_deleted` để loại truyện khỏi các list public/ranking/detail chính
+```text
+truyenviethay_new/
+├── backend/          # Toàn bộ mã nguồn Node.js
+│   ├── config/       # Trình khởi tạo kết nối DB, Redis, R2...
+│   ├── controllers/  # Tiếp nhận & Phản hồi HTTP Lifecycle 
+│   ├── jobs/         # Danh sách các tiến trình chạy ngầm
+│   ├── migrations/   # Quản lý Database schemas & Table Updates
+│   ├── models/       # Thao tác CSDL (Thường dùng Query thô tối ưu hoá)
+│   └── services/     # Chứa tầng Logic, tương tác lưu trữ File, User Auth
+│
+├── frontend/         # Toàn bộ mã Vue.js
+│   ├── public/       # Thư mục gốc PWA, Logo, manifest...
+│   └── src/          
+│       ├── components/ # Khối UI độc lập, Layouts tổng
+│       ├── modules/    # Stores trung tâm thao tác dữ liệu
+│       ├── views/      # Giao diện Trang Ứng dụng
+│       └── utils/      # Client CDN builder, Axios Interceptors
+│
+├── docker-compose.yml# File Orchestration để Run Development Environment
+├── DEPLOY.md         # Document hướng dẫn Live App System
+└── README.md         # File thuyết minh giới thiệu (bạn đang đọc)
+```
 
-### CORS / domain
-
-HTTP API và Socket.io hiện đọc origin từ env:
-
-- `CLIENT_URL`
-- `CLIENT_URLS`
-- `CORS_ORIGINS`
-
-Nếu thêm domain frontend mới, chỉ cần cập nhật env backend.
-
-## Scripts / jobs nền
-
-Backend khởi động các job sau ở production:
-
-- `viewSyncCronjob`
-- `dailyStatsCronjob`
-- `notificationCleanupCronjob`
-- `expireRewardsCronjob`
-- `expireInventoryCronjob`
-- `cleanupHistoryOrphansCronjob`
-- `reconcileAggregatesCronjob`
-- `authorRankingCronjob`
-- notification worker
-
-## Tài liệu triển khai
-
-Xem chi tiết ở [DEPLOY.md](./DEPLOY.md).
+<div align="center">
+  <p><i>Phát triển bởi ❤️ và sự cẩn trọng tỉ mỉ dành cho nền tảng di động số.</i></p>
+</div>

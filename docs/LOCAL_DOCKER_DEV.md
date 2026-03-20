@@ -1,9 +1,10 @@
-# Local Docker Dev
+# Local Debug Modes
 
-Tai lieu nay dung cho truong hop:
+Tai lieu nay dung cho 2 truong hop:
 
 - backend va frontend chay tren may local
-- MySQL va Redis chay bang Docker
+- MySQL chay thang tren DO VPS hoac chay local bang Docker
+- Redis co the giu local bang Docker
 - production van chay tren VPS rieng
 
 ## 1. Yeu cau
@@ -20,12 +21,55 @@ docker compose version
 node --version
 ```
 
-## 2. Khoi dong MySQL + Redis local
+## 2. Mode A: ket noi thang toi DO VPS database
+
+Neu ban muon debug bug tren data that, khong can chay MySQL local. Thuong chi can Redis local:
+
+```bash
+docker compose up -d redis
+docker compose ps
+```
+
+Copy env mau cho mode nay:
+
+```bash
+cp backend/.env.vps.example backend/.env
+```
+
+Neu ban dang dung PowerShell:
+
+```powershell
+Copy-Item backend/.env.vps.example backend/.env
+```
+
+Sau do dien host/user/password/database cua VPS vao `backend/.env`.
+
+Co the dung tung bien:
+
+```env
+DB_HOST=your-do-vps-ip
+DB_PORT=3306
+DB_USER=...
+DB_PASSWORD=...
+DB_NAME=...
+REDIS_URL=redis://127.0.0.1:6380/0
+```
+
+Hoac dung 1 dong:
+
+```env
+DATABASE_URL=mysql://user:password@your-do-vps-ip:3306/truyenviethay
+REDIS_URL=redis://127.0.0.1:6380/0
+```
+
+Khi backend start, log se in ra target DB dang dung de ban check nhanh.
+
+## 3. Mode B: MySQL + Redis local bang Docker
 
 Tai root project:
 
 ```bash
-docker compose up -d mysql redis adminer
+docker compose --profile local-db up -d mysql redis adminer
 docker compose ps
 ```
 
@@ -54,7 +98,7 @@ LOCAL_MYSQL_PASSWORD=Truyen@2026!
 LOCAL_MYSQL_ROOT_PASSWORD=root123
 ```
 
-## 3. Cau hinh backend local
+## 4. Cau hinh backend local khi dung Docker DB
 
 Copy file env mau:
 
@@ -79,7 +123,7 @@ DB_NAME=truyenviethay_dev
 REDIS_URL=redis://127.0.0.1:6380/0
 ```
 
-## 4. Chay migration local
+## 5. Chay migration local
 
 Apply cac migration danh so:
 
@@ -100,7 +144,7 @@ docker compose exec -T mysql sh -lc 'mysql -h127.0.0.1 -u"$MYSQL_USER" -p"$MYSQL
 docker compose exec -T redis redis-cli ping
 ```
 
-## 5. Import data tu VPS ve local
+## 6. Import data tu VPS ve local
 
 ### Dump tren VPS
 
@@ -135,7 +179,7 @@ docker compose exec -T mysql sh -lc 'mysql -h127.0.0.1 -u"$MYSQL_USER" -p"$MYSQL
 
 Neu dump cu hon schema hien tai, chay lai migration sau khi import.
 
-## 6. Chay backend + frontend local
+## 7. Chay backend + frontend local
 
 Backend:
 
@@ -163,7 +207,7 @@ Frontend dev mac dinh:
 
 - `http://localhost:5173`
 
-## 7. Adminer
+## 8. Adminer
 
 Mo:
 
@@ -181,12 +225,18 @@ Dang nhap:
 
 Neu mo Adminer bang browser tren may host ma khong vao duoc bang `mysql`, thu `127.0.0.1` hoac ten container `truyenviethay-mysql`.
 
-## 8. Lenh thuong dung
+## 9. Lenh thuong dung
 
 Khoi dong lai stack:
 
 ```bash
-docker compose up -d
+docker compose up -d redis
+```
+
+Neu muon bat ca local MySQL + Adminer:
+
+```bash
+docker compose --profile local-db up -d mysql redis adminer
 ```
 
 Xem log:
@@ -208,7 +258,7 @@ Reset sach volume:
 docker compose down -v
 ```
 
-## 9. Luu y
+## 10. Luu y
 
 - Khong dung dump production raw de chia se cho nguoi khac.
 - Khi da paste secret that ra ngoai, nen rotate lai secret production.
