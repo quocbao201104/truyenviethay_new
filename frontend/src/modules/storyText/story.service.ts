@@ -46,7 +46,9 @@ export interface Story {
     id_theloai: number;
     ten_theloai: string;
   }>;
+  genre_names?: string;
   so_luong_chuong?: number;
+  so_chuong?: number;
   avg_rating?: number | string;
   total_ratings?: number;
   /** Khi đăng nhập: backend trả thêm */
@@ -54,6 +56,10 @@ export interface Story {
   last_read_chuong_id?: number | null;
   badge?: any;
   equipped_frame?: any;
+  has_audio?: boolean;
+  audio_status?: string | null;
+  source_type?: string | null;
+  source_partner_id?: string | number | null;
 }
 
 export interface PublicStoriesParams {
@@ -62,9 +68,11 @@ export interface PublicStoriesParams {
   sort_by?: string;
   order?: "ASC" | "DESC" | string;
   keyword?: string;
+  category_ids?: number[] | string | null;
   author_id?: number | null;
   trang_thai?: string;
   min_days_ago?: number | null;
+  has_audio?: boolean | number | null;
 }
 
 
@@ -110,14 +118,32 @@ export const getPublicStories = async ({
   sort_by = "thoi_gian_cap_nhat",
   order = "DESC",
   keyword = "",
+  category_ids = null,
   author_id = null,
   trang_thai = "",
   min_days_ago = null,
+  has_audio = null,
 }: PublicStoriesParams = {}) => {
-  const abortKey = `publicStories:${page}:${limit}:${sort_by}:${order}:${keyword}:${author_id ?? ""}:${trang_thai ?? ""}:${min_days_ago ?? ""}`;
+  const normalizedCategoryIds = Array.isArray(category_ids)
+    ? category_ids.join(",")
+    : (category_ids ?? "");
+  const abortKey = `publicStories:${page}:${limit}:${sort_by}:${order}:${keyword}:${normalizedCategoryIds}:${author_id ?? ""}:${trang_thai ?? ""}:${min_days_ago ?? ""}:${has_audio ?? ""}`;
   return await cachedGet<any>(
     `/api/truyen/public`,
-    { params: { page, limit, sort_by, order, keyword, author_id, trang_thai, min_days_ago } },
+    {
+      params: {
+        page,
+        limit,
+        sort_by,
+        order,
+        keyword,
+        category_ids: normalizedCategoryIds || undefined,
+        author_id,
+        trang_thai,
+        min_days_ago,
+        has_audio,
+      },
+    },
     { ttlMs: 30000, dedupe: true, abortKey },
   );
 };

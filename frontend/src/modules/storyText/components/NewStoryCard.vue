@@ -10,7 +10,7 @@
   >
     <div class="cover-aura-wrapper">
       <img
-        :src="story.anh_bia ? getImageUrl(story.anh_bia, 320) : '/img/default-cover.png'"
+        :src="story.anh_bia ? getImageUrl(story.anh_bia, 320) : 'https://res.cloudinary.com/dg9ftuhv4/image/upload/v1774000516/h%C3%ACnh_5_clb3fa.jpg'"
         :srcset="buildSrcSet(story.anh_bia)"
         sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 200px"
         width="200"
@@ -80,7 +80,8 @@ import { prefetchStoryBySlug, prefetchChaptersByStoryId } from "@/modules/storyT
 const props = defineProps({
   story: { type: Object, required: true },
   variant: { type: String, default: 'list' },
-  animateStatus: { type: Boolean, default: false }
+  animateStatus: { type: Boolean, default: false },
+  routeBase: { type: String, default: '/truyen-chu' },
 });
 const router = useRouter();
 let didPrefetch = false;
@@ -89,12 +90,13 @@ const navigateToStory = () => {
     if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
     }
-    router.push(`/truyen-chu/${props.story.slug}`);
+    router.push(`${props.routeBase}/${props.story.slug}`);
 };
 
 const prefetchStory = () => {
   if (didPrefetch) return;
   didPrefetch = true;
+  if (props.routeBase !== '/truyen-chu') return;
   if (props.story?.slug) prefetchStoryBySlug(props.story.slug);
   if (props.story?.id) prefetchChaptersByStoryId(props.story.id);
 };

@@ -3,7 +3,7 @@
     <div class="header-content-aura">
       
       <div class="header-left-spirit">
-        <router-link to="/truyen-chu" class="logo-aura-link">
+        <router-link to="/" class="logo-aura-link">
           <img
             src="@/assets/images/logo.png"
             alt="TruyenVietHay Logo"

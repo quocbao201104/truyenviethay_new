@@ -28,7 +28,7 @@
               <i class="fas fa-book-open mr-2"></i> Truyện Chữ
             </router-link>
             <router-link to="/truyen-audio" class="btn-spirit azure">
-              <i class="fas fa-image mr-2"></i> Truyện Audio
+              <i class="fas fa-headphones mr-2"></i> Truyện Audio
             </router-link>
           </div>
         </div>

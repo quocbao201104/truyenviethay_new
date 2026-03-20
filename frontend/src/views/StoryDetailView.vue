@@ -488,7 +488,7 @@ const formatDate = (d?: string | null) => {
 };
 
 const handleImageError = (e: Event) => {
-  (e.target as HTMLImageElement).src = "/img/default-cover.png";
+  (e.target as HTMLImageElement).src = "https://res.cloudinary.com/dg9ftuhv4/image/upload/v1774000516/h%C3%ACnh_5_clb3fa.jpg";
 };
 
 const formatStatus = (status: string) => {

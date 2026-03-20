@@ -3,7 +3,8 @@ import HomeView from "../views/HomeView.vue";
 import LoginView from "../views/LoginView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 const StoryListView = () => import("@/modules/storyText/views/StoryListView.vue");
-const StoryPictView = () => import("@/modules/storyPicture/views/StoryPictView.vue");
+const StoryAudioView = () => import("@/modules/storyAudio/views/StoryAudioView.vue");
+const StoryAudioDetailView = () => import("@/modules/storyAudio/views/StoryAudioDetailView.vue");
 const CategoryView = () => import("@/views/CategoryView.vue");
 import ProfileView from "@/views/ProfileView.vue";
 import ProfileSettingsView from "@/views/ProfileSettingsView.vue";
@@ -47,6 +48,16 @@ const routes: Array<RouteRecordRaw> = [
     component: StoryListView,
   },
   {
+    path: "/truyen-audio",
+    name: "StoryAudioList",
+    component: StoryAudioView,
+  },
+  {
+    path: "/truyen-audio/:slug",
+    name: "StoryAudioDetail",
+    component: StoryAudioDetailView,
+  },
+  {
     path: "/the-loai",
     name: "Categories",
     component: CategoryView,
@@ -64,13 +75,11 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/truyen-tranh",
-    name: "StoryPictList",
-    component: StoryPictView,
+    redirect: { name: "StoryAudioList" },
   },
   {
     path: "/truyen-tranh/:slug",
-    name: "StoryPictDetail",
-    component: StoryPictView,
+    redirect: { name: "StoryAudioList" },
   },
   {
     path: "/truyen-chu/:storySlug/:chapterSlug",
@@ -227,7 +236,7 @@ const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition;
 
-    if (to.name === "StoryDetail" || to.name === "ChapterRead") {
+    if (to.name === "StoryDetail" || to.name === "StoryAudioDetail" || to.name === "ChapterRead") {
       return { top: 0 };
     }
 
