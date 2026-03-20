@@ -13,6 +13,8 @@
   <a href="https://www.mysql.com/"><img src="https://img.shields.io/badge/MySQL-8%2B-4479A1?logo=mysql" alt="MySQL"></a>
 </p>
 
+TruyenVietHay la nen tang truyen full-stack gom 2 nhanh chinh: truyen chu va truyen audio. He thong tap trung vao hieu nang doc/nghe, trai nghiem mobile, cache CDN, gamification, author profile/ranking va cac tinh nang tuong tac thoi gian thuc.
+
 TruyenVietHay là nền tảng đọc truyện chữ full-stack với trọng tâm là hiệu năng đọc chương, trải nghiệm mobile, gamification, author profile/ranking và tương tác thời gian thực.
 
 ## Môi trường hiện tại
@@ -21,6 +23,7 @@ TruyenVietHay là nền tảng đọc truyện chữ full-stack với trọng t�
 | --- | --- |
 | Frontend | [https://truyenviethay.id.vn](https://truyenviethay.id.vn) |
 | Backend API | [https://api.truyenviethay.id.vn](https://api.truyenviethay.id.vn) |
+| Audio CDN | [https://audio.truyenviethay.id.vn](https://audio.truyenviethay.id.vn) |
 | CDN chương | [https://cdn.truyenviethay.id.vn](https://cdn.truyenviethay.id.vn) |
 
 ## Kiến trúc hiện tại
@@ -58,6 +61,25 @@ File triển khai chính:
 - [frontend/src/utils/chapterCdn.ts](C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/utils/chapterCdn.ts)
 - [frontend/src/views/ChapterView.vue](C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/views/ChapterView.vue)
 
+### 2b. Audio metadata qua API, file MP3 phat truc tiep tu CDN
+
+Luong audio hien tai:
+
+1. Frontend lay danh sach truyen audio tu `/api/truyen/public?has_audio=1`.
+2. Khi vao chi tiet `/truyen-audio/:slug`, frontend goi `/api/truyen/slug/:slug/audio`.
+3. Backend tra ve metadata truyen, danh sach cum/tap audio va progress cua user neu da dang nhap.
+4. Frontend phat truc tiep `audio_url` tu audio CDN, khong proxy file MP3 qua backend.
+5. Progress duoc luu 2 lop:
+   - backend luu `last_part_id` theo user de resume theo tap giua cac thiet bi
+   - frontend luu `currentTime` vao local storage de resume dung giay tren cung thiet bi
+
+Dieu nay giup:
+
+- backend nhe hon vi khong stream media
+- audio tan dung cache/range request cua CDN
+- giao dien chi tiet audio mo nhanh hon va de scale traffic nghe
+- user co the nghe tiep tu tap dang do, va tren cung thiet bi thi nghe tiep dung giay
+
 ### 3. Ảnh vẫn đi qua image base / Cloudinary
 
 - Ảnh bìa, avatar, badge, shop item hiện vẫn theo hướng Cloudinary / image base.
@@ -88,6 +110,18 @@ Backend hiện không chỉ là REST API. Nó còn chạy:
 - lịch sử đọc và continue reading
 - prefetch chương tiếp theo
 - sắp xếp/lọc/trạng thái/truyện hot/top/thể loại
+
+### Audio
+
+- trang danh sach audio rieng tai `/truyen-audio`
+- trang chi tiet audio rieng theo slug
+- chi lay truyen co `has_audio = 1`
+- player HTML5 phat MP3 truc tiep tu audio CDN
+- gom playlist theo cum audio, mo rong theo nhom de de chon tap
+- luu progress nghe tiep:
+  - backend luu tap cuoi dang nghe
+  - frontend luu vi tri giay tren local storage
+- bo loc audio dong bo query URL de reload/back-forward van giu state
 
 ### Author system
 
@@ -127,11 +161,16 @@ Backend hiện không chỉ là REST API. Nó còn chạy:
 - Vue 3
 - TypeScript
 - Vite
+- Tailwind CSS 4
 - Pinia
 - Vue Router
+- Axios
+- Vue Toastification
 - ApexCharts
 - Swiper
 - Socket.io Client
+- Font Awesome
+- date-fns
 - Vite PWA
 
 ### Backend
@@ -142,8 +181,16 @@ Backend hiện không chỉ là REST API. Nó còn chạy:
 - Redis / Upstash Redis
 - Socket.io
 - JWT + Google OAuth
+- bcrypt
+- Joi + express-validator
+- Helmet + CORS + express-rate-limit + compression
 - Cloudinary
+- Multer + multer-storage-cloudinary
 - AWS SDK S3 client cho R2/S3-compatible object storage
+- ioredis
+- Winston
+- Sharp
+- slugify
 - node-cron
 
 ## Cấu trúc thư mục
@@ -214,21 +261,34 @@ Tối thiểu nên có:
 
 ## Chạy local
 
-### Docker dev stack
+### Docker dev stack / direct VPS DB
 
-Cách nhanh và ổn định nhất cho local dev hiện tại là chạy backend/frontend trên máy local, còn MySQL + Redis bằng Docker.
+Có 2 mode local dev:
+
+- debug nhanh trên data that: backend/frontend local, DB trỏ thẳng VPS, chỉ giữ Redis local
+- local full stack: backend/frontend local, MySQL + Redis bằng Docker
 
 Tại root project:
 
 ```bash
-docker compose up -d mysql redis adminer
-cp backend/.env.docker.example backend/.env
+docker compose up -d redis
+cp backend/.env.vps.example backend/.env
 ```
 
 Mặc định:
 
-- MySQL: `127.0.0.1:3307`
 - Redis: `127.0.0.1:6380`
+
+Nếu muốn chạy cả MySQL local:
+
+```bash
+docker compose --profile local-db up -d mysql redis adminer
+cp backend/.env.docker.example backend/.env
+```
+
+Khi đó mặc định:
+
+- MySQL: `127.0.0.1:3307`
 - Adminer: `http://localhost:8080`
 
 Sau khi stack lên, chạy migration:
