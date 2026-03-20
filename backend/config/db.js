@@ -47,6 +47,14 @@ const buildSslConfig = () => {
   };
 };
 
+const formatDbTarget = (config) => {
+  if (config.socketPath) {
+    return `socket:${config.socketPath}/${config.database || "(no-db)"}`;
+  }
+
+  return `${config.host || "127.0.0.1"}:${config.port || DEFAULT_DB_PORT}/${config.database || "(no-db)"}`;
+};
+
 const getDbConfig = () => {
   const databaseUrl =
     process.env.DATABASE_URL || process.env.MYSQL_URL || process.env.DB_URL;
@@ -78,7 +86,14 @@ const getDbConfig = () => {
   };
 };
 
-const pool = mysql.createPool(getDbConfig());
+const dbConfig = getDbConfig();
+console.log(
+  `[db] target=${formatDbTarget(dbConfig)} ssl=${dbConfig.ssl ? "on" : "off"} source=${
+    process.env.DATABASE_URL || process.env.MYSQL_URL || process.env.DB_URL ? "url" : "env"
+  }`,
+);
+
+const pool = mysql.createPool(dbConfig);
 
 pool.on("error", (err) => {
   console.error("Unexpected database pool error:", err);

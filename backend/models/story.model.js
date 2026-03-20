@@ -1,9 +1,20 @@
 const db = require("../config/db");
+const TheLoaiModel = require("./category.model");
 const ACTIVE_STORY_CLAUSE = `(tn.is_deleted = 0 OR tn.is_deleted IS NULL)`;
 const ACTIVE_STORY_CLAUSE_NO_ALIAS = `(is_deleted = 0 OR is_deleted IS NULL)`;
 const { getOrSet, invalidate } = require("../utils/cache");
 
 const STORY_LIST_CACHE_TTL = 600; // 10 phút
+
+const normalizeStatusFilter = (value) => {
+  if (value === undefined || value === null) return "";
+  return String(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .trim();
+};
 
 const StoryModel = {
   create: async (storyData) => {
@@ -165,6 +176,93 @@ const StoryModel = {
     return rows[0];
   },
 
+  getAudioPartsByStoryId: async (storyId) => {
+    const [rows] = await db.query(
+      `SELECT
+         ap.id,
+         ap.video_id,
+         ap.truyen_id,
+         ap.part_number,
+         ap.audio_url,
+         ap.duration_seconds,
+         ap.r2_key,
+         ap.created_at,
+         v.youtube_video_id,
+         v.youtube_playlist_id,
+         v.title AS video_title,
+         v.raw_title AS video_raw_title,
+         v.video_index,
+         v.duration_seconds AS video_duration_seconds,
+         v.process_status,
+         v.thumbnail
+       FROM audio_parts ap
+       INNER JOIN videos v ON v.id = ap.video_id
+       WHERE ap.truyen_id = ?
+       ORDER BY
+         COALESCE(v.video_index, 2147483647) ASC,
+         ap.part_number ASC,
+         ap.id ASC`,
+      [storyId]
+    );
+
+    return rows;
+  },
+
+  getAudioProgressByUserAndStory: async (userId, storyId) => {
+    const [rows] = await db.query(
+      `SELECT
+         uap.user_id,
+         uap.truyen_id,
+         uap.last_part_id,
+         uap.updated_at,
+         ap.part_number,
+         ap.audio_url,
+         ap.r2_key,
+         ap.video_id,
+         v.youtube_video_id,
+         v.video_index
+       FROM user_audio_progress uap
+       LEFT JOIN audio_parts ap ON ap.id = uap.last_part_id
+       LEFT JOIN videos v ON v.id = ap.video_id
+       WHERE uap.user_id = ? AND uap.truyen_id = ?
+       LIMIT 1`,
+      [userId, storyId]
+    );
+
+    return rows[0] || null;
+  },
+
+  getAudioPartByIdAndStory: async (partId, storyId) => {
+    const [rows] = await db.query(
+      `SELECT id, truyen_id, video_id, part_number, audio_url
+       FROM audio_parts
+       WHERE id = ? AND truyen_id = ?
+       LIMIT 1`,
+      [partId, storyId]
+    );
+
+    return rows[0] || null;
+  },
+
+  saveAudioProgress: async (userId, storyId, lastPartId) => {
+    const [updateResult] = await db.query(
+      `UPDATE user_audio_progress
+       SET last_part_id = ?, updated_at = NOW()
+       WHERE user_id = ? AND truyen_id = ?`,
+      [lastPartId, userId, storyId]
+    );
+
+    if (!updateResult.affectedRows) {
+      await db.query(
+        `INSERT INTO user_audio_progress (user_id, truyen_id, last_part_id, updated_at)
+         VALUES (?, ?, ?, NOW())`,
+        [userId, storyId, lastPartId]
+      );
+    }
+
+    return await StoryModel.getAudioProgressByUserAndStory(userId, storyId);
+  },
+
   getFollowers: async (storyId) => {
     const [followers] = await db.query(
       "SELECT user_id FROM theo_doi WHERE truyen_id = ?",
@@ -267,12 +365,42 @@ const StoryModel = {
       min_chapters = null,
       max_chapters = null,
       min_days_ago = null,
+      has_audio = null,
     } = opts;
     const safePage = Math.max(1, parseInt(page, 10) || 1);
     const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
-    const hasFilters = !!(keyword?.trim() || category_ids || author_id || trang_thai || min_views != null || max_views != null || min_chapters != null || max_chapters != null || min_days_ago != null);
-    const cacheable = !hasFilters && safePage === 1;
-    const cacheKey = cacheable ? `storyList:${sort_by}:${order}:${safeLimit}` : null;
+    const hasFilters = !!(
+      keyword?.trim() ||
+      category_ids ||
+      author_id ||
+      trang_thai ||
+      min_views != null ||
+      max_views != null ||
+      min_chapters != null ||
+      max_chapters != null ||
+      min_days_ago != null ||
+      has_audio != null
+    );
+    const cacheable = safePage === 1;
+    const cacheKey = cacheable
+      ? [
+          "storyList",
+          `sort=${sort_by}`,
+          `order=${order}`,
+          `limit=${safeLimit}`,
+          `keyword=${keyword || ""}`,
+          `categories=${Array.isArray(category_ids) ? category_ids.join(",") : category_ids || ""}`,
+          `author=${author_id || ""}`,
+          `status=${trang_thai || ""}`,
+          `minViews=${min_views ?? ""}`,
+          `maxViews=${max_views ?? ""}`,
+          `minChapters=${min_chapters ?? ""}`,
+          `maxChapters=${max_chapters ?? ""}`,
+          `minDays=${min_days_ago ?? ""}`,
+          `hasAudio=${has_audio ?? ""}`,
+          `filtered=${hasFilters ? "1" : "0"}`,
+        ].join(":")
+      : null;
 
     if (cacheKey) {
       const cached = await getOrSet(cacheKey, STORY_LIST_CACHE_TTL, () =>
@@ -297,18 +425,51 @@ const StoryModel = {
     min_chapters = null,
     max_chapters = null,
     min_days_ago = null,
+    has_audio = null,
   }) => {
     const safePage = Math.max(1, parseInt(page, 10) || 1);
     const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
     const offset = (safePage - 1) * safeLimit;
-    const allowedSort = ["ten_truyen", "luot_xem", "thoi_gian_cap_nhat", "hot_score", "thoi_gian_tao"];
-    const sortField = allowedSort.includes(sort_by) ? `tn.${sort_by}` : "tn.thoi_gian_cap_nhat";
+    const sortFieldMap = {
+      ten_truyen: "tn.ten_truyen",
+      luot_xem: "tn.luot_xem",
+      thoi_gian_cap_nhat: "tn.thoi_gian_cap_nhat",
+      hot_score: "tn.hot_score",
+      thoi_gian_tao: "tn.thoi_gian_tao",
+      luot_thich: "tn.luot_thich",
+      rating: "tn.rating",
+      avg_rating: "tn.rating",
+    };
+    const sortField = sortFieldMap[sort_by] || "tn.thoi_gian_cap_nhat";
     const sortOrder = order.toUpperCase() === "ASC" ? "ASC" : "DESC";
     // Secondary sort for fairness: if sorting by views, secondary sort by update time.
-    const secondarySort = (sort_by === "luot_xem" || sort_by === "hot_score") ? ", tn.thoi_gian_cap_nhat DESC" : "";
+    const secondarySort = ["luot_xem", "hot_score", "luot_thich", "rating", "avg_rating"].includes(sort_by)
+      ? ", tn.thoi_gian_cap_nhat DESC"
+      : "";
 
-    let selectQuery = `SELECT tn.id, tn.ten_truyen, tn.tac_gia, tn.slug, tn.mo_ta, tn.anh_bia, tn.luot_xem, tn.thoi_gian_cap_nhat, tn.trang_thai,
-                       tn.so_luong_chuong, tn.so_luong_chuong AS so_chuong, tn.chuong_moi
+    let selectQuery = `SELECT
+                         tn.id,
+                         tn.ten_truyen,
+                         tn.tac_gia,
+                         tn.slug,
+                         tn.mo_ta,
+                         tn.anh_bia,
+                         tn.luot_xem,
+                         tn.luot_thich,
+                         tn.luot_theo_doi,
+                         tn.rating,
+                         tn.rating AS avg_rating,
+                         tn.rating_count,
+                         tn.hot_score,
+                         tn.thoi_gian_cap_nhat,
+                         tn.trang_thai,
+                         tn.so_luong_chuong,
+                         tn.so_luong_chuong AS so_chuong,
+                         tn.chuong_moi,
+                         tn.has_audio,
+                         tn.audio_status,
+                         tn.source_type,
+                         tn.source_partner_id
                        FROM truyen_new tn`;
     
     // Base count query needs to handle WHERE clauses, but HAVING clauses make simple COUNT(*) difficult.
@@ -334,8 +495,6 @@ const StoryModel = {
              params.push(`%${searchText}%`, `%${searchText}%`);
         }
     }
-    let havingConditions = [];
-
     // Filter by Genre (OR logic for multiple genres)
     if (category_ids) {
         // Handle array or string input
@@ -359,8 +518,20 @@ if (ids.length > 0) {
 
     // Filter by Status
     if (trang_thai) {
-        whereConditions.push(`tn.trang_thai = ?`);
-        params.push(trang_thai);
+        const normalizedStatus = normalizeStatusFilter(trang_thai);
+        const statusVariants = {
+            dang_ra: ["dang_ra", "Dang ra", "Đang ra"],
+            hoan_thanh: ["hoan_thanh", "Hoan thanh", "Hoàn thành"],
+        };
+
+        if (statusVariants[normalizedStatus]) {
+            const placeholders = statusVariants[normalizedStatus].map(() => "?").join(",");
+            whereConditions.push(`tn.trang_thai IN (${placeholders})`);
+            params.push(...statusVariants[normalizedStatus]);
+        } else {
+            whereConditions.push(`tn.trang_thai = ?`);
+            params.push(trang_thai);
+        }
     }
 
     // Filter by Author (public)
@@ -395,15 +566,21 @@ if (ids.length > 0) {
         whereConditions.push(`tn.thoi_gian_tao >= DATE_SUB(NOW(), INTERVAL ? DAY)`);
         params.push(parseInt(min_days_ago));
     }
+    if (has_audio !== null && has_audio !== undefined && has_audio !== "") {
+        const normalizedHasAudio = String(has_audio).toLowerCase();
+        if (["1", "true", "yes"].includes(normalizedHasAudio)) {
+            whereConditions.push(`tn.has_audio = 1`);
+        } else if (["0", "false", "no"].includes(normalizedHasAudio)) {
+            whereConditions.push(`(tn.has_audio = 0 OR tn.has_audio IS NULL)`);
+        }
+    }
 
     const whereClause = `WHERE ${whereConditions.join(" AND ")}`;
-    const havingClause = havingConditions.length > 0 ? `HAVING ${havingConditions.join(" AND ")}` : "";
 
     // Main Data Query
     const query = `
        ${selectQuery}
        ${whereClause}
-       ${havingClause}
        ORDER BY ${sortField} ${sortOrder}${secondarySort}
        LIMIT ? OFFSET ?
     `;
@@ -413,63 +590,15 @@ if (ids.length > 0) {
     const dataParams = [...params, safeLimit, offset];
     
     const [data] = await db.query(query, dataParams);
-
-    // Count Query
-    // Accurate count with HAVING requires a subquery wrapper
-    // SELECT COUNT(*) as total FROM (SELECT tn.id, (subquery) as so_luong_chuong ... WHERE ... HAVING ...) as temp
-    // Re-use selectQuery core but we only need ID for counting
-    
-    // Count Query Optimization
-    let countQuery;
-    let countParams;
-
-    // Simplified filtering logic now that so_luong_chuong is a real column
-    // We can move HAVING conditions to WHERE (mostly) or keep them simple.
-    // For `so_luong_chuong`, since it's a real column, we can use WHERE instead of HAVING!
-    if (min_chapters !== null || max_chapters !== null) {
-        // Move chapter filter to WHERE clauses for better performance
-        // Note: We need to handle this in `whereConditions` above, but since we are modifying code down here:
-        // Let's rely on the fact that `so_luong_chuong` is now in `tn`.
-        // So `havingConditions` can theoretically be used, but WHERE is faster.
-        // However, to minimize code rewrite impact just below, we can keep using havingConditions OR refactor properly.
-        // The best approach: `havingConditions` logic below works for aliases too in MySQL.
-        // BUT, `WHERE tn.so_luong_chuong >= ?` is standard and better.
+    if (data.length > 0) {
+      const genresByStoryId = await TheLoaiModel.getByStoryIds(data.map((story) => story.id));
+      for (const story of data) {
+        story.genres = genresByStoryId.get(story.id) || [];
+      }
     }
 
-    if (havingConditions.length > 0) {
-        const havingClauseStr = `HAVING ${havingConditions.join(" AND ")}`;
-        // Complex count with HAVING 
-             /*
-             Old complex subquery:
-            SELECT tn.id, (SELECT COUNT(*) ...) 
-            FROM truyen_new tn ... HAVING ...
-            */
-            // New simplified:
-            // Since so_luong_chuong is a column, we actually don't NEED the subquery in select anymore?
-            // Wait, if we use HAVING, we still need `SELECT COUNT(*)` to respect it?
-            // Actually, if we use WHERE for chapter count, we don't need HAVING at all!
-    }
-    
-    // REFACTORING: Since we can now filter chapters in WHERE, let's treat it as such.
-    // But wait, the loop above (lines 302-310) pushed to `havingConditions`.
-    // Let's CHANGE that behavior in a future step or just accept that HAVING works fine on columns too.
-    // Ideally, we move them to `whereConditions`. But for now, let's fix the `countQuery`.
-
-    if (havingConditions.length > 0) {
-        // Even with having, we don't need the expensive sub-select for chapter count anymore.
-        const countSubQuery = `
-            SELECT tn.id
-            FROM truyen_new tn
-            ${whereClause}
-            ${havingClause}
-        `;
-        countQuery = `SELECT COUNT(*) as total FROM (${countSubQuery}) as sub`;
-        countParams = [...params]; // Params already include having values
-    } else {
-        // Simple count
-        countQuery = `SELECT COUNT(*) as total FROM truyen_new tn ${whereClause}`;
-        countParams = [...params];
-    }
+    const countQuery = `SELECT COUNT(*) as total FROM truyen_new tn ${whereClause}`;
+    const countParams = [...params];
     const [countResult] = await db.query(countQuery, countParams);
 
     return {

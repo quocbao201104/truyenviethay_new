@@ -53,6 +53,9 @@ router.get("/:id/sample-chapter", storyController.getStorySampleChapter);
 
 // Lấy truyện theo slug
 router.get("/slug/:slug", optionalAuthenticateToken, storyController.getStoryBySlug);
+router.get("/slug/:slug/audio", optionalAuthenticateToken, storyController.getStoryAudioBySlug);
+router.get("/:id/audio", optionalAuthenticateToken, storyController.getStoryAudioById);
+router.post("/:id/audio-progress", authenticateToken, storyController.saveStoryAudioProgress);
 
 // Cập nhật truyện
 router.put(

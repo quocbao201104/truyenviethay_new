@@ -11,6 +11,8 @@ const { getOrSet, invalidate } = require("../utils/cache");
 const STORY_DETAIL_CACHE_TTL_SECONDS = 600; // 10 phút
 const ALL_STORIES_CACHE_TTL_SECONDS = 600; // 10 phút
 
+const STORY_AUDIO_CACHE_TTL_SECONDS = 600; // 10 phut
+
 const safeKeyPart = (value) =>
   encodeURIComponent(value === undefined || value === null ? "" : String(value));
 const toIntOrUndefined = (value) => {
@@ -20,6 +22,7 @@ const toIntOrUndefined = (value) => {
 
 const storyDetailIdKey = (id) => `storyDetail:id:${id}`;
 const storyDetailSlugKey = (slug) => `storyDetail:slug:${slug}`;
+const storyAudioKey = (id) => `storyAudio:id:${id}`;
 const allStoriesCacheKey = (params) => {
   const {
     page,
@@ -47,6 +50,16 @@ const allStoriesCacheKey = (params) => {
 
 const normalizeStory = (story) => {
   if (!story) return story;
+  if (typeof story.genres === "string") {
+    try {
+      story.genres = JSON.parse(story.genres);
+    } catch {
+      story.genres = [];
+    }
+  }
+  if (!Array.isArray(story.genres)) {
+    story.genres = [];
+  }
   if (story.thoi_gian_cap_nhat && typeof story.thoi_gian_cap_nhat === 'string') {
     story.thoi_gian_cap_nhat = story.thoi_gian_cap_nhat.replace(" ", "T") + "Z";
   }
@@ -116,7 +129,8 @@ const getPublicStories = async (req, res) => {
       max_views,
       min_chapters,
       max_chapters,
-      min_days_ago
+      min_days_ago,
+      has_audio,
     } = req.query;
 
     const result = await StoryModel.getPublicStories({
@@ -133,6 +147,7 @@ const getPublicStories = async (req, res) => {
       min_chapters,
       max_chapters,
       min_days_ago,
+      has_audio,
     });
     if (result && result.data) {
       result.data = normalizeStories(result.data);
@@ -239,6 +254,189 @@ const getStorySampleChapter = async (req, res) => {
   } catch (error) {
     console.error("Lỗi khi lấy chương mẫu:", error);
     res.status(500).json({ message: "Lỗi khi lấy chương mẫu" });
+  }
+};
+
+const cloneAudioResponse = (payload) => ({
+  story: { ...payload.story },
+  audio: {
+    ...payload.audio,
+    videos: Array.isArray(payload.audio?.videos)
+      ? payload.audio.videos.map((video) => ({
+          ...video,
+          parts: Array.isArray(video.parts) ? video.parts.map((part) => ({ ...part })) : [],
+        }))
+      : [],
+  },
+  progress: payload.progress ? { ...payload.progress } : null,
+});
+
+const buildAudioBaseResponse = async (story) => {
+  const parts = await StoryModel.getAudioPartsByStoryId(story.id);
+
+  const videosMap = new Map();
+  for (const part of parts) {
+    if (!videosMap.has(part.video_id)) {
+      videosMap.set(part.video_id, {
+        video_id: part.video_id,
+        youtube_video_id: part.youtube_video_id,
+        youtube_playlist_id: part.youtube_playlist_id,
+        title: part.video_title,
+        raw_title: part.video_raw_title,
+        video_index: part.video_index,
+        duration_seconds: part.video_duration_seconds,
+        process_status: part.process_status,
+        thumbnail: part.thumbnail,
+        parts: [],
+      });
+    }
+
+    videosMap.get(part.video_id).parts.push({
+      id: part.id,
+      video_id: part.video_id,
+      truyen_id: part.truyen_id,
+      part_number: part.part_number,
+      audio_url: part.audio_url || (part.r2_key ? `https://audio.truyenviethay.id.vn/${part.r2_key}` : null),
+      duration: part.duration_seconds,
+      created_at: part.created_at,
+    });
+  }
+
+  const videos = Array.from(videosMap.values());
+  const totalDurationSeconds = parts.reduce((sum, part) => sum + (Number(part.duration_seconds) || 0), 0);
+
+  return {
+    story: {
+      id: story.id,
+      slug: story.slug,
+      ten_truyen: story.ten_truyen,
+      tac_gia: story.tac_gia,
+      anh_bia: story.anh_bia || null,
+      mo_ta: story.mo_ta || null,
+      has_audio: !!story.has_audio,
+      audio_status: story.audio_status || null,
+      source_type: story.source_type || null,
+      source_partner_id: story.source_partner_id || null,
+    },
+    audio: {
+      total_videos: videos.length,
+      total_parts: parts.length,
+      total_duration_seconds: totalDurationSeconds,
+      videos,
+    },
+    progress: null,
+  };
+};
+
+const buildAudioResponse = async (story, userId) => {
+  const baseResponse = await getOrSet(
+    storyAudioKey(story.id),
+    STORY_AUDIO_CACHE_TTL_SECONDS,
+    () => buildAudioBaseResponse(story),
+  );
+  const response = cloneAudioResponse(baseResponse);
+
+  if (userId && Number.isFinite(parseInt(userId, 10))) {
+    const progress = await StoryModel.getAudioProgressByUserAndStory(userId, story.id);
+    response.progress = progress
+      ? {
+          user_id: progress.user_id,
+          truyen_id: progress.truyen_id,
+          last_part_id: progress.last_part_id,
+          updated_at: progress.updated_at,
+          part_number: progress.part_number,
+          audio_url: progress.audio_url || (progress.r2_key ? `https://audio.truyenviethay.id.vn/${progress.r2_key}` : null),
+          video_id: progress.video_id,
+          youtube_video_id: progress.youtube_video_id,
+          video_index: progress.video_index,
+        }
+      : null;
+  }
+
+  return response;
+};
+
+const getStoryAudioById = async (req, res) => {
+  try {
+    const storyId = req.params.id;
+    const story = await StoryModel.getById(storyId);
+
+    if (!story) {
+      return res.status(404).json({ message: "Không tìm thấy truyện" });
+    }
+
+    const response = await buildAudioResponse(story, req.user?.id);
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error("Lỗi khi lấy audio theo story ID:", error);
+    return res.status(500).json({ message: "Lỗi khi lấy danh sách audio" });
+  }
+};
+
+const getStoryAudioBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const story = await StoryModel.getBySlug(slug);
+
+    if (!story) {
+      return res.status(404).json({ message: "Không tìm thấy truyện" });
+    }
+
+    const response = await buildAudioResponse(story, req.user?.id);
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error("Lỗi khi lấy audio theo slug:", error);
+    return res.status(500).json({ message: "Lỗi khi lấy danh sách audio" });
+  }
+};
+
+const saveStoryAudioProgress = async (req, res) => {
+  try {
+    const storyId = Number.parseInt(req.params.id, 10);
+    const userId = req.user?.id;
+    const lastPartId = Number.parseInt(req.body?.last_part_id, 10);
+
+    if (!userId) {
+      return res.status(401).json({ message: "Vui long dang nhap de luu tien do audio." });
+    }
+
+    if (!Number.isFinite(storyId) || !Number.isFinite(lastPartId)) {
+      return res.status(400).json({ message: "Du lieu luu tien do khong hop le." });
+    }
+
+    const story = await StoryModel.getById(storyId);
+    if (!story) {
+      return res.status(404).json({ message: "Khong tim thay truyen." });
+    }
+
+    const audioPart = await StoryModel.getAudioPartByIdAndStory(lastPartId, storyId);
+    if (!audioPart) {
+      return res.status(400).json({ message: "Tap audio khong thuoc truyen nay." });
+    }
+
+    const progress = await StoryModel.saveAudioProgress(userId, storyId, lastPartId);
+
+    return res.status(200).json({
+      success: true,
+      progress: progress
+        ? {
+            user_id: progress.user_id,
+            truyen_id: progress.truyen_id,
+            last_part_id: progress.last_part_id,
+            updated_at: progress.updated_at,
+            part_number: progress.part_number,
+            audio_url:
+              progress.audio_url ||
+              (progress.r2_key ? `https://audio.truyenviethay.id.vn/${progress.r2_key}` : null),
+            video_id: progress.video_id,
+            youtube_video_id: progress.youtube_video_id,
+            video_index: progress.video_index,
+          }
+        : null,
+    });
+  } catch (error) {
+    console.error("Loi khi luu tien do audio:", error);
+    return res.status(500).json({ message: "Loi khi luu tien do audio." });
   }
 };
 
@@ -499,6 +697,9 @@ const getHotStories = async (req, res) => {
 module.exports = {
   getAllStories,
   getStoryById,
+  getStoryAudioById,
+  getStoryAudioBySlug,
+  saveStoryAudioProgress,
   updateStory,
   deleteStory,
   getPendingApproval: getPendingApprovalNormalized,

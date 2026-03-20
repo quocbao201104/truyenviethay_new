@@ -17,6 +17,40 @@ const TheLoaiModel = {
     );
     return rows;
   },
+  getByStoryIds: async (storyIds) => {
+    if (!Array.isArray(storyIds) || storyIds.length === 0) return new Map();
+
+    const ids = storyIds
+      .map((id) => parseInt(id, 10))
+      .filter((id) => Number.isFinite(id));
+    if (ids.length === 0) return new Map();
+
+    const placeholders = ids.map(() => "?").join(",");
+    const [rows] = await db.query(
+      `SELECT
+         tt.truyen_id,
+         t.id_theloai,
+         t.ten_theloai
+       FROM truyen_theloai tt
+       INNER JOIN theloai_new t ON tt.theloai_id = t.id_theloai
+       WHERE tt.truyen_id IN (${placeholders})
+       ORDER BY tt.truyen_id ASC, t.ten_theloai ASC`,
+      ids,
+    );
+
+    const genresByStoryId = new Map();
+    for (const row of rows) {
+      if (!genresByStoryId.has(row.truyen_id)) {
+        genresByStoryId.set(row.truyen_id, []);
+      }
+      genresByStoryId.get(row.truyen_id).push({
+        id_theloai: row.id_theloai,
+        ten_theloai: row.ten_theloai,
+      });
+    }
+
+    return genresByStoryId;
+  },
   // Lọc truyện theo nhiều thể loại
   filterByGenreIds: async (genreIds, offset, limit) => {
     const placeholders = genreIds.map(() => "?").join(",");
