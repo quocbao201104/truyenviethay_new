@@ -10,7 +10,7 @@ export const getTopRatedStories = async (page = 1, limit = 50): Promise<any> => 
     return response.data;
 };
 
-export const getHotStories = async (limit = 50): Promise<Story[]> => {
+export const getHotStories = async (limit = 10): Promise<Story[]> => {
     const response = await axios.get("/api/truyen/hot-stories", {
         params: { limit }
     });

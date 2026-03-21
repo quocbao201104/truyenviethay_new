@@ -11,7 +11,8 @@ const { getOrSet, invalidate } = require("../utils/cache");
 const STORY_DETAIL_CACHE_TTL_SECONDS = 600; // 10 phút
 const ALL_STORIES_CACHE_TTL_SECONDS = 600; // 10 phút
 
-const STORY_AUDIO_CACHE_TTL_SECONDS = 600; // 10 phut
+const STORY_AUDIO_META_CACHE_TTL_SECONDS = 120; // 2 phut
+const STORY_AUDIO_PLAYLIST_CACHE_TTL_SECONDS = 1800; // 30 phut
 
 const safeKeyPart = (value) =>
   encodeURIComponent(value === undefined || value === null ? "" : String(value));
@@ -23,6 +24,13 @@ const toIntOrUndefined = (value) => {
 const storyDetailIdKey = (id) => `storyDetail:id:${id}`;
 const storyDetailSlugKey = (slug) => `storyDetail:slug:${slug}`;
 const storyAudioKey = (id) => `storyAudio:id:${id}`;
+const storyAudioMetaKey = (id) => `storyAudio:meta:id:${id}`;
+const storyAudioPlaylistKey = (id) => `storyAudio:playlist:id:${id}`;
+const invalidateStoryAudioCache = async (storyId) => {
+  await invalidate(storyAudioMetaKey(storyId));
+  await invalidate(storyAudioPlaylistKey(storyId));
+  await invalidate(storyAudioKey(storyId));
+};
 const allStoriesCacheKey = (params) => {
   const {
     page,
@@ -131,6 +139,7 @@ const getPublicStories = async (req, res) => {
       max_chapters,
       min_days_ago,
       has_audio,
+      require_text_chapters,
     } = req.query;
 
     const result = await StoryModel.getPublicStories({
@@ -148,6 +157,7 @@ const getPublicStories = async (req, res) => {
       max_chapters,
       min_days_ago,
       has_audio,
+      require_text_chapters,
     });
     if (result && result.data) {
       result.data = normalizeStories(result.data);
@@ -271,8 +281,35 @@ const cloneAudioResponse = (payload) => ({
   progress: payload.progress ? { ...payload.progress } : null,
 });
 
-const buildAudioBaseResponse = async (story) => {
-  const parts = await StoryModel.getAudioPartsByStoryId(story.id);
+const buildAudioStoryMeta = async (story) => {
+  const partnerId = Number.parseInt(story.source_partner_id, 10);
+  const partner = Number.isFinite(partnerId)
+    ? await StoryModel.getPartnerById(partnerId)
+    : null;
+
+  return {
+    id: story.id,
+    slug: story.slug,
+    ten_truyen: story.ten_truyen,
+    tac_gia: story.tac_gia,
+    anh_bia: story.anh_bia || null,
+    mo_ta: story.mo_ta || null,
+    has_audio: !!story.has_audio,
+    audio_status: story.audio_status || null,
+    source_type: story.source_type || null,
+    source_partner_id: story.source_partner_id || null,
+    copyright_holder: partner
+      ? {
+          id: partner.id,
+          name: partner.name,
+          url: partner.youtube_url || null,
+        }
+      : null,
+  };
+};
+
+const buildAudioPlaylist = async (storyId) => {
+  const parts = await StoryModel.getAudioPartsByStoryId(storyId);
 
   const videosMap = new Map();
   for (const part of parts) {
@@ -306,35 +343,31 @@ const buildAudioBaseResponse = async (story) => {
   const totalDurationSeconds = parts.reduce((sum, part) => sum + (Number(part.duration_seconds) || 0), 0);
 
   return {
-    story: {
-      id: story.id,
-      slug: story.slug,
-      ten_truyen: story.ten_truyen,
-      tac_gia: story.tac_gia,
-      anh_bia: story.anh_bia || null,
-      mo_ta: story.mo_ta || null,
-      has_audio: !!story.has_audio,
-      audio_status: story.audio_status || null,
-      source_type: story.source_type || null,
-      source_partner_id: story.source_partner_id || null,
-    },
-    audio: {
-      total_videos: videos.length,
-      total_parts: parts.length,
-      total_duration_seconds: totalDurationSeconds,
-      videos,
-    },
-    progress: null,
+    total_videos: videos.length,
+    total_parts: parts.length,
+    total_duration_seconds: totalDurationSeconds,
+    videos,
   };
 };
 
 const buildAudioResponse = async (story, userId) => {
-  const baseResponse = await getOrSet(
-    storyAudioKey(story.id),
-    STORY_AUDIO_CACHE_TTL_SECONDS,
-    () => buildAudioBaseResponse(story),
-  );
-  const response = cloneAudioResponse(baseResponse);
+  const [storyMeta, playlist] = await Promise.all([
+    getOrSet(
+      storyAudioMetaKey(story.id),
+      STORY_AUDIO_META_CACHE_TTL_SECONDS,
+      () => buildAudioStoryMeta(story),
+    ),
+    getOrSet(
+      storyAudioPlaylistKey(story.id),
+      STORY_AUDIO_PLAYLIST_CACHE_TTL_SECONDS,
+      () => buildAudioPlaylist(story.id),
+    ),
+  ]);
+  const response = cloneAudioResponse({
+    story: storyMeta,
+    audio: playlist,
+    progress: null,
+  });
 
   if (userId && Number.isFinite(parseInt(userId, 10))) {
     const progress = await StoryModel.getAudioProgressByUserAndStory(userId, story.id);
@@ -518,6 +551,7 @@ const updateStory = async (req, res) => {
       await invalidate(storyDetailIdKey(storyId));
       if (existingStory?.slug) await invalidate(storyDetailSlugKey(existingStory.slug));
       if (slug && slug !== existingStory?.slug) await invalidate(storyDetailSlugKey(slug));
+      await invalidateStoryAudioCache(storyId);
       return res.status(200).json({ message: "Cập nhật truyện thành công" });
     } else {
       return res.status(400).json({ message: "Không có thay đổi nào được lưu lại" });
@@ -548,6 +582,7 @@ const deleteStory = async (req, res) => {
     await StoryModel.invalidateStoryListCache?.();
     await invalidate(storyDetailIdKey(storyId));
     if (existingStory?.slug) await invalidate(storyDetailSlugKey(existingStory.slug));
+    await invalidateStoryAudioCache(storyId);
     res.status(200).json({ message: "Xoá truyện thành công" });
   } catch (error) {
     console.error("Lỗi khi xoá truyện:", error);
@@ -583,6 +618,7 @@ const approveOrRejectStory = async (req, res) => {
     await invalidate(storyDetailIdKey(storyId));
     const existingStory = await StoryModel.getById(storyId);
     if (existingStory?.slug) await invalidate(storyDetailSlugKey(existingStory.slug));
+    await invalidateStoryAudioCache(storyId);
     res.json(result);
   } catch (error) {
     console.error("Error in approveOrRejectStory:", error);

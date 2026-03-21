@@ -244,6 +244,18 @@ const StoryModel = {
     return rows[0] || null;
   },
 
+  getPartnerById: async (partnerId) => {
+    const [rows] = await db.query(
+      `SELECT id, name, youtube_url
+       FROM partners
+       WHERE id = ?
+       LIMIT 1`,
+      [partnerId]
+    );
+
+    return rows[0] || null;
+  },
+
   saveAudioProgress: async (userId, storyId, lastPartId) => {
     const [updateResult] = await db.query(
       `UPDATE user_audio_progress
@@ -366,6 +378,7 @@ const StoryModel = {
       max_chapters = null,
       min_days_ago = null,
       has_audio = null,
+      require_text_chapters = null,
     } = opts;
     const safePage = Math.max(1, parseInt(page, 10) || 1);
     const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
@@ -379,7 +392,8 @@ const StoryModel = {
       min_chapters != null ||
       max_chapters != null ||
       min_days_ago != null ||
-      has_audio != null
+      has_audio != null ||
+      require_text_chapters != null
     );
     const cacheable = safePage === 1;
     const cacheKey = cacheable
@@ -398,6 +412,7 @@ const StoryModel = {
           `maxChapters=${max_chapters ?? ""}`,
           `minDays=${min_days_ago ?? ""}`,
           `hasAudio=${has_audio ?? ""}`,
+          `requireTextChapters=${require_text_chapters ?? ""}`,
           `filtered=${hasFilters ? "1" : "0"}`,
         ].join(":")
       : null;
@@ -426,6 +441,7 @@ const StoryModel = {
     max_chapters = null,
     min_days_ago = null,
     has_audio = null,
+    require_text_chapters = null,
   }) => {
     const safePage = Math.max(1, parseInt(page, 10) || 1);
     const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
@@ -572,6 +588,12 @@ if (ids.length > 0) {
             whereConditions.push(`tn.has_audio = 1`);
         } else if (["0", "false", "no"].includes(normalizedHasAudio)) {
             whereConditions.push(`(tn.has_audio = 0 OR tn.has_audio IS NULL)`);
+        }
+    }
+    if (require_text_chapters !== null && require_text_chapters !== undefined && require_text_chapters !== "") {
+        const normalizedRequireTextChapters = String(require_text_chapters).toLowerCase();
+        if (["1", "true", "yes"].includes(normalizedRequireTextChapters)) {
+            whereConditions.push(`tn.so_luong_chuong > 0`);
         }
     }
 
@@ -724,7 +746,7 @@ if (ids.length > 0) {
   },
 
   getHotStories: async (limit = 5) => {
-    const safeLimit = Math.min(100, Math.max(1, parseInt(limit, 10) || 5));
+    const safeLimit = Math.min(10, Math.max(1, parseInt(limit, 10) || 10));
     const cacheKey = `hotStories:${safeLimit}`;
     const rows = await getOrSet(
       cacheKey,
@@ -737,6 +759,7 @@ if (ids.length > 0) {
            FROM truyen_new
            WHERE trang_thai_kiem_duyet = 'duyet'
              AND ${ACTIVE_STORY_CLAUSE_NO_ALIAS}
+             AND so_luong_chuong > 0
            ORDER BY hot_score DESC
            LIMIT ?`,
           [safeLimit]

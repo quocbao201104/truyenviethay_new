@@ -102,10 +102,11 @@
               <div v-if="index < 3" class="rank-aura-glow-cloud"></div>
 
               <div class="rank-indicator">
-                <div class="circle-inner">
-                  <span class="rank-num">{{ index + 1 }}</span>
-                  <i v-if="index < 3" class="fas fa-crown mini-crown"></i>
-                </div>
+                <span class="rank-kicker">
+                  <i v-if="index < 3" class="fas fa-crown rank-crown"></i>
+                  {{ index < 3 ? 'Top' : 'Hạng' }}
+                </span>
+                <span class="rank-num">{{ index + 1 }}</span>
               </div>
 
               <router-link :to="`/truyen-chu/${story.slug}`" class="story-cover-pill first-element">
@@ -179,10 +180,11 @@
               <div v-if="index < 3" class="rank-aura-glow-cloud"></div>
 
               <div class="rank-indicator">
-                <div class="circle-inner">
-                  <span class="rank-num">{{ index + 1 }}</span>
-                  <i v-if="index < 3" class="fas fa-crown mini-crown"></i>
-                </div>
+                <span class="rank-kicker">
+                  <i v-if="index < 3" class="fas fa-crown rank-crown"></i>
+                  {{ index < 3 ? 'Top' : 'Hạng' }}
+                </span>
+                <span class="rank-num">{{ index + 1 }}</span>
               </div>
 
               <div class="author-avatar-ranking first-element">
@@ -509,38 +511,42 @@ const handleImageError = (event: Event) => {
 }
 
 .rank-indicator {
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  min-height: 92px;
   flex-shrink: 0;
-  padding: 3px;
-  background: rgba(148, 163, 184, 0.12);
-  border-radius: 50%;
+  padding: 10px 8px;
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.12), rgba(15, 23, 42, 0.92));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
   z-index: 5;
-}
-
-.circle-inner {
-  width: 100%;
-  height: 100%;
-  background: #101724;
-  border-radius: 50%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 2px solid #334155;
-  position: relative;
+  gap: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.rank-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.86);
 }
 
 .rank-num {
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 900;
-  color: #475569;
+  color: #e2e8f0;
+  line-height: 1;
 }
 
-.mini-crown {
-  position: absolute;
-  top: -8px;
-  font-size: 0.7rem;
-  color: inherit;
+.rank-crown {
+  font-size: 0.62rem;
 }
 
 /* Aura Glow Mây Xanh */
@@ -566,7 +572,8 @@ const handleImageError = (event: Event) => {
   box-shadow: var(--app-shadow-1);
 }
 .rank-cloud-1 .rank-aura-glow-cloud { background: rgba(243, 201, 107, 0.85); }
-.rank-cloud-1 .circle-inner { border-color: #eab308; background: rgba(234, 179, 8, 0.12); }
+.rank-cloud-1 .rank-indicator { border-color: rgba(234, 179, 8, 0.34); background: linear-gradient(180deg, rgba(234, 179, 8, 0.2), rgba(41, 29, 8, 0.94)); }
+.rank-cloud-1 .rank-kicker { color: rgba(254, 240, 138, 0.92); }
 .rank-cloud-1 .rank-num { color: #eab308; }
 
 /* Top 2 - Ánh Bạc / Bích Không */
@@ -576,7 +583,8 @@ const handleImageError = (event: Event) => {
   box-shadow: var(--app-shadow-1);
 }
 .rank-cloud-2 .rank-aura-glow-cloud { background: rgba(148, 163, 184, 0.7); }
-.rank-cloud-2 .circle-inner { border-color: #94a3b8; background: rgba(148, 163, 184, 0.12); }
+.rank-cloud-2 .rank-indicator { border-color: rgba(203, 213, 225, 0.22); background: linear-gradient(180deg, rgba(203, 213, 225, 0.16), rgba(24, 32, 46, 0.94)); }
+.rank-cloud-2 .rank-kicker { color: rgba(226, 232, 240, 0.88); }
 .rank-cloud-2 .rank-num { color: #cbd5e1; }
 
 /* Top 3 - Ánh Đồng / Thanh Lam */
@@ -586,7 +594,8 @@ const handleImageError = (event: Event) => {
   box-shadow: var(--app-shadow-1);
 }
 .rank-cloud-3 .rank-aura-glow-cloud { background: rgba(224, 129, 79, 0.75); }
-.rank-cloud-3 .circle-inner { border-color: #c2410c; background: rgba(194, 65, 12, 0.12); }
+.rank-cloud-3 .rank-indicator { border-color: rgba(249, 115, 22, 0.24); background: linear-gradient(180deg, rgba(249, 115, 22, 0.18), rgba(41, 22, 11, 0.94)); }
+.rank-cloud-3 .rank-kicker { color: rgba(254, 215, 170, 0.9); }
 .rank-cloud-3 .rank-num { color: #fb923c; }
 
 /* Story Cover */
@@ -840,20 +849,20 @@ const handleImageError = (event: Event) => {
   }
 
   .rank-indicator {
-    position: absolute;
-    top: -8px;
-    left: -8px;
-    width: 35px;
-    height: 35px;
-    z-index: 10;
-  }
-
-  .circle-inner {
-    border-width: 1.5px;
+    width: 46px;
+    min-height: 64px;
+    padding: 7px 5px;
+    border-radius: 14px;
+    gap: 4px;
   }
 
   .rank-num {
-    font-size: 0.9rem;
+    font-size: 1.3rem;
+  }
+
+  .rank-kicker {
+    font-size: 0.48rem;
+    letter-spacing: 0.9px;
   }
   
   .story-cover-pill {

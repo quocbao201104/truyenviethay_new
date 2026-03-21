@@ -206,6 +206,7 @@ const fetchStories = async () => {
       limit: 18,
       sort_by: sortBy.value,
       order: 'DESC',
+      require_text_chapters: true,
     };
     if (selectedCategories.value.length > 0) {
       params.category_ids = selectedCategories.value.join(',');

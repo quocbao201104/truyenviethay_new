@@ -73,6 +73,8 @@ export interface PublicStoriesParams {
   trang_thai?: string;
   min_days_ago?: number | null;
   has_audio?: boolean | number | null;
+  require_text_chapters?: boolean | number | null;
+  skip_request_cache?: boolean;
 }
 
 
@@ -123,27 +125,35 @@ export const getPublicStories = async ({
   trang_thai = "",
   min_days_ago = null,
   has_audio = null,
+  require_text_chapters = null,
+  skip_request_cache = false,
 }: PublicStoriesParams = {}) => {
   const normalizedCategoryIds = Array.isArray(category_ids)
     ? category_ids.join(",")
     : (category_ids ?? "");
-  const abortKey = `publicStories:${page}:${limit}:${sort_by}:${order}:${keyword}:${normalizedCategoryIds}:${author_id ?? ""}:${trang_thai ?? ""}:${min_days_ago ?? ""}:${has_audio ?? ""}`;
+  const params = {
+    page,
+    limit,
+    sort_by,
+    order,
+    keyword,
+    category_ids: normalizedCategoryIds || undefined,
+    author_id,
+    trang_thai,
+    min_days_ago,
+    has_audio,
+    require_text_chapters,
+  };
+
+  if (skip_request_cache) {
+    const response = await axios.get(`/api/truyen/public`, { params });
+    return response.data;
+  }
+
+  const abortKey = `publicStories:${page}:${limit}:${sort_by}:${order}:${keyword}:${normalizedCategoryIds}:${author_id ?? ""}:${trang_thai ?? ""}:${min_days_ago ?? ""}:${has_audio ?? ""}:${require_text_chapters ?? ""}`;
   return await cachedGet<any>(
     `/api/truyen/public`,
-    {
-      params: {
-        page,
-        limit,
-        sort_by,
-        order,
-        keyword,
-        category_ids: normalizedCategoryIds || undefined,
-        author_id,
-        trang_thai,
-        min_days_ago,
-        has_audio,
-      },
-    },
+    { params },
     { ttlMs: 30000, dedupe: true, abortKey },
   );
 };

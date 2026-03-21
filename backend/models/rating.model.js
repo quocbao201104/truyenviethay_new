@@ -107,6 +107,7 @@ const Rating = {
            FROM truyen_new t
            WHERE t.trang_thai_kiem_duyet = 'duyet'
              AND (t.is_deleted = 0 OR t.is_deleted IS NULL)
+             AND t.so_luong_chuong > 0
              AND t.rating_count >= 1
            ORDER BY t.rating DESC, t.rating_count DESC
            LIMIT ? OFFSET ?`,
@@ -117,6 +118,7 @@ const Rating = {
           `SELECT COUNT(*) as total FROM truyen_new t 
            WHERE t.trang_thai_kiem_duyet = 'duyet'
              AND (t.is_deleted = 0 OR t.is_deleted IS NULL)
+             AND t.so_luong_chuong > 0
              AND t.rating_count >= 1`
         );
 

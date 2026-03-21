@@ -7,11 +7,11 @@ export const useRankingStore = defineStore("ranking", () => {
     const loading = ref(false);
     const error = ref<string | null>(null);
 
-    const fetchHotStories = async () => {
+    const fetchHotStories = async (limit: number = 10) => {
         loading.value = true;
         error.value = null;
         try {
-            hotStories.value = await getHotStories();
+            hotStories.value = await getHotStories(limit);
         } catch (err: any) {
             error.value = err.message || "Failed to load hot stories";
         } finally {

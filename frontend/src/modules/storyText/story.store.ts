@@ -333,13 +333,13 @@ export const useStoryStore = defineStore("story", () => {
     };
 
     /**
-     * Fetch top rated stories with 10-minute cache
+     * Fetch top rated stories with 3-minute cache
      */
     const fetchTopRatedStories = async (page: number = 1, limit: number = 8) => {
         return getCachedOrFetch(
             `topRated:${page}:${limit}`,
             () => getTopRatedStories(page, limit),
-            10 * 60 * 1000 // 10 minutes
+            3 * 60 * 1000 // 3 minutes
         );
     };
 
@@ -354,6 +354,8 @@ export const useStoryStore = defineStore("story", () => {
                     page,
                     limit,
                     min_days_ago: 30,
+                    require_text_chapters: true,
+                    skip_request_cache: true,
                     sort_by: "luot_xem",
                     order: "DESC"
                 });
@@ -374,6 +376,8 @@ export const useStoryStore = defineStore("story", () => {
                     page,
                     limit,
                     trang_thai: "hoan_thanh",
+                    require_text_chapters: true,
+                    skip_request_cache: true,
                     sort_by: "luot_xem",
                     order: "DESC"
                 });

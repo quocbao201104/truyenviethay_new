@@ -41,6 +41,11 @@ export interface StoryAudioResponse {
     audio_status?: string | null;
     source_type?: string | null;
     source_partner_id?: string | number | null;
+    copyright_holder?: {
+      id: number;
+      name: string;
+      url?: string | null;
+    } | null;
   };
   audio: {
     total_videos: number;

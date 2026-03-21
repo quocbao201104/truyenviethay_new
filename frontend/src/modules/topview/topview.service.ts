@@ -13,7 +13,8 @@ export const getTopViewStories = async (limit = 10): Promise<Story[]> => {
         params: {
             sort_by: "luot_xem", // Views
             order: "DESC",
-            limit
+            limit,
+            require_text_chapters: true,
         }
     });
     return response.data.data;

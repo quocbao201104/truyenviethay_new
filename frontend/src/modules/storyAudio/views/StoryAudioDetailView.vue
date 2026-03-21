@@ -166,6 +166,18 @@
               <h3>Noi dung truyen</h3>
             </div>
             <p class="story-description">{{ cleanDescription }}</p>
+            <p v-if="copyrightHolder" class="story-copyright">
+              Ban quyen thuoc ve:
+              <a
+                class="story-copyright__link"
+                :href="copyrightHolder.url || '#'"
+                :target="copyrightHolder.url ? '_blank' : undefined"
+                :rel="copyrightHolder.url ? 'noreferrer' : undefined"
+                @click.prevent="handleCopyrightClick"
+              >
+                {{ copyrightHolder.name }}
+              </a>
+            </p>
           </div>
         </div>
 
@@ -360,15 +372,19 @@ const coverUrl = computed(() => {
 
 const cleanDescription = computed(() => {
   const desc = audioPayload.value?.story.mo_ta;
-  if (!desc) return "Chua co loi tua cho tac pham nay.";
-  if (
-    desc.includes("Duoc tao tu dong tu du lieu am thanh") ||
-    desc.includes("Duoc tao tu du lieu am thanh")
-  ) {
-    return "Chua co loi tua cho tac pham nay.";
-  }
-  return desc;
+  return desc?.trim() || "Chua co loi tua cho tac pham nay.";
 });
+
+const copyrightHolder = computed(() => {
+  const holder = audioPayload.value?.story.copyright_holder;
+  if (!holder?.name) return null;
+  return holder;
+});
+
+const handleCopyrightClick = () => {
+  if (!copyrightHolder.value?.url) return;
+  window.open(copyrightHolder.value.url, "_blank", "noopener,noreferrer");
+};
 
 const resumeStorageKey = computed(() => {
   const storyId = audioPayload.value?.story.id;
@@ -963,6 +979,24 @@ watch(
   color: var(--app-text-muted);
   line-height: 1.8;
   font-size: 1rem;
+}
+
+.story-copyright {
+  margin-top: 12px;
+  color: rgba(148, 163, 184, 0.92);
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+
+.story-copyright__link {
+  color: #7dd3fc;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.story-copyright__link:hover {
+  color: #bae6fd;
+  text-decoration: underline;
 }
 
 .playlist-card {
