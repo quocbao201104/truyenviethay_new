@@ -485,8 +485,23 @@ const StoryModel = {
                          tn.has_audio,
                          tn.audio_status,
                          tn.source_type,
-                         tn.source_partner_id
-                       FROM truyen_new tn`;
+                         tn.source_partner_id,
+                         audio_meta.audio_total_parts,
+                         audio_meta.audio_total_duration_seconds,
+                         audio_meta.audio_latest_part_at,
+                         p.name AS source_partner_name,
+                         p.youtube_url AS source_partner_url
+                       FROM truyen_new tn
+                       LEFT JOIN (
+                         SELECT
+                           ap.truyen_id,
+                           COUNT(*) AS audio_total_parts,
+                           COALESCE(SUM(ap.duration_seconds), 0) AS audio_total_duration_seconds,
+                           MAX(ap.created_at) AS audio_latest_part_at
+                         FROM audio_parts ap
+                         GROUP BY ap.truyen_id
+                       ) audio_meta ON audio_meta.truyen_id = tn.id
+                       LEFT JOIN partners p ON p.id = tn.source_partner_id`;
     
     // Base count query needs to handle WHERE clauses, but HAVING clauses make simple COUNT(*) difficult.
     // We will use a subquery approach for counting total if HAVING is involved, or build dynamically.

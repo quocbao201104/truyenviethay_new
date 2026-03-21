@@ -1,9 +1,19 @@
 <template>
   <div class="sidebar-inner">
+    <div class="sidebar-intro">
+      <span class="sidebar-kicker">Tùy chọn truyện</span>
+      <p class="sidebar-subtitle">
+        Lọc nhanh kho audio theo thể loại, tình trạng, và cách sắp xếp để tìm đúng mood nghe.
+      </p>
+    </div>
+
     <div class="filter-block">
       <div class="block-header">
         <i class="fas fa-scroll"></i>
-        <h3>Phân loại</h3>
+        <div>
+          <h3>Phân loại</h3>
+          <p>Chọn một hoặc nhiều thể loại đang nghe.</p>
+        </div>
       </div>
       <div v-if="loadingGenres" class="filter-loading">
         <i class="fas fa-yin-yang fa-spin"></i>
@@ -30,7 +40,10 @@
     <div class="filter-block">
       <div class="block-header">
         <i class="fas fa-hourglass-half"></i>
-        <h3>Tình trạng</h3>
+        <div>
+          <h3>Tình trạng</h3>
+          <p>Lọc theo nhịp cập nhật của truyện.</p>
+        </div>
       </div>
       <div class="status-options">
         <label
@@ -49,12 +62,15 @@
     <div class="filter-block">
       <div class="block-header">
         <i class="fas fa-sort-amount-down"></i>
-        <h3>Sắp xếp</h3>
+        <div>
+          <h3>Sắp xếp</h3>
+          <p>Chọn cách ưu tiên danh sách audio.</p>
+        </div>
       </div>
       <div class="custom-select-wrapper">
-        <select v-model="localSort" class="xianxia-select" @change="emitUpdate">
+        <select v-model="localSort" class="audio-select" @change="emitUpdate">
           <option value="thoi_gian_cap_nhat">Mới cập nhật</option>
-          <option value="luot_xem">Xem nhiều nhất</option>
+          <option value="luot_xem">Nghe nhiều nhất</option>
           <option value="luot_thich">Được yêu thích</option>
           <option value="avg_rating">Đánh giá cao</option>
           <option value="ten_truyen">Tên A-Z</option>
@@ -142,11 +158,36 @@ onMounted(() => {
 
 <style scoped>
 .sidebar-inner {
-  padding: 4px 0 8px;
+  padding: 10px 0 14px;
+}
+
+.sidebar-intro {
+  margin: 0 20px 20px;
+  padding: 16px 16px 14px;
+  border: 1px solid rgba(216, 179, 106, 0.12);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(20, 32, 49, 0.96), rgba(12, 19, 29, 0.82));
+}
+
+.sidebar-kicker {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #d8b36a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.sidebar-subtitle {
+  margin: 0;
+  color: #8ea2b5;
+  font-size: 0.84rem;
+  line-height: 1.65;
 }
 
 .filter-block {
-  padding: 20px 20px 16px;
+  padding: 20px 20px 18px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.07);
 }
 
@@ -156,104 +197,111 @@ onMounted(() => {
 
 .block-header {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 12px;
   margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
 }
 
 .block-header i {
-  color: #74dbf3;
-  font-size: 1rem;
+  margin-top: 2px;
+  color: #7adccc;
+  font-size: 0.98rem;
 }
 
 .block-header h3 {
-  margin: 0;
-  color: #e2e8f0;
-  font-size: 0.85rem;
+  margin: 0 0 4px;
+  color: #eef5fb;
+  font-size: 0.88rem;
   font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.block-header p {
+  margin: 0;
+  color: #73869b;
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
 .filter-loading {
   padding: 16px;
-  color: var(--app-text-subtle, #64748b);
+  color: #73869b;
   text-align: center;
 }
 
 .genre-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .genre-chip {
-  padding: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  border-radius: 10px;
-  background: rgba(12, 18, 29, 0.4);
+  padding: 11px 10px;
+  border: 1px solid rgba(125, 220, 204, 0.1);
+  border-radius: 14px;
+  background: rgba(15, 22, 34, 0.44);
   cursor: pointer;
   text-align: center;
-  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
 .genre-chip:hover {
   transform: translateY(-1px);
-  border-color: rgba(91, 196, 232, 0.25);
-  background: rgba(91, 196, 232, 0.05);
+  border-color: rgba(125, 220, 204, 0.25);
+  background: rgba(125, 220, 204, 0.07);
 }
 
 .genre-chip.active {
-  border-color: rgba(91, 196, 232, 0.35);
-  background: rgba(91, 196, 232, 0.12);
+  border-color: rgba(216, 179, 106, 0.22);
+  background: rgba(216, 179, 106, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(216, 179, 106, 0.18);
 }
 
 .chip-text {
   display: block;
   overflow: hidden;
-  color: var(--app-text-muted, #94a3b8);
-  font-size: 0.76rem;
+  color: #9db0c2;
+  font-size: 0.78rem;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .genre-chip.active .chip-text {
-  color: #a9ebff;
+  color: #f5dfb3;
 }
 
 .status-options {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
 }
 
 .pill-btn {
   display: block;
-  padding: 12px 16px;
+  padding: 12px 14px;
   border: 1px solid rgba(148, 163, 184, 0.1);
-  border-radius: 12px;
-  background: rgba(12, 18, 29, 0.4);
-  color: var(--app-text-muted, #94a3b8);
+  border-radius: 14px;
+  background: rgba(15, 22, 34, 0.46);
+  color: #98abbd;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.84rem;
+  font-weight: 700;
   text-align: center;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .pill-btn:hover {
-  background: rgba(91, 196, 232, 0.06);
+  border-color: rgba(125, 220, 204, 0.18);
+  background: rgba(125, 220, 204, 0.05);
 }
 
 .pill-btn.active {
-  border-color: rgba(91, 196, 232, 0.2);
-  border-left: 3px solid #48cfa5;
-  background: rgba(91, 196, 232, 0.12);
-  color: #a9ebff;
+  border-color: rgba(216, 179, 106, 0.18);
+  background: linear-gradient(135deg, rgba(216, 179, 106, 0.14), rgba(125, 220, 204, 0.09));
+  color: #fff4d8;
 }
 
 .custom-select-wrapper {
@@ -266,35 +314,35 @@ onMounted(() => {
   top: 50%;
   right: 14px;
   transform: translateY(-50%);
-  color: #74dbf3;
+  color: #d8b36a;
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
   pointer-events: none;
 }
 
-.xianxia-select {
+.audio-select {
   width: 100%;
   appearance: none;
-  padding: 12px 16px;
+  padding: 13px 16px;
   border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 12px;
-  background: rgba(12, 18, 29, 0.55);
-  color: #e2e8f0;
+  border-radius: 14px;
+  background: rgba(15, 22, 34, 0.6);
+  color: #eef5fb;
   cursor: pointer;
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: 700;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.xianxia-select:focus {
-  border-color: rgba(91, 196, 232, 0.35);
-  box-shadow: 0 0 0 3px rgba(91, 196, 232, 0.08);
+.audio-select:focus {
+  border-color: rgba(125, 220, 204, 0.28);
+  box-shadow: 0 0 0 3px rgba(125, 220, 204, 0.08);
 }
 
-.xianxia-select option {
-  background: #151e2d;
-  color: #e2e8f0;
+.audio-select option {
+  background: #121b29;
+  color: #eef5fb;
 }
 
 .clear-btn {
@@ -303,23 +351,23 @@ onMounted(() => {
   justify-content: center;
   gap: 8px;
   width: calc(100% - 40px);
-  margin: 12px 20px 4px;
+  margin: 14px 20px 6px;
   padding: 14px;
-  border: 1px dashed rgba(223, 120, 135, 0.24);
-  border-radius: 12px;
-  background: rgba(223, 120, 135, 0.06);
-  color: #e59ba8;
+  border: 1px dashed rgba(216, 179, 106, 0.22);
+  border-radius: 14px;
+  background: rgba(216, 179, 106, 0.05);
+  color: #f1dcae;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.81rem;
   font-weight: 800;
-  letter-spacing: 0.5px;
-  transition: background 0.2s, color 0.2s, transform 0.2s;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
 .clear-btn:hover {
   transform: translateY(-1px);
-  border-style: solid;
-  background: rgba(223, 120, 135, 0.12);
-  color: #ffe4e8;
+  border-color: rgba(216, 179, 106, 0.32);
+  background: rgba(216, 179, 106, 0.1);
 }
 </style>

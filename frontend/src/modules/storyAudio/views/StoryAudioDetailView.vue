@@ -4,7 +4,7 @@
       <section class="audio-shell audio-shell--loading">
         <div class="loading-state">
           <i class="fas fa-circle-notch fa-spin"></i>
-          <p>Dang tai khong gian audio...</p>
+          <p>Đang tải không gian audio...</p>
         </div>
       </section>
     </main>
@@ -20,229 +20,203 @@
       <section class="audio-hero-shell">
         <router-link to="/truyen-audio" class="back-link">
           <i class="fas fa-arrow-left"></i>
-          Tro ve thu vien
+          Trở về thư viện
         </router-link>
 
-        <div class="hero-grid">
-          <div class="hero-cover-card">
-            <img
-              :src="coverUrl"
-              :alt="audioPayload.story.ten_truyen"
-              class="hero-cover-image"
-              @error="handleCoverError"
-            />
-            <div class="hero-cover-overlay"></div>
-          </div>
-
-          <div class="hero-info-card">
-            <div class="hero-topline">
-              <span class="audio-chip">
-                <i class="fas fa-headphones"></i>
-                Truyen Audio
-              </span>
-              <span class="audio-chip audio-chip--soft">
-                {{ displayAudioStatus }}
-              </span>
-            </div>
-
-            <h1>{{ audioPayload.story.ten_truyen }}</h1>
-
-            <p class="hero-author">
-              <i class="fas fa-feather-pointed"></i>
-              Tac gia:
-              <span>{{ audioPayload.story.tac_gia || "Dang cap nhat" }}</span>
-            </p>
-
-            <div class="hero-stats">
-              <div class="hero-stat">
-                <span>So tap</span>
-                <strong>{{ flatParts.length }}</strong>
-              </div>
-              <div class="hero-stat">
-                <span>So cum</span>
-                <strong>{{ playlistClusters.length }}</strong>
-              </div>
-              <div class="hero-stat">
-                <span>Thoi luong</span>
-                <strong>{{ formatDuration(audioPayload.audio.total_duration_seconds) }}</strong>
-              </div>
-            </div>
-
-            <div class="hero-actions">
-              <button
-                type="button"
-                class="hero-btn hero-btn--primary"
-                :disabled="!currentPart"
-                @click="togglePlayback"
-              >
-                <i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i>
-                {{ isPlaying ? "Tam dung" : "Nghe ngay" }}
-              </button>
-
-              <div class="hero-actions-group">
-                <button
-                  type="button"
-                  class="hero-btn hero-btn--icon"
-                  :disabled="!hasPrevPart"
-                  title="Bai truoc"
-                  @click="playAdjacentPart(-1)"
-                >
-                  <i class="fas fa-backward-step"></i>
-                </button>
-
-                <button
-                  type="button"
-                  class="hero-btn hero-btn--icon"
-                  :disabled="!hasNextPart"
-                  title="Bai tiep theo"
-                  @click="playAdjacentPart(1)"
-                >
-                  <i class="fas fa-forward-step"></i>
-                </button>
-              </div>
-
-              <a
-                v-if="currentPart?.audio_url"
-                class="hero-btn hero-btn--outline"
-                :href="currentPart.audio_url"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <i class="fas fa-download"></i>
-                Tai MP3
-              </a>
-
-              <router-link
-                :to="`/truyen-chu/${audioPayload.story.slug}`"
-                class="hero-btn hero-btn--outline"
-              >
-                <i class="fas fa-book-open"></i>
-                Doc chu
-              </router-link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="audio-layout">
-        <div class="player-panel">
-          <div class="panel-card player-card">
-            <div class="player-card__header">
-              <div class="now-playing-info">
-                <span class="panel-label">
-                  <i class="fas fa-compact-disc"></i>
-                  Dang phat
-                </span>
-                <h2>{{ currentPartTitle }}</h2>
-              </div>
-
-              <div v-if="currentPart" class="part-duration-badge">
-                <i class="far fa-clock"></i>
-                {{ formatPartDuration(currentPart.duration) }}
-              </div>
-            </div>
-
-            <div class="audio-player-wrapper">
-              <audio
-                ref="audioElement"
-                class="main-audio-player"
-                controls
-                controlsList="nodownload"
-                preload="metadata"
-                crossorigin="anonymous"
-                :src="currentPart?.audio_url || ''"
-                @play="handlePlay"
-                @pause="handlePause"
-                @ended="handleEnded"
-                @timeupdate="handleTimeUpdate"
-                @loadedmetadata="handleLoadedMetadata"
+        <section class="stage-shell">
+          <div class="stage-feature">
+            <div class="stage-cover">
+              <img
+                :src="coverUrl"
+                :alt="audioPayload.story.ten_truyen"
+                class="stage-cover__image"
+                @error="handleCoverError"
               />
-            </div>
-          </div>
-
-          <div class="panel-card intro-card">
-            <div class="intro-header">
-              <span class="panel-label">Gioi thieu</span>
-              <h3>Noi dung truyen</h3>
-            </div>
-            <p class="story-description">{{ cleanDescription }}</p>
-            <p v-if="copyrightHolder" class="story-copyright">
-              Ban quyen thuoc ve:
-              <a
-                class="story-copyright__link"
-                :href="copyrightHolder.url || '#'"
-                :target="copyrightHolder.url ? '_blank' : undefined"
-                :rel="copyrightHolder.url ? 'noreferrer' : undefined"
-                @click.prevent="handleCopyrightClick"
-              >
-                {{ copyrightHolder.name }}
-              </a>
-            </p>
-          </div>
-        </div>
-
-        <aside class="playlist-panel">
-          <div class="panel-card playlist-card">
-            <div class="playlist-header">
-              <div>
-                <span class="panel-label">Danh sach phat</span>
-                <h3>{{ playlistClusters.length }} cum tap</h3>
-              </div>
+              <div class="stage-cover__overlay"></div>
             </div>
 
-            <div class="playlist-groups">
-              <section
-                v-for="cluster in playlistClusters"
-                :key="cluster.key"
-                class="playlist-group"
-                :class="{ 'playlist-group--expanded': expandedClusterKey === cluster.key }"
-              >
-                <button
-                  type="button"
-                  class="playlist-group__header"
-                  @click="toggleCluster(cluster.key)"
-                >
-                  <strong :title="cluster.fullLabel">{{ cluster.label }}</strong>
-                  <span class="playlist-group__summary">
-                    <span class="part-count">{{ cluster.parts.length }} tap</span>
-                    <span
-                      v-if="currentClusterKey === cluster.key"
-                      class="playlist-group__status"
-                    >
-                      Dang nghe
-                    </span>
-                    <i
-                      class="fas fa-chevron-down playlist-group__chevron"
-                      :class="{ 'playlist-group__chevron--open': expandedClusterKey === cluster.key }"
-                    ></i>
+            <div class="stage-center">
+              <div class="stage-title-block">
+                <span class="stage-kicker">Listening Stage</span>
+                <h1>{{ audioPayload.story.ten_truyen }}</h1>
+
+                <div class="stage-meta">
+                  <span class="stage-meta__item" title="Tác giả">
+                    <i class="fas fa-feather-pointed"></i>
+                    <strong>{{ audioPayload.story.tac_gia || "Đang cập nhật" }}</strong>
                   </span>
-                </button>
+                  <span class="stage-meta__item" title="Trạng thái">
+                    <i class="fas fa-circle-check"></i>
+                    <strong>{{ displayAudioStatus }}</strong>
+                  </span>
+                </div>
+              </div>
 
-                <div v-if="expandedClusterKey === cluster.key" class="playlist-items">
-                  <button
-                    v-for="part in cluster.parts"
-                    :key="part.id"
-                    type="button"
-                    class="part-item"
-                    :class="{ active: currentPart?.id === part.id }"
-                    @click="selectPart(part, true)"
-                  >
-                    <div class="part-item__main">
-                      <div class="part-indicator" v-if="currentPart?.id === part.id">
-                        <div class="bar"></div>
-                        <div class="bar"></div>
-                        <div class="bar"></div>
-                      </div>
-                      <span class="part-item__title">Tap {{ part.part_number }}</span>
+              <div class="stage-player">
+                <div class="stage-player__header">
+                  <div class="stage-player__top-row">
+                    <span class="panel-label">
+                      <i class="fas fa-compact-disc"></i>
+                      live
+                    </span>
+                    <div v-if="currentPart" class="part-duration-badge">
+                      <i class="far fa-clock"></i>
+                      {{ formatPartDuration(currentPart.duration) }}
                     </div>
-                    <span class="part-item__meta">{{ formatPartDuration(part.duration) }}</span>
+                  </div>
+
+                  <div class="now-playing-info">
+                    <h2>{{ currentPlaybackContext.title }}</h2>
+                    <p class="stage-player__context" :title="currentPlaybackContext.cluster">
+                      {{ currentPlaybackContext.cluster }} | {{ currentPlaybackContext.duration }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="audio-controls-wrapper">
+                  <button
+                    type="button"
+                    class="audio-nav-btn"
+                    :disabled="!hasPrevPart"
+                    title="Bài trước"
+                    @click="playAdjacentPart(-1)"
+                  >
+                    <i class="fas fa-backward-step"></i>
+                  </button>
+
+                  <audio
+                    ref="audioElement"
+                    class="main-audio-player"
+                    controls
+                    controlsList="nodownload"
+                    preload="metadata"
+                    crossorigin="anonymous"
+                    :src="currentPart?.audio_url || ''"
+                    @play="handlePlay"
+                    @pause="handlePause"
+                    @ended="handleEnded"
+                    @timeupdate="handleTimeUpdate"
+                    @loadedmetadata="handleLoadedMetadata"
+                  />
+
+                  <button
+                    type="button"
+                    class="audio-nav-btn"
+                    :disabled="!hasNextPart"
+                    title="Bài tiếp theo"
+                    @click="playAdjacentPart(1)"
+                  >
+                    <i class="fas fa-forward-step"></i>
                   </button>
                 </div>
-              </section>
+              </div>
+
+            </div> <!-- /.stage-center -->
+
+            <section class="panel-card editorial-notes">
+              <div class="editorial-notes__header">
+                <span class="panel-label">Ghi chú biên tập</span>
+                <h3>Mở đầu cho người nghe</h3>
+              </div>
+              <p class="editorial-notes__description">{{ cleanDescription }}</p>
+              <p v-if="copyrightHolder" class="editorial-notes__copyright">
+                Bản quyền thuộc về:
+                <a
+                  class="editorial-notes__copyright-link"
+                  :href="copyrightHolder.url || '#'"
+                  :target="copyrightHolder.url ? '_blank' : undefined"
+                  :rel="copyrightHolder.url ? 'noreferrer' : undefined"
+                  @click.prevent="handleCopyrightClick"
+                >
+                  {{ copyrightHolder.name }}
+                </a>
+              </p>
+            </section>
+          </div> <!-- /.stage-feature -->
+
+          <aside class="stage-queue">
+            <div class="panel-card playlist-card">
+              <div class="playlist-header">
+                <div>
+                  <span class="panel-label">Danh sách phát</span>
+                  <h3>{{ playlistClusters.length }} Quyển</h3>
+                </div>
+                <router-link
+                  :to="`/truyen-chu/${audioPayload.story.slug}`"
+                  class="btn-read-top"
+                >
+                  <i class="fas fa-book-open"></i>
+                  Đọc chữ
+                </router-link>
+              </div>
+
+              <div class="playlist-groups">
+                <section
+                  v-for="cluster in playlistClusters"
+                  :key="cluster.key"
+                  class="playlist-group"
+                  :class="{ 'playlist-group--expanded': expandedClusterKey === cluster.key }"
+                >
+                  <button
+                    type="button"
+                    class="playlist-group__header"
+                    @click="toggleCluster(cluster.key)"
+                  >
+                    <div class="playlist-group__title">
+                      <span class="playlist-group__kicker">Audio Series</span>
+                      <strong :title="cluster.fullLabel">{{ cluster.label }}</strong>
+                    </div>
+                    <span class="playlist-group__summary">
+                      <span class="part-count">{{ cluster.parts.length }} tập</span>
+                      <span
+                        v-if="currentClusterKey === cluster.key"
+                        class="playlist-group__status"
+                      >
+                        live
+                      </span>
+                      <i
+                        class="fas fa-chevron-down playlist-group__chevron"
+                        :class="{ 'playlist-group__chevron--open': expandedClusterKey === cluster.key }"
+                      ></i>
+                    </span>
+                  </button>
+
+                  <div v-if="expandedClusterKey === cluster.key" class="playlist-items">
+                    <button
+                      v-for="part in cluster.parts"
+                      :key="part.id"
+                      type="button"
+                      class="part-item"
+                      :class="{ active: currentPart?.id === part.id }"
+                      @click="selectPart(part, true)"
+                    >
+                      <div class="part-item__main">
+                        <span class="part-item__index">{{ part.part_number }}</span>
+                        <div class="part-item__copy">
+                          <span class="part-item__title">Tập {{ part.part_number }}</span>
+                          <span class="part-item__subtitle">
+                            {{
+                              currentPart?.id === part.id
+                                ? "Đang phát hiện tại"
+                                : "Sẵn sàng cho lượt nghe"
+                            }}
+                          </span>
+                        </div>
+                        <div class="part-indicator" v-if="currentPart?.id === part.id">
+                          <div class="bar"></div>
+                          <div class="bar"></div>
+                          <div class="bar"></div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </section>
+              </div>
             </div>
-          </div>
-        </aside>
+          </aside>
+        </section>
       </section>
+
     </main>
   </div>
 </template>
@@ -291,6 +265,7 @@ const expandedClusterKey = ref<string | null>(null);
 const pendingSeekSeconds = ref<number | null>(null);
 const lastRemoteSavedPartId = ref<number | null>(null);
 const isRestoringInitialPart = ref(false);
+const fetchRequestId = ref(0);
 const beforeUnloadListener = () => {
   flushResumeState();
 };
@@ -308,14 +283,14 @@ const getClusterSourceTitle = (video: StoryAudioVideo) => {
   return (
     video.title?.trim() ||
     video.raw_title?.trim() ||
-    `Cum ${video.video_index ?? video.video_id}`
+    `Quyển ${video.video_index ?? video.video_id}`
   );
 };
 
 const shortenClusterTitle = (title: string, maxLength = 28) => {
   const normalized = title.trim();
   if (normalized.length <= maxLength) return normalized;
-  return `${normalized.slice(0, Math.max(maxLength - 9, 12)).trim()} {......}`;
+  return `${normalized.slice(0, Math.max(maxLength - 3, 12)).trim()}...`;
 };
 
 const playlistClusters = computed<PlaylistCluster[]>(() => {
@@ -337,14 +312,24 @@ const currentPartIndex = computed(() =>
   flatParts.value.findIndex((part) => part.id === currentPart.value?.id),
 );
 
-const currentClusterKey = computed(() => {
+const currentCluster = computed<PlaylistCluster | null>(() => {
   if (!currentPart.value) return null;
   return (
     playlistClusters.value.find((cluster) =>
       cluster.parts.some((part) => part.id === currentPart.value?.id),
-    )?.key || null
+    ) || null
   );
 });
+
+const currentClusterKey = computed(() => currentCluster.value?.key || null);
+
+
+
+const currentPlaybackContext = computed(() => ({
+  title: currentPartTitle.value,
+  duration: currentPart.value ? formatPartDuration(currentPart.value.duration) : "đang cập nhật",
+  cluster: currentCluster.value?.fullLabel || "Chưa chọn cụm",
+}));
 
 const hasPrevPart = computed(() => currentPartIndex.value > 0);
 const hasNextPart = computed(
@@ -352,15 +337,25 @@ const hasNextPart = computed(
 );
 
 const currentPartTitle = computed(() => {
-  if (!currentPart.value) return "Chua chon tap";
-  return `Tap ${currentPart.value.part_number}`;
+  if (!currentPart.value) return "Chưa chọn tập";
+  return `Tập ${currentPart.value.part_number}`;
 });
 
 const displayAudioStatus = computed(() => {
   const status = audioPayload.value?.story.audio_status;
   if (!status) return "San sang";
-  if (status === "READY") return "Tron bo";
-  return status;
+
+  switch (String(status).toUpperCase()) {
+    case "READY":
+      return "Sẵn sàng";
+    case "COMPLETED":
+    case "COMPLETE":
+      return "Hoàn thành";
+    case "PROCESSING":
+      return "Đang xử lý";
+    default:
+      return String(status);
+  }
 });
 
 const coverUrl = computed(() => {
@@ -371,8 +366,11 @@ const coverUrl = computed(() => {
 });
 
 const cleanDescription = computed(() => {
-  const desc = audioPayload.value?.story.mo_ta;
-  return desc?.trim() || "Chua co loi tua cho tac pham nay.";
+  const desc = audioPayload.value?.story.mo_ta?.trim();
+  if (!desc || /^Auto-created from partner audio ingest/i.test(desc)) {
+    return "Tác phẩm này đang được giới thiệu theo hướng gọn, để người nghe vào truyện nhanh hơn.";
+  }
+  return desc;
 });
 
 const copyrightHolder = computed(() => {
@@ -452,7 +450,21 @@ const toggleCluster = (clusterKey: string) => {
   expandedClusterKey.value = expandedClusterKey.value === clusterKey ? null : clusterKey;
 };
 
-const selectPart = async (part: AudioPart, autoplay = false) => {
+const selectPart = async (
+  part: AudioPart,
+  autoplay = false,
+  options: { preservePendingSeek?: boolean; skipPreviousFlush?: boolean } = {},
+) => {
+  const previousPart = currentPart.value;
+
+  if (!options.skipPreviousFlush && previousPart && previousPart.id !== part.id) {
+    flushResumeState(false);
+  }
+
+  if (!options.preservePendingSeek) {
+    pendingSeekSeconds.value = null;
+  }
+
   currentPart.value = part;
   isPlaying.value = false;
 
@@ -532,18 +544,18 @@ const handleEnded = () => {
 
 const formatDuration = (seconds?: number | null) => {
   const totalSeconds = Number(seconds || 0);
-  if (!totalSeconds) return "0 phut";
+  if (!totalSeconds) return "0 phút";
 
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
-  if (!hours) return `${minutes || 1} phut`;
-  if (!minutes) return `${hours} gio`;
-  return `${hours} gio ${minutes} phut`;
+  if (!hours) return `${minutes || 1} phút`;
+  if (!minutes) return `${hours} giờ`;
+  return `${hours} giờ ${minutes} phút`;
 };
 
 const formatPartDuration = (seconds?: number | null) => {
   const totalSeconds = Number(seconds || 0);
-  if (!totalSeconds) return "dang cap nhat";
+  if (!totalSeconds) return "đang cập nhật";
 
   const minutes = Math.floor(totalSeconds / 60);
   const remainSeconds = totalSeconds % 60;
@@ -553,9 +565,7 @@ const formatPartDuration = (seconds?: number | null) => {
 watch(currentPart, (part) => {
   if (!part) return;
 
-  const cluster = playlistClusters.value.find((item) =>
-    item.parts.some((clusterPart) => clusterPart.id === part.id),
-  );
+  const cluster = currentCluster.value;
 
   if (cluster) {
     expandedClusterKey.value = cluster.key;
@@ -563,20 +573,31 @@ watch(currentPart, (part) => {
 
   if (isRestoringInitialPart.value) return;
 
-  saveLocalResume(true);
+  // Defer local resume writes until the new audio source has settled and
+  // playback events provide a timestamp for the new part.
   void saveRemoteResume(false);
 });
 
 const fetchAudioDetail = async () => {
   const slug = route.params.slug as string;
   if (!slug) return;
+  const requestId = ++fetchRequestId.value;
 
   loading.value = true;
   error.value = "";
   pendingSeekSeconds.value = null;
+  flushResumeState(true);
+  audioElement.value?.pause();
+  currentPart.value = null;
+  isPlaying.value = false;
+  expandedClusterKey.value = null;
 
   try {
     const response = await getStoryAudioBySlug(slug);
+    if (requestId !== fetchRequestId.value || route.params.slug !== slug) {
+      return;
+    }
+
     audioPayload.value = response;
     lastRemoteSavedPartId.value = response.progress?.last_part_id || null;
 
@@ -611,12 +632,23 @@ const fetchAudioDetail = async () => {
 
     if (initialPart) {
       isRestoringInitialPart.value = true;
-      await selectPart(initialPart, false);
+      await selectPart(initialPart, false, {
+        preservePendingSeek: true,
+        skipPreviousFlush: true,
+      });
       isRestoringInitialPart.value = false;
     }
   } catch (err: any) {
-    error.value = err?.response?.data?.message || "Khong the tai chi tiet truyen audio.";
+    if (requestId !== fetchRequestId.value) {
+      return;
+    }
+
+    error.value = err?.response?.data?.message || "Không thể tải chi tiết truyện audio.";
   } finally {
+    if (requestId !== fetchRequestId.value) {
+      return;
+    }
+
     isRestoringInitialPart.value = false;
     loading.value = false;
   }
@@ -726,45 +758,77 @@ watch(
   font-weight: 700;
 }
 
-.hero-grid {
+.stage-shell {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  gap: 32px;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+  gap: 24px;
+  align-items: start;
 }
 
-.hero-cover-card {
+.stage-feature {
+  display: grid;
+  grid-template-columns: clamp(180px, 22vw, 250px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  padding: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(91, 196, 232, 0.08), transparent 36%),
+    rgba(18, 26, 39, 0.62);
+  box-shadow: var(--app-shadow-1);
+}
+
+.stage-cover {
   position: relative;
+  width: 100%;
   overflow: hidden;
   border-radius: 24px;
-  aspect-ratio: 3 / 4;
   box-shadow: var(--app-shadow-2);
 }
 
-.hero-cover-image {
+.stage-cover__image {
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-height: 500px; /* Optional to prevent excessively tall images */
   display: block;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
 }
 
-.hero-cover-overlay {
+.stage-cover__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(11, 17, 27, 0.8), transparent 40%);
+  background:
+    linear-gradient(to top, rgba(11, 17, 27, 0.82), transparent 40%),
+    linear-gradient(180deg, rgba(91, 196, 232, 0.05), transparent 36%);
 }
 
-.hero-info-card {
+
+
+.stage-center {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 10px 0;
+  gap: 20px;
+  min-width: 0;
 }
 
-.hero-topline {
+.stage-queue {
+  min-width: 0;
+}
+
+.stage-title-block {
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  margin-bottom: 16px;
+}
+
+.stage-kicker {
+  color: #8af0ca;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 .audio-chip {
@@ -786,44 +850,60 @@ watch(
   color: #a9ebff;
 }
 
-.hero-info-card h1 {
-  margin-bottom: 12px;
+.stage-title-block h1 {
+  margin: 0;
   color: #f8fbff;
-  font-size: clamp(1.45rem, 2.7vw, 2.15rem);
+  font-size: clamp(1.8rem, 2.7vw, 2.65rem);
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.14;
 }
 
-.hero-author {
+.stage-mood {
+  margin: 0;
+  color: var(--app-text-muted);
+  max-width: 52ch;
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.stage-meta {
   display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  color: #c3d6e4;
+  font-size: 0.92rem;
+}
+
+.stage-meta__item {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 24px;
-  color: var(--app-text-muted);
-  font-size: 1rem;
+  padding: 8px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
 }
 
-.hero-author span {
-  color: #d8ebf8;
+.stage-meta__item strong {
+  color: #eff8ff;
   font-weight: 700;
 }
 
-.hero-stats {
+.stage-stats {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  margin-bottom: 32px;
 }
 
-.hero-stat {
-  min-width: 130px;
-  padding: 16px 20px;
+.stage-stat {
+  min-width: 140px;
+  padding: 16px 18px;
   border: 1px solid rgba(148, 163, 184, 0.1);
   border-radius: 16px;
   background: rgba(18, 26, 39, 0.6);
 }
 
-.hero-stat span {
+.stage-stat span {
   display: block;
   margin-bottom: 6px;
   color: var(--app-text-subtle);
@@ -832,83 +912,119 @@ watch(
   letter-spacing: 0.05em;
 }
 
-.hero-stat strong {
+.stage-stat strong {
   display: block;
   color: #f8fbff;
   font-size: 1.2rem;
 }
 
-.hero-actions {
+.stage-player {
+  flex: 1;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 24px;
+  background: rgba(12, 18, 29, 0.72);
+  box-shadow: var(--app-shadow-1);
+  margin-top: auto;
+}
+
+.stage-player__header {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.stage-player__top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.now-playing-info {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  text-align: left;
+}
+
+.stage-player__header h2 {
+  margin: 0;
+  color: #f8fbff;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.stage-player__context {
+  margin: 0;
+  color: var(--app-text-subtle);
+  font-size: 0.92rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.audio-controls-wrapper {
+  display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
 }
 
-.hero-actions-group {
-  display: flex;
-  gap: 8px;
-}
-
-.hero-btn {
+.audio-nav-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
-}
-
-.hero-btn--primary {
-  padding: 12px 28px;
-  background: linear-gradient(135deg, #48cfa5, #74dbf3);
-  color: #08111a;
-}
-
-.hero-btn--icon {
-  width: 50px;
-  height: 50px;
-  padding: 0;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
+  border: none;
   background: rgba(255, 255, 255, 0.08);
   color: #eff8ff;
   font-size: 1.1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
 }
 
-.hero-btn--outline {
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  background: transparent;
-  color: #eff8ff;
-}
-
-.hero-btn:disabled {
+.audio-nav-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.audio-layout {
-  display: flex;
-  align-items: flex-start;
-  gap: 24px;
+.audio-nav-btn:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
-.player-panel {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+.btn-read-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 999px;
+  background: transparent;
+  color: #eff8ff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
 }
 
-.playlist-panel {
-  width: 400px;
-  flex: 0 0 400px;
+.btn-read-top:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.editorial-notes {
+  grid-column: 1 / -1;
 }
 
 .panel-card {
@@ -931,15 +1047,8 @@ watch(
   text-transform: uppercase;
 }
 
-.player-card__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
-}
-
 .now-playing-info h2,
-.intro-header h3,
+.editorial-notes__header h3,
 .playlist-header h3 {
   margin: 0;
   color: #f8fbff;
@@ -961,40 +1070,34 @@ watch(
   font-weight: 700;
 }
 
-.audio-player-wrapper {
-  padding: 16px;
-  border: 1px solid rgba(148, 163, 184, 0.05);
-  border-radius: 16px;
-  background: rgba(10, 16, 27, 0.5);
-}
-
 .main-audio-player {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   outline: none;
   color-scheme: dark;
 }
 
-.story-description {
+.editorial-notes__description {
   margin-top: 16px;
   color: var(--app-text-muted);
   line-height: 1.8;
   font-size: 1rem;
 }
 
-.story-copyright {
+.editorial-notes__copyright {
   margin-top: 12px;
   color: rgba(148, 163, 184, 0.92);
   font-size: 0.84rem;
   line-height: 1.7;
 }
 
-.story-copyright__link {
+.editorial-notes__copyright-link {
   color: #7dd3fc;
   font-weight: 700;
   text-decoration: none;
 }
 
-.story-copyright__link:hover {
+.editorial-notes__copyright-link:hover {
   color: #bae6fd;
   text-decoration: underline;
 }
@@ -1007,9 +1110,56 @@ watch(
 }
 
 .playlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
   margin-bottom: 20px;
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.playlist-header h3 {
+  margin-top: 4px;
+}
+
+.queue-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: 220px;
+  text-align: right;
+}
+
+.queue-summary__eyebrow {
+  color: #8af0ca;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.queue-summary strong {
+  color: #f8fbff;
+  font-size: 1.08rem;
+  line-height: 1.3;
+}
+
+.queue-summary p {
+  margin: 0;
+  color: var(--app-text-subtle);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.queue-summary__meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 10px;
+  color: #bfd4e2;
+  font-size: 0.78rem;
 }
 
 .playlist-groups {
@@ -1043,25 +1193,43 @@ watch(
   width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 12px 14px;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 16px;
   border: 1px solid rgba(148, 163, 184, 0.08);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.025);
   color: inherit;
   cursor: pointer;
   text-align: left;
 }
 
+.playlist-group__title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.playlist-group__kicker {
+  color: #c7a96b;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .playlist-group__header strong {
   color: #eff8ff;
   font-size: 0.95rem;
+  line-height: 1.45;
 }
 
 .playlist-group__summary {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  white-space: nowrap;
 }
 
 .playlist-group__chevron {
@@ -1097,40 +1265,70 @@ watch(
 .playlist-items {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .part-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  gap: 16px;
+  padding: 15px 16px;
   border: 1px solid rgba(148, 163, 184, 0.05);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.02);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.018);
   color: var(--app-text-muted);
   cursor: pointer;
   text-align: left;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s,
+    transform 0.2s;
 }
 
 .part-item:hover:not(.active) {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(148, 163, 184, 0.15);
   color: #eff8ff;
+  transform: translateY(-1px);
 }
 
 .part-item.active {
-  border-color: rgba(91, 196, 232, 0.3);
-  background: rgba(91, 196, 232, 0.1);
-  color: #74dbf3;
+  border-color: rgba(91, 196, 232, 0.22);
+  background:
+    linear-gradient(135deg, rgba(91, 196, 232, 0.12), rgba(72, 207, 165, 0.08)),
+    rgba(255, 255, 255, 0.02);
+  color: #f0fbff;
 }
 
 .part-item__main {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+}
+
+.part-item__index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #d8ebf8;
+  font-size: 0.88rem;
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+
+.part-item__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
 .part-item__title {
@@ -1138,9 +1336,34 @@ watch(
   font-weight: 600;
 }
 
+.part-item__subtitle {
+  color: var(--app-text-subtle);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
 .part-item__meta {
-  opacity: 0.8;
-  font-size: 0.85rem;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  color: #bfd4e2;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.part-item__playing {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(72, 207, 165, 0.16);
+  color: #8af0ca;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .part-indicator {
@@ -1166,13 +1389,23 @@ watch(
 }
 
 @media (max-width: 1100px) {
-  .audio-layout {
-    flex-direction: column;
+  .stage-shell {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .playlist-panel {
+  .stage-feature {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+    padding: 20px;
+  }
+
+  .stage-cover {
+    max-width: 280px;
+    margin: 0 auto;
+  }
+
+  .stage-queue {
     width: 100%;
-    flex: auto;
   }
 
   .playlist-card {
@@ -1185,71 +1418,177 @@ watch(
     padding-bottom: 120px;
   }
 
-  .hero-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
+  .stage-shell {
+    gap: 18px;
   }
 
-  .hero-cover-card {
-    max-width: 180px;
-    margin: 0 auto;
-    border-radius: 16px;
+  .stage-feature {
+    padding: 18px;
+    border-radius: 24px;
   }
 
-  .hero-info-card {
+  .stage-center {
+    align-items: center;
     text-align: center;
   }
 
-  .hero-topline,
-  .hero-author,
-  .hero-stats,
-  .hero-actions {
+  .stage-title-block {
+    align-items: center;
+  }
+
+  .stage-cover {
+    max-width: 220px;
+    border-radius: 18px;
+    margin: 0 auto;
+  }
+
+  .stage-meta {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px; /* for scrollbar affordance if any */
     justify-content: center;
   }
 
-  .hero-author {
-    flex-wrap: wrap;
-  }
-
-  .hero-stat {
+  .stage-stat {
     flex: 1;
     min-width: calc(50% - 8px);
     padding: 12px;
-  }
-
-  .hero-actions {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .hero-btn--primary {
-    width: 100%;
-    grid-column: 1 / -1;
-  }
-
-  .hero-actions-group {
-    grid-column: 1 / -1;
-    justify-content: center;
-    gap: 24px;
-    padding: 8px 0;
-  }
-
-  .hero-btn--outline {
-    width: 100%;
-    justify-content: center;
   }
 
   .panel-card {
     padding: 20px;
   }
 
-  .player-card__header {
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
+  .stage-player__header {
+    align-items: stretch;
     text-align: center;
+  }
+  
+  .now-playing-info {
+    align-items: center;
+    text-align: center;
+  }
+
+  .queue-summary {
+    align-items: flex-start;
+    max-width: none;
+    text-align: left;
+  }
+
+  .queue-summary__meta {
+    justify-content: flex-start;
+  }
+
+  .part-item {
+    align-items: flex-start;
+  }
+
+  .part-item__meta {
+    align-items: flex-end;
+  }
+}
+
+@media (max-width: 640px) {
+  .stage-cover {
+    max-width: 160px;
+  }
+
+  .stage-title-block h1 {
+    font-size: 1.55rem;
+  }
+
+  .stage-mood {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .stage-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 8px 0;
+  }
+
+  .stage-stat {
+    padding: 10px 4px;
+    min-width: 0;
+  }
+
+  .stage-stat span {
+    font-size: 0.65rem;
+    margin-bottom: 4px;
+    letter-spacing: 0;
+  }
+
+  .stage-stat strong {
+    font-size: 1rem;
+  }
+
+  .stage-player {
+    padding: 16px 14px;
+    border-radius: 20px;
+  }
+
+  .stage-player__header h2 {
+    font-size: 1.15rem;
+  }
+
+  .part-duration-badge {
+    padding: 4px 10px;
+    font-size: 0.78rem;
+  }
+
+  .hero-actions {
+    gap: 16px;
+  }
+
+  .hero-btn {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+
+  .hero-actions-group {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+
+  .panel-card {
+    padding: 16px;
+  }
+
+  .playlist-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .queue-summary {
+    align-items: flex-start;
+    text-align: left;
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  }
+
+  .queue-summary__meta {
+    justify-content: flex-start;
+  }
+
+  .part-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .part-item__meta {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .playlist-group__header {
+    padding: 12px;
   }
 }
 </style>
