@@ -37,87 +37,141 @@
 
             <div class="stage-center">
               <div class="stage-title-block">
-                <span class="stage-kicker">Listening Stage</span>
                 <h1>{{ audioPayload.story.ten_truyen }}</h1>
-
-                <div class="stage-meta">
-                  <span class="stage-meta__item" title="Tác giả">
-                    <i class="fas fa-feather-pointed"></i>
-                    <strong>{{ audioPayload.story.tac_gia || "Đang cập nhật" }}</strong>
-                  </span>
-                  <span class="stage-meta__item" title="Trạng thái">
-                    <i class="fas fa-circle-check"></i>
-                    <strong>{{ displayAudioStatus }}</strong>
-                  </span>
-                </div>
               </div>
 
               <div class="stage-player">
                 <div class="stage-player__header">
                   <div class="stage-player__top-row">
                     <span class="panel-label">
-                      <i class="fas fa-compact-disc"></i>
+                      <i class="fas fa-compact-disc live-icon--spinning"></i>
                       live
                     </span>
-                    <div v-if="currentPart" class="part-duration-badge">
-                      <i class="far fa-clock"></i>
-                      {{ formatPartDuration(currentPart.duration) }}
+                    <div v-if="currentCluster" class="part-count-badge">
+                      <i class="fas fa-list-ol"></i>
+                      {{ currentCluster.parts.length }} tập
                     </div>
                   </div>
 
                   <div class="now-playing-info">
-                    <h2>{{ currentPlaybackContext.title }}</h2>
-                    <p class="stage-player__context" :title="currentPlaybackContext.cluster">
-                      {{ currentPlaybackContext.cluster }} | {{ currentPlaybackContext.duration }}
-                    </p>
+                    <div class="scrolling-container">
+                      <p class="stage-player__context scrolling-text" :title="currentPlaybackContext.cluster">
+                        {{ currentPlaybackContext.cluster }}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div class="audio-controls-wrapper">
-                  <button
-                    type="button"
-                    class="audio-nav-btn"
-                    :disabled="!hasPrevPart"
-                    title="Bài trước"
-                    @click="playAdjacentPart(-1)"
-                  >
-                    <i class="fas fa-backward-step"></i>
-                  </button>
+                <div class="custom-player-ui">
+                  <!-- Row 1: Progress Bar -->
+                  <div class="progress-container">
+                    <span class="time-label">{{ formatTime(currentTime) }}</span>
+                    <input
+                      type="range"
+                      class="progress-slider"
+                      min="0"
+                      :max="duration"
+                      step="1"
+                      v-model="currentTime"
+                      @input="seek"
+                    />
+                    <span class="time-label">{{ formatTime(duration) }}</span>
+                  </div>
 
-                  <audio
-                    ref="audioElement"
-                    class="main-audio-player"
-                    controls
-                    controlsList="nodownload"
-                    preload="metadata"
-                    crossorigin="anonymous"
-                    :src="currentPart?.audio_url || ''"
-                    @play="handlePlay"
-                    @pause="handlePause"
-                    @ended="handleEnded"
-                    @timeupdate="handleTimeUpdate"
-                    @loadedmetadata="handleLoadedMetadata"
-                  />
+                  <!-- Row 2: Controls -->
+                  <div class="controls-container">
+                    <button
+                      type="button"
+                      class="audio-nav-btn"
+                      :disabled="!hasPrevPart"
+                      title="Bài trước"
+                      @click="playAdjacentPart(-1)"
+                    >
+                      <i class="fas fa-backward-step"></i>
+                    </button>
 
-                  <button
-                    type="button"
-                    class="audio-nav-btn"
-                    :disabled="!hasNextPart"
-                    title="Bài tiếp theo"
-                    @click="playAdjacentPart(1)"
-                  >
-                    <i class="fas fa-forward-step"></i>
-                  </button>
+                    <button
+                      type="button"
+                      class="audio-nav-btn"
+                      title="Lùi 10s"
+                      @click="skipSeconds(-10)"
+                    >
+                      <i class="fas fa-rotate-left"></i>
+                      <span class="btn-skip-label"></span>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="audio-main-btn"
+                      @click="togglePlayback"
+                    >
+                      <i v-if="isPlaying" class="fas fa-pause"></i>
+                      <i v-else class="fas fa-play"></i>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="audio-nav-btn"
+                      title="Tiến 10s"
+                      @click="skipSeconds(10)"
+                    >
+                      <i class="fas fa-rotate-right"></i>
+                      <span class="btn-skip-label"></span>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="audio-nav-btn"
+                      :disabled="!hasNextPart"
+                      title="Bài tiếp theo"
+                      @click="playAdjacentPart(1)"
+                    >
+                      <i class="fas fa-forward-step"></i>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="speed-toggle-btn"
+                      @click="cycleSpeed"
+                    >
+                      {{ playbackRate }}x
+                    </button>
+                  </div>
                 </div>
+
+                <audio
+                  ref="audioElement"
+                  class="hidden-audio-element"
+                  preload="metadata"
+                  crossorigin="anonymous"
+                  :src="currentPart?.audio_url || ''"
+                  @play="handlePlay"
+                  @pause="handlePause"
+                  @ended="handleEnded"
+                  @timeupdate="handleTimeUpdate"
+                  @loadedmetadata="handleLoadedMetadata"
+                />
               </div>
 
             </div> <!-- /.stage-center -->
 
-            <section class="panel-card editorial-notes">
+            <section class="panel-card editorial-notes desktop-notes">
               <div class="editorial-notes__header">
                 <span class="panel-label">Ghi chú biên tập</span>
                 <h3>Mở đầu cho người nghe</h3>
               </div>
+
+              <div class="stage-meta editorial-meta">
+                <span class="stage-meta__item" title="Tác giả">
+                  <i class="fas fa-feather-pointed"></i>
+                  <strong>{{ audioPayload.story.tac_gia || "Đang cập nhật" }}</strong>
+                </span>
+                <span class="stage-meta__item stage-meta__item--status" title="Trạng thái">
+                  <i class="fas fa-circle-check"></i>
+                  <strong>{{ displayAudioStatus }}</strong>
+                </span>
+              </div>
+
               <p class="editorial-notes__description">{{ cleanDescription }}</p>
               <p v-if="copyrightHolder" class="editorial-notes__copyright">
                 Bản quyền thuộc về:
@@ -214,6 +268,38 @@
               </div>
             </div>
           </aside>
+
+          <section class="panel-card editorial-notes mobile-notes">
+            <div class="editorial-notes__header">
+              <span class="panel-label">Ghi chú biên tập</span>
+              <h3>Mở đầu cho người nghe</h3>
+            </div>
+
+            <div class="stage-meta editorial-meta">
+              <span class="stage-meta__item" title="Tác giả">
+                <i class="fas fa-feather-pointed"></i>
+                <strong>{{ audioPayload.story.tac_gia || "Đang cập nhật" }}</strong>
+              </span>
+              <span class="stage-meta__item stage-meta__item--status" title="Trạng thái">
+                <i class="fas fa-circle-check"></i>
+                <strong>{{ displayAudioStatus }}</strong>
+              </span>
+            </div>
+
+            <p class="editorial-notes__description">{{ cleanDescription }}</p>
+            <p v-if="copyrightHolder" class="editorial-notes__copyright">
+              Bản quyền thuộc về:
+              <a
+                class="editorial-notes__copyright-link"
+                :href="copyrightHolder.url || '#'"
+                :target="copyrightHolder.url ? '_blank' : undefined"
+                :rel="copyrightHolder.url ? 'noreferrer' : undefined"
+                @click.prevent="handleCopyrightClick"
+              >
+                {{ copyrightHolder.name }}
+              </a>
+            </p>
+          </section>
         </section>
       </section>
 
@@ -266,6 +352,11 @@ const pendingSeekSeconds = ref<number | null>(null);
 const lastRemoteSavedPartId = ref<number | null>(null);
 const isRestoringInitialPart = ref(false);
 const fetchRequestId = ref(0);
+
+const currentTime = ref(0);
+const duration = ref(0);
+const playbackRate = ref(1);
+
 const beforeUnloadListener = () => {
   flushResumeState();
 };
@@ -480,6 +571,62 @@ const selectPart = async (
   }
 };
 
+const formatTime = (seconds: number) => {
+  const total = Math.floor(seconds || 0);
+  const mins = Math.floor(total / 60);
+  const secs = total % 60;
+  return `${mins}:${String(secs).padStart(2, "0")}`;
+};
+
+const handleTimeUpdate = () => {
+  if (audioElement.value) {
+    currentTime.value = audioElement.value.currentTime;
+  }
+  saveLocalResume(false);
+};
+
+const handleLoadedMetadata = () => {
+  if (!audioElement.value) return;
+  duration.value = audioElement.value.duration;
+
+  if (pendingSeekSeconds.value == null) return;
+
+  const totalDur = Number(audioElement.value.duration || 0);
+  const safeTime =
+    totalDur > 1
+      ? Math.min(Math.max(pendingSeekSeconds.value, 0), Math.max(totalDur - 1, 0))
+      : Math.max(pendingSeekSeconds.value, 0);
+
+  if (safeTime > 0) {
+    audioElement.value.currentTime = safeTime;
+  }
+
+  pendingSeekSeconds.value = null;
+};
+
+const seek = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (audioElement.value) {
+    audioElement.value.currentTime = Number(target.value);
+  }
+};
+
+const skipSeconds = (seconds: number) => {
+  if (audioElement.value) {
+    audioElement.value.currentTime = Math.max(0, Math.min(duration.value, audioElement.value.currentTime + seconds));
+  }
+};
+
+const cycleSpeed = () => {
+  const speeds = [1, 1.25, 1.5, 2];
+  const currentIndex = speeds.indexOf(playbackRate.value);
+  const nextIndex = (currentIndex + 1) % speeds.length;
+  playbackRate.value = speeds[nextIndex];
+  if (audioElement.value) {
+    audioElement.value.playbackRate = playbackRate.value;
+  }
+};
+
 const playAdjacentPart = async (delta: number) => {
   const nextIndex = currentPartIndex.value + delta;
   const nextPart = flatParts.value[nextIndex];
@@ -507,31 +654,14 @@ const togglePlayback = async () => {
 
 const handlePlay = () => {
   isPlaying.value = true;
+  if (audioElement.value) {
+    audioElement.value.playbackRate = playbackRate.value;
+  }
 };
 
 const handlePause = () => {
   isPlaying.value = false;
   flushResumeState(false);
-};
-
-const handleTimeUpdate = () => {
-  saveLocalResume(false);
-};
-
-const handleLoadedMetadata = () => {
-  if (!audioElement.value || pendingSeekSeconds.value == null) return;
-
-  const duration = Number(audioElement.value.duration || 0);
-  const safeTime =
-    duration > 1
-      ? Math.min(Math.max(pendingSeekSeconds.value, 0), Math.max(duration - 1, 0))
-      : Math.max(pendingSeekSeconds.value, 0);
-
-  if (safeTime > 0) {
-    audioElement.value.currentTime = safeTime;
-  }
-
-  pendingSeekSeconds.value = null;
 };
 
 const handleEnded = () => {
@@ -853,7 +983,7 @@ watch(
 .stage-title-block h1 {
   margin: 0;
   color: #f8fbff;
-  font-size: clamp(1.8rem, 2.7vw, 2.65rem);
+  font-size: clamp(1.4rem, 2vw, 2.1rem);
   font-weight: 800;
   line-height: 1.14;
 }
@@ -963,13 +1093,135 @@ watch(
   margin: 0;
   color: var(--app-text-subtle);
   font-size: 0.92rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
+}
+
+.scrolling-container {
   overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: center;
+  position: relative;
+  width: 100%;
+}
+
+.scrolling-text {
+  display: inline-block;
+  padding-left: 100%;
+  animation: marquee 15s linear infinite;
+}
+
+@keyframes marquee {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-100%, 0); }
+}
+
+.live-icon--spinning {
+  animation: spin 3s linear infinite;
+  color: #8af0ca;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.custom-player-ui {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.time-label {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--app-text-subtle);
+  min-width: 45px;
+}
+
+.progress-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #74dbf3;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(116, 219, 243, 0.5);
+}
+
+.controls-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.audio-main-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #74dbf3;
+  color: #121a27;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.audio-main-btn:hover {
+  transform: scale(1.05);
+  background: #a9ebff;
+}
+
+.btn-skip-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  position: absolute;
+  margin-top: 2px;
+}
+
+.speed-toggle-btn {
+  min-width: 44px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #eff8ff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.speed-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #74dbf3;
+}
+
+.hidden-audio-element {
+  display: none;
 }
 
 .audio-controls-wrapper {
@@ -1027,6 +1279,10 @@ watch(
   grid-column: 1 / -1;
 }
 
+.mobile-notes {
+  display: none;
+}
+
 .panel-card {
   padding: 28px;
   border: 1px solid rgba(148, 163, 184, 0.1);
@@ -1058,15 +1314,16 @@ watch(
   font-size: 1.35rem;
 }
 
-.part-duration-badge {
+.part-duration-badge,
+.part-count-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 4px 10px;
   border-radius: 999px;
   background: rgba(91, 196, 232, 0.1);
   color: #a9ebff;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
 }
 
@@ -1078,10 +1335,21 @@ watch(
 }
 
 .editorial-notes__description {
-  margin-top: 16px;
+  margin-top: 12px;
   color: var(--app-text-muted);
   line-height: 1.8;
   font-size: 1rem;
+}
+
+.editorial-meta {
+  margin-top: 16px;
+  margin-bottom: 4px;
+}
+
+.editorial-meta .stage-meta__item {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(148, 163, 184, 0.15);
+  padding: 6px 12px;
 }
 
 .editorial-notes__copyright {
@@ -1415,58 +1683,162 @@ watch(
 
 @media (max-width: 768px) {
   .audio-detail-container {
-    padding-bottom: 120px;
+    padding: 16px 12px 100px;
   }
 
   .stage-shell {
-    gap: 18px;
+    gap: 16px;
+    grid-template-columns: 1fr;
   }
 
   .stage-feature {
-    padding: 18px;
-    border-radius: 24px;
-  }
-
-  .stage-center {
-    align-items: center;
-    text-align: center;
-  }
-
-  .stage-title-block {
-    align-items: center;
+    padding: 16px;
+    border-radius: 20px;
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    grid-template-areas: 
+      "cover title"
+      "player player";
+    gap: 16px;
+    align-items: start;
   }
 
   .stage-cover {
-    max-width: 220px;
-    border-radius: 18px;
-    margin: 0 auto;
+    grid-area: cover;
+    width: 80px !important;
+    height: 110px !important;
+    min-height: 110px;
+    border-radius: 12px;
+    margin: 0 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  .stage-cover__image {
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .stage-center {
+    display: contents; /* Projects children into stage-feature grid */
+  }
+
+  .stage-title-block {
+    grid-area: title;
+    align-items: flex-start !important;
+    text-align: left !important;
+    gap: 4px !important;
+    padding-top: 0;
+  }
+
+  .stage-kicker {
+    display: none !important; /* Bỏ 'Listening Stage' */
+  }
+
+  .stage-title-block h1 {
+    font-size: 1.15rem !important;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-top: -2px;
   }
 
   .stage-meta {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 4px; /* for scrollbar affordance if any */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-top: 2px;
+    padding: 0 !important;
+  }
+
+  .stage-meta__item {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    font-size: 0.85rem !important;
+    color: var(--app-text-muted);
+  }
+
+  .stage-meta__item--status {
+    display: none !important; /* Bỏ trạng thái sẵn sàng */
+  }
+
+  .stage-meta__item i {
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+
+  .stage-player {
+    grid-area: player;
+    width: 100%;
+    margin-top: 0 !important;
+    padding: 16px;
+    border-radius: 18px;
+    background: rgba(12, 18, 29, 0.85);
+  }
+
+  .controls-container {
+    gap: 8px; /* Tighter gap on mobile */
+  }
+
+  .audio-nav-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+    position: relative;
+    display: flex;
+    align-items: center;
     justify-content: center;
   }
 
-  .stage-stat {
-    flex: 1;
-    min-width: calc(50% - 8px);
-    padding: 12px;
-  }
-
-  .panel-card {
-    padding: 20px;
+  .audio-main-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 1.2rem;
   }
 
   .stage-player__header {
-    align-items: stretch;
-    text-align: center;
+    gap: 8px;
+    margin-bottom: 12px;
   }
-  
+
   .now-playing-info {
-    align-items: center;
-    text-align: center;
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+
+  .now-playing-info h2 {
+    font-size: 1.1rem !important;
+    text-align: left !important;
+  }
+
+  .scrolling-container {
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+
+  .stage-player__context {
+    font-size: 0.8rem;
+    text-align: left !important;
+  }
+
+  .desktop-notes {
+    display: none;
+  }
+
+  .mobile-notes {
+    display: block;
+    margin-top: 0;
+  }
+
+  .panel-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .playlist-card {
+    max-height: 500px;
   }
 
   .queue-summary {
@@ -1480,11 +1852,7 @@ watch(
   }
 
   .part-item {
-    align-items: flex-start;
-  }
-
-  .part-item__meta {
-    align-items: flex-end;
+    padding: 12px;
   }
 }
 
@@ -1494,7 +1862,7 @@ watch(
   }
 
   .stage-title-block h1 {
-    font-size: 1.55rem;
+    font-size: 1.25rem;
   }
 
   .stage-mood {
@@ -1557,9 +1925,16 @@ watch(
   }
 
   .playlist-header {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     gap: 12px;
+  }
+
+  .btn-read-top {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    flex-shrink: 0;
   }
 
   .queue-summary {
