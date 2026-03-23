@@ -52,4 +52,6 @@ pnpm-debug.log*
 /docker-compose.override.yml
 /docker-compose.local.yml
 /docker-compose.*.local.yml
-/docker/*
+/docker/
+
+/taste-skill_tmp/

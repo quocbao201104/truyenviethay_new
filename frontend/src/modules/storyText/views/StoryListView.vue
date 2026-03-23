@@ -847,10 +847,10 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 640px) {
-  .main-content-spirit { padding: 15px 14px 60px; }
-  .hero-aura-wrapper { margin-bottom: 30px; border-radius: 16px; }
-  .continue-cultivation-area { margin-bottom: 40px; }
-  .spirit-block { margin-bottom: 40px; }
+  .main-content-spirit { padding: 12px 14px 56px; }
+  .hero-aura-wrapper { margin-bottom: 12px; border-radius: 16px; }
+  .continue-cultivation-area { margin-bottom: 24px; }
+  .spirit-block { margin-bottom: 34px; }
   
   .spirit-title { font-size: 1.3rem; }
   .spirit-note { display: none; /* Ẩn note phụ trên mobile cho gọn */ }

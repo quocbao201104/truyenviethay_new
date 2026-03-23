@@ -18,11 +18,6 @@
 
     <main v-else-if="audioPayload" class="audio-detail-container">
       <section class="audio-hero-shell">
-        <router-link to="/truyen-audio" class="back-link">
-          <i class="fas fa-arrow-left"></i>
-          Trở về thư viện
-        </router-link>
-
         <section class="stage-shell">
           <div class="stage-feature">
             <div class="stage-cover">
@@ -33,11 +28,29 @@
                 @error="handleCoverError"
               />
               <div class="stage-cover__overlay"></div>
+              <div class="stage-cover__badge-row">
+                <span class="stage-badge stage-badge--audio">
+                  <i class="fas fa-headphones"></i>
+                  Audio
+                </span>
+                <span class="stage-badge stage-badge--status">
+                  {{ displayAudioStatus }}
+                </span>
+              </div>
             </div>
 
             <div class="stage-center">
               <div class="stage-title-block">
                 <h1>{{ audioPayload.story.ten_truyen }}</h1>
+              </div>
+              <div class="stage-mobile-badges">
+                <span class="stage-badge stage-badge--audio">
+                  <i class="fas fa-headphones"></i>
+                  Audio
+                </span>
+                <span class="stage-badge stage-badge--status">
+                  {{ displayAudioStatus }}
+                </span>
               </div>
 
               <div class="stage-player">
@@ -45,7 +58,7 @@
                   <div class="stage-player__top-row">
                     <span class="panel-label">
                       <i class="fas fa-compact-disc live-icon--spinning"></i>
-                      live
+                      Đang phát
                     </span>
                     <div v-if="currentCluster" class="part-count-badge">
                       <i class="fas fa-list-ol"></i>
@@ -193,7 +206,7 @@
               <div class="playlist-header">
                 <div>
                   <span class="panel-label">Danh sách phát</span>
-                  <h3>{{ playlistClusters.length }} Quyển</h3>
+                  <h3>{{ playlistClusters.length }} cụm tập</h3>
                 </div>
                 <router-link
                   :to="`/truyen-chu/${audioPayload.story.slug}`"
@@ -815,9 +828,21 @@ watch(
 
 <style scoped>
 .story-audio-detail-page {
+  --audio-premium-bg: linear-gradient(135deg, rgba(11, 21, 34, 0.96), rgba(19, 31, 47, 0.9));
+  --audio-premium-surface: rgba(14, 24, 38, 0.76);
+  --audio-premium-border: rgba(120, 144, 168, 0.16);
+  --audio-premium-border-strong: rgba(216, 179, 106, 0.26);
+  --audio-premium-text: #f5f7fb;
+  --audio-premium-muted: #9cb0c2;
+  --audio-premium-soft: #73869b;
+  --audio-premium-jade: #61dcc4;
+  --audio-premium-gold: #d1b371;
   min-height: 100vh;
   color: var(--app-text);
-  background: #0b111b;
+  background:
+    radial-gradient(circle at top left, rgba(125, 220, 204, 0.08), transparent 38%),
+    radial-gradient(circle at top right, rgba(216, 179, 106, 0.06), transparent 36%),
+    #0b111b;
   position: relative;
 }
 
@@ -829,8 +854,8 @@ watch(
   right: 0;
   height: 500px;
   background:
-    radial-gradient(circle at top left, rgba(91, 196, 232, 0.08), transparent 50%),
-    linear-gradient(180deg, rgba(18, 26, 39, 0.5) 0%, #0b111b 100%);
+    radial-gradient(circle at top left, rgba(125, 220, 204, 0.1), transparent 50%),
+    linear-gradient(180deg, rgba(18, 26, 39, 0.56) 0%, #0b111b 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -881,8 +906,9 @@ watch(
   margin-bottom: 24px;
   padding: 8px 16px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--app-text-muted);
+  border: 1px solid rgba(216, 179, 106, 0.12);
+  background: rgba(14, 24, 38, 0.74);
+  color: var(--audio-premium-muted);
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 700;
@@ -901,37 +927,72 @@ watch(
   gap: 28px;
   align-items: start;
   padding: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  border: 1px solid var(--audio-premium-border);
   border-radius: 28px;
-  background:
-    radial-gradient(circle at top left, rgba(91, 196, 232, 0.08), transparent 36%),
-    rgba(18, 26, 39, 0.62);
-  box-shadow: var(--app-shadow-1);
+  background: var(--audio-premium-bg);
+  box-shadow: 0 24px 56px rgba(4, 9, 20, 0.34);
 }
 
 .stage-cover {
   position: relative;
   width: 100%;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 22px;
+  aspect-ratio: 3 / 4;
+  border: 1px solid rgba(216, 179, 106, 0.2);
   box-shadow: var(--app-shadow-2);
 }
 
 .stage-cover__image {
   width: 100%;
-  height: auto;
-  max-height: 500px; /* Optional to prevent excessively tall images */
+  height: 100%;
   display: block;
-  object-fit: contain;
-  object-position: center;
+  object-fit: cover;
+  object-position: center 22%;
 }
 
 .stage-cover__overlay {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to top, rgba(11, 17, 27, 0.82), transparent 40%),
-    linear-gradient(180deg, rgba(91, 196, 232, 0.05), transparent 36%);
+    linear-gradient(to top, rgba(8, 14, 22, 0.78), transparent 42%),
+    linear-gradient(180deg, rgba(11, 21, 34, 0.08), transparent 36%);
+}
+
+.stage-cover__badge-row {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.stage-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
+.stage-badge--audio {
+  border: 1px solid rgba(216, 179, 106, 0.24);
+  background: rgba(12, 18, 28, 0.78);
+  color: #f6dfaa;
+}
+
+.stage-badge--status {
+  border: 1px solid rgba(125, 220, 204, 0.24);
+  background: rgba(12, 18, 28, 0.78);
+  color: #8af0ca;
 }
 
 
@@ -982,10 +1043,17 @@ watch(
 
 .stage-title-block h1 {
   margin: 0;
-  color: #f8fbff;
-  font-size: clamp(1.4rem, 2vw, 2.1rem);
+  color: var(--audio-premium-text);
+  font-size: clamp(1.45rem, 2.05vw, 2.2rem);
   font-weight: 800;
-  line-height: 1.14;
+  line-height: 1.24;
+}
+
+.stage-mobile-badges {
+  display: none;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .stage-mood {
@@ -1052,9 +1120,9 @@ watch(
   flex: 1;
   min-width: 0;
   padding: 20px;
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  border: 1px solid var(--audio-premium-border);
   border-radius: 24px;
-  background: rgba(12, 18, 29, 0.72);
+  background: var(--audio-premium-surface);
   box-shadow: var(--app-shadow-1);
   margin-top: auto;
 }
@@ -1181,8 +1249,8 @@ watch(
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #74dbf3;
-  color: #121a27;
+  background: linear-gradient(135deg, #4dd8c6, #7fe6ff);
+  color: #071018;
   border: none;
   font-size: 1.4rem;
   cursor: pointer;
@@ -1191,7 +1259,7 @@ watch(
 
 .audio-main-btn:hover {
   transform: scale(1.05);
-  background: #a9ebff;
+  background: linear-gradient(135deg, #61dcc4, #a9ebff);
 }
 
 .btn-skip-label {
@@ -1205,7 +1273,7 @@ watch(
   min-width: 44px;
   height: 32px;
   padding: 0 8px;
-  border-radius: 6px;
+  border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.2);
   background: rgba(255, 255, 255, 0.05);
   color: #eff8ff;
@@ -1239,8 +1307,8 @@ watch(
   height: 44px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.08);
-  color: #eff8ff;
+  background: rgba(255, 255, 255, 0.06);
+  color: #dbe7f2;
   font-size: 1.1rem;
   cursor: pointer;
   flex-shrink: 0;
@@ -1253,7 +1321,8 @@ watch(
 }
 
 .audio-nav-btn:not(:disabled):hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(125, 220, 204, 0.16);
+  color: #f5fffb;
 }
 
 .btn-read-top {
@@ -1261,10 +1330,10 @@ watch(
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  border: 1px solid rgba(216, 179, 106, 0.24);
   border-radius: 999px;
-  background: transparent;
-  color: #eff8ff;
+  background: rgba(12, 18, 28, 0.55);
+  color: #f6dfaa;
   font-size: 0.85rem;
   font-weight: 700;
   text-decoration: none;
@@ -1272,7 +1341,17 @@ watch(
 }
 
 .btn-read-top:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(216, 179, 106, 0.14);
+  color: #fff0cb;
+}
+
+.audio-main-btn,
+.audio-nav-btn,
+.speed-toggle-btn,
+.btn-read-top,
+.playlist-group__header,
+.part-item {
+  touch-action: manipulation;
 }
 
 .editorial-notes {
@@ -1285,10 +1364,10 @@ watch(
 
 .panel-card {
   padding: 28px;
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  border: 1px solid var(--audio-premium-border);
   border-radius: 24px;
-  background: rgba(18, 26, 39, 0.7);
-  box-shadow: var(--app-shadow-1);
+  background: var(--audio-premium-surface);
+  box-shadow: 0 18px 44px rgba(3, 8, 18, 0.28);
 }
 
 .panel-label {
@@ -1296,7 +1375,7 @@ watch(
   align-items: center;
   gap: 6px;
   margin-bottom: 8px;
-  color: #74dbf3;
+  color: var(--audio-premium-jade);
   font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -1375,6 +1454,7 @@ watch(
   flex-direction: column;
   max-height: 800px;
   padding: 24px;
+  border-color: var(--audio-premium-border-strong);
 }
 
 .playlist-header {
@@ -1464,9 +1544,9 @@ watch(
   align-items: flex-start;
   gap: 16px;
   padding: 14px 16px;
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(120, 144, 168, 0.2);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(15, 22, 34, 0.44);
   color: inherit;
   cursor: pointer;
   text-align: left;
@@ -1488,7 +1568,7 @@ watch(
 }
 
 .playlist-group__header strong {
-  color: #eff8ff;
+  color: var(--audio-premium-text);
   font-size: 0.95rem;
   line-height: 1.45;
 }
@@ -1509,8 +1589,8 @@ watch(
 }
 
 .playlist-group--expanded .playlist-group__header {
-  border-color: rgba(91, 196, 232, 0.22);
-  background: rgba(91, 196, 232, 0.06);
+  border-color: rgba(125, 220, 204, 0.24);
+  background: rgba(125, 220, 204, 0.08);
 }
 
 .part-count {
@@ -1543,9 +1623,9 @@ watch(
   justify-content: space-between;
   gap: 16px;
   padding: 15px 16px;
-  border: 1px solid rgba(148, 163, 184, 0.05);
+  border: 1px solid rgba(120, 144, 168, 0.16);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.018);
+  background: rgba(15, 22, 34, 0.46);
   color: var(--app-text-muted);
   cursor: pointer;
   text-align: left;
@@ -1557,16 +1637,16 @@ watch(
 }
 
 .part-item:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(148, 163, 184, 0.15);
-  color: #eff8ff;
+  background: rgba(125, 220, 204, 0.08);
+  border-color: rgba(125, 220, 204, 0.24);
+  color: #f3fbff;
   transform: translateY(-1px);
 }
 
 .part-item.active {
-  border-color: rgba(91, 196, 232, 0.22);
+  border-color: rgba(216, 179, 106, 0.24);
   background:
-    linear-gradient(135deg, rgba(91, 196, 232, 0.12), rgba(72, 207, 165, 0.08)),
+    linear-gradient(135deg, rgba(216, 179, 106, 0.16), rgba(125, 220, 204, 0.1)),
     rgba(255, 255, 255, 0.02);
   color: #f0fbff;
 }
@@ -1585,8 +1665,8 @@ watch(
   width: 34px;
   height: 34px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #d8ebf8;
+  background: rgba(11, 21, 34, 0.68);
+  color: #f5dfb3;
   font-size: 0.88rem;
   font-weight: 800;
   flex: 0 0 auto;
@@ -1682,6 +1762,13 @@ watch(
 }
 
 @media (max-width: 768px) {
+  .story-audio-detail-page,
+  .stage-feature,
+  .custom-player-ui,
+  .playlist-card {
+    touch-action: manipulation;
+  }
+
   .audio-detail-container {
     padding: 16px 12px 100px;
   }
@@ -1698,8 +1785,10 @@ watch(
     grid-template-columns: 80px 1fr;
     grid-template-areas: 
       "cover title"
+      "cover badges"
       "player player";
-    gap: 16px;
+    row-gap: 8px;
+    column-gap: 16px;
     align-items: start;
   }
 
@@ -1718,6 +1807,10 @@ watch(
     object-fit: cover;
   }
 
+  .stage-cover__badge-row {
+    display: none;
+  }
+
   .stage-center {
     display: contents; /* Projects children into stage-feature grid */
   }
@@ -1726,8 +1819,11 @@ watch(
     grid-area: title;
     align-items: flex-start !important;
     text-align: left !important;
-    gap: 4px !important;
+    justify-content: center;
+    min-height: 0;
+    height: 100%;
     padding-top: 0;
+    gap: 0 !important;
   }
 
   .stage-kicker {
@@ -1735,14 +1831,29 @@ watch(
   }
 
   .stage-title-block h1 {
-    font-size: 1.15rem !important;
-    line-height: 1.3;
+    font-size: clamp(0.98rem, 3.8vw, 1.14rem) !important;
+    line-height: 1.32;
     display: -webkit-box;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    margin-top: -2px;
+    margin: 0;
+  }
+
+  .stage-mobile-badges {
+    grid-area: badges;
+    display: flex;
+    align-self: end;
+    margin-top: 0;
+    margin-bottom: 2px;
+    gap: 6px;
+  }
+
+  .stage-mobile-badges .stage-badge {
+    padding: 4px 8px;
+    font-size: 0.64rem;
+    letter-spacing: 0.05em;
   }
 
   .stage-meta {
@@ -1862,7 +1973,9 @@ watch(
   }
 
   .stage-title-block h1 {
-    font-size: 1.25rem;
+    font-size: clamp(0.94rem, 3.7vw, 1.05rem) !important;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
   }
 
   .stage-mood {

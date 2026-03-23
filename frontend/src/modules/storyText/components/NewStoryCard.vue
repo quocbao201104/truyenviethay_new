@@ -9,10 +9,10 @@
     tabindex="0"
   >
     <div class="cover-aura-wrapper">
-      <img
-        :src="story.anh_bia ? getImageUrl(story.anh_bia, 320) : 'https://res.cloudinary.com/dg9ftuhv4/image/upload/v1774000516/h%C3%ACnh_5_clb3fa.jpg'"
+       <img
+        :src="story.anh_bia ? getImageUrl(story.anh_bia, 640) : 'https://res.cloudinary.com/dg9ftuhv4/image/upload/v1774000516/h%C3%ACnh_5_clb3fa.jpg'"
         :srcset="buildSrcSet(story.anh_bia)"
-        sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 200px"
+        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1440px) 240px, 260px"
         width="200"
         height="280"
         :alt="`Bìa truyện ${story.ten_truyen}`"
@@ -138,7 +138,7 @@ const getStatusClass = (status) => {
 
 const buildSrcSet = (path) => {
   if (!path) return '';
-  const widths = [220, 320, 420];
+  const widths = [320, 480, 640, 800];
   return widths.map((w) => getImageUrl(path, w) + ' ' + w + 'w').join(', ');
 };
 </script>
