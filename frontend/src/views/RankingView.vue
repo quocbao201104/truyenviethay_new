@@ -101,14 +101,6 @@
             >
               <div v-if="index < 3" class="rank-aura-glow-cloud"></div>
 
-              <div class="rank-indicator">
-                <span class="rank-kicker">
-                  <i v-if="index < 3" class="fas fa-crown rank-crown"></i>
-                  {{ index < 3 ? 'Top' : 'Hạng' }}
-                </span>
-                <span class="rank-num">{{ index + 1 }}</span>
-              </div>
-
               <router-link :to="`/truyen-chu/${story.slug}`" class="story-cover-pill first-element">
                 <img 
                   :src="getImageUrl(story.anh_bia)" 
@@ -178,14 +170,6 @@
               @click="navigateToAuthor(author.id)"
             >
               <div v-if="index < 3" class="rank-aura-glow-cloud"></div>
-
-              <div class="rank-indicator">
-                <span class="rank-kicker">
-                  <i v-if="index < 3" class="fas fa-crown rank-crown"></i>
-                  {{ index < 3 ? 'Top' : 'Hạng' }}
-                </span>
-                <span class="rank-num">{{ index + 1 }}</span>
-              </div>
 
               <div class="author-avatar-ranking first-element">
                 <div class="spirit-array-center" :class="author.equipped_frame?.css_class">
@@ -330,9 +314,24 @@ const handleImageError = (event: Event) => {
 <style scoped>
 /* ===== CORE THEME - THANH VÂN (MÂY XANH) ===== */
 .ranking-container.thanh-van-theme {
+  --rank-bg-top: #0b121d;
+  --rank-bg-mid: #0f1826;
+  --rank-bg-bottom: #0a111b;
+  --rank-surface: rgba(15, 24, 37, 0.88);
+  --rank-border: rgba(124, 147, 170, 0.22);
+  --rank-border-strong: rgba(212, 179, 119, 0.36);
+  --rank-jade: #68dbc5;
+  --rank-jade-soft: #9beadb;
+  --rank-gold: #d7b678;
+  --rank-pearl: #d9e4f0;
+  --rank-muted: #9eb2c5;
+  --rank-text: #edf4ff;
   min-height: 100vh;
-  background: #101724;
-  color: #cbd5e1;
+  background:
+    radial-gradient(circle at top left, rgba(104, 219, 197, 0.08), transparent 36%),
+    radial-gradient(circle at top right, rgba(215, 182, 120, 0.08), transparent 34%),
+    linear-gradient(180deg, var(--rank-bg-top) 0%, var(--rank-bg-mid) 44%, var(--rank-bg-bottom) 100%);
+  color: var(--rank-text);
   font-family: 'Be Vietnam Pro', sans-serif;
   padding: 24px 0 68px;
 }
@@ -356,10 +355,11 @@ const handleImageError = (event: Event) => {
 
 .cloud-main {
   font-size: 2.5rem;
-  color: #38bdf8;
+  color: var(--rank-gold);
   filter: none;
   margin-bottom: 10px;
   animation: float-cloud 3s ease-in-out infinite;
+  text-shadow: 0 0 14px rgba(215, 182, 120, 0.22);
 }
 
 .section-title {
@@ -367,7 +367,7 @@ const handleImageError = (event: Event) => {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 5px;
-  background: linear-gradient(to right, #e0f2fe, #38bdf8, #2dd4bf);
+  background: linear-gradient(120deg, #f8fbff 8%, #e7cf9a 46%, #98e6d7 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -375,7 +375,7 @@ const handleImageError = (event: Event) => {
 }
 
 .section-subtitle {
-  color: #94a3b8;
+  color: var(--rank-muted);
   text-transform: uppercase;
   letter-spacing: 3px;
   font-size: 0.8rem;
@@ -389,14 +389,14 @@ const handleImageError = (event: Event) => {
   margin-top: 18px;
   padding: 6px;
   border-radius: 999px;
-  background: rgba(18, 26, 39, 0.82);
-  border: 1px solid var(--app-border);
+  background: rgba(12, 20, 31, 0.78);
+  border: 1px solid var(--rank-border);
 }
 
 .rank-tab {
   border: 1px solid transparent;
   background: transparent;
-  color: #cbd5e1;
+  color: #c3d6e7;
   font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 1px;
@@ -408,14 +408,14 @@ const handleImageError = (event: Event) => {
 }
 
 .rank-tab:hover {
-  background: rgba(56, 189, 248, 0.12);
-  color: #e2e8f0;
+  background: rgba(104, 219, 197, 0.14);
+  color: #edf8ff;
 }
 
 .rank-tab.active {
-  background: rgba(91, 196, 232, 0.18);
-  color: #e9f7fd;
-  border-color: rgba(91, 196, 232, 0.28);
+  background: linear-gradient(135deg, rgba(215, 182, 120, 0.2), rgba(104, 219, 197, 0.14));
+  color: #f4fbff;
+  border-color: rgba(215, 182, 120, 0.34);
   box-shadow: none;
 }
 
@@ -428,9 +428,9 @@ const handleImageError = (event: Event) => {
 }
 
 .rank-subtab {
-  border: 1px solid rgba(91, 196, 232, 0.16);
-  background: rgba(21, 31, 47, 0.75);
-  color: #cbd5e1;
+  border: 1px solid rgba(124, 147, 170, 0.24);
+  background: rgba(12, 20, 31, 0.74);
+  color: #c3d6e7;
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 1px;
@@ -442,14 +442,14 @@ const handleImageError = (event: Event) => {
 }
 
 .rank-subtab:hover {
-  border-color: rgba(56, 189, 248, 0.5);
-  color: #e2e8f0;
+  border-color: rgba(104, 219, 197, 0.48);
+  color: #ecf8ff;
 }
 
 .rank-subtab.active {
-  background: rgba(91, 196, 232, 0.14);
-  border-color: rgba(91, 196, 232, 0.28);
-  color: #e2e8f0;
+  background: rgba(104, 219, 197, 0.16);
+  border-color: rgba(215, 182, 120, 0.3);
+  color: #edf8ff;
 }
 
 .author-pill {
@@ -459,7 +459,7 @@ const handleImageError = (event: Event) => {
 .section-divider-aura-cloud {
   height: 1px;
   width: 300px;
-  background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+  background: linear-gradient(90deg, transparent, var(--rank-gold), transparent);
   margin: 20px auto;
   position: relative;
 }
@@ -471,7 +471,7 @@ const handleImageError = (event: Event) => {
   transform: translate(-50%, -50%) rotate(45deg);
   width: 8px;
   height: 8px;
-  background: #38bdf8;
+  background: var(--rank-jade);
   box-shadow: none;
 }
 
@@ -485,68 +485,51 @@ const handleImageError = (event: Event) => {
 .ranking-pill.mây-cap {
   display: flex;
   align-items: center;
-  background: rgba(21, 31, 47, 0.9);
-  border: 1px solid var(--app-border);
+  gap: 14px;
+  background: linear-gradient(180deg, rgba(15, 24, 37, 0.9), rgba(13, 21, 32, 0.94));
+  border: 1px solid var(--rank-border);
   border-radius: 24px;
-  padding: 12px 22px 12px 12px;
+  padding: 14px 20px 14px 14px;
   position: relative;
   transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
   box-shadow: var(--app-shadow-1);
 }
 
 .ranking-pill.rank-cloud-1 {
-  transform: scale(1.025);
+  transform: scale(1.022);
+  box-shadow: 0 18px 34px rgba(148, 109, 29, 0.18), var(--app-shadow-1);
+  transform-origin: center;
+}
+
+.ranking-pill.rank-cloud-2 {
+  transform: scale(1.014);
+  box-shadow: 0 14px 26px rgba(148, 163, 184, 0.15), var(--app-shadow-1);
+  transform-origin: center;
+}
+
+.ranking-pill.rank-cloud-3 {
+  transform: scale(1.008);
+  box-shadow: 0 10px 20px rgba(224, 129, 79, 0.12), var(--app-shadow-1);
   transform-origin: center;
 }
 
 .ranking-pill.mây-cap:hover {
   transform: translateY(-2px);
-  border-color: rgba(91, 196, 232, 0.24);
-  background: rgba(24, 35, 52, 0.95);
+  border-color: rgba(104, 219, 197, 0.36);
+  background: linear-gradient(180deg, rgba(17, 28, 41, 0.94), rgba(15, 24, 36, 0.96));
   box-shadow: var(--app-shadow-2);
 }
 
 .ranking-pill.rank-cloud-1:hover {
-  transform: scale(1.025) translateY(-2px);
+  transform: scale(1.022) translateY(-2px);
 }
 
-.rank-indicator {
-  width: 64px;
-  min-height: 92px;
-  flex-shrink: 0;
-  padding: 10px 8px;
-  background: linear-gradient(180deg, rgba(148, 163, 184, 0.12), rgba(15, 23, 42, 0.92));
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 18px;
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+.ranking-pill.rank-cloud-2:hover {
+  transform: scale(1.014) translateY(-2px);
 }
 
-.rank-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.58rem;
-  font-weight: 800;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: rgba(148, 163, 184, 0.86);
-}
-
-.rank-num {
-  font-size: 2rem;
-  font-weight: 900;
-  color: #e2e8f0;
-  line-height: 1;
-}
-
-.rank-crown {
-  font-size: 0.62rem;
+.ranking-pill.rank-cloud-3:hover {
+  transform: scale(1.008) translateY(-2px);
 }
 
 /* Aura Glow Mây Xanh */
@@ -567,36 +550,27 @@ const handleImageError = (event: Event) => {
 /* ===== STYLE CHO 3 THẺ TOP ĐẦU ===== */
 /* Top 1 - Ánh Kim / Lưu Ly */
 .ranking-pill.rank-cloud-1 { 
-  border-color: rgba(243, 201, 107, 0.38); 
-  background: linear-gradient(135deg, rgba(243, 201, 107, 0.12), rgba(21, 31, 47, 0.92));
-  box-shadow: var(--app-shadow-1);
+  border-color: rgba(215, 182, 120, 0.48);
+  background: linear-gradient(135deg, rgba(215, 182, 120, 0.16), rgba(15, 24, 37, 0.94));
+  box-shadow: 0 0 0 1px rgba(247, 229, 186, 0.16) inset, 0 18px 34px rgba(148, 109, 29, 0.22), var(--app-shadow-1);
 }
-.rank-cloud-1 .rank-aura-glow-cloud { background: rgba(243, 201, 107, 0.85); }
-.rank-cloud-1 .rank-indicator { border-color: rgba(234, 179, 8, 0.34); background: linear-gradient(180deg, rgba(234, 179, 8, 0.2), rgba(41, 29, 8, 0.94)); }
-.rank-cloud-1 .rank-kicker { color: rgba(254, 240, 138, 0.92); }
-.rank-cloud-1 .rank-num { color: #eab308; }
+.rank-cloud-1 .rank-aura-glow-cloud { background: rgba(215, 182, 120, 0.8); }
 
 /* Top 2 - Ánh Bạc / Bích Không */
 .ranking-pill.rank-cloud-2 { 
-  border-color: rgba(148, 163, 184, 0.34); 
-  background: linear-gradient(135deg, rgba(148, 163, 184, 0.12), rgba(21, 31, 47, 0.92));
-  box-shadow: var(--app-shadow-1);
+  border-color: rgba(186, 199, 214, 0.34);
+  background: linear-gradient(135deg, rgba(177, 191, 208, 0.12), rgba(15, 24, 37, 0.94));
+  box-shadow: 0 0 0 1px rgba(226, 232, 240, 0.12) inset, 0 14px 26px rgba(142, 157, 174, 0.16), var(--app-shadow-1);
 }
-.rank-cloud-2 .rank-aura-glow-cloud { background: rgba(148, 163, 184, 0.7); }
-.rank-cloud-2 .rank-indicator { border-color: rgba(203, 213, 225, 0.22); background: linear-gradient(180deg, rgba(203, 213, 225, 0.16), rgba(24, 32, 46, 0.94)); }
-.rank-cloud-2 .rank-kicker { color: rgba(226, 232, 240, 0.88); }
-.rank-cloud-2 .rank-num { color: #cbd5e1; }
+.rank-cloud-2 .rank-aura-glow-cloud { background: rgba(177, 191, 208, 0.64); }
 
 /* Top 3 - Ánh Đồng / Thanh Lam */
 .ranking-pill.rank-cloud-3 { 
-  border-color: rgba(224, 129, 79, 0.36); 
-  background: linear-gradient(135deg, rgba(224, 129, 79, 0.12), rgba(21, 31, 47, 0.92));
-  box-shadow: var(--app-shadow-1);
+  border-color: rgba(120, 201, 184, 0.34);
+  background: linear-gradient(135deg, rgba(103, 208, 188, 0.12), rgba(15, 24, 37, 0.94));
+  box-shadow: 0 0 0 1px rgba(174, 236, 223, 0.1) inset, 0 10px 20px rgba(103, 208, 188, 0.16), var(--app-shadow-1);
 }
-.rank-cloud-3 .rank-aura-glow-cloud { background: rgba(224, 129, 79, 0.75); }
-.rank-cloud-3 .rank-indicator { border-color: rgba(249, 115, 22, 0.24); background: linear-gradient(180deg, rgba(249, 115, 22, 0.18), rgba(41, 22, 11, 0.94)); }
-.rank-cloud-3 .rank-kicker { color: rgba(254, 215, 170, 0.9); }
-.rank-cloud-3 .rank-num { color: #fb923c; }
+.rank-cloud-3 .rank-aura-glow-cloud { background: rgba(103, 208, 188, 0.68); }
 
 /* Story Cover */
 .story-cover-pill {
@@ -604,7 +578,7 @@ const handleImageError = (event: Event) => {
   height: 95px;
   border-radius: 12px;
   overflow: hidden;
-  margin-left: 10px;
+  margin-left: 0;
   flex-shrink: 0;
   box-shadow: 0 8px 18px rgba(2, 8, 18, 0.24);
   border: 1px solid rgba(148, 163, 184, 0.16);
@@ -625,7 +599,7 @@ const handleImageError = (event: Event) => {
 
 /* ===== SPIRIT ARRAY AVATAR (Ranking Version) ===== */
 .author-avatar-ranking {
-  margin-left: 10px;
+  margin-left: 0;
   flex-shrink: 0;
 }
 
@@ -659,7 +633,7 @@ const handleImageError = (event: Event) => {
 }
 
 .first-element {
-  margin-left: 5px !important;
+  margin-left: 0 !important;
   position: relative;
   z-index: 5;
 }
@@ -667,14 +641,14 @@ const handleImageError = (event: Event) => {
 /* Story Details */
 .story-details {
   flex-grow: 1;
-  margin-left: 20px;
+  margin-left: 0;
   min-width: 0;
 }
 
 .title-link {
   font-size: 1.18rem;
   font-weight: 800;
-  color: #f1f5f9;
+  color: var(--rank-text);
   text-decoration: none;
   display: block;
   margin-bottom: 6px;
@@ -692,7 +666,7 @@ const handleImageError = (event: Event) => {
 }
 
 .title-link:hover {
-  color: #38bdf8;
+  color: var(--rank-jade-soft);
 }
 
 .author-name-plate { display: flex; align-items: center; gap: 8px; }
@@ -715,14 +689,14 @@ const handleImageError = (event: Event) => {
 
 /* Score Crystal (Linh Đan Đánh Giá) */
 .score-crystal-cloud {
-  background: rgba(14, 20, 31, 0.52);
-  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: rgba(11, 18, 28, 0.62);
+  border: 1px solid rgba(124, 147, 170, 0.2);
   padding: 10px 14px;
   border-radius: 14px;
   text-align: center;
   min-width: 80px;
   box-shadow: none;
-  margin-left: 16px;
+  margin-left: auto;
   align-self: stretch;
   display: flex;
   flex-direction: column;
@@ -734,7 +708,7 @@ const handleImageError = (event: Event) => {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  color: #38bdf8;
+  color: var(--rank-gold);
 }
 
 .star-row .val {
@@ -752,10 +726,10 @@ const handleImageError = (event: Event) => {
 /* Error/Empty State Cloud Colors */
 .error-message-aura-cloud {
   text-align: center;
-  color: #38bdf8;
+  color: var(--rank-jade-soft);
   padding: 30px;
-  background: rgba(56, 189, 248, 0.1);
-  border: 1px solid #38bdf8;
+  background: rgba(104, 219, 197, 0.1);
+  border: 1px solid rgba(104, 219, 197, 0.4);
   border-radius: 12px;
   margin: 30px 0;
 }
@@ -768,7 +742,7 @@ const handleImageError = (event: Event) => {
 
 .empty-state-aura-cloud i {
   font-size: 3rem;
-  color: #38bdf8;
+  color: var(--rank-gold);
   margin-bottom: 20px;
   animation: float-cloud 4s ease-in-out infinite;
 }
@@ -798,7 +772,7 @@ const handleImageError = (event: Event) => {
   content: "";
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(104, 219, 197, 0.14), transparent);
   animation: shimmer-swipe 2s infinite;
 }
 
@@ -846,23 +820,6 @@ const handleImageError = (event: Event) => {
     align-items: center;
     text-align: left;
     gap: 12px;
-  }
-
-  .rank-indicator {
-    width: 46px;
-    min-height: 64px;
-    padding: 7px 5px;
-    border-radius: 14px;
-    gap: 4px;
-  }
-
-  .rank-num {
-    font-size: 1.3rem;
-  }
-
-  .rank-kicker {
-    font-size: 0.48rem;
-    letter-spacing: 0.9px;
   }
   
   .story-cover-pill {
