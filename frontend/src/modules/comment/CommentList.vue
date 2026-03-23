@@ -71,29 +71,43 @@
         <div class="fb-body">
           <!-- Bubble -->
           <div :class="['fb-bubble', comment.author_frame?.css_class || '', { 'has-frame': !!comment.author_frame }]">
-            <div
-              class="author-nameplate"
-              :data-rarity="comment.author_badge?.rarity || 'none'"
-              :style="{ '--plate-color': comment.author_badge?.color || '#555e6b' }"
-            >
-              <span class="plate-shine"></span>
-              <span class="comment-author" :class="{ 'is-story-author': comment.user_id === props.storyAuthorId }">
-                <i v-if="comment.user_id === props.storyAuthorId" class="fas fa-crown author-crown"></i>
-                {{ comment.author_name || 'Ẩn danh' }}
-              </span>
-              <UserBadge :badge="comment.author_badge" size="sm" />
+            <div class="bubble-head">
+              <div
+                class="author-nameplate"
+                :data-rarity="comment.author_badge?.rarity || 'none'"
+                :style="{ '--plate-color': comment.author_badge?.color || '#555e6b' }"
+              >
+                <span class="plate-shine"></span>
+                <span class="comment-author" :class="{ 'is-story-author': comment.user_id === props.storyAuthorId }">
+                  <i v-if="comment.user_id === props.storyAuthorId" class="fas fa-crown author-crown"></i>
+                  {{ comment.author_name || 'Ẩn danh' }}
+                </span>
+                <UserBadge :badge="comment.author_badge" size="sm" />
+              </div>
+              <div v-if="canDelete(comment)" class="comment-actions">
+                <button
+                  class="btn-more"
+                  title="Tùy chọn bình luận"
+                  @click.stop="toggleActionMenu(getActionMenuKey(comment.id))"
+                >
+                  <i class="fas fa-ellipsis-vertical"></i>
+                </button>
+                <div
+                  v-if="isActionMenuOpen(getActionMenuKey(comment.id))"
+                  class="comment-action-menu"
+                  @click.stop
+                >
+                  <button
+                    class="menu-delete-item"
+                    @click="handleDeleteFromMenu(comment.id)"
+                  >
+                    <i class="fas fa-trash-can"></i>
+                    <span>Xóa bình luận</span>
+                  </button>
+                </div>
+              </div>
             </div>
             <p class="comment-text">{{ comment.content }}</p>
-
-            <!-- Delete: admin | author | owner (backend checks 15p, no replies) -->
-            <button
-              v-if="canDelete(comment)"
-              @click="handleDelete(comment.id)"
-              class="btn-delete"
-              title="Xóa bình luận"
-            >
-              <i class="fas fa-times"></i>
-            </button>
           </div>
 
           <div class="fb-meta">
@@ -137,25 +151,43 @@
                 </div>
                 <div class="fb-body">
                   <div :class="['fb-bubble', reply.author_frame?.css_class || '', { 'has-frame': !!reply.author_frame }]">
-                    <div
-                      class="author-nameplate"
-                      :data-rarity="reply.author_badge?.rarity || 'none'"
-                      :style="{ '--plate-color': reply.author_badge?.color || '#555e6b' }"
-                    >
-                      <span class="plate-shine"></span>
-                      <span class="comment-author" :class="{ 'is-story-author': reply.user_id === props.storyAuthorId }">
-                        <i v-if="reply.user_id === props.storyAuthorId" class="fas fa-crown author-crown"></i>
-                        {{ reply.author_name || 'ẩn danh' }}
-                      </span>
-                      <UserBadge :badge="reply.author_badge" size="sm" />
+                    <div class="bubble-head">
+                      <div
+                        class="author-nameplate"
+                        :data-rarity="reply.author_badge?.rarity || 'none'"
+                        :style="{ '--plate-color': reply.author_badge?.color || '#555e6b' }"
+                      >
+                        <span class="plate-shine"></span>
+                        <span class="comment-author" :class="{ 'is-story-author': reply.user_id === props.storyAuthorId }">
+                          <i v-if="reply.user_id === props.storyAuthorId" class="fas fa-crown author-crown"></i>
+                          {{ reply.author_name || 'ẩn danh' }}
+                        </span>
+                        <UserBadge :badge="reply.author_badge" size="sm" />
+                      </div>
+                      <div v-if="canDelete(reply)" class="comment-actions">
+                        <button
+                          class="btn-more"
+                          title="Tùy chọn bình luận"
+                          @click.stop="toggleActionMenu(getActionMenuKey(reply.id, comment.id))"
+                        >
+                          <i class="fas fa-ellipsis-vertical"></i>
+                        </button>
+                        <div
+                          v-if="isActionMenuOpen(getActionMenuKey(reply.id, comment.id))"
+                          class="comment-action-menu"
+                          @click.stop
+                        >
+                          <button
+                            class="menu-delete-item"
+                            @click="handleDeleteFromMenu(reply.id)"
+                          >
+                            <i class="fas fa-trash-can"></i>
+                            <span>Xóa bình luận</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                     <p class="comment-text">{{ reply.content }}</p>
-                    <button
-                      v-if="canDelete(reply)"
-                      @click="handleDelete(reply.id)"
-                      class="btn-delete"
-                      title="Xóa"
-                    ><i class="fas fa-times"></i></button>
                   </div>
                   <div class="fb-meta">
                     <span class="meta-time">{{ formatDate(reply.created_at) }}</span>
@@ -208,7 +240,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import { useCommentStore } from "./comment.store";
 import { useAuthStore } from "@/modules/auth/auth.store";
 import type { Comment } from "./comment.service";
@@ -232,6 +264,7 @@ const submitting = ref(false);
 const replyingTo = ref<number | null>(null);
 const replyContent = ref("");
 const submittingReply = ref(false);
+const openActionMenuId = ref<string | null>(null);
 
 // Track which comment's replies are expanded
 const expandedReplies = ref(new Set<number>());
@@ -263,6 +296,12 @@ watch(() => props.storyId, (newId) => {
 const isRepliesExpanded = (id: number) => expandedReplies.value.has(id);
 const expandReplies    = (id: number) => { expandedReplies.value = new Set([...expandedReplies.value, id]); };
 const collapseReplies  = (id: number) => { const s = new Set(expandedReplies.value); s.delete(id); expandedReplies.value = s; };
+const getActionMenuKey = (id: number, parentId?: number) =>
+  parentId ? `reply-${parentId}-${id}` : `comment-${id}`;
+const isActionMenuOpen = (key: string) => openActionMenuId.value === key;
+const toggleActionMenu = (key: string) => {
+  openActionMenuId.value = openActionMenuId.value === key ? null : key;
+};
 
 const handleSubmit = async () => {
   if (!newCommentContent.value.trim()) return;
@@ -311,9 +350,14 @@ const handleDelete = async (commentId: number) => {
   if (!confirm("Bạn có chắc muốn xóa bình luận này?")) return;
   try {
     await store.removeComment(commentId, props.storyId);
+    openActionMenuId.value = null;
   } catch (err: any) {
     alert(err.message || "Lỗi xóa bình luận");
   }
+};
+
+const handleDeleteFromMenu = async (commentId: number) => {
+  await handleDelete(commentId);
 };
 
 const formatDate = (dateString: string) => {
@@ -332,31 +376,43 @@ const onAvatarError = (e: Event) => {
   const img = e.target as HTMLImageElement;
   img.style.display = "none";
 };
+
+const handleOutsideClick = () => {
+  openActionMenuId.value = null;
+};
+
+onMounted(() => {
+  document.addEventListener("click", handleOutsideClick);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleOutsideClick);
+});
 </script>
 
 <style scoped>
 .comment-section {
-  --aura-primary: #0be3ff;
-  --aura-bg: #0b0f19;
-  --bubble-bg: rgba(19, 27, 44, 0.6);
-  --border-light: rgba(52, 211, 153, 0.15);
+  --aura-primary: #72e2cd;
+  --aura-bg: #0b111b;
+  --bubble-bg: rgba(14, 24, 38, 0.74);
+  --border-light: rgba(114, 226, 205, 0.22);
   
   margin-top: 2rem;
-  padding: 1.5rem 0;
+  padding: 1.25rem 0;
   font-family: 'Be Vietnam Pro', sans-serif;
 }
 
 .section-title {
-  font-size: 1.4rem;
+  font-size: 1.18rem;
   font-weight: 800;
   color: var(--aura-primary);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.1rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  text-shadow: 0 0 10px rgba(1, 216, 245, 0.3);
+  letter-spacing: 0.7px;
+  text-shadow: 0 0 10px rgba(114, 226, 205, 0.24);
 }
 
 .comment-form, .reply-form { margin-bottom: 1.5rem; }
@@ -371,12 +427,12 @@ const onAvatarError = (e: Event) => {
 
 .comment-input {
   width: 100%;
-  padding: 0.8rem 1rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  padding: 0.72rem 0.9rem;
+  background: rgba(8, 14, 22, 0.5);
+  border: 1px solid rgba(120, 144, 168, 0.26);
+  border-radius: 14px;
   color: #e2e8f0;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   resize: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   line-height: 1.5;
@@ -385,9 +441,9 @@ const onAvatarError = (e: Event) => {
 
 .comment-input:focus {
   outline: none;
-  border-color: var(--aura-primary);
-  background: rgba(52, 211, 153, 0.05);
-  box-shadow: 0 0 15px rgba(52, 211, 153, 0.15), inset 0 2px 4px rgba(0,0,0,0.2);
+  border-color: rgba(114, 226, 205, 0.52);
+  background: rgba(17, 28, 42, 0.72);
+  box-shadow: 0 0 12px rgba(114, 226, 205, 0.16), inset 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .comment-input::placeholder { color: #64748b; font-style: italic; }
@@ -402,31 +458,32 @@ const onAvatarError = (e: Event) => {
 
 /* NÃºt báº¥m tá»¥ linh */
 .btn-submit {
-  padding: 0.4rem 1.2rem;
-  background: linear-gradient(135deg, #10b981, #34d399);
-  color: #0b0f19;
+  padding: 0.36rem 1.05rem;
+  background: linear-gradient(135deg, #61dcc4, #8de7f5);
+  color: #08131d;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: 0.84rem;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 4px 10px rgba(52, 211, 153, 0.2);
+  box-shadow: 0 6px 14px rgba(6, 16, 26, 0.28);
+  border: 1px solid rgba(143, 232, 247, 0.28);
 }
 .btn-submit:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(52, 211, 153, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(6, 16, 26, 0.34);
 }
 .btn-submit:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
 .btn-submit.sm { padding: 0.3rem 1rem; font-size: 0.85rem; }
 
 .btn-cancel {
-  padding: 0.3rem 1rem;
+  padding: 0.28rem 0.86rem;
   background: transparent;
-  border: 1px solid #475569;
+  border: 1px solid rgba(120, 144, 168, 0.34);
   color: #cbd5e1;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -434,15 +491,15 @@ const onAvatarError = (e: Event) => {
 
 .loading-state, .error-state, .empty-state {
   text-align: center; padding: 3rem 1rem; color: #64748b; font-style: italic;
-  background: var(--bubble-bg); border-radius: 16px; border: 1px dashed #334155;
+  background: var(--bubble-bg); border-radius: 14px; border: 1px dashed rgba(120, 144, 168, 0.28);
 }
 .error-state { color: #f43f5e; border-color: rgba(244, 63, 94, 0.3); }
 
-.comments-list { display: flex; flex-direction: column; gap: 1.5rem; }
+.comments-list { display: flex; flex-direction: column; gap: 1.2rem; }
 
 .fb-comment {
   display: flex;
-  gap: 1rem;
+  gap: 0.86rem;
   align-items: flex-start;
   animation: fadeIn 0.4s ease-out forwards;
 }
@@ -460,7 +517,7 @@ const onAvatarError = (e: Event) => {
   --aura-primary: 1, 216, 245; /* Default cyan for comments */
 }
 
-.spirit-array-center.comment-main { width: 50px; height: 50px; }
+.spirit-array-center.comment-main { width: 46px; height: 46px; }
 .spirit-array-center.comment-reply { width: 36px; height: 36px; }
 
 .spirit-array-center.frame-phoenix-fire { --aura-primary: 239, 68, 68; }
@@ -490,8 +547,8 @@ const onAvatarError = (e: Event) => {
 
 .avatar-wrapper {
   position: relative;
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   z-index: 1;
 }
@@ -533,11 +590,11 @@ const onAvatarError = (e: Event) => {
   background: var(--bubble-bg);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border-radius: 4px 16px 16px 16px;
-  padding: 0.7rem 1rem;
+  border-radius: 4px 14px 14px 14px;
+  padding: 0.62rem 0.88rem;
   max-width: 100%;
-  border: 1px solid rgba(255,255,255,0.05);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border: 1px solid rgba(120, 144, 168, 0.2);
+  box-shadow: 0 8px 18px rgba(3, 9, 20, 0.22);
   transition: border-color 0.3s, transform 0.2s;
 }
 .fb-bubble:hover { border-color: var(--border-light); }
@@ -547,52 +604,109 @@ const onAvatarError = (e: Event) => {
 
 .comment-text {
   color: #e2e8f0;
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 0.9rem;
+  line-height: 1.55;
   white-space: pre-line;
-  margin: 0.4rem 0 0;
+  margin: 0.32rem 0 0;
   word-break: break-word;
 }
 
-/* NÃºt xÃ³a tháº§n tá»‘c */
-.btn-delete {
-  position: absolute;
-  top: 8px; right: 8px;
-  background: rgba(244, 63, 94, 0.1);
-  border: none;
-  color: #f43f5e;
-  cursor: pointer;
-  font-size: 0.8rem;
-  width: 24px; height: 24px;
-  border-radius: 50%;
-  opacity: 0;
-  transform: scale(0.8);
-  transition: all 0.2s;
-  display: flex; justify-content: center; align-items: center;
+.bubble-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
 }
-.fb-bubble:hover .btn-delete { opacity: 1; transform: scale(1); }
-.btn-delete:hover { background: #f43f5e; color: #fff; }
+
+/* NÃºt xÃ³a tháº§n tá»‘c */
+.comment-actions {
+  position: relative;
+  flex-shrink: 0;
+  margin-left: 6px;
+  z-index: 4;
+}
+
+.btn-more {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border: 1px solid rgba(120, 144, 168, 0.3);
+  background: rgba(8, 14, 22, 0.72);
+  color: #9fb6cb;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-more i {
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.btn-more:hover {
+  color: #d7e5f3;
+  border-color: rgba(114, 226, 205, 0.48);
+  background: rgba(17, 28, 42, 0.84);
+}
+
+.comment-action-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 132px;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(120, 144, 168, 0.32);
+  background: rgba(10, 17, 27, 0.95);
+  box-shadow: 0 12px 24px rgba(3, 9, 20, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.menu-delete-item {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #fda4af;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.menu-delete-item:hover {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fecdd3;
+}
 
 .fb-meta {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  margin: 0.4rem 0 0 0.8rem;
+  gap: 0.48rem;
+  margin: 0.34rem 0 0 0.66rem;
 }
 
-.meta-time { font-size: 0.8rem; color: #64748b; }
+.meta-time { font-size: 0.76rem; color: #7b8fa6; }
 .meta-sep { color: #334155; font-size: 0.8rem; }
 
 .meta-btn {
   background: none; border: none;
-  color: #94a3b8;
-  font-size: 0.85rem;
+  color: #9ab2c8;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   padding: 0;
   transition: color 0.2s;
 }
-.meta-btn:hover { color: var(--aura-primary); text-shadow: 0 0 5px rgba(52, 211, 153, 0.4); }
+.meta-btn:hover { color: var(--aura-primary); text-shadow: 0 0 5px rgba(114, 226, 205, 0.4); }
 
 .fb-replies-wrap { margin-top: 1rem; position: relative; }
 
@@ -601,19 +715,19 @@ const onAvatarError = (e: Event) => {
   align-items: center;
   gap: 0.5rem;
   background: transparent;
-  border: 1px dashed #334155;
+  border: 1px dashed rgba(120, 144, 168, 0.36);
   color: #cbd5e1;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
+  padding: 0.32rem 0.74rem;
+  border-radius: 16px;
   transition: all 0.3s;
 }
 .btn-expand-replies:hover, .btn-collapse-replies:hover {
   color: var(--aura-primary);
   border-color: var(--aura-primary);
-  background: rgba(52, 211, 153, 0.05);
+  background: rgba(114, 226, 205, 0.07);
 }
 
 .fb-replies {
@@ -651,19 +765,19 @@ const onAvatarError = (e: Event) => {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.2rem 0.8rem;
+  padding: 0.16rem 0.68rem;
   border-radius: 50px;
   position: relative;
   overflow: hidden;
-  background: color-mix(in srgb, var(--plate-color) 10%, #0b0f19);
+  background: color-mix(in srgb, var(--plate-color) 10%, #0b111b);
   border: 1px solid color-mix(in srgb, var(--plate-color) 40%, transparent);
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  margin-bottom: 2px;
+  margin-bottom: 0;
 }
 
 .comment-author {
   font-weight: 800;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   white-space: nowrap;
   color: #fff;
   text-shadow: 0 0 8px color-mix(in srgb, var(--plate-color) 80%, transparent);
@@ -712,5 +826,146 @@ const onAvatarError = (e: Event) => {
   margin-left: 6px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+  .comment-section {
+    margin-top: 1.25rem;
+    padding: 0.9rem 0;
+  }
+  .section-title {
+    font-size: 1rem;
+    margin-bottom: 0.86rem;
+    letter-spacing: 0.55px;
+  }
+  .comment-form,
+  .reply-form {
+    margin-bottom: 1rem;
+  }
+  .form-row,
+  .reply-form {
+    gap: 0.62rem;
+  }
+  .avatar-img.form-av-img {
+    width: 36px;
+    height: 36px;
+  }
+  .avatar-img.sm {
+    width: 28px;
+    height: 28px;
+  }
+  .comment-input {
+    padding: 0.62rem 0.74rem;
+    font-size: 0.84rem;
+    border-radius: 12px;
+  }
+  .comment-input.sm {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.64rem;
+    border-radius: 10px;
+  }
+  .form-actions {
+    margin-top: 0.42rem;
+    gap: 0.4rem;
+  }
+  .btn-submit {
+    padding: 0.3rem 0.84rem;
+    font-size: 0.78rem;
+  }
+  .btn-submit.sm {
+    padding: 0.28rem 0.76rem;
+    font-size: 0.76rem;
+  }
+  .btn-cancel {
+    padding: 0.24rem 0.72rem;
+    font-size: 0.75rem;
+  }
+  .comments-list {
+    gap: 0.9rem;
+  }
+  .fb-comment {
+    gap: 0.62rem;
+  }
+  .spirit-array-center.comment-main {
+    width: 40px;
+    height: 40px;
+  }
+  .spirit-array-center.comment-reply {
+    width: 30px;
+    height: 30px;
+  }
+  .avatar-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+  .spirit-array-center.comment-reply .avatar-wrapper {
+    width: 30px;
+    height: 30px;
+  }
+  .fb-bubble {
+    border-radius: 4px 12px 12px 12px;
+    padding: 0.52rem 0.72rem;
+  }
+  .bubble-head {
+    gap: 6px;
+  }
+  .comment-actions {
+    margin-left: 4px;
+  }
+  .btn-more {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+  }
+  .btn-more i {
+    font-size: 0.68rem;
+  }
+  .comment-action-menu {
+    min-width: 120px;
+    border-radius: 9px;
+    padding: 3px;
+  }
+  .menu-delete-item {
+    font-size: 0.72rem;
+    padding: 6px 7px;
+    gap: 5px;
+  }
+  .author-nameplate {
+    padding: 0.14rem 0.52rem;
+    gap: 0.34rem;
+  }
+  .comment-author {
+    font-size: 0.74rem;
+  }
+  .comment-text {
+    font-size: 0.84rem;
+    line-height: 1.46;
+    margin-top: 0.24rem;
+  }
+  .fb-meta {
+    margin: 0.28rem 0 0 0.46rem;
+    gap: 0.42rem;
+  }
+  .meta-time,
+  .meta-btn {
+    font-size: 0.72rem;
+  }
+  .btn-expand-replies,
+  .btn-collapse-replies {
+    font-size: 0.74rem;
+    padding: 0.24rem 0.58rem;
+    border-radius: 14px;
+    gap: 0.34rem;
+  }
+  .fb-replies {
+    gap: 0.74rem;
+    padding-left: 1.44rem;
+  }
+  .fb-replies::before {
+    top: -14px;
+    bottom: 14px;
+    left: 0.36rem;
+    width: 1rem;
+  }
 }
 </style>

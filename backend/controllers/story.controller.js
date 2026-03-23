@@ -41,6 +41,8 @@ const allStoriesCacheKey = (params) => {
     category_id,
     sort_by,
     order,
+    has_audio,
+    require_text_chapters,
   } = params;
 
   return [
@@ -53,6 +55,8 @@ const allStoriesCacheKey = (params) => {
     `category_id=${safeKeyPart(category_id)}`,
     `sort_by=${safeKeyPart(sort_by)}`,
     `order=${safeKeyPart(order)}`,
+    `has_audio=${safeKeyPart(has_audio)}`,
+    `require_text_chapters=${safeKeyPart(require_text_chapters)}`,
   ].join(":");
 };
 
@@ -93,6 +97,8 @@ const getAllStories = async (req, res) => {
       category_id,
       sort_by,
       order,
+      has_audio,
+      require_text_chapters,
     } = req.query;
 
     const safePage = toIntOrUndefined(page) ?? 1;
@@ -106,6 +112,8 @@ const getAllStories = async (req, res) => {
       category_id: toIntOrUndefined(category_id),
       sort_by,
       order,
+      has_audio,
+      require_text_chapters,
     };
 
     const cacheKey = allStoriesCacheKey(params);

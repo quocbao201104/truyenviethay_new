@@ -251,13 +251,12 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .story-table-section {
-  background: rgba(36, 40, 52, 0.7);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  border-radius: 0.75rem;
+  background: linear-gradient(135deg, rgba(13, 22, 36, 0.92), rgba(16, 27, 42, 0.86));
+  border: 1px solid rgba(120, 144, 168, 0.26);
+  border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  /* font-family: 'Manrope', sans-serif; */
-  color: #ffffff;
+  box-shadow: 0 20px 40px rgba(3, 9, 20, 0.28);
+  color: #f1f7ff;
   position: relative;
 }
 
@@ -267,21 +266,21 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(7, 12, 20, 0.78);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   z-index: 10;
-  border-radius: 0.75rem;
-  color: #22c55e;
+  border-radius: 1rem;
+  color: #72e2cd;
   font-size: 1.2rem;
   font-weight: 600;
 }
 
 .spinner {
-  border: 4px solid rgba(34, 197, 94, 0.3);
-  border-top: 4px solid #22c55e;
+  border: 4px solid rgba(114, 226, 205, 0.22);
+  border-top: 4px solid #72e2cd;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -298,7 +297,7 @@ onBeforeUnmount(() => {
   text-align: center;
   padding: 2rem;
   font-size: 1.1rem;
-  color: #a0a0a0;
+  color: #8ea5b8;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -307,7 +306,7 @@ onBeforeUnmount(() => {
 
 .no-data-message .fas {
   font-size: 3rem;
-  color: #6b7280;
+  color: #7a92a9;
 }
 
 .table-responsive {
@@ -319,7 +318,7 @@ onBeforeUnmount(() => {
   border-collapse: separate; 
   border-spacing: 0; 
   margin-top: 1rem;
-  border-radius: 0.75rem; 
+  border-radius: 0.95rem; 
   overflow: hidden; 
   table-layout: fixed; 
   min-width: 900px; 
@@ -329,8 +328,7 @@ onBeforeUnmount(() => {
 .story-table td {
   padding: 1rem;
   text-align: left; 
-  border-bottom: 1px solid rgba(75, 85, 99, 0.5);
-  /* font-family: 'Manrope', sans-serif; */ 
+  border-bottom: 1px solid rgba(120, 144, 168, 0.22);
   vertical-align: middle;
 }
 
@@ -345,13 +343,13 @@ onBeforeUnmount(() => {
 
 
 .story-table th {
-  background-color: #2a2d3a; 
-  color: #4caf50; 
-  font-weight: 700;
+  background: linear-gradient(180deg, rgba(25, 36, 52, 0.94), rgba(20, 31, 47, 0.94));
+  color: #72e2cd; 
+  font-weight: 800;
   text-transform: uppercase;
-  font-size: 0.9rem;
-  border-bottom: 2px solid #4caf50; 
-  letter-spacing: 0.5px;
+  font-size: 0.84rem;
+  border-bottom: 1px solid rgba(114, 226, 205, 0.45); 
+  letter-spacing: 0.06em;
   position: relative; 
 }
 
@@ -363,8 +361,8 @@ onBeforeUnmount(() => {
 }
 
 .story-table td {
-  background-color: rgba(26, 29, 41, 0.7); 
-  color: #e0e0e0; 
+  background-color: rgba(10, 17, 27, 0.72); 
+  color: #dce8f4; 
   font-size: 0.95rem;
 }
 
@@ -373,12 +371,16 @@ onBeforeUnmount(() => {
 }
 
 .story-table tbody tr.odd-row td {
-  background-color: rgba(36, 40, 52, 0.7); 
+  background-color: rgba(14, 23, 36, 0.74); 
 }
 
 .story-table tbody tr.story-row:hover {
-  background-color: rgba(76, 175, 80, 0.1); 
+  background-color: rgba(114, 226, 205, 0.08); 
   cursor: pointer;
+}
+
+.story-table tbody tr.story-row:hover td {
+  background-color: rgba(18, 30, 45, 0.92);
 }
 
 /* Sortable Headers */
@@ -391,13 +393,13 @@ th.sortable i {
   right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(155, 181, 203, 0.74);
   transition: color 0.3s ease;
 }
 
 th.sortable.sorted-asc i,
 th.sortable.sorted-desc i {
-  color: #22c55e;
+  color: #72e2cd;
 }
 
 
@@ -411,8 +413,8 @@ th.sortable.sorted-desc i {
   height: 80px;
   object-fit: cover;
   border-radius: 0.5rem;
-  border: 1px solid #4caf50; 
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(114, 226, 205, 0.45); 
+  box-shadow: 0 8px 16px rgba(3, 9, 20, 0.28);
   transition: transform 0.2s ease;
 }
 
@@ -425,14 +427,14 @@ th.sortable.sorted-desc i {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: #8098b0;
   font-size: 0.7rem;
   text-align: center;
   width: 60px;
   height: 80px;
-  border: 1px dashed #4b5563;
+  border: 1px dashed rgba(120, 144, 168, 0.38);
   border-radius: 0.5rem;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(8, 14, 22, 0.62);
 }
 
 .no-image-placeholder-small .fas {
@@ -441,7 +443,7 @@ th.sortable.sorted-desc i {
 }
 
 .story-name-link {
-  color: #4ade80; 
+  color: #8ff0db; 
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s ease;
@@ -453,7 +455,7 @@ th.sortable.sorted-desc i {
 }
 
 .story-name-link:hover {
-  color: #22c55e; 
+  color: #d7fff6; 
   text-decoration: underline;
 }
 
@@ -471,21 +473,21 @@ th.sortable.sorted-desc i {
 }
 
 .status-approved {
-  background: rgba(34, 197, 94, 0.15); /* light green background */
-  color: #6ee7b7; /* brighter green text */
-  border: 1px solid #6ee7b7;
+  background: rgba(114, 226, 205, 0.14);
+  color: #aef6e6;
+  border: 1px solid rgba(114, 226, 205, 0.55);
 }
 
 .status-pending {
-  background: rgba(234, 179, 8, 0.15); /* light yellow background */
-  color: #fde047; /* brighter yellow text */
-  border: 1px solid #fde047;
+  background: rgba(215, 182, 121, 0.14);
+  color: #f4ddb0;
+  border: 1px solid rgba(215, 182, 121, 0.52);
 }
 
 .status-rejected {
-  background: rgba(239, 68, 68, 0.15); /* light red background */
-  color: #f87171; /* brighter red text */
-  border: 1px solid #f87171;
+  background: rgba(244, 63, 94, 0.16);
+  color: #fda4af;
+  border: 1px solid rgba(244, 63, 94, 0.52);
 }
 
 /* Actions Dropdown - Synced with UserTableSection styles */
@@ -504,10 +506,10 @@ th.sortable.sorted-desc i {
   padding: 0.5rem;
   width: 36px;
   height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+  border-radius: 999px;
+  background: rgba(12, 20, 33, 0.72);
+  border: 1px solid rgba(120, 144, 168, 0.3);
+  color: #c9dae9;
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -517,19 +519,20 @@ th.sortable.sorted-desc i {
 }
 
 .action-btn.action-toggle-btn:hover {
-  background: rgba(34, 197, 94, 0.1);
-  border-color: #22c55e;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+  background: rgba(114, 226, 205, 0.14);
+  border-color: rgba(114, 226, 205, 0.52);
+  color: #e3f8ff;
+  box-shadow: 0 10px 18px rgba(3, 9, 20, 0.28);
 }
 
 .dropdown-menu {
   position: absolute;
   top: 100%;
   right: 0;
-  background-color: #2a2d3a;
-  border: 1px solid #22c55e;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  background: rgba(10, 17, 27, 0.96);
+  border: 1px solid rgba(120, 144, 168, 0.32);
+  border-radius: 0.6rem;
+  box-shadow: 0 14px 26px rgba(3, 9, 20, 0.34);
   min-width: 150px; 
   z-index: 10; 
   padding: 0.5rem;
@@ -543,10 +546,10 @@ th.sortable.sorted-desc i {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  color: #e5e7eb;
+  color: #d2e0ed;
   font-size: 0.9rem;
   transition: background-color 0.2s ease, color 0.2s ease;
-  border-radius: 0.3rem;
+  border-radius: 0.45rem;
   background: none;
   border: none;
   text-align: left;
@@ -555,24 +558,24 @@ th.sortable.sorted-desc i {
 }
 
 .dropdown-item:hover {
-  background-color: rgba(34, 197, 94, 0.15);
-  color: #22c55e;
+  background-color: rgba(114, 226, 205, 0.14);
+  color: #e9fffa;
 }
 
 .approve-btn-dropdown {
-  color: #22c55e;
+  color: #72e2cd;
 }
 .reject-btn-dropdown {
-  color: #ef4444;
+  color: #fb7185;
 }
 .view-details-btn-dropdown {
-  color: #3b82f6;
+  color: #9ec0dd;
 }
 .delete-btn-dropdown {
-  color: #ef4444;
+  color: #fb7185;
 }
 .chapter-btn-dropdown {
-  color: #f59e0b; /* Amber/Orange color */
+  color: #f2d8aa;
 }
 
 

@@ -494,11 +494,21 @@ onBeforeUnmount(() => {
 
 /* ===== CORE BACKGROUND ===== */
 .story-list-page-xianxia {
+  --app-radius-lg: 24px;
+  --app-radius-md: 18px;
+  --app-border: rgba(120, 144, 168, 0.22);
+  --app-shadow-1: 0 20px 40px rgba(3, 8, 18, 0.3);
+  --app-shadow-2: 0 24px 46px rgba(3, 8, 18, 0.34);
+  --list-premium-surface: rgba(14, 24, 38, 0.8);
+  --list-premium-jade: #72e2cd;
+  --list-premium-gold: #d7b679;
+  --list-premium-ice: #dbe7f4;
   min-height: 100vh;
-  background-color: #101724;
+  background-color: #0b111b;
   background-image: 
-    radial-gradient(circle at 15% 50%, rgba(72, 207, 165, 0.04) 0%, transparent 48%),
-    radial-gradient(circle at 85% 30%, rgba(91, 196, 232, 0.05) 0%, transparent 42%);
+    radial-gradient(circle at 15% 50%, rgba(114, 226, 205, 0.08) 0%, transparent 48%),
+    radial-gradient(circle at 85% 30%, rgba(215, 182, 121, 0.08) 0%, transparent 42%),
+    linear-gradient(180deg, rgba(11, 21, 34, 0.96), rgba(9, 16, 27, 0.98));
   color: #cbd5e1;
   font-family: 'Be Vietnam Pro', sans-serif;
   overflow-x: hidden;
@@ -554,6 +564,8 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 12px;
   margin: 0;
+  color: #f5f8ff;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .spirit-note {
@@ -572,23 +584,24 @@ onBeforeUnmount(() => {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1px;
-  padding: 8px 16px;
+  padding: 9px 16px;
   border-radius: 50px;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 /* ===== TONE MÀU CÁC BẢNG ===== */
 
 /* 1. EMERALD (Tân Tú - Lục Bảo) */
-.spirit-header.emerald { border-bottom: 1px solid rgba(52, 211, 153, 0.15); }
+.spirit-header.emerald { border-bottom: 1px solid rgba(114, 226, 205, 0.24); }
 .spirit-header.emerald::before {
   content: ''; position: absolute; bottom: -1.5px; left: 0; width: 80px; height: 3px;
-  background: #48cfa5; border-radius: 50px;
+  background: var(--list-premium-jade); border-radius: 50px;
 }
-.spirit-header.emerald .spirit-title { color: #f8fafc; }
-.spirit-header.emerald .spirit-title i { color: #48cfa5; filter: none; }
-.view-all-spirit.emerald { color: #34d399; background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.2); }
-.view-all-spirit.emerald:hover { background: rgba(72, 207, 165, 0.16); color: #c9f5e5; transform: translateY(-1px); }
+.spirit-header.emerald .spirit-title i { color: var(--list-premium-jade); filter: none; }
+.view-all-spirit.emerald { color: #a4f0df; background: rgba(114, 226, 205, 0.14); border: 1px solid rgba(114, 226, 205, 0.28); }
+.view-all-spirit.emerald:hover { background: rgba(114, 226, 205, 0.22); color: #e8fffa; transform: translateY(-1px); box-shadow: 0 10px 20px rgba(7, 17, 27, 0.28); }
 
 .spirit-footer {
   display: flex;
@@ -606,10 +619,11 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(18, 26, 39, 0.7);
+  background: rgba(10, 17, 27, 0.72);
   padding: 4px 8px;
   border-radius: 50px;
-  border: 1px solid var(--app-border);
+  border: 1px solid rgba(120, 144, 168, 0.26);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .pag-btn {
@@ -627,8 +641,8 @@ onBeforeUnmount(() => {
 }
 
 .pag-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.08);
-  color: #f8fafc;
+  background: rgba(114, 226, 205, 0.16);
+  color: #e9f8ff;
 }
 
 .pag-btn:disabled {
@@ -645,39 +659,37 @@ onBeforeUnmount(() => {
 }
 
 /* 2. GOLD (Lệnh Bài - Hoàng Kim) */
-.spirit-header.gold { border-bottom: 1px solid rgba(251, 191, 36, 0.15); }
+.spirit-header.gold { border-bottom: 1px solid rgba(215, 182, 121, 0.25); }
 .spirit-header.gold::before {
   content: ''; position: absolute; bottom: -1.5px; left: 0; width: 80px; height: 3px;
-  background: #f3c96b; border-radius: 50px;
+  background: var(--list-premium-gold); border-radius: 50px;
 }
-.spirit-header.gold .spirit-title { color: #f8fafc; }
-.spirit-header.gold .spirit-title i { color: #f3c96b; filter: none; }
-.view-all-spirit.gold { color: #fbbf24; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2); }
-.view-all-spirit.gold:hover { background: rgba(243, 201, 107, 0.16); color: #fbe9bc; transform: translateY(-1px); }
+.spirit-header.gold .spirit-title i { color: var(--list-premium-gold); filter: none; }
+.view-all-spirit.gold { color: #f2d8aa; background: rgba(215, 182, 121, 0.14); border: 1px solid rgba(215, 182, 121, 0.28); }
+.view-all-spirit.gold:hover { background: rgba(215, 182, 121, 0.22); color: #fff0d2; transform: translateY(-1px); box-shadow: 0 10px 20px rgba(7, 17, 27, 0.28); }
 
 /* 3. PURPLE (Đại Viên Mãn - Tử Khí) */
-.spirit-header.purple { border-bottom: 1px solid rgba(192, 132, 252, 0.15); }
+.spirit-header.purple { border-bottom: 1px solid rgba(166, 197, 228, 0.22); }
 .spirit-header.purple::before {
   content: ''; position: absolute; bottom: -1.5px; left: 0; width: 80px; height: 3px;
-  background: #b397e7; border-radius: 50px;
+  background: #a6c5e4; border-radius: 50px;
 }
-.spirit-header.purple .spirit-title { color: #f8fafc; }
-.spirit-header.purple .spirit-title i { color: #b397e7; filter: none; }
-.view-all-spirit.purple { color: #c084fc; background: rgba(192, 132, 252, 0.1); border: 1px solid rgba(192, 132, 252, 0.2); }
-.view-all-spirit.purple:hover { background: rgba(179, 151, 231, 0.16); color: #e6ddf7; transform: translateY(-1px); }
+.spirit-header.purple .spirit-title i { color: #a6c5e4; filter: none; }
+.view-all-spirit.purple { color: #c8def3; background: rgba(166, 197, 228, 0.14); border: 1px solid rgba(166, 197, 228, 0.28); }
+.view-all-spirit.purple:hover { background: rgba(166, 197, 228, 0.22); color: #e9f3ff; transform: translateY(-1px); box-shadow: 0 10px 20px rgba(7, 17, 27, 0.28); }
 
 /* 4. FIRE (Linh Anh - Đỏ Cam) */
-.spirit-header.fire { border-bottom: 1px solid rgba(249, 115, 22, 0.15); padding-bottom: 8px;}
+.spirit-header.fire { border-bottom: 1px solid rgba(215, 182, 121, 0.25); padding-bottom: 8px;}
 .spirit-header.fire::before {
   content: ''; position: absolute; bottom: -1.5px; left: 0; width: 60px; height: 3px;
-  background: #f48b46; border-radius: 50px;
+  background: var(--list-premium-gold); border-radius: 50px;
 }
-.sidebar-title-xianxia { margin: 0; font-size: 1.2rem; font-weight: 900; color: #f8fafc; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 10px; }
-.spirit-header.fire .sidebar-title-xianxia i { color: #f48b46; filter: none; }
+.sidebar-title-xianxia { margin: 0; font-size: 1.2rem; font-weight: 900; color: #f8fafc; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 10px; text-shadow: 0 1px 0 rgba(255,255,255,0.06); }
+.spirit-header.fire .sidebar-title-xianxia i { color: var(--list-premium-gold); filter: none; }
 
 /* ===== 5. MOON (Nguyệt Bảng - Ánh Trăng Bạc/Xám Nhạt) ĐẶC BIỆT ===== */
 .moon-board {
-  background: linear-gradient(180deg, rgba(21, 31, 47, 0.92) 0%, rgba(15, 23, 35, 0.96) 100%) !important;
+  background: linear-gradient(180deg, rgba(16, 26, 40, 0.92) 0%, rgba(12, 20, 32, 0.96) 100%) !important;
   border: 1px solid var(--app-border) !important;
   box-shadow: var(--app-shadow-2) !important;
   position: relative;
@@ -690,15 +702,15 @@ onBeforeUnmount(() => {
   border-radius: 50%; pointer-events: none;
 }
 
-.spirit-header.moon { border-bottom: 1px solid rgba(148, 163, 184, 0.2); padding-bottom: 10px;}
+.spirit-header.moon { border-bottom: 1px solid rgba(166, 197, 228, 0.24); padding-bottom: 10px;}
 .spirit-header.moon::before {
   content: ''; position: absolute; bottom: -1.5px; left: 0; width: 60px; height: 3px;
-  background: #d6dde8; border-radius: 50px;
+  background: var(--list-premium-ice); border-radius: 50px;
 }
-.spirit-header.moon .sidebar-title-xianxia i, .spirit-header.moon .spirit-title i { color: #d6dde8; filter: none; }
+.spirit-header.moon .sidebar-title-xianxia i, .spirit-header.moon .spirit-title i { color: var(--list-premium-ice); filter: none; }
 .spirit-header.moon .spirit-title { color: #f8fafc; }
 
-.moon-subtitle { font-size: 0.8rem; color: #94a3b8; margin-bottom: 20px; font-style: italic; }
+.moon-subtitle { font-size: 0.8rem; color: #9ab2c8; margin-bottom: 20px; font-style: italic; }
 
 .moon-tabs {
   display: flex;
@@ -707,8 +719,8 @@ onBeforeUnmount(() => {
 }
 
 .moon-tab {
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(148, 163, 184, 0.06);
+  border: 1px solid rgba(120, 144, 168, 0.28);
+  background: rgba(10, 17, 27, 0.7);
   color: #cbd5e1;
   font-size: 0.75rem;
   font-weight: 800;
@@ -721,15 +733,15 @@ onBeforeUnmount(() => {
 }
 
 .moon-tab:hover {
-  background: rgba(226, 232, 240, 0.15);
-  border-color: rgba(226, 232, 240, 0.35);
+  background: rgba(166, 197, 228, 0.2);
+  border-color: rgba(166, 197, 228, 0.45);
   color: #e2e8f0;
 }
 
 .moon-tab.active {
-  background: #d6dde8;
-  color: #0f172a;
-  border-color: #d6dde8;
+  background: linear-gradient(135deg, #9ec0dd, #d9e8f7);
+  color: #08131d;
+  border-color: rgba(217, 232, 247, 0.85);
   box-shadow: none;
 }
 
@@ -747,9 +759,9 @@ onBeforeUnmount(() => {
 }
 
 .sidebar-card-aura { 
-  background: rgba(18, 26, 39, 0.82);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  background: var(--list-premium-surface);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius-md);
   padding: 22px; 
@@ -761,33 +773,33 @@ onBeforeUnmount(() => {
 
 .ranking-spirit-item {
   display: flex; align-items: center; gap: 15px; padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255,255,255,0.05); 
+  background: rgba(8, 14, 22, 0.45);
+  border: 1px solid rgba(120, 144, 168, 0.2); 
   border-radius: 12px; cursor: pointer;
   transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
   position: relative;
 }
 
 .ranking-spirit-item:hover {
-  background: rgba(226, 232, 240, 0.08);
-  border-color: rgba(226, 232, 240, 0.2);
+  background: rgba(114, 226, 205, 0.12);
+  border-color: rgba(114, 226, 205, 0.32);
   transform: translateX(4px);
-  box-shadow: none;
+  box-shadow: 0 10px 20px rgba(3, 9, 20, 0.24);
 }
 
 .rank-orb {
   width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-weight: 900; font-size: 1rem; color: #94a3b8; 
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(7, 14, 24, 0.76);
+  border: 1px solid rgba(120, 144, 168, 0.28);
   box-shadow: none;
 }
 
 /* Top 1-2-3 Nguyệt Bảng (Tone Bạc/Trăng) */
-.moon-item .rank-orb.top-1 { background: rgba(241, 245, 249, 0.15); border-color: #f8fafc; color: #f8fafc; }
-.moon-item .rank-orb.top-2 { background: rgba(203, 213, 225, 0.1); border-color: #cbd5e1; color: #cbd5e1; }
-.moon-item .rank-orb.top-3 { background: rgba(148, 163, 184, 0.1); border-color: #94a3b8; color: #94a3b8; }
+.moon-item .rank-orb.top-1 { background: rgba(215, 182, 121, 0.16); border-color: #f1d6a1; color: #f8e5bf; }
+.moon-item .rank-orb.top-2 { background: rgba(166, 197, 228, 0.14); border-color: #c2ddf4; color: #d9ecff; }
+.moon-item .rank-orb.top-3 { background: rgba(114, 226, 205, 0.14); border-color: #95ead9; color: #d7fff6; }
 
 .rank-details {
   flex-grow: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 6px;
@@ -802,33 +814,34 @@ onBeforeUnmount(() => {
 .ranking-spirit-item:hover .rank-name { color: #f5f8fc; }
 
 .rank-val { 
-  margin: 0; font-size: 0.75rem; color: #94a3b8; font-weight: 600; 
+  margin: 0; font-size: 0.75rem; color: #9ab2c8; font-weight: 600; 
   display: flex; align-items: center; gap: 6px; 
 }
-.rank-val::before { content: '\f06e'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: #94a3b8; font-size: 0.75rem; }
+.rank-val::before { content: '\f06e'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: #9ab2c8; font-size: 0.75rem; }
 
 .spirit-more-link, .spirit-more-link-mobile {
   display: block; text-align: center; margin-top: 20px;
   font-size: 0.8rem; font-weight: 800; text-transform: uppercase;
-  transition: all 0.3s; text-decoration: none; padding: 10px; border-radius: 8px;
+  transition: all 0.3s; text-decoration: none; padding: 10px; border-radius: 10px;
+  border: 1px solid rgba(120, 144, 168, 0.2);
 }
-.spirit-more-link.moon-text { color: #cbd5e1; background: rgba(255,255,255,0.02); }
-.spirit-more-link.moon-text:hover { color: #0f172a; background: #d6dde8; }
+.spirit-more-link.moon-text { color: #d4e3f2; background: rgba(12, 20, 33, 0.6); }
+.spirit-more-link.moon-text:hover { color: #08131d; background: linear-gradient(135deg, #9ec0dd, #d9e8f7); border-color: rgba(217, 232, 247, 0.85); }
 
 /* PHÂN LOẠI (TAG CLOUD) */
 .tag-cloud-spirit { display: flex; flex-wrap: wrap; gap: 12px; }
 
 .tag-pill-spirit {
   padding: 8px 16px; 
-  background: rgba(0, 0, 0, 0.22); 
-  border: 1px solid rgba(255, 255, 255, 0.08); 
+  background: rgba(10, 17, 27, 0.7); 
+  border: 1px solid rgba(120, 144, 168, 0.22); 
   border-radius: 8px; /* Đổi sang bo góc nhẹ thay vì pill tròn */
   color: #cbd5e1; font-size: 0.85rem; font-weight: 600; text-decoration: none;
   transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .tag-pill-spirit.fire-pill:hover {
-  background: rgba(249, 115, 22, 0.15); border-color: #f97316; color: #f97316;
+  background: rgba(215, 182, 121, 0.15); border-color: var(--list-premium-gold); color: #f3ddb1;
   transform: translateY(-2px);
 }
 

@@ -1426,11 +1426,28 @@ watch(
     font-size: 0.72rem;
   }
   .actions-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+  }
+  .btn-primary {
+    min-width: 0;
+    padding: 0 10px;
+    font-size: 0.74rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .secondary-actions {
-    width: 100%;
-    justify-content: space-between;
+    width: auto;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+  .btn-action-spirit {
+    width: 40px;
+    height: 40px;
+  }
+  .btn-action-spirit i {
+    font-size: 0.92rem;
   }
 }
 

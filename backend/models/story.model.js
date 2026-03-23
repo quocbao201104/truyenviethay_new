@@ -52,6 +52,8 @@ const StoryModel = {
     category_id = null,
     sort_by = "thoi_gian_cap_nhat",
     order = "DESC",
+    has_audio = null,
+    require_text_chapters = null,
   }) => {
     const offset = (page - 1) * limit;
     let query = `
@@ -95,6 +97,26 @@ const StoryModel = {
       whereClauses.push(`tn.user_id = ?`);
       params.push(author_id);
       countParams.push(author_id);
+    }
+
+    if (has_audio !== null && has_audio !== undefined && has_audio !== "") {
+      const normalizedHasAudio = String(has_audio).toLowerCase();
+      if (normalizedHasAudio === "1" || normalizedHasAudio === "true") {
+        whereClauses.push(`tn.has_audio = 1`);
+      } else if (normalizedHasAudio === "0" || normalizedHasAudio === "false") {
+        whereClauses.push(`(tn.has_audio = 0 OR tn.has_audio IS NULL)`);
+      }
+    }
+
+    if (
+      require_text_chapters !== null &&
+      require_text_chapters !== undefined &&
+      require_text_chapters !== ""
+    ) {
+      const normalizedRequireText = String(require_text_chapters).toLowerCase();
+      if (normalizedRequireText === "1" || normalizedRequireText === "true") {
+        whereClauses.push(`tn.so_luong_chuong > 0`);
+      }
     }
 
     if (category_id) {

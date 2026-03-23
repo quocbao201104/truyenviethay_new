@@ -37,7 +37,10 @@
 
     <div class="main-highlight desktop-only">
       <transition name="fade" mode="out-in">
-        <div class="highlight-content cosmic-glass" :key="mainStory.id || 'default'">
+        <div
+          class="highlight-content cosmic-glass"
+          :key="mainStory.id || 'default'"
+        >
           <img
             :src="getImageUrl(mainStory.anh_bia)"
             class="main-cover-bg"
@@ -90,8 +93,8 @@
             />
             <div class="book-glow-aura"></div>
           </div>
-          </div>
-        </transition>
+        </div>
+      </transition>
     </div>
 
     <div class="side-trending desktop-only">
@@ -189,11 +192,14 @@ const truncateText = (text: string, length: number) => {
   border-radius: 26px;
   border: 1px solid var(--hero-premium-border);
   overflow: hidden;
-  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 @media (hover: hover) {
-.main-highlight:hover {
+  .main-highlight:hover {
     transform: translateY(-3px);
     border-color: rgba(99, 220, 197, 0.36);
     box-shadow: 0 28px 60px rgba(3, 8, 18, 0.4);
@@ -203,8 +209,11 @@ const truncateText = (text: string, length: number) => {
     transform: perspective(1000px) rotateY(-5deg) scale(1.03);
     box-shadow: -18px 18px 34px rgba(3, 8, 18, 0.45);
   }
-  
-  .main-highlight:hover .book-glow-aura { opacity: 0.5; transform: scale(1.03); }
+
+  .main-highlight:hover .book-glow-aura {
+    opacity: 0.5;
+    transform: scale(1.03);
+  }
 }
 
 .highlight-content {
@@ -221,8 +230,10 @@ const truncateText = (text: string, length: number) => {
 /* Nền ảnh mờ */
 .main-cover-bg {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: top center;
   filter: blur(18px) brightness(0.42) saturate(1.05);
@@ -231,10 +242,20 @@ const truncateText = (text: string, length: number) => {
 }
 
 .overlay-gradient {
-  position: absolute; inset: 0;
+  position: absolute;
+  inset: 0;
   background:
-    radial-gradient(circle at 12% 40%, rgba(99, 220, 197, 0.1), transparent 32%),
-    linear-gradient(90deg, rgba(10, 16, 26, 0.95) 0%, rgba(10, 16, 26, 0.82) 52%, rgba(10, 16, 26, 0.26) 100%);
+    radial-gradient(
+      circle at 12% 40%,
+      rgba(99, 220, 197, 0.1),
+      transparent 32%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(10, 16, 26, 0.95) 0%,
+      rgba(10, 16, 26, 0.82) 52%,
+      rgba(10, 16, 26, 0.26) 100%
+    );
   z-index: 2;
 }
 
@@ -281,19 +302,36 @@ const truncateText = (text: string, length: number) => {
 }
 
 .main-meta {
-  display: flex; align-items: center; gap: 20px;
-  color: #9fb4c7; margin-bottom: 18px; font-size: 0.95rem; font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: #9fb4c7;
+  margin-bottom: 18px;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
-.main-meta i { color: #5ddac3; } 
+.main-meta i {
+  color: #5ddac3;
+}
 
 .main-summary {
-  color: #b8cad9; line-height: 1.72; margin-bottom: 26px; font-size: 1rem;
-  display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical;
+  color: #b8cad9;
+  line-height: 1.72;
+  margin-bottom: 26px;
+  font-size: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 /* Nút Action */
-.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 
 .btn-cultivate-now {
   background: linear-gradient(135deg, #62dcc4, #8fe8f5);
@@ -303,8 +341,11 @@ const truncateText = (text: string, length: number) => {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  display: flex; align-items: center; gap: 8px;
-  transition: all 0.3s; cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+  cursor: pointer;
   box-shadow: 0 10px 24px rgba(4, 10, 20, 0.28);
   border: 1px solid rgba(143, 232, 247, 0.34);
 }
@@ -323,7 +364,8 @@ const truncateText = (text: string, length: number) => {
   border-radius: 16px;
   font-weight: 700;
   backdrop-filter: blur(8px);
-  transition: all 0.3s; cursor: pointer;
+  transition: all 0.3s;
+  cursor: pointer;
 }
 
 .btn-info-glass:hover {
@@ -335,51 +377,88 @@ const truncateText = (text: string, length: number) => {
 
 /* Sách 3D */
 .floating-cover {
-  position: absolute; right: 46px; top: 50%; transform: translateY(-50%);
-  z-index: 10; width: 236px; height: 340px;
+  position: absolute;
+  right: 46px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 236px;
+  height: 340px;
 }
 
 .book-cover-3d {
-  width: 100%; height: 100%; object-fit: cover; 
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   object-position: top center;
   border-radius: 18px;
   box-shadow: -15px 15px 30px rgba(3, 8, 18, 0.45);
   transform: perspective(1000px) rotateY(-15deg);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative; z-index: 2;
+  position: relative;
+  z-index: 2;
 }
 
 .book-glow-aura {
-  position: absolute; inset: -12px; background: radial-gradient(circle, rgba(99, 220, 197, 0.18) 0%, transparent 72%);
-  filter: blur(12px); opacity: 0; transition: all 0.35s ease; z-index: 1;
+  position: absolute;
+  inset: -12px;
+  background: radial-gradient(
+    circle,
+    rgba(99, 220, 197, 0.18) 0%,
+    transparent 72%
+  );
+  filter: blur(12px);
+  opacity: 0;
+  transition: all 0.35s ease;
+  z-index: 1;
 }
 
 /* Chat Board Sidebar */
 .side-trending {
-  background: linear-gradient(180deg, rgba(15, 24, 37, 0.86), rgba(14, 22, 34, 0.92));
+  background: linear-gradient(
+    180deg,
+    rgba(15, 24, 37, 0.86),
+    rgba(14, 22, 34, 0.92)
+  );
   border-radius: 24px;
   padding: 24px 20px;
-  border: 1px solid var(--hero-premium-border); 
-  display: flex; flex-direction: column;
+  border: 1px solid var(--hero-premium-border);
+  display: flex;
+  flex-direction: column;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   box-shadow: 0 20px 42px rgba(3, 8, 18, 0.28);
-  height: 100%; box-sizing: border-box;
+  height: 100%;
+  box-sizing: border-box;
   min-height: 0;
   overflow: hidden;
 }
 
-.fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 
 /* =========================================
    RESPONSIVE (MOBILE & TABLET)
    ========================================= */
-.hero-mobile-static { display: none; }
+.hero-mobile-static {
+  display: none;
+}
 
 @media (max-width: 1024px) {
-  .hero-grid-container { height: auto; grid-template-columns: 1fr; margin-bottom: 8px; }
-  .desktop-only { display: none !important; }
+  .hero-grid-container {
+    height: auto;
+    grid-template-columns: 1fr;
+    margin-bottom: 8px;
+  }
+  .desktop-only {
+    display: none !important;
+  }
 
   .hero-mobile-static {
     position: relative;
@@ -395,24 +474,41 @@ const truncateText = (text: string, length: number) => {
     box-shadow: 0 18px 36px rgba(2, 6, 16, 0.36);
   }
 
-  .mobile-bg-wrapper { position: absolute; inset: 0; z-index: 1; }
-  
+  .mobile-bg-wrapper {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
   .mobile-bg-img {
-    width: 100%; height: 100%; object-fit: cover; object-position: center top;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
     animation: slow-pan 20s ease-in-out infinite alternate;
   }
-  
+
   .mobile-vignette {
-    position: absolute; inset: 0;
+    position: absolute;
+    inset: 0;
     background:
-      linear-gradient(180deg, rgba(5, 10, 17, 0.14) 0%, rgba(5, 10, 17, 0.58) 58%, rgba(5, 10, 17, 0.92) 100%),
-      radial-gradient(circle at 50% 24%, rgba(99, 220, 197, 0.14), transparent 42%);
+      linear-gradient(
+        180deg,
+        rgba(5, 10, 17, 0.14) 0%,
+        rgba(5, 10, 17, 0.58) 58%,
+        rgba(5, 10, 17, 0.92) 100%
+      ),
+      radial-gradient(
+        circle at 50% 24%,
+        rgba(99, 220, 197, 0.14),
+        transparent 42%
+      );
   }
 
   .mobile-content-wrapper {
     position: relative;
     z-index: 10;
-    padding: 18px 16px 18px;
+    padding: 16px 16px 24px;
     text-align: center;
   }
 
@@ -421,12 +517,13 @@ const truncateText = (text: string, length: number) => {
     font-size: clamp(2.15rem, 7.8vw, 3rem);
     font-weight: 800;
     line-height: 1.04;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     letter-spacing: 0.07em;
     text-transform: uppercase;
+    transform: translateY(-3px);
   }
 
   .title-line {
@@ -437,9 +534,9 @@ const truncateText = (text: string, length: number) => {
   }
 
   .title-line + .title-line {
-    margin-top: 2px;
+    margin-top: 4px;
   }
-  
+
   .word-glow {
     display: inline-block;
     color: #fefefe;
@@ -449,7 +546,7 @@ const truncateText = (text: string, length: number) => {
       0 0 16px rgba(255, 255, 255, 0.34),
       0 6px 16px rgba(0, 0, 0, 0.78);
   }
-  
+
   /* Đổi hiệu ứng chữ trên Mobile thành Cyan */
   .word-glow-cyan {
     display: inline-block;
@@ -471,8 +568,15 @@ const truncateText = (text: string, length: number) => {
     letter-spacing: 0.16em;
     margin-bottom: 14px;
     font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.8);
-    background: linear-gradient(90deg, transparent, rgba(99, 220, 197, 0.18), transparent);
+    text-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.9),
+      0 0 10px rgba(0, 0, 0, 0.8);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(99, 220, 197, 0.18),
+      transparent
+    );
     padding: 6px 0;
     border-top: 1px solid rgba(99, 220, 197, 0.2);
     border-bottom: 1px solid rgba(99, 220, 197, 0.2);
@@ -495,10 +599,13 @@ const truncateText = (text: string, length: number) => {
     overflow: hidden;
     transition: all 0.25s ease;
     border: 1px solid rgba(124, 147, 170, 0.28);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
   }
-  
-  .spirit-btn-sm:active { transform: scale(0.96); filter: brightness(1.2); }
+
+  .spirit-btn-sm:active {
+    transform: scale(0.96);
+    filter: brightness(1.2);
+  }
 
   .btn-inner-sm {
     position: relative;
@@ -508,20 +615,36 @@ const truncateText = (text: string, length: number) => {
     font-size: 0.84rem;
     letter-spacing: 0.04em;
   }
-  
-  .btn-aura-sm { position: absolute; inset: 0; z-index: 1; opacity: 0.9; }
+
+  .btn-aura-sm {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: 0.9;
+  }
 
   /* Đổi nút Mobile sang Băng Lam */
   .spirit-btn-sm.cyan {
     border-color: rgba(99, 220, 197, 0.5);
     box-shadow: 0 4px 20px rgba(99, 220, 197, 0.26);
   }
-  .spirit-btn-sm.cyan .btn-aura-sm { background: linear-gradient(135deg, #4db8dc, #61dcc4); }
-  
+  .spirit-btn-sm.cyan .btn-aura-sm {
+    background: linear-gradient(135deg, #4db8dc, #61dcc4);
+  }
+
   /* Nút phụ kính mờ */
-  .spirit-btn-sm.dark-glass { border-color: rgba(255, 255, 255, 0.2); background: rgba(15, 23, 42, 0.6); }
-  .spirit-btn-sm.dark-glass .btn-inner-sm { color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-  .spirit-btn-sm.dark-glass .btn-aura-sm { background: transparent; backdrop-filter: blur(8px); }
+  .spirit-btn-sm.dark-glass {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(15, 23, 42, 0.6);
+  }
+  .spirit-btn-sm.dark-glass .btn-inner-sm {
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  .spirit-btn-sm.dark-glass .btn-aura-sm {
+    background: transparent;
+    backdrop-filter: blur(8px);
+  }
 }
 
 @media (max-width: 640px) {
@@ -536,19 +659,20 @@ const truncateText = (text: string, length: number) => {
   }
 
   .mobile-content-wrapper {
-    padding: 14px 12px 12px;
+    padding: 12px 12px 16px;
   }
 
   .grand-title-mobile {
     font-size: clamp(1.9rem, 8vw, 2.5rem);
     line-height: 1.02;
-    gap: 4px;
-    margin-bottom: 8px;
+    gap: 6px;
+    margin-bottom: 10px;
     letter-spacing: 0.06em;
+    transform: translateY(-2px);
   }
 
   .title-line + .title-line {
-    margin-top: 1px;
+    margin-top: 2px;
   }
 
   .slogan-mobile {
@@ -573,12 +697,23 @@ const truncateText = (text: string, length: number) => {
 
 /* ===== ANIMATIONS ===== */
 @keyframes slow-pan {
-  0% { transform: scale(1); object-position: center top; }
-  100% { transform: scale(1.15); object-position: center bottom; }
+  0% {
+    transform: scale(1);
+    object-position: center top;
+  }
+  100% {
+    transform: scale(1.15);
+    object-position: center bottom;
+  }
 }
 
 @keyframes aura-pulse-cyan {
-  0%, 100% { filter: brightness(100%) drop-shadow(0 0 2px #61dcc4); }
-  50% { filter: brightness(130%) drop-shadow(0 0 12px #61dcc4); }
+  0%,
+  100% {
+    filter: brightness(100%) drop-shadow(0 0 2px #61dcc4);
+  }
+  50% {
+    filter: brightness(130%) drop-shadow(0 0 12px #61dcc4);
+  }
 }
 </style>

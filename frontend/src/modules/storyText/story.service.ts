@@ -90,6 +90,8 @@ export interface AdminStoriesParams {
   keyword?: string;
   author_id?: number | null;
   category_id?: number | null;
+  has_audio?: boolean | number | null;
+  require_text_chapters?: boolean | number | null;
 }
 
 // --- Chapter APIs ---
@@ -170,6 +172,8 @@ export const getAdminStories = async ({
   keyword = "",
   author_id = null,
   category_id = null,
+  has_audio = null,
+  require_text_chapters = null,
 }: AdminStoriesParams = {}) => {
   const res = await axios.get(`/api/truyen`, {
     params: {
@@ -179,6 +183,8 @@ export const getAdminStories = async ({
       keyword,
       author_id,
       category_id,
+      has_audio,
+      require_text_chapters,
     },
   });
   return res.data;
