@@ -292,8 +292,6 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap');
-
 /* Vũ trụ không gian (Deep Space & Gold) */
 .tasks-page-cosmic {
   position: relative;

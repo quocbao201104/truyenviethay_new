@@ -101,8 +101,6 @@ const handleImageError = (e: Event) => {
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap");
-
 .top-stories-table-xianxia {
   background: rgba(11, 15, 25, 0.6);
   backdrop-filter: blur(20px);

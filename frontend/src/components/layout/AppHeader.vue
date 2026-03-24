@@ -55,7 +55,15 @@
                 @click="closeSuggestions"
               >
                 <div class="suggestion-cover-wrapper">
-                   <img :src="getStoryImageUrl(story.anh_bia)" :alt="story.ten_truyen" @error="handleImageError" />
+                   <img
+                     :src="getStoryImageUrl(story.anh_bia, 96)"
+                     :srcset="getStoryImageSrcSet(story.anh_bia)"
+                     sizes="45px"
+                     :alt="story.ten_truyen"
+                     loading="lazy"
+                     decoding="async"
+                     @error="handleImageError"
+                   />
                 </div>
                 <div class="suggestion-spirit-info">
                   <div class="suggestion-spirit-title">{{ story.ten_truyen }}</div>
@@ -173,8 +181,14 @@ import axios from "@/utils/axios";
 import { useNotificationStore } from "@/modules/notification/notification.store";
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { getAvatarUrl, getImageUrl } from "@/config/constants";
+import {
+  DEFAULT_STORY_COVER_URL,
+  getAvatarUrl,
+  getStoryCoverSrcSet,
+  getStoryCoverUrl,
+} from "@/config/constants";
 import NotificationCenter from "@/modules/notification/components/NotificationCenter.vue";
+import { prefetchSearchExperience } from "@/router/prefetch";
 
 export default {
   name: "AppHeader",
@@ -254,6 +268,7 @@ export default {
     };
 
     const handleSearchFocus = () => {
+      prefetchSearchExperience();
       showSuggestions.value = true;
       if (searchQuery.value?.trim().length >= 2) performSearch(searchQuery.value);
     };
@@ -275,8 +290,9 @@ export default {
       }
     };
 
-    const getStoryImageUrl = (path) => getImageUrl(path);
-    const handleImageError = (e) => { e.target.src = '/placeholder.jpg'; };
+    const getStoryImageUrl = (path, width = 96) => getStoryCoverUrl(path, width);
+    const getStoryImageSrcSet = (path) => getStoryCoverSrcSet(path, [64, 96, 128]);
+    const handleImageError = (e) => { e.target.src = DEFAULT_STORY_COVER_URL; };
 
     const notifications = computed(() => notificationStore.notifications);
     const unreadCount = computed(() => notificationStore.unreadCount);
@@ -301,7 +317,7 @@ export default {
       isLoggedIn, userFullName, avatarUrl, showDropdown, toggleDropdown, handleLogout,
       searchQuery, showSuggestions, searchResults, searchLoading, searchInputRef,
       handleSearchInput, handleSearchFocus, handleSearchBarClick, clearSearch,
-      closeSuggestions, handleSearchSubmit, getStoryImageUrl, handleImageError, handleAvatarError,
+      closeSuggestions, handleSearchSubmit, getStoryImageUrl, getStoryImageSrcSet, handleImageError, handleAvatarError,
       toggleNotification, showNotifications, notifications, unreadCount,
       handleNotificationNavigation
     };
@@ -310,8 +326,6 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap');
-
 /* ===== CORE THEME SPIRIT ===== */
 .header-xianxia {
   position: sticky;

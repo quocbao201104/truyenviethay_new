@@ -2,9 +2,13 @@
   <article class="audio-story-card">
     <div class="audio-story-card__cover">
       <img
-        :src="story.anh_bia || 'https://res.cloudinary.com/dg9ftuhv4/image/upload/v1774000516/h%C3%ACnh_5_clb3fa.jpg'"
+        :src="coverUrl"
+        :srcset="coverSrcSet"
+        sizes="(max-width: 640px) 44vw, (max-width: 1200px) 280px, 320px"
         :alt="story.ten_truyen"
         class="cover-image"
+        loading="lazy"
+        decoding="async"
       />
       <div class="cover-overlay"></div>
       
@@ -83,6 +87,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { getStoryCoverSrcSet, getStoryCoverUrl } from "@/config/constants";
 import type { Story, StoryAudioResponse, AudioPart } from '@/modules/storyAudio/storyAudio.service';
 
 const props = defineProps<{
@@ -95,6 +100,9 @@ const props = defineProps<{
 defineEmits<{
   (e: 'toggle-preview', story: Story): void;
 }>();
+
+const coverUrl = computed(() => getStoryCoverUrl(props.story.anh_bia, 640));
+const coverSrcSet = computed(() => getStoryCoverSrcSet(props.story.anh_bia, [320, 480, 640, 800]));
 
 const firstPlayablePart = computed<AudioPart | null>(() => {
   if (!props.audioData?.audio?.videos?.length) return null;

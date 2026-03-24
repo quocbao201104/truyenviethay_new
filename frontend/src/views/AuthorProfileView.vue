@@ -385,8 +385,6 @@ watch(
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800;900&display=swap");
-
 /* ===== BACKGROUND TINH TRẦN ===== */
 .author-profile-page {
   min-height: 100vh;

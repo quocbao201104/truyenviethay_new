@@ -4,6 +4,8 @@ import {
     getPublicStories,
     getAdminStories,
     getStoryById,
+    getStoryBySlug,
+    getMyStories,
     approveOrRejectStoryApi,
     updateStoryAdmin,
     deleteStoryAdmin,
@@ -147,8 +149,6 @@ export const useStoryStore = defineStore("story", () => {
         loading.value = true;
         currentStory.value = null; // Clear previous story
         try {
-            // Need to import getStoryBySlug from service
-            const { getStoryBySlug } = await import("./story.service");
             const res = await getStoryBySlug(slug);
              if (res) {
                 currentStory.value = res;
@@ -190,7 +190,6 @@ export const useStoryStore = defineStore("story", () => {
     const fetchAuthorStories = async (params: any) => {
         authorStoriesLoading.value = true;
         try {
-            const { getMyStories } = await import("./story.service");
             const result = await getMyStories(params);
             authorStories.value = result.data || [];
             authorStoriesPagination.value = result.pagination;

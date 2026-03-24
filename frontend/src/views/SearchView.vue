@@ -318,8 +318,6 @@ watch(() => route.query, () => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap');
-
 /* ===== CONTAINER & GLOBAL ===== */
 .search-view-container {
   min-height: 100vh;

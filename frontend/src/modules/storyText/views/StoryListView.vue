@@ -490,8 +490,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap");
-
 /* ===== CORE BACKGROUND ===== */
 .story-list-page-xianxia {
   --app-radius-lg: 24px;

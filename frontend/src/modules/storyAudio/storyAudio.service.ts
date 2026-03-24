@@ -1,7 +1,8 @@
 import axios from "@/utils/axios";
-import { cachedGet } from "@/utils/requestCache";
+import { cachedGet, prefetchGet } from "@/utils/requestCache";
 import {
   getPublicStories,
+  prefetchPublicStories,
   type PublicStoriesParams,
   type Story,
 } from "@/modules/storyText/story.service";
@@ -82,6 +83,21 @@ export const getAudioStories = async ({
   });
 };
 
+export const prefetchAudioStories = async ({
+  page = 1,
+  limit = 12,
+  sort_by = "thoi_gian_cap_nhat",
+  order = "DESC",
+}: PublicStoriesParams = {}) => {
+  await prefetchPublicStories({
+    page,
+    limit,
+    sort_by,
+    order,
+    has_audio: true,
+  });
+};
+
 export const getStoryAudioBySlug = async (slug: string): Promise<StoryAudioResponse> => {
   return await cachedGet<StoryAudioResponse>(
     `/api/truyen/slug/${slug}/audio`,
@@ -95,6 +111,15 @@ export const getStoryAudioById = async (id: number): Promise<StoryAudioResponse>
     `/api/truyen/${id}/audio`,
     {},
     { ttlMs: 60000, dedupe: true, abortKey: `storyAudio:${id}` },
+  );
+};
+
+export const prefetchStoryAudioBySlug = async (slug: string) => {
+  if (!slug) return;
+  await prefetchGet<StoryAudioResponse>(
+    `/api/truyen/slug/${slug}/audio`,
+    {},
+    { ttlMs: 60000, dedupe: true },
   );
 };
 

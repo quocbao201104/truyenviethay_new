@@ -133,18 +133,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from "vue";
+import { defineAsyncComponent, ref, onMounted, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import { getAuthorDashboard } from "@/modules/author/author.api";
 import { useStoryStore } from "@/modules/storyText/story.store";
 import { useCategoryStore } from "@/modules/category/category.store";
 import AuthorDashboardStatCard from "@/components/author/AuthorDashboardStatCard.vue";
-import AuthorDashboardChart from "@/components/author/AuthorDashboardChart.vue";
 import AuthorStoryFiltersSection from "@/components/author/AuthorStoryFiltersSection.vue";
 import AuthorStoryTableSection from "@/components/author/AuthorStoryTableSection.vue";
 import NotificationInbox from "@/components/author/NotificationInbox.vue";
 import { useNotificationStore } from "@/modules/notification/notification.store";
 import { useAppToast } from "@/composables/useAppToast";
+
+const AuthorDashboardChart = defineAsyncComponent({
+  loader: () => import("@/components/author/AuthorDashboardChart.vue"),
+  delay: 0,
+});
 
 const router = useRouter();
 const storyStore = useStoryStore();

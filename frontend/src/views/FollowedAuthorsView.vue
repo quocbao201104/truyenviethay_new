@@ -101,8 +101,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800;900&display=swap");
-
 .followed-authors-page {
   min-height: 100vh;
   background: #0b0f19;

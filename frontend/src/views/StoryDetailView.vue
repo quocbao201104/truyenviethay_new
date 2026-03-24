@@ -45,12 +45,16 @@
           <div class="cover-wrapper">
             <div
               class="cover-blur-bg"
-              :style="{ backgroundImage: `url(${getImageUrl(story.anh_bia)})` }"
+              :style="{ backgroundImage: `url(${storyCoverBlurUrl})` }"
             ></div>
             <img
-              :src="getImageUrl(story.anh_bia)"
+              :src="storyCoverUrl"
+              :srcset="storyCoverSrcSet"
+              sizes="(max-width: 768px) 58vw, (max-width: 1200px) 280px, 320px"
               :alt="story.ten_truyen"
               class="story-cover-main"
+              decoding="async"
+              fetchpriority="high"
               @error="handleImageError"
             />
             <div :class="['status-sigil-detail', statusClass]">
@@ -341,7 +345,11 @@ import { useRatingStore } from "@/modules/rating/rating.store";
 import { useHistoryStore } from "@/modules/history/history.store";
 import CommentList from "@/modules/comment/CommentList.vue";
 import SkeletonLoader from "@/components/common/SkeletonLoader.vue";
-import { getImageUrl } from "@/config/constants";
+import {
+  DEFAULT_STORY_COVER_URL,
+  getStoryCoverSrcSet,
+  getStoryCoverUrl,
+} from "@/config/constants";
 
 const route = useRoute();
 const storyStore = useStoryStore();
@@ -490,8 +498,14 @@ const formatDate = (d?: string | null) => {
   return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 };
 
+const storyCoverUrl = computed(() => getStoryCoverUrl(story.value?.anh_bia, 720));
+const storyCoverSrcSet = computed(() =>
+  getStoryCoverSrcSet(story.value?.anh_bia, [320, 480, 640, 720, 960]),
+);
+const storyCoverBlurUrl = computed(() => getStoryCoverUrl(story.value?.anh_bia, 960));
+
 const handleImageError = (e: Event) => {
-  (e.target as HTMLImageElement).src = "https://res.cloudinary.com/dg9ftuhv4/image/upload/v1774000516/h%C3%ACnh_5_clb3fa.jpg";
+  (e.target as HTMLImageElement).src = DEFAULT_STORY_COVER_URL;
 };
 
 const formatStatus = (status: string) => {
@@ -565,8 +579,6 @@ watch(
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap");
-
 /* ===== CORE THEME ===== */
 .story-detail-page-cosmic {
   --text-premium-bg: linear-gradient(135deg, rgba(11, 21, 34, 0.96), rgba(18, 30, 45, 0.92));

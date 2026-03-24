@@ -35,7 +35,7 @@
         <span>MƯỢN LỰC THIÊN ĐẠO</span>
       </div>
       <div class="google-signin-container">
-        <GoogleLogin :callback="onGoogleCallback" />
+        <LazyGoogleLoginButton :callback="onGoogleCallback" />
       </div>
     </div>
 
@@ -48,6 +48,7 @@
 <script setup>
 import { ref, reactive } from "vue";
 import BaseInput from "@/components/common/BaseInput.vue";
+import LazyGoogleLoginButton from "@/modules/auth/components/LazyGoogleLoginButton.vue";
 
 const emit = defineEmits(["submit-login", "submit-google-login"]);
 

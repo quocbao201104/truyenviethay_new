@@ -18,7 +18,7 @@
             <span>MƯỢN LỰC THIÊN ĐẠO</span>
           </div>
           <div class="google-signin-container">
-            <GoogleLogin :callback="onGoogleCallback" />
+            <LazyGoogleLoginButton :callback="onGoogleCallback" />
           </div>
         </div>
         
@@ -34,6 +34,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import LazyGoogleLoginButton from "@/modules/auth/components/LazyGoogleLoginButton.vue";
 import RegisterForm from "@/modules/auth/RegisterForm.vue";
 import { useAuthStore } from "@/modules/auth/auth.store";
 
@@ -56,8 +57,6 @@ const onGoogleCallback = async (response) => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap');
-
 /* ===== BACKGROUND (TINH TRẦN HƯ KHÔNG) ===== */
 .dangky-container {
   display: flex;

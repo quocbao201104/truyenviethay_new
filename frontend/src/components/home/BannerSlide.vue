@@ -3,7 +3,14 @@
     <!-- Background Layer with Blur -->
     <div class="slide-cosmic-bg">
       <div class="cover-cosmic-wrapper">
-        <img :src="coverUrl" class="cover-bg-aura" alt="Background" />
+        <img
+          :src="coverBackgroundUrl"
+          :srcset="coverBackgroundSrcSet"
+          sizes="100vw"
+          class="cover-bg-aura"
+          alt="Background"
+          decoding="async"
+        />
       </div>
       <div class="cosmic-overlay-radial"></div>
     </div>
@@ -47,7 +54,14 @@
       <!-- Right: Book Cover 3D -->
       <div class="cover-aura-display" @click="goToStory">
         <div class="book-3d-container">
-          <img :src="coverUrl" class="book-cover-3d" :alt="story.ten_truyen" />
+          <img
+            :src="coverUrl"
+            :srcset="coverSrcSet"
+            sizes="320px"
+            class="book-cover-3d"
+            :alt="story.ten_truyen"
+            decoding="async"
+          />
           <div class="book-glow-cyan"></div>
         </div>
       </div>
@@ -58,7 +72,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import { getImageUrl } from "@/config/constants";
+import {
+  getStoryCoverSrcSet,
+  getStoryCoverUrl,
+} from "@/config/constants";
 
 interface Story {
   id: number;
@@ -76,7 +93,12 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
-const coverUrl = computed(() => getImageUrl(props.story.anh_bia));
+const coverUrl = computed(() => getStoryCoverUrl(props.story.anh_bia, 640));
+const coverSrcSet = computed(() => getStoryCoverSrcSet(props.story.anh_bia, [320, 480, 640, 800]));
+const coverBackgroundUrl = computed(() => getStoryCoverUrl(props.story.anh_bia, 1280));
+const coverBackgroundSrcSet = computed(() =>
+  getStoryCoverSrcSet(props.story.anh_bia, [640, 960, 1280, 1600]),
+);
 
 const goToStory = () => {
   router.push(`/truyen-chu/${props.story.slug}`);

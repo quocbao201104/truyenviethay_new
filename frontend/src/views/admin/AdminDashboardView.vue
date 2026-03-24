@@ -97,13 +97,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { defineAsyncComponent, ref, onMounted } from "vue";
 import { getAdminDashboard } from "@/modules/admin/admin.api";
 import AuthorDashboardStatCard from "@/components/author/AuthorDashboardStatCard.vue";
-import AuthorDashboardChart from "@/components/author/AuthorDashboardChart.vue";
 import AdminDashboardTopStories from "@/components/admin/AdminDashboardTopStories.vue";
 import AdminAuthorApplications from "@/components/admin/AdminAuthorApplications.vue";
 import { useAppToast } from "@/composables/useAppToast";
+
+const AuthorDashboardChart = defineAsyncComponent({
+  loader: () => import("@/components/author/AuthorDashboardChart.vue"),
+  delay: 0,
+});
 
 const { showErrorToast } = useAppToast();
 

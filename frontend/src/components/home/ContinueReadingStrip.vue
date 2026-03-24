@@ -15,7 +15,15 @@
         :title="item.ten_truyen"
       >
         <div class="cover-aura-wrapper">
-          <img :src="getImageUrl(item.anh_bia)" :alt="item.ten_truyen" class="item-cover-img" />
+          <img
+            :src="getStoryCoverUrl(item.anh_bia, 240)"
+            :srcset="getStoryCoverSrcSet(item.anh_bia, [160, 240, 320])"
+            sizes="88px"
+            :alt="item.ten_truyen"
+            class="item-cover-img"
+            loading="lazy"
+            decoding="async"
+          />
           
           <div class="bottom-vignette"></div>
 
@@ -40,7 +48,7 @@
 import { computed, onMounted } from 'vue';
 import { useAuthStore } from "@/modules/auth/auth.store";
 import { useHistoryStore } from "@/modules/history/history.store";
-import { getImageUrl } from "@/config/constants";
+import { getStoryCoverSrcSet, getStoryCoverUrl } from "@/config/constants";
 import type { HistoryItem } from '@/modules/history/history.service';
 
 const authStore = useAuthStore();
@@ -85,8 +93,6 @@ const getChapterLink = (item: HistoryItem) => {
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap");
-
 /* ===== KHUNG CHÍNH (CONTAINER) ===== */
 .continue-reading-strip {
   margin-bottom: 35px;

@@ -2,6 +2,47 @@
   <div class="story-audio-detail-page">
     <main v-if="loading" class="audio-detail-container">
       <section class="audio-shell audio-shell--loading">
+        <div class="loading-shell" aria-hidden="true">
+          <div class="loading-shell__feature">
+            <div class="loading-shell__cover shimmer-block"></div>
+            <div class="loading-shell__main">
+              <span class="loading-shell__eyebrow shimmer-block"></span>
+              <span class="loading-shell__title shimmer-block"></span>
+              <span class="loading-shell__title loading-shell__title--short shimmer-block"></span>
+
+              <div class="loading-shell__player">
+                <div class="loading-shell__player-top">
+                  <span class="loading-shell__pill shimmer-block"></span>
+                  <span class="loading-shell__pill loading-shell__pill--short shimmer-block"></span>
+                </div>
+                <span class="loading-shell__context shimmer-block"></span>
+                <span class="loading-shell__progress shimmer-block"></span>
+                <div class="loading-shell__controls">
+                  <span
+                    v-for="button in [1, 2, 3, 4, 5]"
+                    :key="`loading-control-${button}`"
+                    class="loading-shell__control shimmer-block"
+                    :class="{ 'loading-shell__control--primary': button === 3 }"
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="loading-shell__queue panel-card">
+            <div class="loading-shell__queue-header">
+              <span class="loading-shell__queue-title shimmer-block"></span>
+              <span class="loading-shell__queue-cta shimmer-block"></span>
+            </div>
+            <div class="loading-shell__queue-items">
+              <span
+                v-for="item in playlistSkeletonRows"
+                :key="`loading-queue-${item}`"
+                class="loading-shell__queue-item shimmer-block"
+              ></span>
+            </div>
+          </div>
+        </div>
         <div class="loading-state">
           <i class="fas fa-circle-notch fa-spin"></i>
           <p>Đang tải không gian audio...</p>
@@ -23,8 +64,12 @@
             <div class="stage-cover">
               <img
                 :src="coverUrl"
+                :srcset="coverSrcSet"
+                sizes="(max-width: 768px) 60vw, (max-width: 1280px) 320px, 360px"
                 :alt="audioPayload.story.ten_truyen"
                 class="stage-cover__image"
+                decoding="async"
+                fetchpriority="high"
                 @error="handleCoverError"
               />
               <div class="stage-cover__overlay"></div>
@@ -168,12 +213,13 @@
 
             </div> <!-- /.stage-center -->
 
-            <section class="panel-card editorial-notes desktop-notes">
+            <section class="panel-card editorial-notes desktop-notes" :class="{ 'editorial-notes--warming': !deferredPanelsReady }">
               <div class="editorial-notes__header">
                 <span class="panel-label">Ghi chú biên tập</span>
                 <h3>Mở đầu cho người nghe</h3>
               </div>
 
+              <template v-if="deferredPanelsReady">
               <div class="stage-meta editorial-meta">
                 <span class="stage-meta__item" title="Tác giả">
                   <i class="fas fa-feather-pointed"></i>
@@ -198,6 +244,20 @@
                   {{ copyrightHolder.name }}
                 </a>
               </p>
+              </template>
+
+              <div v-else class="notes-skeleton" aria-hidden="true">
+                <div class="notes-skeleton__chips">
+                  <span class="notes-skeleton__chip shimmer-block"></span>
+                  <span class="notes-skeleton__chip notes-skeleton__chip--short shimmer-block"></span>
+                </div>
+                <span
+                  v-for="line in noteSkeletonRows"
+                  :key="`desktop-note-skeleton-${line}`"
+                  class="notes-skeleton__line shimmer-block"
+                  :class="{ 'notes-skeleton__line--short': line === noteSkeletonRows[noteSkeletonRows.length - 1] }"
+                ></span>
+              </div>
             </section>
           </div> <!-- /.stage-feature -->
 
@@ -217,7 +277,7 @@
                 </router-link>
               </div>
 
-              <div class="playlist-groups">
+              <div v-if="deferredPanelsReady" class="playlist-groups">
                 <section
                   v-for="cluster in playlistClusters"
                   :key="cluster.key"
@@ -279,15 +339,28 @@
                   </div>
                 </section>
               </div>
+
+              <div v-else class="playlist-skeleton" aria-hidden="true">
+                <div
+                  v-for="item in playlistSkeletonRows"
+                  :key="`playlist-skeleton-${item}`"
+                  class="playlist-skeleton__item"
+                >
+                  <span class="playlist-skeleton__eyebrow shimmer-block"></span>
+                  <span class="playlist-skeleton__title shimmer-block"></span>
+                  <span class="playlist-skeleton__meta shimmer-block"></span>
+                </div>
+              </div>
             </div>
           </aside>
 
-          <section class="panel-card editorial-notes mobile-notes">
+          <section class="panel-card editorial-notes mobile-notes" :class="{ 'editorial-notes--warming': !deferredPanelsReady }">
             <div class="editorial-notes__header">
               <span class="panel-label">Ghi chú biên tập</span>
               <h3>Mở đầu cho người nghe</h3>
             </div>
 
+            <template v-if="deferredPanelsReady">
             <div class="stage-meta editorial-meta">
               <span class="stage-meta__item" title="Tác giả">
                 <i class="fas fa-feather-pointed"></i>
@@ -312,6 +385,20 @@
                 {{ copyrightHolder.name }}
               </a>
             </p>
+            </template>
+
+            <div v-else class="notes-skeleton" aria-hidden="true">
+              <div class="notes-skeleton__chips">
+                <span class="notes-skeleton__chip shimmer-block"></span>
+                <span class="notes-skeleton__chip notes-skeleton__chip--short shimmer-block"></span>
+              </div>
+              <span
+                v-for="line in noteSkeletonRows"
+                :key="`mobile-note-skeleton-${line}`"
+                class="notes-skeleton__line shimmer-block"
+                :class="{ 'notes-skeleton__line--short': line === noteSkeletonRows[noteSkeletonRows.length - 1] }"
+              ></span>
+            </div>
           </section>
         </section>
       </section>
@@ -323,7 +410,11 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { getImageUrl } from "@/config/constants";
+import {
+  DEFAULT_STORY_COVER_URL,
+  getStoryCoverSrcSet,
+  getStoryCoverUrl,
+} from "@/config/constants";
 import { useAuthStore } from "@/modules/auth/auth.store";
 import {
   getStoryAudioBySlug,
@@ -336,8 +427,6 @@ import {
 const route = useRoute();
 const authStore = useAuthStore();
 
-const DEFAULT_COVER_URL =
-  "https://res.cloudinary.com/dg9ftuhv4/image/upload/v1774000516/h%C3%ACnh_5_clb3fa.jpg";
 const RESUME_STORAGE_PREFIX = "storyAudioResume";
 const LOCAL_PROGRESS_MIN_SECONDS = 3;
 
@@ -354,6 +443,12 @@ type LocalAudioResume = {
   updatedAt: string;
 };
 
+type IdleCallbackHandle = number;
+type IdleCallbackDeadline = {
+  didTimeout: boolean;
+  timeRemaining: () => number;
+};
+
 const loading = ref(false);
 const error = ref("");
 const audioPayload = ref<StoryAudioResponse | null>(null);
@@ -365,10 +460,14 @@ const pendingSeekSeconds = ref<number | null>(null);
 const lastRemoteSavedPartId = ref<number | null>(null);
 const isRestoringInitialPart = ref(false);
 const fetchRequestId = ref(0);
+const deferredPanelsReady = ref(false);
+const deferredPanelsHandle = ref<IdleCallbackHandle | null>(null);
 
 const currentTime = ref(0);
 const duration = ref(0);
 const playbackRate = ref(1);
+const playlistSkeletonRows = [1, 2, 3];
+const noteSkeletonRows = [1, 2, 3];
 
 const beforeUnloadListener = () => {
   flushResumeState();
@@ -377,6 +476,56 @@ const visibilityListener = () => {
   if (document.visibilityState === "hidden") {
     flushResumeState();
   }
+};
+
+const getIdleWindow = () =>
+  typeof window === "undefined"
+    ? null
+    : (window as Window & {
+        requestIdleCallback?: (
+          callback: (deadline: IdleCallbackDeadline) => void,
+          options?: { timeout: number },
+        ) => IdleCallbackHandle;
+        cancelIdleCallback?: (handle: IdleCallbackHandle) => void;
+      });
+
+const clearDeferredPanelsSchedule = () => {
+  const idleWindow = getIdleWindow();
+
+  if (deferredPanelsHandle.value == null) return;
+
+  if (idleWindow?.cancelIdleCallback) {
+    idleWindow.cancelIdleCallback(deferredPanelsHandle.value);
+  } else if (typeof window !== "undefined") {
+    window.clearTimeout(deferredPanelsHandle.value);
+  }
+
+  deferredPanelsHandle.value = null;
+};
+
+const scheduleDeferredPanels = (requestId: number) => {
+  clearDeferredPanelsSchedule();
+
+  const idleWindow = getIdleWindow();
+  const commit = () => {
+    deferredPanelsHandle.value = null;
+    if (requestId !== fetchRequestId.value) return;
+    deferredPanelsReady.value = true;
+  };
+
+  if (idleWindow?.requestIdleCallback) {
+    deferredPanelsHandle.value = idleWindow.requestIdleCallback(() => {
+      commit();
+    }, { timeout: 180 });
+    return;
+  }
+
+  if (typeof window !== "undefined") {
+    deferredPanelsHandle.value = window.setTimeout(commit, 32);
+    return;
+  }
+
+  commit();
 };
 
 const flatParts = computed(
@@ -463,11 +612,11 @@ const displayAudioStatus = computed(() => {
 });
 
 const coverUrl = computed(() => {
-  const cover = audioPayload.value?.story.anh_bia;
-  if (!cover) return DEFAULT_COVER_URL;
-  if (String(cover).startsWith("http")) return String(cover);
-  return getImageUrl(cover);
+  return getStoryCoverUrl(audioPayload.value?.story.anh_bia, 720);
 });
+const coverSrcSet = computed(() =>
+  getStoryCoverSrcSet(audioPayload.value?.story.anh_bia, [320, 480, 640, 720, 960]),
+);
 
 const cleanDescription = computed(() => {
   const desc = audioPayload.value?.story.mo_ta?.trim();
@@ -547,7 +696,7 @@ function flushResumeState(forceRemote = false) {
 const handleCoverError = (event: Event) => {
   const image = event.target as HTMLImageElement | null;
   if (!image) return;
-  image.src = DEFAULT_COVER_URL;
+  image.src = DEFAULT_STORY_COVER_URL;
 };
 
 const toggleCluster = (clusterKey: string) => {
@@ -729,6 +878,8 @@ const fetchAudioDetail = async () => {
   loading.value = true;
   error.value = "";
   pendingSeekSeconds.value = null;
+  deferredPanelsReady.value = false;
+  clearDeferredPanelsSchedule();
   flushResumeState(true);
   audioElement.value?.pause();
   currentPart.value = null;
@@ -781,6 +932,8 @@ const fetchAudioDetail = async () => {
       });
       isRestoringInitialPart.value = false;
     }
+
+    scheduleDeferredPanels(requestId);
   } catch (err: any) {
     if (requestId !== fetchRequestId.value) {
       return;
@@ -808,6 +961,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  clearDeferredPanelsSchedule();
   flushResumeState();
   if (typeof window !== "undefined") {
     window.removeEventListener("beforeunload", beforeUnloadListener);
@@ -887,6 +1041,169 @@ watch(
 .loading-state i {
   font-size: 2rem;
   color: #74dbf3;
+}
+
+.audio-shell--loading .loading-state {
+  display: none;
+}
+
+.loading-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 24px;
+  text-align: left;
+}
+
+.loading-shell__feature {
+  display: grid;
+  grid-template-columns: clamp(180px, 22vw, 250px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: stretch;
+  padding: 24px;
+  border: 1px solid var(--audio-premium-border);
+  border-radius: 28px;
+  background: var(--audio-premium-bg);
+  box-shadow: 0 24px 56px rgba(4, 9, 20, 0.24);
+}
+
+.loading-shell__cover {
+  width: 100%;
+  min-height: 320px;
+  border-radius: 22px;
+}
+
+.loading-shell__main,
+.loading-shell__queue-items,
+.notes-skeleton {
+  display: flex;
+  flex-direction: column;
+}
+
+.loading-shell__main {
+  gap: 14px;
+}
+
+.loading-shell__eyebrow {
+  width: 112px;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.loading-shell__title {
+  width: min(88%, 540px);
+  height: 18px;
+  border-radius: 999px;
+}
+
+.loading-shell__title--short {
+  width: min(58%, 320px);
+}
+
+.loading-shell__player {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: auto;
+  padding: 20px;
+  border: 1px solid var(--audio-premium-border);
+  border-radius: 24px;
+  background: var(--audio-premium-surface);
+}
+
+.loading-shell__player-top,
+.loading-shell__controls,
+.loading-shell__queue-header,
+.notes-skeleton__chips {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.loading-shell__pill {
+  width: 108px;
+  height: 12px;
+  border-radius: 999px;
+}
+
+.loading-shell__pill--short {
+  width: 72px;
+}
+
+.loading-shell__context,
+.loading-shell__progress {
+  height: 14px;
+  border-radius: 999px;
+}
+
+.loading-shell__context {
+  width: 100%;
+}
+
+.loading-shell__progress {
+  width: 100%;
+}
+
+.loading-shell__controls {
+  justify-content: center;
+}
+
+.loading-shell__control {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.loading-shell__control--primary {
+  width: 56px;
+  height: 56px;
+}
+
+.loading-shell__queue {
+  padding: 24px;
+}
+
+.loading-shell__queue-title {
+  width: 128px;
+  height: 14px;
+  border-radius: 999px;
+}
+
+.loading-shell__queue-cta {
+  width: 88px;
+  height: 34px;
+  border-radius: 999px;
+}
+
+.loading-shell__queue-items {
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.loading-shell__queue-item {
+  height: 74px;
+  border-radius: 18px;
+}
+
+.shimmer-block {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.shimmer-block::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .audio-shell--error {
@@ -1449,12 +1766,81 @@ watch(
   text-decoration: underline;
 }
 
+.notes-skeleton {
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.notes-skeleton__chip {
+  width: 132px;
+  height: 32px;
+  border-radius: 999px;
+}
+
+.notes-skeleton__chip--short {
+  width: 96px;
+}
+
+.notes-skeleton__line {
+  width: 100%;
+  height: 14px;
+  border-radius: 999px;
+}
+
+.notes-skeleton__line--short {
+  width: 72%;
+}
+
 .playlist-card {
   display: flex;
   flex-direction: column;
   max-height: 800px;
   padding: 24px;
   border-color: var(--audio-premium-border-strong);
+}
+
+.playlist-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.playlist-skeleton__item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid rgba(120, 144, 168, 0.14);
+  border-radius: 18px;
+  background: rgba(15, 22, 34, 0.36);
+}
+
+.playlist-skeleton__eyebrow,
+.playlist-skeleton__meta {
+  height: 11px;
+  border-radius: 999px;
+}
+
+.playlist-skeleton__eyebrow {
+  width: 88px;
+}
+
+.playlist-skeleton__title {
+  width: 78%;
+  height: 16px;
+  border-radius: 999px;
+}
+
+.playlist-skeleton__meta {
+  width: 56%;
+}
+
+@supports (content-visibility: auto) {
+  .editorial-notes,
+  .playlist-card {
+    content-visibility: auto;
+    contain-intrinsic-size: 320px;
+  }
 }
 
 .playlist-header {
@@ -1737,6 +2123,22 @@ watch(
 }
 
 @media (max-width: 1100px) {
+  .loading-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .loading-shell__feature {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+    padding: 20px;
+  }
+
+  .loading-shell__cover {
+    max-width: 280px;
+    min-height: 280px;
+    margin: 0 auto;
+  }
+
   .stage-shell {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1771,6 +2173,46 @@ watch(
 
   .audio-detail-container {
     padding: 16px 12px 100px;
+  }
+
+  .audio-shell {
+    padding: 18px;
+  }
+
+  .loading-shell__feature {
+    padding: 16px;
+    border-radius: 20px;
+    grid-template-columns: 80px 1fr;
+    gap: 16px;
+  }
+
+  .loading-shell__cover {
+    width: 80px;
+    min-height: 110px;
+    border-radius: 12px;
+  }
+
+  .loading-shell__title {
+    width: 100%;
+  }
+
+  .loading-shell__title--short {
+    width: 74%;
+  }
+
+  .loading-shell__player {
+    grid-column: 1 / -1;
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .loading-shell__queue {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .loading-shell__queue-item {
+    height: 62px;
   }
 
   .stage-shell {

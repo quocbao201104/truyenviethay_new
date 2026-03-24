@@ -4,15 +4,64 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 // If usage prefers a separate base for images (e.g., CDN), it can be configured here.
 // For now, it mirrors the API_BASE_URL logic or can be a separate env var.
 export const IMAGE_BASE_URL = import.meta.env.VITE_APP_IMAGE_URL || API_BASE_URL;
+export const DEFAULT_STORY_COVER_URL =
+    "https://res.cloudinary.com/dg9ftuhv4/image/upload/v1774000516/h%C3%ACnh_5_clb3fa.jpg";
+
+type CloudinaryImageOptions = {
+    width?: number;
+    height?: number;
+    quality?: string;
+    format?: string;
+    crop?: string;
+    dprAuto?: boolean;
+};
+
+export const buildCloudinaryImageUrl = (
+    path: string,
+    {
+        width,
+        height,
+        quality = "auto",
+        format = "auto",
+        crop,
+        dprAuto = false,
+    }: CloudinaryImageOptions = {},
+): string => {
+    if (!path.includes('cloudinary.com')) return path;
+
+    const transforms: string[] = [];
+    if (width) transforms.push(`w_${Math.round(width)}`);
+    if (height) transforms.push(`h_${Math.round(height)}`);
+    if (crop) transforms.push(`c_${crop}`);
+    if (dprAuto) transforms.push("dpr_auto");
+    transforms.push(`f_${format}`, `q_${quality}`);
+
+    return path.replace('/upload/', `/upload/${transforms.join(",")}/`);
+};
+
+export const buildCloudinarySrcSet = (
+    path: string | null | undefined,
+    widths: number[],
+    options: Omit<CloudinaryImageOptions, "width"> = {},
+): string => {
+    if (!path) return "";
+
+    return widths
+        .map((width) => {
+            const url = path.includes("cloudinary.com")
+                ? buildCloudinaryImageUrl(path, { ...options, width })
+                : getImageUrl(path, width);
+            return `${url} ${width}w`;
+        })
+        .join(", ");
+};
 
 export const getImageUrl = (path: string | null | undefined, width: number = 600): string => {
     if (!path) return '/placeholder.jpg'; // Or a default local asset
     
     // Cloudinary Optimization
     if (path.includes('cloudinary.com')) {
-        // Inject transformations (w_X, f_auto, q_auto)
-        // Regex looks for /upload/ and inserts params after it
-        return path.replace('/upload/', `/upload/w_${width},f_auto,q_auto/`);
+        return buildCloudinaryImageUrl(path, { width });
     }
 
     if (path.startsWith('http')) return path;
@@ -20,6 +69,28 @@ export const getImageUrl = (path: string | null | undefined, width: number = 600
     // Ensure path starts with slash if appending to base
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     return `${IMAGE_BASE_URL}${cleanPath}`;
+};
+
+export const getStoryCoverUrl = (
+    path: string | null | undefined,
+    width: number = 600,
+): string => {
+    if (!path) return DEFAULT_STORY_COVER_URL;
+    if (path.includes("cloudinary.com")) {
+        return buildCloudinaryImageUrl(path, { width, quality: "auto", format: "auto" });
+    }
+    if (path.startsWith("http")) return path;
+    return getImageUrl(path, width);
+};
+
+export const getStoryCoverSrcSet = (
+    path: string | null | undefined,
+    widths: number[] = [320, 480, 640, 800],
+): string => {
+    if (!path) return "";
+    return widths
+        .map((width) => `${getStoryCoverUrl(path, width)} ${width}w`)
+        .join(", ");
 };
 
 export const getAvatarUrl = (path: string | null | undefined): string => {

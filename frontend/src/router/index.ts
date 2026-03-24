@@ -1,39 +1,39 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-import HomeView from "../views/HomeView.vue";
-import LoginView from "../views/LoginView.vue";
-import RegisterView from "@/views/RegisterView.vue";
+const HomeView = () => import("../views/HomeView.vue");
+const LoginView = () => import("../views/LoginView.vue");
+const RegisterView = () => import("@/views/RegisterView.vue");
 const StoryListView = () => import("@/modules/storyText/views/StoryListView.vue");
 const StoryAudioView = () => import("@/modules/storyAudio/views/StoryAudioView.vue");
 const StoryAudioDetailView = () => import("@/modules/storyAudio/views/StoryAudioDetailView.vue");
 const CategoryView = () => import("@/views/CategoryView.vue");
-import ProfileView from "@/views/ProfileView.vue";
-import ProfileSettingsView from "@/views/ProfileSettingsView.vue";
-import AdminUserManagementView from "@/views/admin/AdminUserManagementView.vue";
-import AdminStoryManagementView from "@/views/admin/AdminStoryManagementView.vue";
-import AdminDashboardView from "@/views/admin/AdminDashboardView.vue"; // Import this
-import SubmitStoryView from "@/views/SubmitStoryView.vue";
-import FavoritesView from "@/views/FavoritesView.vue";
-import HistoryView from "@/views/HistoryView.vue";
+const ProfileView = () => import("@/views/ProfileView.vue");
+const ProfileSettingsView = () => import("@/views/ProfileSettingsView.vue");
+const AdminUserManagementView = () => import("@/views/admin/AdminUserManagementView.vue");
+const AdminStoryManagementView = () => import("@/views/admin/AdminStoryManagementView.vue");
+const AdminDashboardView = () => import("@/views/admin/AdminDashboardView.vue");
+const SubmitStoryView = () => import("@/views/SubmitStoryView.vue");
+const FavoritesView = () => import("@/views/FavoritesView.vue");
+const HistoryView = () => import("@/views/HistoryView.vue");
 const TopView = () => import("@/views/TopView.vue");
 const SearchView = () => import("@/views/SearchView.vue");
 const RankingView = () => import("@/views/RankingView.vue");
-import TasksView from "@/views/TasksView.vue";
-import AuthorProfileView from "@/views/AuthorProfileView.vue";
-import FollowedAuthorsView from "@/views/FollowedAuthorsView.vue";
+const TasksView = () => import("@/views/TasksView.vue");
+const AuthorProfileView = () => import("@/views/AuthorProfileView.vue");
+const FollowedAuthorsView = () => import("@/views/FollowedAuthorsView.vue");
 
 import { useAuthStore } from "@/modules/auth/auth.store";
 const StoryDetailView = () => import("@/views/StoryDetailView.vue");
 const ChapterView = () => import("@/views/ChapterView.vue");
-import AuthorChapterManagementView from "@/views/Author/AuthorChapterManagementView.vue";
-import AuthorChapterEditor from "@/views/Author/AuthorChapterEditor.vue";
-import AuthorDashboardView from "@/views/Author/AuthorDashboardView.vue";
-import AuthorApplyView from "@/views/Author/AuthorApplyView.vue";
+const AuthorChapterManagementView = () => import("@/views/Author/AuthorChapterManagementView.vue");
+const AuthorChapterEditor = () => import("@/views/Author/AuthorChapterEditor.vue");
+const AuthorDashboardView = () => import("@/views/Author/AuthorDashboardView.vue");
+const AuthorApplyView = () => import("@/views/Author/AuthorApplyView.vue");
 
 // Rules & Legal Views
-import PrivacyView from "@/views/Rules/PrivacyView.vue";
-import TermsView from "@/views/Rules/TermsView.vue";
-import CopyrightView from "@/views/Rules/CopyrightView.vue";
-import ContactView from "@/views/Rules/ContactView.vue";
+const PrivacyView = () => import("@/views/Rules/PrivacyView.vue");
+const TermsView = () => import("@/views/Rules/TermsView.vue");
+const CopyrightView = () => import("@/views/Rules/CopyrightView.vue");
+const ContactView = () => import("@/views/Rules/ContactView.vue");
 const routes: Array<RouteRecordRaw> = [
   { path: "/", name: "Home", component: HomeView },
   { path: "/dang-nhap", name: "Login", component: LoginView },

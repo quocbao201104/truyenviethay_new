@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "vue-toastification";
 import { getFollowedStories, toggleFollowStory, type Story } from "./favorite.service";
+import { useStoryStore } from "@/modules/storyText/story.store";
 
 export const useFavoriteStore = defineStore("favorite", () => {
     const router = useRouter();
@@ -67,7 +68,7 @@ export const useFavoriteStore = defineStore("favorite", () => {
             const isNowFollowed = response.message.includes("Đã theo dõi");
             
             // SYNC with storyStore if it exists to fix stale UI in StoryDetailView
-            const storyStore = (await import("@/modules/storyText/story.store")).useStoryStore();
+            const storyStore = useStoryStore();
             if (storyStore.currentStory && storyStore.currentStory.id === storyId) {
                 storyStore.currentStory.is_followed = isNowFollowed;
             }

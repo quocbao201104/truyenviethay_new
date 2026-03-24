@@ -1,11 +1,16 @@
 <template>
   <div class="hero-grid-container" v-if="stories.length > 0">
-    <div class="hero-mobile-static mobile-only">
+    <div v-if="isMobileViewport" class="hero-mobile-static">
       <div class="mobile-bg-wrapper">
         <img
-          src="https://res.cloudinary.com/dg9ftuhv4/image/upload/f_auto,q_auto,w_800/v1772805142/truyenviethay/banners/banner-mobile.png"
+          :src="mobileBannerImage"
+          :srcset="mobileBannerSrcSet"
+          sizes="100vw"
           alt="Truyện Việt Hay Banner"
           class="mobile-bg-img"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
         />
         <div class="mobile-vignette"></div>
       </div>
@@ -23,11 +28,11 @@
         <p class="slogan-mobile">VẠN GIỚI KHAI MỞ - TIÊN LỮ THÔNG THIÊN</p>
 
         <div class="action-buttons-mobile">
-          <router-link to="/truyen-chu" class="spirit-btn-sm cyan">
+          <router-link to="/truyen-chu" class="spirit-btn-sm cyan" @mouseenter="warmStoryList" @focusin="warmStoryList" @touchstart.passive="warmStoryList">
             <div class="btn-aura-sm"></div>
             <span class="btn-inner-sm">TRUYỆN CHỮ</span>
           </router-link>
-          <router-link to="/truyen-audio" class="spirit-btn-sm dark-glass">
+          <router-link to="/truyen-audio" class="spirit-btn-sm dark-glass" @mouseenter="warmAudioList" @focusin="warmAudioList" @touchstart.passive="warmAudioList">
             <div class="btn-aura-sm"></div>
             <span class="btn-inner-sm">TRUYỆN AUDIO</span>
           </router-link>
@@ -35,16 +40,23 @@
       </div>
     </div>
 
-    <div class="main-highlight desktop-only">
+    <div v-else class="main-highlight">
       <transition name="fade" mode="out-in">
         <div
           class="highlight-content cosmic-glass"
           :key="mainStory.id || 'default'"
+          @mouseenter="warmCurrentStory"
+          @focusin="warmCurrentStory"
         >
           <img
-            :src="getImageUrl(mainStory.anh_bia)"
+            :src="getImageUrl(mainStory.anh_bia, 1280)"
+            :srcset="buildStoryCoverSrcSet(mainStory.anh_bia)"
+            sizes="(max-width: 1600px) 66vw, 960px"
             class="main-cover-bg"
             alt="Background"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
           />
           <div class="overlay-gradient"></div>
 
@@ -87,9 +99,12 @@
 
           <div class="floating-cover">
             <img
-              :src="getImageUrl(mainStory.anh_bia)"
+              :src="getImageUrl(mainStory.anh_bia, 420)"
+              :srcset="buildStoryCoverSrcSet(mainStory.anh_bia)"
+              sizes="280px"
               :alt="mainStory.ten_truyen"
               class="book-cover-3d"
+              decoding="async"
             />
             <div class="book-glow-aura"></div>
           </div>
@@ -97,7 +112,7 @@
       </transition>
     </div>
 
-    <div class="side-trending desktop-only">
+    <div v-if="!isMobileViewport" class="side-trending">
       <HomeChatBoard />
     </div>
   </div>
@@ -106,16 +121,52 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
-import { getImageUrl } from "@/config/constants";
+import {
+  buildCloudinaryImageUrl,
+  buildCloudinarySrcSet,
+  getImageUrl,
+} from "@/config/constants";
+import {
+  prefetchAudioListExperience,
+  prefetchStoryDetailExperience,
+  prefetchStoryListExperience,
+} from "@/router/prefetch";
 import HomeChatBoard from "./HomeChatBoard.vue";
 
 const router = useRouter();
+const isMobileViewport = ref(
+  typeof window !== "undefined"
+    ? window.matchMedia("(max-width: 1024px)").matches
+    : false,
+);
+const MOBILE_HERO_BANNER =
+  "https://res.cloudinary.com/dg9ftuhv4/image/upload/v1772805142/truyenviethay/banners/banner-mobile.png";
+const mobileBannerImage = buildCloudinaryImageUrl(MOBILE_HERO_BANNER, {
+  width: 640,
+  quality: "auto:eco",
+  dprAuto: true,
+});
+const mobileBannerSrcSet = buildCloudinarySrcSet(
+  MOBILE_HERO_BANNER,
+  [360, 480, 640, 800],
+  { quality: "auto:eco", dprAuto: true },
+);
+let viewportMediaQuery: MediaQueryList | null = null;
+let viewportListener: ((event: MediaQueryListEvent) => void) | null = null;
 
 const navigateToStory = (slug: string) => {
   if (document.activeElement instanceof HTMLElement) {
     document.activeElement.blur();
   }
   router.push(`/truyen-chu/${slug}`);
+};
+
+const warmStoryList = () => {
+  prefetchStoryListExperience();
+};
+
+const warmAudioList = () => {
+  prefetchAudioListExperience();
 };
 
 const props = defineProps({
@@ -135,6 +186,17 @@ const currentIndex = ref(0);
 let intervalId: any = null;
 
 onMounted(() => {
+  viewportMediaQuery = window.matchMedia("(max-width: 1024px)");
+  isMobileViewport.value = viewportMediaQuery.matches;
+  viewportListener = (event: MediaQueryListEvent) => {
+    isMobileViewport.value = event.matches;
+  };
+  if (viewportMediaQuery.addEventListener) {
+    viewportMediaQuery.addEventListener("change", viewportListener);
+  } else {
+    viewportMediaQuery.addListener(viewportListener);
+  }
+
   intervalId = setInterval(() => {
     if (props.stories && props.stories.length > 1) {
       const maxItems = Math.min(5, props.stories.length);
@@ -145,9 +207,27 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (intervalId) clearInterval(intervalId);
+  if (viewportMediaQuery && viewportListener) {
+    if (viewportMediaQuery.removeEventListener) {
+      viewportMediaQuery.removeEventListener("change", viewportListener);
+    } else {
+      viewportMediaQuery.removeListener(viewportListener);
+    }
+  }
 });
 
 const mainStory = computed(() => props.stories[currentIndex.value] || {});
+
+const warmCurrentStory = () => {
+  prefetchStoryDetailExperience(mainStory.value?.slug);
+};
+
+const buildStoryCoverSrcSet = (path?: string | null) => {
+  if (!path) return "";
+  return [420, 640, 960, 1280]
+    .map((width) => `${getImageUrl(path, width)} ${width}w`)
+    .join(", ");
+};
 
 const formatNumber = (num: number) => {
   if (!num) return "0";
@@ -163,7 +243,6 @@ const truncateText = (text: string, length: number) => {
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cinzel+Decorative:wght@700&display=swap");
 /* ===== CORE LAYOUT ===== */
 .hero-grid-container {
   --hero-premium-surface: rgba(14, 24, 38, 0.82);

@@ -10,10 +10,15 @@
     <section class="hero-gate">
       <div class="hero-bg-wrapper">
         <img
-          src="https://res.cloudinary.com/dg9ftuhv4/image/upload/f_auto,q_auto,w_800/v1772805144/truyenviethay/banners/banner-desktop.jpg"
+          :src="homeHeroImage"
+          :srcset="homeHeroSrcSet"
+          sizes="100vw"
           alt="TruyenVietHay Background"
           class="hero-bg-image"
           crossorigin="anonymous"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
         />
         <div class="hero-vignette"></div>
       </div>
@@ -31,14 +36,26 @@
           </h1>
 
           <div class="nut-dieu-huong">
-            <router-link to="/truyen-chu" class="btn-hero-card emerald">
+            <router-link
+              to="/truyen-chu"
+              class="btn-hero-card emerald"
+              @mouseenter="warmStoryList"
+              @focusin="warmStoryList"
+              @touchstart.passive="warmStoryList"
+            >
               <div class="btn-hero-icon"><i class="fas fa-book-open"></i></div>
               <div class="btn-hero-text">
                 <span class="btn-hero-main">Truyện Chữ</span>
                 <span class="btn-hero-sub">50.000+ tựa truyện</span>
               </div>
             </router-link>
-            <router-link to="/truyen-audio" class="btn-hero-card azure">
+            <router-link
+              to="/truyen-audio"
+              class="btn-hero-card azure"
+              @mouseenter="warmAudioList"
+              @focusin="warmAudioList"
+              @touchstart.passive="warmAudioList"
+            >
               <div class="btn-hero-icon"><i class="fas fa-headphones"></i></div>
               <div class="btn-hero-text">
                 <span class="btn-hero-main">Truyện Audio</span>
@@ -93,7 +110,7 @@
                 <span class="af-icon"><i class="fas fa-microphone-alt"></i></span>
                 <div>
                   <strong>Giọng Đọc Chuyên Nghiệp</strong>
-                  <p>Diễn viên lồng tiếng được tuyển chọn kỹ càng, từng chương rõ ràng và cuốn hút.</p>
+                  <p>Giọng đọc AI được tuyển chọn kỹ càng, từng chương rõ ràng và cuốn hút.</p>
                 </div>
               </li>
               <li>
@@ -221,6 +238,22 @@
 </template>
 
 <script setup>
+import { buildCloudinaryImageUrl, buildCloudinarySrcSet } from "@/config/constants";
+import { prefetchAudioListExperience, prefetchStoryListExperience } from "@/router/prefetch";
+
+const HOME_HERO_BANNER =
+  "https://res.cloudinary.com/dg9ftuhv4/image/upload/v1772805144/truyenviethay/banners/banner-desktop.jpg";
+const homeHeroImage = buildCloudinaryImageUrl(HOME_HERO_BANNER, {
+  width: 960,
+  quality: "auto:eco",
+  dprAuto: true,
+});
+const homeHeroSrcSet = buildCloudinarySrcSet(
+  HOME_HERO_BANNER,
+  [480, 768, 960, 1280, 1600],
+  { quality: "auto:eco", dprAuto: true },
+);
+
 /** Random but deterministic particle styles so SSR matches hydration */
 function particleStyle(n) {
   const size = 4 + (n % 5) * 3;
@@ -230,11 +263,17 @@ function particleStyle(n) {
   const delay = (n % 5) * 1.2;
   return `width:${size}px;height:${size}px;left:${left}%;top:${top}%;animation-duration:${dur}s;animation-delay:-${delay}s`;
 }
+
+function warmStoryList() {
+  prefetchStoryListExperience();
+}
+
+function warmAudioList() {
+  prefetchAudioListExperience();
+}
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap");
-
 /* =====================
    BASE
    ===================== */
@@ -949,6 +988,14 @@ function particleStyle(n) {
 .copyright-spirit {
   text-align: center; color: #475569; font-size: 0.88rem; font-weight: 600;
   padding-top: 28px; border-top: 1px dashed rgba(255,255,255,0.08);
+}
+
+@supports (content-visibility: auto) {
+  .audio-intro-sect,
+  .gioi-thieu-sect {
+    content-visibility: auto;
+    contain-intrinsic-size: 900px;
+  }
 }
 
 /* =====================

@@ -64,7 +64,6 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&display=swap');
 
 /* ===== BACKGROUND (TINH TRẦN HƯ KHÔNG) ===== */
 .dangnhap-container {

@@ -1,7 +1,20 @@
 <template>
-  <article class="hcard" :class="{ 'hcard--hero': variant === 'hero' }">
+  <article
+    class="hcard"
+    :class="{ 'hcard--hero': variant === 'hero' }"
+    @mouseenter="warmDetailExperience"
+    @focusin="warmDetailExperience"
+    @touchstart.passive="warmDetailExperience"
+  >
     <router-link :to="`/truyen-audio/${story.slug}`" class="hcard__cover-link">
-      <img :src="coverUrl" :alt="story.ten_truyen" loading="lazy" />
+      <img
+        :src="coverUrl"
+        :srcset="coverSrcSet"
+        sizes="(max-width: 640px) 42vw, (max-width: 1200px) 240px, 320px"
+        :alt="story.ten_truyen"
+        loading="lazy"
+        decoding="async"
+      />
       <div class="hcard__cover-overlay"></div>
       <span class="hcard__badge">
         <i class="fas fa-headphones"></i>
@@ -80,8 +93,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { getImageUrl } from "@/config/constants";
+import { computed, ref } from "vue";
+import { getStoryCoverSrcSet, getStoryCoverUrl } from "@/config/constants";
+import { prefetchStoryAudioBySlug } from "@/modules/storyAudio/storyAudio.service";
 import type { Story } from "@/modules/storyText/story.service";
 
 const props = withDefaults(
@@ -95,12 +109,17 @@ const props = withDefaults(
 );
 
 const coverUrl = computed(() => {
-  if (!props.story.anh_bia) {
-    return "https://res.cloudinary.com/dg9ftuhv4/image/upload/v1774000516/h%C3%ACnh_5_clb3fa.jpg";
-  }
-  if (props.story.anh_bia.startsWith("http")) return props.story.anh_bia;
-  return getImageUrl(props.story.anh_bia);
+  return getStoryCoverUrl(props.story.anh_bia, props.variant === "hero" ? 720 : 480);
 });
+
+const coverSrcSet = computed(() =>
+  getStoryCoverSrcSet(
+    props.story.anh_bia,
+    props.variant === "hero" ? [360, 480, 640, 720, 960] : [240, 320, 480, 640],
+  ),
+);
+
+const hasWarmedDetail = ref(false);
 
 const genres = computed(() => props.story.genres || []);
 const visibleGenres = computed(() => genres.value.slice(0, props.variant === "hero" ? 4 : 3));
@@ -165,6 +184,15 @@ function formatDuration(seconds?: number | null) {
   if (!hours) return `${Math.max(minutes, 1)} phút`;
   if (!minutes) return `${hours} giờ`;
   return `${hours} giờ ${minutes} phút`;
+}
+
+function warmDetailExperience() {
+  if (hasWarmedDetail.value || !props.story.slug) return;
+
+  hasWarmedDetail.value = true;
+
+  void import("@/modules/storyAudio/views/StoryAudioDetailView.vue");
+  void prefetchStoryAudioBySlug(props.story.slug);
 }
 </script>
 

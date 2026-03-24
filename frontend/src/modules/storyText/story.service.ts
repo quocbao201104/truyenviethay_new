@@ -165,6 +165,44 @@ export const getPublicStories = async ({
   );
 };
 
+export const prefetchPublicStories = async ({
+  page = 1,
+  limit = 20,
+  sort_by = "thoi_gian_cap_nhat",
+  order = "DESC",
+  keyword = "",
+  category_ids = null,
+  author_id = null,
+  trang_thai = "",
+  min_days_ago = null,
+  has_audio = null,
+  require_text_chapters = null,
+}: PublicStoriesParams = {}) => {
+  const normalizedCategoryIds = Array.isArray(category_ids)
+    ? category_ids.join(",")
+    : (category_ids ?? "");
+
+  await prefetchGet<any>(
+    `/api/truyen/public`,
+    {
+      params: {
+        page,
+        limit,
+        sort_by,
+        order,
+        keyword,
+        category_ids: normalizedCategoryIds || undefined,
+        author_id,
+        trang_thai,
+        min_days_ago,
+        has_audio,
+        require_text_chapters,
+      },
+    },
+    { ttlMs: 30000, dedupe: true },
+  );
+};
+
 export const getAdminStories = async ({
   page = 1,
   limit = 10,
@@ -211,6 +249,15 @@ export const getStoryBySlug = async (slug: string) => {
     `/api/truyen/slug/${slug}`,
     {},
     { ttlMs: 60000, dedupe: true, abortKey: `storySlug:${slug}` },
+  );
+};
+
+export const prefetchStoryBySlug = async (slug: string) => {
+  if (!slug) return;
+  await prefetchGet<any>(
+    `/api/truyen/slug/${slug}`,
+    {},
+    { ttlMs: 60000, dedupe: true },
   );
 };
 
@@ -271,16 +318,6 @@ export const getTopDailyStories = async (limit: number = 10) => {
     { ttlMs: 60000, dedupe: true },
   );
   return (response as any).data ?? response;
-};
-
-// --- Prefetch helpers ---
-export const prefetchPublicStories = async (params: PublicStoriesParams = {}) => {
-  await prefetchGet(`/api/truyen/public`, { params }, { ttlMs: 30000, dedupe: true });
-};
-
-export const prefetchStoryBySlug = async (slug: string) => {
-  if (!slug) return;
-  await prefetchGet(`/api/truyen/slug/${slug}`, {}, { ttlMs: 60000, dedupe: true });
 };
 
 export const prefetchChaptersByStoryId = async (storyId: number, page = 1, limit = 200) => {

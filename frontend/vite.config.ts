@@ -9,6 +9,37 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   const target = env.VITE_API_URL || "http://localhost:3000";
+  const manualChunks = (id: string) => {
+    if (!id.includes("node_modules")) return undefined;
+
+    if (id.includes("apexcharts") || id.includes("vue3-apexcharts")) {
+      return "vendor-charts";
+    }
+
+    if (
+      id.includes("/vue/") ||
+      id.includes("\\vue\\") ||
+      id.includes("vue-router") ||
+      id.includes("pinia") ||
+      id.includes("@vue")
+    ) {
+      return "vendor-core";
+    }
+
+    if (id.includes("vue3-google-login")) {
+      return "vendor-auth";
+    }
+
+    if (id.includes("swiper")) {
+      return "vendor-swiper";
+    }
+
+    if (id.includes("socket.io-client")) {
+      return "vendor-realtime";
+    }
+
+    return "vendor-misc";
+  };
 
   return {
     plugins: [
@@ -59,6 +90,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       minify: "terser",
+      chunkSizeWarningLimit: 1100,
       terserOptions: {
         compress: {
           drop_console: true,
@@ -67,6 +99,7 @@ export default defineConfig(({ mode }) => {
       },
       rollupOptions: {
         output: {
+          manualChunks,
           entryFileNames: "assets/[name].[hash].js",
           chunkFileNames: "assets/[name].[hash].js",
           assetFileNames: "assets/[name].[hash][extname]",

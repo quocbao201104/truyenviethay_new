@@ -10,8 +10,8 @@
   >
     <div class="cover-aura-wrapper">
        <img
-        :src="story.anh_bia ? getImageUrl(story.anh_bia, 640) : 'https://res.cloudinary.com/dg9ftuhv4/image/upload/v1774000516/h%C3%ACnh_5_clb3fa.jpg'"
-        :srcset="buildSrcSet(story.anh_bia)"
+        :src="getStoryCoverUrl(story.anh_bia, 640)"
+        :srcset="getStoryCoverSrcSet(story.anh_bia, [320, 480, 640, 800])"
         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1440px) 240px, 260px"
         width="200"
         height="280"
@@ -74,7 +74,7 @@
 <script setup>
 import { defineProps } from 'vue';
 import { useRouter } from 'vue-router';
-import { getImageUrl } from "@/config/constants";
+import { getStoryCoverSrcSet, getStoryCoverUrl } from "@/config/constants";
 import { prefetchStoryBySlug, prefetchChaptersByStoryId } from "@/modules/storyText/story.service";
 
 const props = defineProps({
@@ -136,17 +136,9 @@ const getStatusClass = (status) => {
   return 'status-on-going';
 };
 
-const buildSrcSet = (path) => {
-  if (!path) return '';
-  const widths = [320, 480, 640, 800];
-  return widths.map((w) => getImageUrl(path, w) + ' ' + w + 'w').join(', ');
-};
 </script>
 
 <style scoped>
-/* Import Be Vietnam Pro */
-@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap");
-
 .xianxia-story-card {
   font-family: 'Be Vietnam Pro', sans-serif;
   background: rgba(21, 31, 47, 0.92);
