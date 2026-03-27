@@ -55,6 +55,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/", require("./routes/sitemap.routes"));
+
 // Routes
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/truyen", require("./routes/story.routes"));
