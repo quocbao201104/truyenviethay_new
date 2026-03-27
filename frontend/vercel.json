@@ -1,14 +1,10 @@
 {
   "rewrites": [
+    { "source": "/sitemap.xml", "destination": "https://api.truyenviethay.id.vn/sitemap.xml" },
+    { "source": "/sitemaps/:path*", "destination": "https://api.truyenviethay.id.vn/sitemaps/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
-    {
-      "source": "/:path*",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store, max-age=0" }
-      ]
-    },
     {
       "source": "/assets/:path*",
       "headers": [
@@ -19,6 +15,24 @@
       "source": "/favicon.ico",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/sitemaps/:path*",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
       ]
     }
   ]

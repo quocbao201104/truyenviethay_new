@@ -123,12 +123,14 @@
 <script setup lang="ts">
 import { onMounted, computed, watch, ref, onBeforeUnmount, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useHead } from "@unhead/vue";
 import { useChapterStore } from "@/modules/storyText/chapter/chapter.store";
 import { saveReadingHistory } from "@/modules/history/history.service";
 import { useAuthStore } from "@/modules/auth/auth.store";
 import { getChapterBySlug, getChapterById, type Chapter } from "@/modules/storyText/chapter/chapter.service";
 import { buildChapterCdnUrl } from "@/utils/chapterCdn";
 import { formatChapterContent } from "@/utils/chapterFormat";
+import { defaultOgImage, toCanonicalUrl, truncateText } from "@/seo/site";
 
 const route = useRoute();
 const router = useRouter();
@@ -199,6 +201,52 @@ const chapterTitle = computed(() => {
   if (!chapter.value?.tieu_de) return "";
   return chapter.value.tieu_de.replace(/<\/?[^>]+(>|$)/g, "").trim();
 });
+
+const chapterCanonicalPath = computed(() => {
+  const storySlug = chapter.value?.truyen?.slug || (route.params.storySlug as string);
+  const chapterSlug = chapter.value?.slug || (route.params.chapterSlug as string);
+  if (!storySlug || !chapterSlug) return route.path;
+  return `/truyen-chu/${storySlug}/${chapterSlug}`;
+});
+
+const chapterCanonicalUrl = computed(() => toCanonicalUrl(chapterCanonicalPath.value));
+
+const chapterMetaTitle = computed(() => {
+  const chapterName = chapterTitle.value || "Đọc chương truyện";
+  const storyName = chapter.value?.truyen?.ten_truyen;
+  if (!storyName) return `${chapterName} | TruyenVietHay`;
+  return `${chapterName} - ${storyName} | TruyenVietHay`;
+});
+
+const chapterMetaDescription = computed(() => {
+  const storyName = chapter.value?.truyen?.ten_truyen || "truyện chữ";
+  const text = chapterContent.value || plainMessage.value || "";
+  const excerpt = truncateText(text.replace(/\s+/g, " ").trim(), 145);
+  return excerpt || `Đọc ${chapterTitle.value || "chương mới"} của ${storyName} tại TruyenVietHay.`;
+});
+
+useHead(() => ({
+  title: chapterMetaTitle.value,
+  link: [
+    {
+      rel: "canonical",
+      href: chapterCanonicalUrl.value,
+    },
+  ],
+  meta: [
+    { name: "description", content: chapterMetaDescription.value },
+    { name: "robots", content: "index, follow" },
+    { property: "og:type", content: "article" },
+    { property: "og:title", content: chapterMetaTitle.value },
+    { property: "og:description", content: chapterMetaDescription.value },
+    { property: "og:url", content: chapterCanonicalUrl.value },
+    { property: "og:image", content: defaultOgImage },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: chapterMetaTitle.value },
+    { name: "twitter:description", content: chapterMetaDescription.value },
+    { name: "twitter:image", content: defaultOgImage },
+  ],
+}));
 
 const isHtml = computed(() => /<\/?[a-z][\s\S]*>/i.test(chapterContent.value || ""));
 const displayText = computed(() => chapterContent.value || plainMessage.value);

@@ -238,8 +238,11 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
+import { useHead } from "@unhead/vue";
 import { buildCloudinaryImageUrl, buildCloudinarySrcSet } from "@/config/constants";
 import { prefetchAudioListExperience, prefetchStoryListExperience } from "@/router/prefetch";
+import { defaultOgImage, toCanonicalUrl } from "@/seo/site";
 
 const HOME_HERO_BANNER =
   "https://res.cloudinary.com/dg9ftuhv4/image/upload/v1772805144/truyenviethay/banners/banner-desktop.jpg";
@@ -253,6 +256,35 @@ const homeHeroSrcSet = buildCloudinarySrcSet(
   [480, 768, 960, 1280, 1600],
   { quality: "auto:eco", dprAuto: true },
 );
+
+const homeCanonicalUrl = toCanonicalUrl("/");
+const homeTitle = "Đọc Truyện Chữ & Nghe Truyện Audio Miễn Phí | TruyenVietHay";
+const homeDescription =
+  "Kho truyện chữ và truyện audio tiếng Việt cập nhật liên tục. Đọc online mượt, nghe truyện mọi lúc tại TruyenVietHay.";
+const homeOgImage = computed(() => homeHeroImage || defaultOgImage);
+
+useHead(() => ({
+  title: homeTitle,
+  link: [
+    {
+      rel: "canonical",
+      href: homeCanonicalUrl,
+    },
+  ],
+  meta: [
+    { name: "description", content: homeDescription },
+    { name: "robots", content: "index, follow" },
+    { property: "og:type", content: "website" },
+    { property: "og:title", content: homeTitle },
+    { property: "og:description", content: homeDescription },
+    { property: "og:url", content: homeCanonicalUrl },
+    { property: "og:image", content: homeOgImage.value },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: homeTitle },
+    { name: "twitter:description", content: homeDescription },
+    { name: "twitter:image", content: homeOgImage.value },
+  ],
+}));
 
 /** Random but deterministic particle styles so SSR matches hydration */
 function particleStyle(n) {

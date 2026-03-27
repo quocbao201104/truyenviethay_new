@@ -17,17 +17,209 @@
 
 <script setup>
 import MainLayout from "./layouts/MainLayout.vue";
-import { watch } from 'vue';
+import { computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useHead } from "@unhead/vue";
 import { useAppToast } from '@/composables/useAppToast';
 import { useAuthStore } from '@/modules/auth/auth.store';
 import { useSocket } from '@/composables/useSocket';
+import {
+  defaultOgImage,
+  getFirstQueryValue,
+  sanitizeRouteQuery,
+  toCanonicalUrl,
+  toCanonicalUrlWithQuery,
+  toPositiveInteger,
+} from "@/seo/site";
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const { connect, disconnect } = useSocket();
 const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast();
+
+const baseTitle = "TruyenVietHay";
+const defaultDescription =
+  "Đọc truyện chữ và nghe truyện audio miễn phí tại TruyenVietHay. Cập nhật chương mới mỗi ngày.";
+const noIndexRouteNames = new Set([
+  "Login",
+  "Register",
+  "Profile",
+  "ProfileSettings",
+  "Favorites",
+  "Tasks",
+  "History",
+  "FollowedAuthors",
+  "AdminDashboard",
+  "AdminManageUsers",
+  "AdminManageStories",
+  "AuthorStoryManagement",
+  "AuthorDashboard",
+  "SubmitStory",
+  "AuthorChapterManagement",
+  "AuthorAddChapter",
+  "AuthorEditChapter",
+  "AuthorApply",
+  "SearchView",
+  "NotFound",
+]);
+
+const routeFallbackTitle = computed(() => {
+  const titleMap = {
+    Home: "Đọc Truyện Chữ & Nghe Truyện Audio Miễn Phí",
+    StoryList: "Truyện Chữ Mới Cập Nhật",
+    StoryAudioList: "Truyện Audio Mới Cập Nhật",
+    Categories: "Thể Loại Truyện",
+    TopView: "Truyện Hot",
+    Ranking: "Bảng Xếp Hạng Truyện",
+  };
+
+  const routeName = String(route.name || "");
+  const pageTitle = titleMap[routeName];
+  return pageTitle ? `${pageTitle} | ${baseTitle}` : baseTitle;
+});
+
+const shouldIndexRoute = computed(() => {
+  const routeName = String(route.name || "");
+  return !noIndexRouteNames.has(routeName);
+});
+
+const routeSeoPolicy = computed(() => {
+  const routeName = String(route.name || "");
+  const sanitizedQuery = sanitizeRouteQuery(route.query || {});
+  const page = toPositiveInteger(sanitizedQuery.page, 1);
+
+  if (routeName === "SearchView") {
+    return {
+      canonicalHref: toCanonicalUrl("/tim-kiem"),
+      robots: "noindex, follow",
+    };
+  }
+
+  if (routeName === "StoryAudioList") {
+    const hasFilterQuery =
+      Boolean(getFirstQueryValue(sanitizedQuery.sort)) ||
+      Boolean(getFirstQueryValue(sanitizedQuery.status)) ||
+      Boolean(getFirstQueryValue(sanitizedQuery.genres));
+
+    const canonicalQuery = {};
+    if (page > 1) canonicalQuery.page = page;
+
+    return {
+      canonicalHref: toCanonicalUrlWithQuery("/truyen-audio", canonicalQuery),
+      robots: hasFilterQuery || page > 1 ? "noindex, follow" : "index, follow",
+    };
+  }
+
+  if (routeName === "Categories") {
+    const rawCategories = getFirstQueryValue(sanitizedQuery.categories);
+    const selectedCategories = rawCategories
+      .split(",")
+      .map((value) => Number.parseInt(value.trim(), 10))
+      .filter((value) => Number.isInteger(value) && value > 0);
+
+    const hasSortQuery =
+      Boolean(getFirstQueryValue(sanitizedQuery.sort)) &&
+      getFirstQueryValue(sanitizedQuery.sort) !== "thoi_gian_cap_nhat";
+
+    const hasSingleCategory = selectedCategories.length === 1;
+    const hasMultiCategory = selectedCategories.length > 1;
+
+    const canonicalQuery = {};
+    if (hasSingleCategory) canonicalQuery.categories = selectedCategories[0];
+    if (page > 1) canonicalQuery.page = page;
+
+    return {
+      canonicalHref: toCanonicalUrlWithQuery("/the-loai", canonicalQuery),
+      robots: hasSortQuery || hasMultiCategory || page > 1 ? "noindex, follow" : "index, follow",
+    };
+  }
+
+  if (routeName === "StoriesByCategory") {
+    const categoryId = Number.parseInt(String(route.params.id || ""), 10);
+    const canonicalQuery = Number.isInteger(categoryId) && categoryId > 0
+      ? { categories: categoryId }
+      : {};
+
+    return {
+      canonicalHref: toCanonicalUrlWithQuery("/the-loai", canonicalQuery),
+      robots: "noindex, follow",
+    };
+  }
+
+  return {
+    canonicalHref: toCanonicalUrl(route.path || "/"),
+    robots: shouldIndexRoute.value ? "index, follow" : "noindex, follow",
+  };
+});
+
+const canonicalUrl = computed(() => routeSeoPolicy.value.canonicalHref);
+const robotsMeta = computed(() => routeSeoPolicy.value.robots);
+
+useHead(() => ({
+  title: routeFallbackTitle.value,
+  htmlAttrs: { lang: "vi" },
+  link: [
+    {
+      rel: "canonical",
+      href: canonicalUrl.value,
+    },
+  ],
+  meta: [
+    {
+      name: "description",
+      content: defaultDescription,
+    },
+    {
+      name: "robots",
+      content: robotsMeta.value,
+    },
+    {
+      property: "og:type",
+      content: "website",
+    },
+    {
+      property: "og:site_name",
+      content: baseTitle,
+    },
+    {
+      property: "og:locale",
+      content: "vi_VN",
+    },
+    {
+      property: "og:title",
+      content: routeFallbackTitle.value,
+    },
+    {
+      property: "og:description",
+      content: defaultDescription,
+    },
+    {
+      property: "og:url",
+      content: canonicalUrl.value,
+    },
+    {
+      property: "og:image",
+      content: defaultOgImage,
+    },
+    {
+      name: "twitter:card",
+      content: "summary_large_image",
+    },
+    {
+      name: "twitter:title",
+      content: routeFallbackTitle.value,
+    },
+    {
+      name: "twitter:description",
+      content: defaultDescription,
+    },
+    {
+      name: "twitter:image",
+      content: defaultOgImage,
+    },
+  ],
+}));
 
 // Initialize socket when user is logged in
 watch(() => authStore.isLoggedIn, (isLoggedIn) => {

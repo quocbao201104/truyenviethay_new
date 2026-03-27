@@ -338,6 +338,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed, onUnmounted } from "vue";
 import { useRoute, useRouter, onBeforeRouteUpdate } from "vue-router";
+import { useHead } from "@unhead/vue";
 import { useStoryStore } from "@/modules/storyText/story.store";
 import { useChapterStore } from "@/modules/storyText/chapter/chapter.store";
 import { useFavoriteStore } from "@/modules/favorite/favorite.store";
@@ -350,6 +351,7 @@ import {
   getStoryCoverSrcSet,
   getStoryCoverUrl,
 } from "@/config/constants";
+import { defaultOgImage, stripHtml, toCanonicalUrl, truncateText } from "@/seo/site";
 
 const route = useRoute();
 const storyStore = useStoryStore();
@@ -503,6 +505,67 @@ const storyCoverSrcSet = computed(() =>
   getStoryCoverSrcSet(story.value?.anh_bia, [320, 480, 640, 720, 960]),
 );
 const storyCoverBlurUrl = computed(() => getStoryCoverUrl(story.value?.anh_bia, 960));
+
+const storyCanonicalPath = computed(() => {
+  const slug = story.value?.slug || (route.params.slug as string) || "";
+  return slug ? `/truyen-chu/${slug}` : route.path;
+});
+
+const storyCanonicalUrl = computed(() => toCanonicalUrl(storyCanonicalPath.value));
+
+const storyMetaTitle = computed(() => {
+  const storyName = story.value?.ten_truyen?.trim();
+  if (!storyName) return "Truyện Chữ | TruyenVietHay";
+  const author = story.value?.tac_gia?.trim();
+  return author
+    ? `${storyName} - ${author} | Đọc Truyện Full`
+    : `${storyName} | Đọc Truyện Full`;
+});
+
+const storyMetaDescription = computed(() => {
+  const fallback = "Đọc truyện chương mới nhất tại TruyenVietHay.";
+  const summary = truncateText(stripHtml(story.value?.mo_ta), 150);
+  const chapters = story.value?.so_luong_chuong || story.value?.so_chuong || 0;
+  const chapterText = chapters > 0 ? ` ${chapters} chương.` : "";
+  return summary || `${fallback}${chapterText}`;
+});
+
+const storyMetaKeywords = computed(() => {
+  const keywords: string[] = [];
+  if (story.value?.ten_truyen) keywords.push(story.value.ten_truyen);
+  if (story.value?.tac_gia) keywords.push(story.value.tac_gia);
+  if (story.value?.genres?.length) {
+    keywords.push(...story.value.genres.map((genre) => genre.ten_theloai));
+  }
+  keywords.push("truyện chữ", "đọc truyện online");
+  return Array.from(new Set(keywords.filter(Boolean))).join(", ");
+});
+
+const storyOgImage = computed(() => storyCoverUrl.value || defaultOgImage);
+
+useHead(() => ({
+  title: storyMetaTitle.value,
+  link: [
+    {
+      rel: "canonical",
+      href: storyCanonicalUrl.value,
+    },
+  ],
+  meta: [
+    { name: "description", content: storyMetaDescription.value },
+    { name: "keywords", content: storyMetaKeywords.value },
+    { name: "robots", content: "index, follow" },
+    { property: "og:type", content: "book" },
+    { property: "og:title", content: storyMetaTitle.value },
+    { property: "og:description", content: storyMetaDescription.value },
+    { property: "og:url", content: storyCanonicalUrl.value },
+    { property: "og:image", content: storyOgImage.value },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: storyMetaTitle.value },
+    { name: "twitter:description", content: storyMetaDescription.value },
+    { name: "twitter:image", content: storyOgImage.value },
+  ],
+}));
 
 const handleImageError = (e: Event) => {
   (e.target as HTMLImageElement).src = DEFAULT_STORY_COVER_URL;

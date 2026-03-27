@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Private/auth sections
+Disallow: /admin/
+Disallow: /user/
+Disallow: /dang-nhap
+Disallow: /dang-ky
+Disallow: /tim-kiem
+
+# Duplicate URL controls
+Disallow: /*?toast=
+Disallow: /*?tab=
+
+Sitemap: https://truyenviethay.id.vn/sitemap.xml
