@@ -4,8 +4,8 @@
     { "source": "/sitemaps/:path*", "destination": "https://api.truyenviethay.id.vn/sitemaps/:path*" },
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/index.html", "destination": "/index.html" },
-    { "source": "/", "destination": "/api/render?path=/" },
-    { "source": "/:path*", "destination": "/api/render?path=/:path*" }
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/:path*", "destination": "/index.html" }
   ],
   "headers": [
     {
