@@ -7,9 +7,20 @@ Disallow: /user/
 Disallow: /dang-nhap
 Disallow: /dang-ky
 Disallow: /tim-kiem
+Disallow: /the_loai/
+
+# Temporary faceted/query crawl controls
+Disallow: /*?sort=
+Disallow: /*&sort=
+Disallow: /*?status=
+Disallow: /*&status=
+Disallow: /*?genres=
+Disallow: /*&genres=
 
 # Duplicate URL controls
 Disallow: /*?toast=
+Disallow: /*&toast=
 Disallow: /*?tab=
+Disallow: /*&tab=
 
 Sitemap: https://truyenviethay.id.vn/sitemap.xml
