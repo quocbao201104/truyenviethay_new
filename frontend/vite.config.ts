@@ -16,16 +16,6 @@ export default defineConfig(({ mode }) => {
       return "vendor-charts";
     }
 
-    if (
-      id.includes("/vue/") ||
-      id.includes("\\vue\\") ||
-      id.includes("vue-router") ||
-      id.includes("pinia") ||
-      id.includes("@vue")
-    ) {
-      return "vendor-core";
-    }
-
     if (id.includes("vue3-google-login")) {
       return "vendor-auth";
     }
@@ -38,7 +28,9 @@ export default defineConfig(({ mode }) => {
       return "vendor-realtime";
     }
 
-    return "vendor-misc";
+    // Keep a single shared vendor chunk to avoid circular init issues
+    // between split runtime chunks (for example vendor-core <-> vendor-misc).
+    return "vendor";
   };
 
   return {
