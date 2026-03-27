@@ -25,12 +25,9 @@ import { useAuthStore } from '@/modules/auth/auth.store';
 import { useSocket } from '@/composables/useSocket';
 import {
   defaultOgImage,
-  getFirstQueryValue,
-  sanitizeRouteQuery,
-  toCanonicalUrl,
   toCanonicalUrlWithQuery,
-  toPositiveInteger,
 } from "@/seo/site";
+import { resolveSeoPolicyForRoute } from "@/seo/routePolicy";
 
 const route = useRoute();
 const router = useRouter();
@@ -41,29 +38,6 @@ const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast();
 const baseTitle = "TruyenVietHay";
 const defaultDescription =
   "Đọc truyện chữ và nghe truyện audio miễn phí tại TruyenVietHay. Cập nhật chương mới mỗi ngày.";
-const noIndexRouteNames = new Set([
-  "Login",
-  "Register",
-  "Profile",
-  "ProfileSettings",
-  "Favorites",
-  "Tasks",
-  "History",
-  "FollowedAuthors",
-  "AdminDashboard",
-  "AdminManageUsers",
-  "AdminManageStories",
-  "AuthorStoryManagement",
-  "AuthorDashboard",
-  "SubmitStory",
-  "AuthorChapterManagement",
-  "AuthorAddChapter",
-  "AuthorEditChapter",
-  "AuthorApply",
-  "SearchView",
-  "NotFound",
-]);
-
 const routeFallbackTitle = computed(() => {
   const titleMap = {
     Home: "Đọc Truyện Chữ & Nghe Truyện Audio Miễn Phí",
@@ -79,77 +53,16 @@ const routeFallbackTitle = computed(() => {
   return pageTitle ? `${pageTitle} | ${baseTitle}` : baseTitle;
 });
 
-const shouldIndexRoute = computed(() => {
-  const routeName = String(route.name || "");
-  return !noIndexRouteNames.has(routeName);
-});
-
 const routeSeoPolicy = computed(() => {
-  const routeName = String(route.name || "");
-  const sanitizedQuery = sanitizeRouteQuery(route.query || {});
-  const page = toPositiveInteger(sanitizedQuery.page, 1);
-
-  if (routeName === "SearchView") {
-    return {
-      canonicalHref: toCanonicalUrl("/tim-kiem"),
-      robots: "noindex, follow",
-    };
-  }
-
-  if (routeName === "StoryAudioList") {
-    const hasFilterQuery =
-      Boolean(getFirstQueryValue(sanitizedQuery.sort)) ||
-      Boolean(getFirstQueryValue(sanitizedQuery.status)) ||
-      Boolean(getFirstQueryValue(sanitizedQuery.genres));
-
-    const canonicalQuery = {};
-    if (page > 1) canonicalQuery.page = page;
-
-    return {
-      canonicalHref: toCanonicalUrlWithQuery("/truyen-audio", canonicalQuery),
-      robots: hasFilterQuery || page > 1 ? "noindex, follow" : "index, follow",
-    };
-  }
-
-  if (routeName === "Categories") {
-    const rawCategories = getFirstQueryValue(sanitizedQuery.categories);
-    const selectedCategories = rawCategories
-      .split(",")
-      .map((value) => Number.parseInt(value.trim(), 10))
-      .filter((value) => Number.isInteger(value) && value > 0);
-
-    const hasSortQuery =
-      Boolean(getFirstQueryValue(sanitizedQuery.sort)) &&
-      getFirstQueryValue(sanitizedQuery.sort) !== "thoi_gian_cap_nhat";
-
-    const hasSingleCategory = selectedCategories.length === 1;
-    const hasMultiCategory = selectedCategories.length > 1;
-
-    const canonicalQuery = {};
-    if (hasSingleCategory) canonicalQuery.categories = selectedCategories[0];
-    if (page > 1) canonicalQuery.page = page;
-
-    return {
-      canonicalHref: toCanonicalUrlWithQuery("/the-loai", canonicalQuery),
-      robots: hasSortQuery || hasMultiCategory || page > 1 ? "noindex, follow" : "index, follow",
-    };
-  }
-
-  if (routeName === "StoriesByCategory") {
-    const categoryId = Number.parseInt(String(route.params.id || ""), 10);
-    const canonicalQuery = Number.isInteger(categoryId) && categoryId > 0
-      ? { categories: categoryId }
-      : {};
-
-    return {
-      canonicalHref: toCanonicalUrlWithQuery("/the-loai", canonicalQuery),
-      robots: "noindex, follow",
-    };
-  }
-
+  const resolved = resolveSeoPolicyForRoute({
+    routeName: String(route.name || ""),
+    pathname: route.path || "/",
+    query: route.query || {},
+    params: route.params || {},
+  });
   return {
-    canonicalHref: toCanonicalUrl(route.path || "/"),
-    robots: shouldIndexRoute.value ? "index, follow" : "noindex, follow",
+    canonicalHref: toCanonicalUrlWithQuery(resolved.canonicalPath, resolved.canonicalQuery),
+    robots: resolved.robots,
   };
 });
 

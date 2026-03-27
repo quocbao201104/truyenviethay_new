@@ -2,7 +2,10 @@
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "https://api.truyenviethay.id.vn/sitemap.xml" },
     { "source": "/sitemaps/:path*", "destination": "https://api.truyenviethay.id.vn/sitemaps/:path*" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    { "source": "/index.html", "destination": "/index.html" },
+    { "source": "/", "destination": "/api/render?path=/" },
+    { "source": "/:path*", "destination": "/api/render?path=/:path*" }
   ],
   "headers": [
     {
