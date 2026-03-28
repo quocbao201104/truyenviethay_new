@@ -81,7 +81,9 @@ const getChapterNumber = (item: HistoryItem) => {
 };
 
 const handleImageError = (e: Event) => {
-  (e.target as HTMLImageElement).src = DEFAULT_STORY_COVER_URL;
+  const target = e.target as HTMLImageElement;
+  target.src = DEFAULT_STORY_COVER_URL;
+  target.srcset = "";
 };
 
 const getChapterLink = (item: HistoryItem) => {

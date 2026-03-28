@@ -429,6 +429,369 @@ Sitemap: https://truyenviethay.id.vn/sitemap-index.xml
 | Medium | SERP differentiation modules (guide/arc/summary) | Tăng CTR và intent match | Content + SEO | Medium | Medium |
 | Low | Dashboard monitoring SEO kỹ thuật | Giảm regression khi scale | SEO + Data | Medium | Medium |
 
+Chat:
+ **Phase 1: sửa nền tảng index/crawl** trước, vì hiện tại đây là nút thắt lớn nhất của `truyenviethay_new`.
+
+**Thứ tự triển khai khuyến nghị**
+1. **Phase 1 (Critical, 3-7 ngày): Indexation Foundation**
+- Tạo `robots.txt`, `sitemap.xml`/`sitemap-index.xml` chuẩn.
+- Bỏ cấu hình chặn cache toàn site trong [`/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/vercel.json`](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/vercel.json).
+- Chuẩn hóa canonical + URL (lọc query rác, chỉ giữ URL chuẩn để index).
+- Bật SEO head theo route (`title`, `meta`, canonical, og) bằng `@unhead/vue`.
+- Sửa `<html lang="vi">` trong [`/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/index.html`](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/index.html).
+
+2. **Phase 2 (High, 2-4 tuần): On-page Template + Internal Linking**
+- Template title/meta cho: home, truyện, chương, thể loại, tác giả, audio.
+- Điều hướng chapter (`prev/next`, danh sách chương), truyện liên quan, cùng thể loại/tác giả.
+- Liên kết chéo text ↔ audio để tránh self-cannibalization.
+- Thêm schema: `BreadcrumbList`, `Book/CreativeWork`, `ItemList`, `AudioObject`.
+
+3. **Phase 3 (High, 1-2 tháng): Taxonomy & Crawl Budget Control**
+- Quy định taxonomy nào index/noindex.
+- Noindex các filter page mỏng/trùng.
+- Chuẩn hóa phân trang/listing để bot crawl sâu hơn vào chapter chất lượng.
+- Dọn title/meta trùng hàng loạt.
+
+4. **Phase 4 (Medium-High, 2-3 tháng): Scale Traffic**
+- Programmatic landing pages (genre x status x length x origin).
+- Audio SEO nâng cao: transcript/summaries theo episode.
+- Audio sitemap riêng (nếu audio pages self-canonical và có unique value đủ mạnh).
+
+----
+Phase 1 batch 1 đã được triển khai xong trong repo `truyenviethay_new`.
+
+Đã sửa:
+- Thêm nền tảng SEO technical:
+  - [`/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/public/robots.txt`](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/public/robots.txt)
+  - [`/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/public/sitemap.xml`](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/public/sitemap.xml)
+- Gỡ cấu hình cache gây bất lợi crawl/index trong Vercel + thêm cache riêng cho robots/sitemap:
+  - [`/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/vercel.json`](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/vercel.json)
+- Chuẩn hóa HTML root cho SEO:
+  - đổi `lang="vi"`, thêm meta mặc định, bỏ no-cache meta cứng:
+  - [`/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/index.html`](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/index.html)
+- Bật head manager runtime:
+  - [`/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/main.ts`](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/main.ts)
+- Thêm lớp SEO helper (canonical/url/strip/truncate):
+  - [`/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/seo/site.ts`](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/seo/site.ts)
+- Thêm SEO fallback toàn app (canonical + robots theo route + og/twitter mặc định):
+  - [`/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/App.vue`](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/App.vue)
+- Thêm meta/canonical động cho 3 trang trọng tâm:
+  - Home: [`/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/views/HomeView.vue`](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/views/HomeView.vue)
+  - Story detail: [`/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/views/StoryDetailView.vue`](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/views/StoryDetailView.vue)
+  - Chapter: [`/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/views/ChapterView.vue`](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/views/ChapterView.vue)
+- Bổ sung env type cho SEO vars:
+  - [`/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/env.d.ts`](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/src/env.d.ts)
+--------
+Nhìn theo mức độ quan trọng, các phần bạn đã làm có giá trị thật:
+
+* `robots.txt` + `sitemap.xml`: đã có tín hiệu crawl/index cơ bản
+* gỡ cấu hình cache bất lợi trong `vercel.json`: rất đáng làm sớm
+* sửa `lang="vi"` + bỏ no-cache meta cứng trong `index.html`: đúng
+* bật runtime head manager: cần thiết để metadata theo route hoạt động
+* thêm SEO helper + fallback toàn app: tốt, giúp không bị “trang nào đó quên canonical/meta”
+* thêm meta/canonical động cho **Home / Story / Chapter**: đây là 3 template quan trọng nhất trước mắt
+
+Nói ngắn: **batch 1 là đạt**.
+
+Phần “bước tiếp theo” Codex gợi ý cũng hợp lý, nhưng mình sẽ **xếp lại thứ tự trong batch 2** để tối ưu hơn cho site của bạn.
+
+## Thứ tự mình khuyên cho Phase 1 batch 2
+
+### 1. Chuẩn hóa canonical rule cho list/query pages
+
+Cái này nên làm **trước** schema.
+
+Vì nếu:
+
+* category page có `?page=2`
+* `?sort=new`
+* `?status=full`
+* `?audio=true`
+* hoặc nhiều query param khác
+
+mà canonical chưa rõ, thì Google có thể index sai cụm URL hoặc tự chọn canonical ngoài ý muốn.
+
+Bạn nên chốt rule rất rõ:
+
+* query rác tracking (`utm_*`, `fbclid`, etc.) → canonical về URL sạch
+* query sort/filter không có giá trị SEO → canonical về URL gốc hoặc `noindex,follow`
+* pagination:
+
+  * nếu page 2, 3... có nội dung danh sách khác nhau và cần crawl → self-canonical
+  * nếu không muốn index sâu → `noindex,follow`
+* chỉ giữ các URL taxonomy “thật sự có chiến lược index”
+
+### 2. Tạo sitemap động từ backend cho story/chapter/audio
+
+Đây là bước rất nên làm sớm, nhất là site truyện.
+
+Với site của bạn, sitemap tĩnh chỉ là giải pháp tạm. Sitemap động mới giúp:
+
+* truyện mới được phát hiện nhanh hơn
+* chương mới lên sitemap đều
+* `lastmod` có ý nghĩa
+* tách riêng sitemap theo loại URL
+
+Mình khuyên cấu trúc như sau:
+
+* `/sitemap.xml` → sitemap index
+* `/sitemaps/stories.xml`
+* `/sitemaps/chapters-1.xml`, `/sitemaps/chapters-2.xml`
+* `/sitemaps/audio.xml` hoặc chỉ thêm khi audio đủ mạnh để index riêng
+* có thể thêm `/sitemaps/categories.xml` nếu taxonomy đã ổn
+
+Ưu tiên:
+
+* story
+* chapter
+* rồi mới audio
+
+### 3. Thêm schema cơ bản cho story/chapter/audio
+
+Schema nên làm sau canonical và sitemap động.
+
+Thứ tự schema nên là:
+
+* **Story detail**:
+
+  * `BreadcrumbList`
+  * `Book` hoặc `CreativeWork`
+* **Chapter page**:
+
+  * `BreadcrumbList`
+  * `Article` hoặc `CreativeWork`
+* **Audio page**:
+
+  * chỉ thêm `AudioObject` nếu trang audio thực sự là page riêng có giá trị index độc lập
+  * nếu audio chỉ là module trong chapter/story page, có thể nhúng schema thận trọng hơn thay vì đẩy thành entity độc lập quá sớm
+
+## Đánh giá nhanh 3 đề xuất batch 2
+
+### A. Sitemap động
+
+**Nên làm ngay.**
+Đây là hạng mục quan trọng nhất trong 3 cái.
+
+### B. Canonical rule cho query/list pages
+
+**Nên làm ngay, thậm chí trước sitemap động nếu query đang nhiều.**
+Nếu không làm, rất dễ sinh index rác.
+
+### C. Schema cơ bản
+
+**Nên làm ngay sau khi canonical rule rõ.**
+Có ích, nhưng không cứu được nếu URL/index policy đang mơ hồ.
+
 ---
 
-Nếu bạn muốn, bước tiếp theo mình có thể làm ngay là viết **spec triển khai kỹ thuật chi tiết theo file** cho repo này (task-by-task: `robots`, generator sitemap, head meta service, canonical middleware, schema composer) để dev bắt tay code trực tiếp.
+## Batch 2 mình đề xuất viết lại thành checklist thực thi
+
+### Batch 2A — URL & canonical governance
+
+* định nghĩa danh sách query params:
+
+  * tracking params
+  * pagination params
+  * sort/filter params
+* mapping rule:
+
+  * param nào bỏ khỏi canonical
+  * param nào self-canonical
+  * param nào `noindex,follow`
+* áp dụng thống nhất cho:
+
+  * home listing
+  * category
+  * author
+  * search/filter
+  * audio listing nếu có
+
+**Done when**
+
+* mọi trang list/query có canonical rule rõ
+* không còn canonical trỏ lung tung hoặc giữ nguyên toàn bộ query rác
+
+### Batch 2B — Dynamic sitemap
+
+* sinh sitemap index từ backend
+* sinh sitemap story
+* sinh sitemap chapter có chia file
+* thêm `lastmod`
+* giới hạn mỗi file hợp lý
+* chỉ đưa URL canonical, indexable vào sitemap
+
+**Done when**
+
+* sitemap không chứa URL query rác
+* chapter mới được phản ánh tự động
+* story mới vào sitemap mà không cần sửa tay
+
+### Batch 2C — Base structured data
+
+* Story: `BreadcrumbList` + `Book/CreativeWork`
+* Chapter: `BreadcrumbList` + `CreativeWork/Article`
+* Audio: `AudioObject` nếu self-canonical
+* validate JSON-LD
+
+**Done when**
+
+* schema render đúng ở HTML
+* không tạo conflict giữa entity story/chapter/audio
+
+---
+
+## Một điểm rất quan trọng cho audio
+
+Ở batch 2, mình khuyên **chưa vội làm audio sitemap riêng**, trừ khi bạn đã xác định rõ:
+
+* audio page tự canonical chính nó
+* audio page có nội dung riêng đủ mạnh
+* có title/meta riêng
+* có transcript hoặc mô tả đủ tốt
+* không chỉ là một player mỏng
+
+Nếu chưa chắc, cứ:
+
+* ưu tiên story + chapter sitemap
+* audio để giai đoạn sau
+
+## Mức độ hoàn thành hiện tại
+
+Nếu lấy plan ban đầu làm chuẩn, mình chấm:
+
+* **Phase 1 batch 1**: khoảng **70–80% phần nền tảng**
+* thứ còn thiếu lớn nhất của Phase 1:
+
+  1. canonical policy cho list/query URLs
+  2. sitemap động thật sự
+  3. kiểm tra render HTML/source cho bot
+  4. schema nền tảng
+
+### 4. Xác minh HTML thực tế mà bot nhìn thấy
+
+Cần kiểm tra cho:
+
+* home
+* story detail
+* chapter
+* audio
+
+Xem trong initial HTML có:
+
+* title/meta đúng
+* canonical đúng
+* nội dung chính có hiện diện hay không
+* schema có mặt hay không
+
+Vì đôi khi app Vue “trông đúng trên browser”, nhưng bot fetch HTML ban đầu vẫn khá mỏng.
+
+------
+Trước đó đã sửa:
+- [render.js](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/api/render.js)
+- [vercel.json](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/vercel.json)
+
+Những gì đã làm:
+1. Bật lại Option C nhưng an toàn:
+- Rewrite chỉ áp cho request có `Accept: text/html` để tránh đụng asset/runtime  
+  ([vercel.json](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/vercel.json):7-18)
+
+2. Harden `api/render`:
+- Resolve path từ nhiều nguồn (query + forwarded headers) để tránh sai route  
+  ([render.js](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/api/render.js):64-95)
+- Merge query an toàn cho policy canonical/noindex  
+  ([render.js](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/api/render.js):97-116)
+- Inject thêm `canonical` + `robots` + debug marker `x-seo-render` vào HTML source  
+  ([render.js](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/api/render.js):127-139)
+- Thêm fail-safe: nếu inject lỗi vẫn trả template HTML (không làm trắng trang)  
+  ([render.js](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/api/render.js):209-218)
+
+3. Thêm debug runtime để QA nhanh:
+- Response header: `x-seo-render`, `x-seo-path`  
+  ([render.js](/C:/Users/Admin/Downloads/web/truyenviethay_new/frontend/api/render.js):222-223)
+
+Verification local:
+- `npm run build` pass
+- Mô phỏng `/tim-kiem`, `/the-loai?page=2` trả đúng:
+  - canonical theo route
+  - robots `noindex, follow` cho route cần noindex
+  (hiện tại đã hiển thị canonical và robots khi test `/tim-kiem`, `/the-loai?page=2` nhưng trang chủ thì chưa có)
+Src check:
+<meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TruyenVietHay - Đọc Truyện Chữ & Nghe Truyện Audio</title>
+    <meta
+      name="description"
+      content="Đọc truyện chữ và nghe truyện audio miễn phí. Cập nhật chương mới mỗi ngày tại TruyenVietHay."
+    />
+    <meta name="apple-mobile-web-app-title" content="TruyenVietHay" />
+    <meta property="og:site_name" content="TruyenVietHay" />
+    <meta property="og:locale" content="vi_VN" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Fonts/CSS -->
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <link rel="preload" href="/fonts/critical/ebe222511beff24d66cf1065323e31dbf6dcbc4b.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/critical/b3cac1dad649a5230f2b83a860418f6d0825a546.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/critical/ba57728a5d4556be56beac3e24b5b3d30d7fbdc5.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/critical/8b6c7c9f87b1c1e862ce4c5134e9864d5ee7d77b.woff2" as="font" type="font/woff2" crossorigin />
+    <script type="module" crossorigin src="/assets/index.DYpha23h.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor.CXTc2ZKB.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-charts.CI_Dm7_k.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-realtime.YzahyF3a.js">
+    <link rel="stylesheet" crossorigin href="/assets/vendor.Bbo-_dVE.css">
+    <link rel="stylesheet" crossorigin href="/assets/index.DE2yzZ9A.css">
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script>
+  <link rel="canonical" href="https://truyenviethay.id.vn/the-loai?page=2" />
+  <meta name="robots" content="noindex, follow" />
+  <meta name="x-seo-render" content="route-head-v2" />
+</head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
+
+
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TruyenVietHay - Đọc Truyện Chữ & Nghe Truyện Audio</title>
+    <meta
+      name="description"
+      content="Đọc truyện chữ và nghe truyện audio miễn phí. Cập nhật chương mới mỗi ngày tại TruyenVietHay."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="apple-mobile-web-app-title" content="TruyenVietHay" />
+    <meta property="og:site_name" content="TruyenVietHay" />
+    <meta property="og:locale" content="vi_VN" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Fonts/CSS -->
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <link rel="preload" href="/fonts/critical/ebe222511beff24d66cf1065323e31dbf6dcbc4b.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/critical/b3cac1dad649a5230f2b83a860418f6d0825a546.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/critical/ba57728a5d4556be56beac3e24b5b3d30d7fbdc5.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/critical/8b6c7c9f87b1c1e862ce4c5134e9864d5ee7d77b.woff2" as="font" type="font/woff2" crossorigin />
+    <script type="module" crossorigin src="/assets/index.DYpha23h.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor.CXTc2ZKB.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-charts.CI_Dm7_k.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-realtime.YzahyF3a.js">
+    <link rel="stylesheet" crossorigin href="/assets/vendor.Bbo-_dVE.css">
+    <link rel="stylesheet" crossorigin href="/assets/index.DE2yzZ9A.css">
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
+------

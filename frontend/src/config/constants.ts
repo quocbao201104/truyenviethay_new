@@ -5,7 +5,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 // For now, it mirrors the API_BASE_URL logic or can be a separate env var.
 export const IMAGE_BASE_URL = import.meta.env.VITE_APP_IMAGE_URL || API_BASE_URL;
 export const DEFAULT_STORY_COVER_URL =
-    "https://res.cloudinary.com/dg9ftuhv4/image/upload/v1774000516/h%C3%ACnh_5_clb3fa.jpg";
+    "https://res.cloudinary.com/dg9ftuhv4/image/upload/f_auto,q_auto:good,c_fill,g_auto,ar_2:3,w_600,dpr_auto/v1774718730/default_cover_lfqxd9.png";
 
 type CloudinaryImageOptions = {
     width?: number;

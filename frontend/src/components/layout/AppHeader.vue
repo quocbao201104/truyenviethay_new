@@ -165,7 +165,7 @@
 
         <router-link v-else to="/dang-nhap" class="btn-spirit-login">
           <i class="fas fa-user-astronaut"></i>
-          <span>Quy Vị Tiên Môn</span>
+          <span>Tiên Môn</span>
         </router-link>
       </div>
     </div>
