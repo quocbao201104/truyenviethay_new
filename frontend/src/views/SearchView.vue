@@ -153,24 +153,30 @@
 
             <!-- PHÂN TRANG (PAGINATION) -->
             <div v-if="totalPages > 1" class="xianxia-pagination">
-              <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="page-nav">
+              <button v-if="currentPage === 1" disabled class="page-nav">
                 <i class="fas fa-chevron-left"></i>
               </button>
+              <router-link v-else :to="getPageUrl(currentPage - 1)" class="page-nav">
+                <i class="fas fa-chevron-left"></i>
+              </router-link>
 
               <div class="page-numbers">
-                <button
+                <router-link
                   v-for="page in visiblePages"
                   :key="page"
-                  @click="goToPage(page)"
+                  :to="getPageUrl(page)"
                   :class="['page-num', { active: page === currentPage }]"
                 >
                   {{ page }}
-                </button>
+                </router-link>
               </div>
 
-              <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="page-nav">
+              <button v-if="currentPage === totalPages" disabled class="page-nav">
                 <i class="fas fa-chevron-right"></i>
               </button>
+              <router-link v-else :to="getPageUrl(currentPage + 1)" class="page-nav">
+                <i class="fas fa-chevron-right"></i>
+              </router-link>
             </div>
 
           </section>
@@ -183,6 +189,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useHead } from "@unhead/vue";
+import { toCanonicalUrlWithQuery, defaultOgImage } from "@/seo/site";
 import NewStoryCard from '@/modules/storyText/components/NewStoryCard.vue';
 import axios from '@/utils/axios';
 
@@ -219,6 +227,41 @@ const visiblePages = computed(() => {
 });
 
 const keyword = computed(() => filters.value.keyword);
+
+const pageTitle = computed(() => {
+  return filters.value.keyword?.trim() 
+    ? `Tìm kiếm: ${filters.value.keyword} - TruyenVietHay`
+    : `Tìm Kiếm Truyện Tiên Hiệp, Kiếm Hiệp | TruyenVietHay`;
+});
+
+const pageDesc = computed(() => {
+  return filters.value.keyword?.trim()
+    ? `Kết quả tìm kiếm cho: "${filters.value.keyword}". Đọc truyện chữ online chất lượng, mượt mà tại TruyenVietHay.`
+    : `Khám phá kho tàng truyện online. Phân loại theo thể loại, trạng thái...`;
+});
+
+const canonicalUrl = computed(() => {
+  const query: any = {};
+  if (filters.value.keyword) query.keyword = filters.value.keyword;
+  if (filters.value.status) query.status = filters.value.status;
+  if (filters.value.sortBy !== 'thoi_gian_cap_nhat') query.sort = filters.value.sortBy;
+  if (filters.value.selectedGenres.length > 0) query.genres = filters.value.selectedGenres.join(',');
+  return toCanonicalUrlWithQuery("/tim-kiem", query);
+});
+
+useHead({
+  title: pageTitle,
+  link: [{ rel: "canonical", href: canonicalUrl }],
+  meta: [
+    { name: "description", content: pageDesc },
+    { name: "robots", content: "noindex, follow" },
+    { property: "og:title", content: pageTitle },
+    { property: "og:description", content: pageDesc },
+    { property: "og:url", content: canonicalUrl },
+    { property: "og:image", content: defaultOgImage },
+    { name: "twitter:card", content: "summary_large_image" }
+  ]
+});
 
 // Methods
 const fetchGenres = async () => {
@@ -276,20 +319,24 @@ const clearAllFilters = () => {
   updateURL();
 };
 
-const goToPage = (page: number) => {
-  if (page < 1 || page > totalPages.value) return;
-  currentPage.value = page;
-  updateURL();
-};
-
-const updateURL = () => {
+const getPageUrl = (pageNumber: number) => {
   const query: any = {};
   if (filters.value.keyword) query.keyword = filters.value.keyword;
   if (filters.value.status) query.status = filters.value.status;
   if (filters.value.sortBy !== 'thoi_gian_cap_nhat') query.sort = filters.value.sortBy;
   if (filters.value.selectedGenres.length > 0) query.genres = filters.value.selectedGenres.join(',');
-  if (currentPage.value > 1) query.page = currentPage.value;
-  router.replace({ query });
+  if (pageNumber > 1) query.page = pageNumber;
+  return { path: '/tim-kiem', query };
+};
+
+const goToPage = (page: number) => {
+  if (page < 1 || page > totalPages.value) return;
+  currentPage.value = page;
+  router.replace(getPageUrl(currentPage.value));
+};
+
+const updateURL = () => {
+  router.replace(getPageUrl(currentPage.value));
 };
 
 const loadFromURL = () => {

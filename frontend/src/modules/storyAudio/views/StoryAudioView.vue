@@ -129,13 +129,13 @@
         </div>
 
         <div v-if="!loading && pagination.total_pages > 1" class="pagination-row">
-          <button :disabled="page <= 1 || loading" @click="goToPage(page - 1)">
-            <i class="fas fa-chevron-left"></i> Trước
-          </button>
+          <button v-if="page <= 1 || loading" disabled><i class="fas fa-chevron-left"></i> Trước</button>
+          <router-link v-else :to="getPageUrl(page - 1)"><i class="fas fa-chevron-left"></i> Trước</router-link>
+
           <span class="page-label">Trang {{ page }} / {{ pagination.total_pages }}</span>
-          <button :disabled="page >= pagination.total_pages || loading" @click="goToPage(page + 1)">
-            Sau <i class="fas fa-chevron-right"></i>
-          </button>
+
+          <button v-if="page >= pagination.total_pages || loading" disabled>Sau <i class="fas fa-chevron-right"></i></button>
+          <router-link v-else :to="getPageUrl(page + 1)">Sau <i class="fas fa-chevron-right"></i></router-link>
         </div>
       </main>
     </div>
@@ -330,10 +330,19 @@ const clearFilters = () => {
   updateUrl();
 };
 
+const getPageUrl = (pageNumber: number) => {
+  const query: Record<string, string | number> = {};
+  if (filters.value.sort_by !== "thoi_gian_cap_nhat") query.sort = filters.value.sort_by;
+  if (filters.value.trang_thai) query.status = filters.value.trang_thai;
+  if (filters.value.genre_ids.length > 0) query.genres = filters.value.genre_ids.join(",");
+  if (pageNumber > 1) query.page = pageNumber;
+  return { path: '/truyen-audio', query };
+};
+
 const goToPage = (nextPage: number) => {
   if (nextPage < 1 || nextPage > pagination.value.total_pages || nextPage === page.value) return;
   page.value = nextPage;
-  updateUrl();
+  router.replace(getPageUrl(page.value));
 };
 
 function formatNumber(value = 0) {

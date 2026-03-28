@@ -63,10 +63,8 @@ const routes: Array<RouteRecordRaw> = [
     component: CategoryView,
   },
   {
-    path: "/the_loai/:id",
-    name: "StoriesByCategory",
-    component: StoryListView,
-    props: true,
+    path: "/the_loai/:pathMatch(.*)*",
+    redirect: "/the-loai",
   },
   {
     path: "/truyen-chu/:slug",

@@ -116,24 +116,22 @@
           </div>
 
           <div v-if="totalPages > 1" class="xianxia-pagination">
-            <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="nav-btn">
-              <i class="fas fa-chevron-left"></i>
-            </button>
+            <button v-if="currentPage === 1" disabled class="nav-btn"><i class="fas fa-chevron-left"></i></button>
+            <router-link v-else :to="getPageUrl(currentPage - 1)" class="nav-btn"><i class="fas fa-chevron-left"></i></router-link>
 
             <div class="num-group">
-              <button
+              <router-link
                 v-for="page in visiblePages"
                 :key="page"
-                @click="goToPage(page)"
+                :to="getPageUrl(page)"
                 :class="['num-btn', { active: page === currentPage }]"
               >
                 {{ page }}
-              </button>
+              </router-link>
             </div>
 
-            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="nav-btn">
-              <i class="fas fa-chevron-right"></i>
-            </button>
+            <button v-if="currentPage === totalPages" disabled class="nav-btn"><i class="fas fa-chevron-right"></i></button>
+            <router-link v-else :to="getPageUrl(currentPage + 1)" class="nav-btn"><i class="fas fa-chevron-right"></i></router-link>
           </div>
         </section>
       </div>
@@ -295,12 +293,16 @@ const goToPage = (page: number) => {
   fetchStories();
 };
 
-const updateURL = () => {
+const getPageUrl = (pageNumber: number) => {
   const query: any = {};
   if (selectedCategories.value.length > 0) query.categories = selectedCategories.value.join(',');
   if (sortBy.value !== 'thoi_gian_cap_nhat') query.sort = sortBy.value;
-  if (currentPage.value > 1) query.page = currentPage.value;
-  router.replace({ query });
+  if (pageNumber > 1) query.page = pageNumber;
+  return { path: '/the-loai', query };
+};
+
+const updateURL = () => {
+  router.replace(getPageUrl(currentPage.value));
 };
 
 const loadFromURL = () => {
