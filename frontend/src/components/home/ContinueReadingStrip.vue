@@ -23,6 +23,7 @@
             class="item-cover-img"
             loading="lazy"
             decoding="async"
+            @error="handleImageError"
           />
           
           <div class="bottom-vignette"></div>
@@ -48,7 +49,11 @@
 import { computed, onMounted } from 'vue';
 import { useAuthStore } from "@/modules/auth/auth.store";
 import { useHistoryStore } from "@/modules/history/history.store";
-import { getStoryCoverSrcSet, getStoryCoverUrl } from "@/config/constants";
+import { 
+  getStoryCoverSrcSet, 
+  getStoryCoverUrl,
+  DEFAULT_STORY_COVER_URL,
+} from "@/config/constants";
 import type { HistoryItem } from '@/modules/history/history.service';
 
 const authStore = useAuthStore();
@@ -73,6 +78,10 @@ const getChapterNumber = (item: HistoryItem) => {
       return item.chuong_moi_nhat_so_chuong;
     }
     return item.chuong_moi_nhat?.replace(/\D/g, '') || '?';
+};
+
+const handleImageError = (e: Event) => {
+  (e.target as HTMLImageElement).src = DEFAULT_STORY_COVER_URL;
 };
 
 const getChapterLink = (item: HistoryItem) => {

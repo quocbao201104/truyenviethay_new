@@ -103,7 +103,7 @@
 
               <router-link :to="`/truyen-chu/${story.slug}`" class="story-cover-pill first-element">
                 <img 
-                  :src="getImageUrl(story.anh_bia)" 
+                  :src="getStoryCoverUrl(story.anh_bia, 160)" 
                   :alt="story.ten_truyen"
                   class="cover-img"
                   loading="lazy"
@@ -229,7 +229,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, computed } from 'vue';
 import { useRankingStore } from '@/modules/ranking/ranking.store';
-import { getAvatarUrl, getImageUrl } from "@/config/constants";
+import { getAvatarUrl, getStoryCoverUrl, DEFAULT_STORY_COVER_URL, getImageUrl } from "@/config/constants";
 import { getTopAuthors, type AuthorRankType, type AuthorPublic } from "@/modules/author/author.api";
 import { useRouter } from "vue-router";
 import { useHead } from "@unhead/vue";
@@ -315,8 +315,7 @@ const navigateToAuthor = (authorId: number) => {
 };
 
 const handleImageError = (event: Event) => {
-  const target = event.target as HTMLImageElement;
-  target.src = '/placeholder.jpg';
+  (event.target as HTMLImageElement).src = DEFAULT_STORY_COVER_URL;
 };
 </script>
 

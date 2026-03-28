@@ -45,7 +45,7 @@
               
               <router-link :to="`/truyen-chu/${item.truyen_slug}`" class="history-cover-spirit">
                 <img 
-                  :src="item.anh_bia" 
+                  :src="getStoryCoverUrl(item.anh_bia, 160)" 
                   :alt="item.ten_truyen"
                   class="cover-img"
                   @error="handleImageError"
@@ -113,6 +113,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useHistoryStore } from '@/modules/history/history.store';
+import { getStoryCoverUrl, DEFAULT_STORY_COVER_URL } from '@/config/constants';
 
 const historyStore = useHistoryStore();
 
@@ -121,8 +122,7 @@ onMounted(() => {
 });
 
 const handleImageError = (event: Event) => {
-  const target = event.target as HTMLImageElement;
-  target.src = '/placeholder.jpg';
+  (event.target as HTMLImageElement).src = DEFAULT_STORY_COVER_URL;
 };
 
 const timeAgo = (date: string) => {

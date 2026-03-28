@@ -49,14 +49,15 @@
           @focusin="warmCurrentStory"
         >
           <img
-            :src="getImageUrl(mainStory.anh_bia, 1280)"
-            :srcset="buildStoryCoverSrcSet(mainStory.anh_bia)"
+            :src="getStoryCoverUrl(mainStory.anh_bia, 1280)"
+            :srcset="getStoryCoverSrcSet(mainStory.anh_bia, [640, 960, 1280, 1600])"
             sizes="(max-width: 1600px) 66vw, 960px"
             class="main-cover-bg"
             alt="Background"
             loading="eager"
             decoding="async"
             fetchpriority="high"
+            @error="handleImageError"
           />
           <div class="overlay-gradient"></div>
 
@@ -99,12 +100,13 @@
 
           <div class="floating-cover">
             <img
-              :src="getImageUrl(mainStory.anh_bia, 420)"
-              :srcset="buildStoryCoverSrcSet(mainStory.anh_bia)"
+              :src="getStoryCoverUrl(mainStory.anh_bia, 420)"
+              :srcset="getStoryCoverSrcSet(mainStory.anh_bia, [320, 420, 640])"
               sizes="280px"
               :alt="mainStory.ten_truyen"
               class="book-cover-3d"
               decoding="async"
+              @error="handleImageError"
             />
             <div class="book-glow-aura"></div>
           </div>
@@ -122,9 +124,11 @@
 import { computed, ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import {
+  DEFAULT_STORY_COVER_URL,
+  getStoryCoverUrl,
+  getStoryCoverSrcSet,
   buildCloudinaryImageUrl,
   buildCloudinarySrcSet,
-  getImageUrl,
 } from "@/config/constants";
 import {
   prefetchAudioListExperience,
@@ -222,11 +226,8 @@ const warmCurrentStory = () => {
   prefetchStoryDetailExperience(mainStory.value?.slug);
 };
 
-const buildStoryCoverSrcSet = (path?: string | null) => {
-  if (!path) return "";
-  return [420, 640, 960, 1280]
-    .map((width) => `${getImageUrl(path, width)} ${width}w`)
-    .join(", ");
+const handleImageError = (e: Event) => {
+  (e.target as HTMLImageElement).src = DEFAULT_STORY_COVER_URL;
 };
 
 const formatNumber = (num: number) => {

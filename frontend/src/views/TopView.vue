@@ -59,7 +59,7 @@
               <!-- Bìa Truyện -->
               <router-link :to="`/truyen-chu/${story.slug}`" class="story-cover-pill">
                 <img 
-                  :src="getImageUrl(story.anh_bia)" 
+                  :src="getStoryCoverUrl(story.anh_bia, 160)" 
                   :alt="story.ten_truyen"
                   class="cover-img"
                   @error="handleImageError"
@@ -99,7 +99,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useTopViewStore } from '@/modules/topview/topview.store';
-import { getImageUrl } from "@/config/constants";
+import { getStoryCoverUrl, DEFAULT_STORY_COVER_URL } from "@/config/constants";
 import { useHead } from "@unhead/vue";
 
 useHead({
@@ -131,8 +131,7 @@ const formatNumber = (num: number): string => {
 };
 
 const handleImageError = (event: Event) => {
-  const target = event.target as HTMLImageElement;
-  target.src = '/placeholder.jpg';
+  (event.target as HTMLImageElement).src = DEFAULT_STORY_COVER_URL;
 };
 </script>
 
