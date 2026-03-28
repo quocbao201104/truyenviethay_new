@@ -42,3 +42,21 @@ export async function getChapterDetail(storySlug, chapterSlug) {
     return null;
   }
 }
+/**
+ * Fetch Story Comments from backend
+ * @param {number|string} truyenId 
+ * @returns {Promise<Array>}
+ */
+export async function getStoryComments(truyenId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/comments?truyen_id=${truyenId}&page=1`, {
+      headers: { "Content-Type": "application/json" }
+    });
+    if (!res.ok) return [];
+    const body = await res.json();
+    return body?.data || [];
+  } catch (error) {
+    console.error("SSR Fetch Comments Error:", error);
+    return [];
+  }
+}

@@ -3,7 +3,7 @@ import path from "node:path";
 import { promises as fs } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { getStoryDetail, getChapterDetail } from "./ssrFetcher.js";
+import { getStoryDetail, getChapterDetail, getStoryComments } from "./ssrFetcher.js";
 
 const DEFAULT_SITE_URL = "https://truyenviethay.id.vn";
 const HEAD_CACHE_CONTROL = "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400";
@@ -160,6 +160,14 @@ function injectSsrContent(html, seoData) {
     }
   }
 
+  // Bơm JSON-LD Schema (SEO Structured Data)
+  if (seoData.jsonLd) {
+    const schemaTag = `\n<script type="application/ld+json">\n${JSON.stringify(seoData.jsonLd, null, 2)}\n</script>\n`;
+    if (result.includes("</head>")) {
+      result = result.replace("</head>", `${schemaTag}\n</head>`);
+    }
+  }
+
   // Bơm sườn Body hiển thị được cho Bot (Crawler đọc)
   if (seoData.bodyHtml) {
     const noscriptContent = `\n<noscript id="seo-ssr-content">\n${seoData.bodyHtml}\n</noscript>\n`;
@@ -276,19 +284,59 @@ export default async function handler(req, res) {
          const [_, storySlug] = storyMatch;
          const story = await getStoryDetail(storySlug);
          if (story) {
+             const comments = await getStoryComments(story.id);
+             const genresText = (story.genres || []).map(g => escapeHtml(g.ten_theloai || g.ten_the_loai)).join(', ');
+             
+             // Build JSON-LD Book Schema
+             const bookSchema = {
+               "@context": "https://schema.org",
+               "@type": "Book",
+               "name": story.ten_truyen,
+               "description": story.mo_ta?.replace(/<[^>]*>?/gm, ''),
+               "author": { "@type": "Person", "name": story.tac_gia?.ten_tac_gia || story.tac_gia || 'Bí danh' },
+               "genre": genresText,
+               "url": canonicalHref,
+             };
+
+             if (story.rating && story.rating_count) {
+               bookSchema.aggregateRating = {
+                 "@type": "AggregateRating",
+                 "ratingValue": story.rating,
+                 "bestRating": "5",
+                 "ratingCount": story.rating_count
+               };
+             }
+
+             if (comments && comments.length > 0) {
+               bookSchema.review = comments.slice(0, 3).map(c => ({
+                 "@type": "Review",
+                 "author": { "@type": "Person", "name": c.author_name || 'Ẩn danh' },
+                 "reviewBody": c.content,
+                 "datePublished": c.created_at
+               }));
+             }
+
              seoData = {
-                title: `${story.ten_truyen} - Tác giả ${story.tac_gia?.ten_tac_gia || 'Bí danh'} | TruyenVietHay`,
+                title: `${story.ten_truyen} - Tác giả ${story.tac_gia?.ten_tac_gia || story.tac_gia || 'Bí danh'} | TruyenVietHay`,
                 description: story.mo_ta?.replace(/<[^>]*>?/gm, '').substring(0, 160) || `Đọc truyện ${story.ten_truyen} chất lượng cực cao.`,
+                jsonLd: bookSchema,
                 bodyHtml: `
                   <main>
                     <header>
                       <h1>${escapeHtml(story.ten_truyen)}</h1>
-                      <p>Tác giả: ${escapeHtml(story.tac_gia?.ten_tac_gia || '')}</p>
-                      <p>Thể loại: ${story.categories?.map(c => escapeHtml(c.ten_the_loai)).join(', ')}</p>
+                      <p>Tác giả: ${escapeHtml(story.tac_gia?.ten_tac_gia || story.tac_gia || '')}</p>
+                      <p>Thể loại: ${genresText}</p>
+                      ${story.rating ? `<p>Đánh giá: ${story.rating}/5 (${story.rating_count} lượt)</p>` : ''}
                     </header>
                     <section class="story-synopsis">
                       <h2>Giới Thiệu</h2>
                       <div class="description">${story.mo_ta}</div>
+                    </section>
+                    <section class="bot-comments-feed">
+                      <h2>Bình Luận Mới Nhất</h2>
+                      <ul>
+                        ${comments.map(c => `<li><strong>${escapeHtml(c.author_name || 'Ẩn danh')}</strong>: ${escapeHtml(c.content)}</li>`).join('\n')}
+                      </ul>
                     </section>
                   </main>
                 `

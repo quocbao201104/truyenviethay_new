@@ -29,6 +29,13 @@ export interface BookSchemaOptions {
   coverUrl?: string | null;
   genres?: string[];
   chapterCount?: number;
+  ratingValue?: number;
+  ratingCount?: number;
+  reviews?: Array<{
+    author: string;
+    content: string;
+    date: string;
+  }>;
 }
 
 /**
@@ -59,6 +66,24 @@ export function buildBookSchema(options: BookSchemaOptions) {
   if (options.genres?.length) schema.genre = options.genres;
   if (options.chapterCount && options.chapterCount > 0) {
     schema.numberOfPages = options.chapterCount;
+  }
+  
+  if (options.ratingValue && options.ratingCount) {
+    schema.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: options.ratingValue,
+      bestRating: "5",
+      ratingCount: options.ratingCount,
+    };
+  }
+
+  if (options.reviews?.length) {
+    schema.review = options.reviews.map(r => ({
+      "@type": "Review",
+      author: { "@type": "Person", name: r.author },
+      reviewBody: r.content,
+      datePublished: r.date,
+    }));
   }
 
   return schema;

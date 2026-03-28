@@ -378,6 +378,7 @@ import { useRoute, useRouter, onBeforeRouteUpdate } from "vue-router";
 import { useHead } from "@unhead/vue";
 import { useStoryStore } from "@/modules/storyText/story.store";
 import { useChapterStore } from "@/modules/storyText/chapter/chapter.store";
+import { useCommentStore } from "@/modules/comment/comment.store";
 import { useFavoriteStore } from "@/modules/favorite/favorite.store";
 import { useRatingStore } from "@/modules/rating/rating.store";
 import { useHistoryStore } from "@/modules/history/history.store";
@@ -399,6 +400,7 @@ const chapterStore = useChapterStore();
 const favoriteStore = useFavoriteStore();
 const ratingStore = useRatingStore();
 const historyStore = useHistoryStore();
+const commentStore = useCommentStore();
 
 const hoverRating = ref(0);
 const userRating = computed(() => ratingStore.userRating);
@@ -618,6 +620,13 @@ useHead(() => ({
               coverUrl: storyOgImage.value || undefined,
               genres: story.value.genres?.map((g) => g.ten_theloai) || [],
               chapterCount: story.value.so_luong_chuong || 0,
+              ratingValue: ratingStats.value.avg_rating || 0,
+              ratingCount: ratingStats.value.total_ratings || 0,
+              reviews: commentStore.comments.slice(0, 3).map((c: any) => ({
+                author: c.author_name || 'Ẩn danh',
+                content: c.content,
+                date: c.created_at
+              }))
             }),
           ),
         },
