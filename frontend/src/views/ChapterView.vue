@@ -112,6 +112,11 @@
           <i class="fas fa-leaf"></i>
         </button>
       </div>
+
+      <nav class="sr-only" aria-hidden="true" v-if="prevChapterUrl || nextChapterUrl">
+        <router-link v-if="prevChapterUrl" :to="prevChapterUrl">Chương trước</router-link>
+        <router-link v-if="nextChapterUrl" :to="nextChapterUrl">Chương tiếp theo</router-link>
+      </nav>
     </main>
 
     <button v-show="isScrolled" class="spirit-fab" @click="scrollToTop">
@@ -350,14 +355,24 @@ const navigateToChapter = (chapterSlug: string) => {
     isMobileControlOpen.value = false; // Đóng menu sau khi chọn chương
 };
 
+const prevChapterUrl = computed(() => {
+  const cSlug = chapter.value?.navigation?.prev_slug || (hasPrev.value ? chapterList.value[currentIndex.value - 1]?.slug : null);
+  return cSlug ? `/truyen-chu/${route.params.storySlug}/${cSlug}` : null;
+});
+
+const nextChapterUrl = computed(() => {
+  const cSlug = chapter.value?.navigation?.next_slug || (hasNext.value ? chapterList.value[currentIndex.value + 1]?.slug : null);
+  return cSlug ? `/truyen-chu/${route.params.storySlug}/${cSlug}` : null;
+});
+
 const prevChapter = () => {
-  if (chapter.value?.navigation?.prev_slug) navigateToChapter(chapter.value.navigation.prev_slug);
-  else if (hasPrev.value) navigateToChapter(chapterList.value[currentIndex.value - 1].slug);
+  if (prevChapterUrl.value) router.push(prevChapterUrl.value);
+  isMobileControlOpen.value = false;
 };
 
 const nextChapter = () => {
-  if (chapter.value?.navigation?.next_slug) navigateToChapter(chapter.value.navigation.next_slug);
-  else if (hasNext.value) navigateToChapter(chapterList.value[currentIndex.value + 1].slug);
+  if (nextChapterUrl.value) router.push(nextChapterUrl.value);
+  isMobileControlOpen.value = false;
 };
 
 const handleSelectChapter = (event: Event) => navigateToChapter((event.target as HTMLSelectElement).value);

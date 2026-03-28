@@ -138,3 +138,43 @@ export function buildAudioObjectSchema(options: AudioObjectSchemaOptions) {
 
   return schema;
 }
+
+export interface AuthorSchemaOptions {
+  penName: string;
+  authorId: number | string;
+  bio?: string | null;
+  totalStories?: number;
+  avatarUrl?: string | null;
+}
+
+/**
+ * JSON-LD schema for an author profile page.
+ * Type: ProfilePage + Person + BreadcrumbList
+ * BreadcrumbList: Trang chủ → Tác giả → {penName}
+ */
+export function buildAuthorSchema(options: AuthorSchemaOptions) {
+  const url = `${siteUrl}/tac-gia/${options.authorId}`;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const schema: Record<string, any> = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    name: `Tác giả ${options.penName}`,
+    url,
+    mainEntity: {
+      "@type": "Person",
+      name: options.penName,
+      url,
+    },
+    breadcrumb: buildBreadcrumbListSchema([
+      { name: "Trang chủ", url: siteUrl },
+      { name: "Tác giả", url: `${siteUrl}/tac-gia` },
+      { name: options.penName, url },
+    ]),
+  };
+
+  if (options.bio) schema.mainEntity.description = options.bio;
+  if (options.avatarUrl) schema.mainEntity.image = options.avatarUrl;
+
+  return schema;
+}

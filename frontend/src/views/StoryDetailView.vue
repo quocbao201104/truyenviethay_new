@@ -154,6 +154,15 @@
                 {{ hasHistory ? "TIẾP TỤC ĐỌC " : "LĨNH HỘI" }}
               </router-link>
 
+              <router-link
+                v-if="story?.has_audio"
+                :to="`/truyen-audio/${story.slug}`"
+                class="btn-primary audio-link"
+                style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"
+              >
+                <i class="fas fa-headphones" style="margin-right: 6px;"></i> NGHE AUDIO
+              </router-link>
+
               <div class="secondary-actions">
                 <button
                   @click="toggleFollow"

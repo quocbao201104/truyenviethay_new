@@ -180,6 +180,43 @@ import type { Story } from "@/modules/storyText/story.service";
 import { getPublicStories } from "@/modules/storyText/story.service";
 import { getAuthorById, toggleFollowAuthor, updateMyAuthorProfile, type AuthorPublic } from "@/modules/author/author.api";
 import { useAuthStore } from "@/modules/auth/auth.store";
+import { useHead } from "@unhead/vue";
+import { toCanonicalUrl, defaultOgImage } from "@/seo/site";
+import { buildAuthorSchema } from "@/seo/schema";
+
+const _pageTitle = computed(() => author.value ? `${author.value.pen_name} - Tác giả truyện | TruyenVietHay` : "Tác giả truyện | TruyenVietHay");
+const _pageUrl = computed(() => toCanonicalUrl(route.path));
+const _pageDesc = computed(() => author.value ? `Đọc truyện của tác giả ${author.value.pen_name}. Đã viết ${author.value.total_stories} bộ truyện, thu hút ${author.value.total_views} lượt xem tại TruyenVietHay.` : "Hồ sơ của tác giả truyện chữ online trên TruyenVietHay.");
+
+useHead({
+  title: _pageTitle,
+  link: [{ rel: "canonical", href: _pageUrl }],
+  meta: [
+    { name: "description", content: _pageDesc },
+    { name: "robots", content: "index, follow" },
+    { property: "og:type", content: "profile" },
+    { property: "og:title", content: _pageTitle },
+    { property: "og:description", content: _pageDesc },
+    { property: "og:url", content: _pageUrl },
+    { property: "og:image", content: computed(() => author.value?.avatar ? getAvatarUrl(author.value.avatar) : defaultOgImage) },
+    { name: "twitter:card", content: "summary" },
+  ],
+  script: computed(() => {
+    if (!author.value) return [];
+    return [
+      {
+        type: "application/ld+json",
+        innerHTML: JSON.stringify(buildAuthorSchema({
+          penName: author.value.pen_name || "Ẩn danh",
+          authorId: author.value.id || author.value.user_id,
+          bio: author.value.bio,
+          totalStories: author.value.total_stories,
+          avatarUrl: author.value.avatar ? getAvatarUrl(author.value.avatar) : undefined
+        }))
+      }
+    ];
+  })
+});
 import { useChatStore } from "@/modules/chat/chat.store";
 
 const route = useRoute();
