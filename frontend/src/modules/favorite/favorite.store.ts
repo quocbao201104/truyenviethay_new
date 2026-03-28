@@ -46,8 +46,6 @@ export const useFavoriteStore = defineStore("favorite", () => {
             // Handle 401 - redirect to login
             if (err.response?.status === 401) {
                 error.value = "Vui lòng đăng nhập để xem truyện theo dõi";
-                toast.error("Vui lòng đăng nhập để xem truyện theo dõi");
-                router.push("/dang-nhap");
                 return;
             }
 

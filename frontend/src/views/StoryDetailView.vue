@@ -382,6 +382,7 @@ import { useCommentStore } from "@/modules/comment/comment.store";
 import { useFavoriteStore } from "@/modules/favorite/favorite.store";
 import { useRatingStore } from "@/modules/rating/rating.store";
 import { useHistoryStore } from "@/modules/history/history.store";
+import { useAuthStore } from "@/modules/auth/auth.store";
 import CommentList from "@/modules/comment/CommentList.vue";
 import SkeletonLoader from "@/components/common/SkeletonLoader.vue";
 import Breadcrumb from "@/components/common/Breadcrumb.vue";
@@ -401,6 +402,7 @@ const favoriteStore = useFavoriteStore();
 const ratingStore = useRatingStore();
 const historyStore = useHistoryStore();
 const commentStore = useCommentStore();
+const authStore = useAuthStore();
 
 const hoverRating = ref(0);
 const userRating = computed(() => ratingStore.userRating);
@@ -666,14 +668,18 @@ const fetchData = async () => {
   if (lastFetchSlug !== slug) return;
 
   if (story.value) {
-    // Initial fetch: first range
-    await Promise.all([
+    const promises: Promise<any>[] = [
       chapterStore.fetchChapterList(story.value.id, 1, rangeLimit, 0),
-      favoriteStore.fetchFavorites(),
       storyStore.fetchLikeStatus(story.value.id),
       ratingStore.fetchRatings(story.value.id),
-      historyStore.fetchHistory(1),
-    ]);
+    ];
+
+    if (authStore.isLoggedIn) {
+      promises.push(favoriteStore.fetchFavorites());
+      promises.push(historyStore.fetchHistory(1));
+    }
+
+    await Promise.all(promises);
     if (lastFetchSlug !== slug) return;
   }
 };

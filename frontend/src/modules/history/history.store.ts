@@ -41,8 +41,6 @@ export const useHistoryStore = defineStore("history", () => {
             // Handle 401 - redirect to login
             if (err.response?.status === 401) {
                 error.value = "Vui lòng đăng nhập để xem lịch sử đọc";
-                toast.error("Vui lòng đăng nhập để xem lịch sử đọc");
-                router.push("/dang-nhap");
                 return;
             }
 

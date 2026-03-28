@@ -249,13 +249,21 @@ export default async function handler(req, res) {
     );
 
     const origin = resolveOrigin(req, siteUrl);
+    
+    // SAFEGUARD: Force index, follow for known public story/chapter paths 
+    // to override any accidental "noindex" from routePolicy (e.g. during a redirect state)
+    let robotsPolicy = routePolicy.robots;
+    if (normalizedPath.startsWith("/truyen-chu/")) {
+        robotsPolicy = "index, follow";
+    }
+
     const templateHtml = await loadIndexTemplate(origin);
     let renderedHtml = templateHtml;
     let renderStatus = "injected";
     let seoData = null;
 
     try {
-      renderedHtml = injectHeadSignals(templateHtml, canonicalHref, routePolicy.robots);
+      renderedHtml = injectHeadSignals(templateHtml, canonicalHref, robotsPolicy);
 
       // Thêm Data SSR Bơm Thẳng Vào HTML
       const storyMatch = normalizedPath.match(/^\/truyen-chu\/([^/]+)$/);
