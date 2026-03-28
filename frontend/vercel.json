@@ -5,14 +5,10 @@
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/index.html", "destination": "/index.html" },
     {
-      "source": "/",
+      "source": "/(.*)",
       "has": [{ "type": "header", "key": "accept", "value": ".*text/html.*" }],
-      "destination": "/api/render?path=/"
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "header", "key": "accept", "value": ".*text/html.*" }],
-      "destination": "/api/render?path=/:path*"
+      "missing": [{ "type": "header", "key": "x-seo-head-render" }],
+      "destination": "/api/render?path=/$1"
     },
     { "source": "/", "destination": "/index.html" },
     { "source": "/:path*", "destination": "/index.html" }
