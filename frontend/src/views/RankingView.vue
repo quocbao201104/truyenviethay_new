@@ -232,6 +232,15 @@ import { useRankingStore } from '@/modules/ranking/ranking.store';
 import { getAvatarUrl, getImageUrl } from "@/config/constants";
 import { getTopAuthors, type AuthorRankType, type AuthorPublic } from "@/modules/author/author.api";
 import { useRouter } from "vue-router";
+import { useHead } from "@unhead/vue";
+
+useHead({
+  title: "Bảng Xếp Hạng - Top Truyện Tiên Hiệp, Ngôn Tình | TruyenVietHay",
+  meta: [
+    { name: "description", content: "Bảng xếp hạng truyện hot nhất, cập nhật liên tục các bộ truyện chữ và truyện audio đình đám." },
+    { name: "robots", content: "noindex, follow" }
+  ]
+});
 
 const rankingStore = useRankingStore();
 const router = useRouter();

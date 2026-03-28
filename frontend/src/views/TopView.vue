@@ -100,6 +100,15 @@
 import { onMounted } from 'vue';
 import { useTopViewStore } from '@/modules/topview/topview.store';
 import { getImageUrl } from "@/config/constants";
+import { useHead } from "@unhead/vue";
+
+useHead({
+  title: "Phong Vân Bảng - Truyện Hot Nhất | TruyenVietHay",
+  meta: [
+    { name: "description", content: "Bảng xếp hạng truyện hot nhất, được xem nhiều nhất tại TruyenVietHay." },
+    { name: "robots", content: "noindex, follow" }
+  ]
+});
 
 const topviewStore = useTopViewStore();
 

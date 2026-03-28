@@ -174,6 +174,53 @@ const selectedCategoryInfo = computed(() => {
   };
 });
 
+import { useHead } from "@unhead/vue";
+import { toCanonicalUrlWithQuery, defaultOgImage } from "@/seo/site";
+
+const pageTitle = computed(() => {
+  if (selectedCategories.value.length === 0) return "Thể Loại Truyện - Tất Cả | TruyenVietHay";
+  if (selectedCategories.value.length === 1 && selectedCategoryInfo.value?.ten_theloai) {
+    return `Truyện ${selectedCategoryInfo.value.ten_theloai} mới nhất | TruyenVietHay`;
+  }
+  return "Nhiều Thể Loại - Truyện online | TruyenVietHay";
+});
+
+const pageDesc = computed(() => {
+  if (selectedCategories.value.length === 1 && selectedCategoryInfo.value?.mo_ta) {
+    return selectedCategoryInfo.value.mo_ta;
+  }
+  return "Đọc truyện theo thể loại tiên hiệp, kiếm hiệp, ngôn tình, đô thị... Tổng hợp đầy đủ các thể loại truyện chữ và audio.";
+});
+
+const isNoIndex = computed(() => {
+  return selectedCategories.value.length !== 1 || sortBy.value !== 'thoi_gian_cap_nhat' || currentPage.value > 1;
+});
+
+const canonicalUrl = computed(() => {
+  if (selectedCategories.value.length === 1) {
+    return toCanonicalUrlWithQuery("/the-loai", { categories: selectedCategories.value[0] });
+  }
+  return toCanonicalUrlWithQuery("/the-loai");
+});
+
+useHead({
+  title: pageTitle,
+  link: [{ rel: "canonical", href: canonicalUrl }],
+  meta: [
+    { name: "description", content: pageDesc },
+    { name: "robots", content: computed(() => isNoIndex.value ? "noindex, follow" : "index, follow") },
+    { property: "og:type", content: "website" },
+    { property: "og:title", content: pageTitle },
+    { property: "og:description", content: pageDesc },
+    { property: "og:url", content: canonicalUrl },
+    { property: "og:image", content: defaultOgImage },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: pageTitle },
+    { name: "twitter:description", content: pageDesc },
+    { name: "twitter:image", content: defaultOgImage },
+  ]
+});
+
 const visiblePages = computed(() => {
   const pages: number[] = [];
   const maxVisible = 5;

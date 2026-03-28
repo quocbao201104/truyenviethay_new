@@ -317,6 +317,26 @@ import HeroGrid from "@/components/home/HeroGrid.vue";
 import ContinueReadingStrip from "@/components/home/ContinueReadingStrip.vue";
 import { useStoryStore } from "@/modules/storyText/story.store";
 import { useRouter } from "vue-router";
+import { useHead } from "@unhead/vue";
+import { toCanonicalUrl, defaultOgImage } from "@/seo/site";
+
+useHead({
+  title: "Đọc Truyện Chữ Online - Kho Truyện Mới Nhất | TruyenVietHay",
+  link: [{ rel: "canonical", href: toCanonicalUrl("/truyen-chu") }],
+  meta: [
+    { name: "description", content: "Đọc truyện chữ online miễn phí. Kho truyện tiên hiệp, ngôn tình, kiếm hiệp... cập nhật mỗi ngày tại TruyenVietHay." },
+    { name: "robots", content: "index, follow" },
+    { property: "og:type", content: "website" },
+    { property: "og:title", content: "Đọc Truyện Chữ Online | TruyenVietHay" },
+    { property: "og:description", content: "Đọc truyện chữ online miễn phí. Kho truyện tiên hiệp, ngôn tình, kiếm hiệp... cập nhật mỗi ngày tại TruyenVietHay." },
+    { property: "og:url", content: toCanonicalUrl("/truyen-chu") },
+    { property: "og:image", content: defaultOgImage },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: "Đọc Truyện Chữ Online | TruyenVietHay" },
+    { name: "twitter:description", content: "Đọc truyện chữ online miễn phí. Kho truyện tiên hiệp, ngôn tình, kiếm hiệp... cập nhật mỗi ngày tại TruyenVietHay." },
+    { name: "twitter:image", content: defaultOgImage },
+  ]
+});
 
 const storyStore = useStoryStore();
 const router = useRouter();

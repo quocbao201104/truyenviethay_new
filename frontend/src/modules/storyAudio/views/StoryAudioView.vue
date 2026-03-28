@@ -187,6 +187,27 @@ const hasActiveFilters = computed(
     filters.value.genre_ids.length > 0,
 );
 
+import { useHead } from "@unhead/vue";
+import { toCanonicalUrl, defaultOgImage } from "@/seo/site";
+
+useHead({
+  title: "Nghe Truyện Audio Online - Kho Audio Tuyển Chọn | TruyenVietHay",
+  link: [{ rel: "canonical", href: toCanonicalUrl("/truyen-audio") }],
+  meta: [
+    { name: "description", content: "Nghe truyện audio miễn phí. Tuyển chọn truyện tiên hiệp, ngôn tình audio chất lượng cao, cập nhật hàng ngày." },
+    { name: "robots", content: computed(() => (hasActiveFilters.value || page.value > 1) ? "noindex, follow" : "index, follow") },
+    { property: "og:type", content: "website" },
+    { property: "og:title", content: "Nghe Truyện Audio Online | TruyenVietHay" },
+    { property: "og:description", content: "Nghe truyện audio miễn phí. Tuyển chọn truyện audio chất lượng cao." },
+    { property: "og:url", content: toCanonicalUrl("/truyen-audio") },
+    { property: "og:image", content: defaultOgImage },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: "Nghe Truyện Audio Online | TruyenVietHay" },
+    { name: "twitter:description", content: "Nghe truyện audio miễn phí. Tuyển chọn truyện audio chất lượng cao." },
+    { name: "twitter:image", content: defaultOgImage },
+  ]
+});
+
 const featuredStory = computed(() => (page.value === 1 ? stories.value[0] || null : null));
 const showHero = computed(() => !!featuredStory.value);
 const displayStories = computed(() =>
