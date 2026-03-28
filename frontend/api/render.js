@@ -3,9 +3,11 @@ import path from "node:path";
 import { promises as fs } from "node:fs";
 import { fileURLToPath } from "node:url";
 
+import { getStoryDetail, getChapterDetail } from "./ssrFetcher.js";
+
 const DEFAULT_SITE_URL = "https://truyenviethay.id.vn";
-const HEAD_CACHE_CONTROL = "public, max-age=0, s-maxage=300";
-const RENDER_VERSION = "route-head-v2";
+const HEAD_CACHE_CONTROL = "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400";
+const RENDER_VERSION = "route-head-v3-ssr";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -138,6 +140,39 @@ function injectHeadSignals(html, canonicalHref, robots) {
   return `${sanitizedHtml}${injection}`;
 }
 
+function injectSsrContent(html, seoData) {
+  if (!seoData) return html;
+  
+  let result = html;
+  // Bơm Title và Description Metadata
+  if (seoData.title) {
+    if (result.includes("<title>")) {
+      result = result.replace(/<title>.*?<\/title>/gi, `<title>${escapeHtml(seoData.title)}</title>`);
+    } else if (result.includes("</head>")) {
+      result = result.replace("</head>", `  <title>${escapeHtml(seoData.title)}</title>\n</head>`);
+    }
+  }
+
+  if (seoData.description) {
+    const descMeta = `  <meta name="description" content="${escapeHtml(seoData.description)}" />`;
+    if (result.includes("</head>")) {
+      result = result.replace("</head>", `${descMeta}\n</head>`);
+    }
+  }
+
+  // Bơm sườn Body hiển thị được cho Bot (Crawler đọc)
+  if (seoData.bodyHtml) {
+    const noscriptContent = `\n<noscript id="seo-ssr-content">\n${seoData.bodyHtml}\n</noscript>\n`;
+    if (result.includes("</body>")) {
+      result = result.replace("</body>", `${noscriptContent}</body>`);
+    } else {
+      result += noscriptContent;
+    }
+  }
+
+  return result;
+}
+
 function templateCandidates() {
   return [
     path.join(process.cwd(), "dist", "index.html"),
@@ -209,9 +244,63 @@ export default async function handler(req, res) {
     const templateHtml = await loadIndexTemplate(origin);
     let renderedHtml = templateHtml;
     let renderStatus = "injected";
+    let seoData = null;
 
     try {
       renderedHtml = injectHeadSignals(templateHtml, canonicalHref, routePolicy.robots);
+
+      // Thêm Data SSR Bơm Thẳng Vào HTML
+      const storyMatch = normalizedPath.match(/^\/truyen-chu\/([^/]+)$/);
+      const chapterMatch = normalizedPath.match(/^\/truyen-chu\/([^/]+)\/([^/]+)$/);
+
+      if (chapterMatch) {
+         // TRANG CHỌN CHƯƠNG
+         const [_, storySlug, chapterSlug] = chapterMatch;
+         const chapter = await getChapterDetail(storySlug, chapterSlug);
+         if (chapter) {
+             seoData = {
+                 title: `${chapter.ten_chuong} - ${chapter.story_name || 'Truyện'} | TruyenVietHay`,
+                 description: `Đọc ${chapter.ten_chuong} của truyện ${chapter.story_name || 'Tiên Hiệp'} online mượt mà. Nội dung đầy đủ.`,
+                 bodyHtml: `
+                   <article>
+                      <h1>${escapeHtml(chapter.ten_chuong)}</h1>
+                      <div class="chapter-content">
+                         ${chapter.noi_dung}
+                      </div>
+                   </article>
+                 `
+             };
+         }
+      } else if (storyMatch) {
+         // TRANG CHI TIẾT TRUYỆN
+         const [_, storySlug] = storyMatch;
+         const story = await getStoryDetail(storySlug);
+         if (story) {
+             seoData = {
+                title: `${story.ten_truyen} - Tác giả ${story.tac_gia?.ten_tac_gia || 'Bí danh'} | TruyenVietHay`,
+                description: story.mo_ta?.replace(/<[^>]*>?/gm, '').substring(0, 160) || `Đọc truyện ${story.ten_truyen} chất lượng cực cao.`,
+                bodyHtml: `
+                  <main>
+                    <header>
+                      <h1>${escapeHtml(story.ten_truyen)}</h1>
+                      <p>Tác giả: ${escapeHtml(story.tac_gia?.ten_tac_gia || '')}</p>
+                      <p>Thể loại: ${story.categories?.map(c => escapeHtml(c.ten_the_loai)).join(', ')}</p>
+                    </header>
+                    <section class="story-synopsis">
+                      <h2>Giới Thiệu</h2>
+                      <div class="description">${story.mo_ta}</div>
+                    </section>
+                  </main>
+                `
+             };
+         }
+      }
+
+      if (seoData) {
+          renderedHtml = injectSsrContent(renderedHtml, seoData);
+          renderStatus = "injected-ssr";
+      }
+
     } catch (injectError) {
       renderStatus = "template-fallback";
       console.error("seo head inject error:", injectError);
