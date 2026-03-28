@@ -246,7 +246,9 @@
           <h3 class="panel-title">
             <i class="fas fa-feather text-cyan-400"></i> Tóm Tắt Bí Tịch
           </h3>
-          <div class="description-text">{{ story.mo_ta }}</div>
+          <div class="description-text">
+            {{ story.mo_ta || `Đọc ${story.ten_truyen} tại TruyenVietHay. Xem danh sách chương, tình trạng cập nhật và thông tin truyện mới nhất.` }}
+          </div>
         </div>
 
         <div
@@ -567,11 +569,10 @@ const storyMetaTitle = computed(() => {
 });
 
 const storyMetaDescription = computed(() => {
-  const fallback = "Đọc truyện chương mới nhất tại TruyenVietHay.";
-  const summary = truncateText(stripHtml(story.value?.mo_ta), 150);
-  const chapters = story.value?.so_luong_chuong || story.value?.so_chuong || 0;
-  const chapterText = chapters > 0 ? ` ${chapters} chương.` : "";
-  return summary || `${fallback}${chapterText}`;
+  if (!story.value) return "Đọc truyện chương mới nhất tại TruyenVietHay.";
+  const fallback = `Đọc ${story.value.ten_truyen} tại TruyenVietHay. Xem danh sách chương, tình trạng cập nhật và thông tin truyện mới nhất.`;
+  const summary = story.value.mo_ta ? truncateText(stripHtml(story.value.mo_ta), 150) : null;
+  return summary || fallback;
 });
 
 const storyMetaKeywords = computed(() => {
