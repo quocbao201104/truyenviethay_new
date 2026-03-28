@@ -42,7 +42,9 @@ function shouldIncludeAudioSitemap() {
 
 function toAbsoluteUrl(path, siteUrl = resolveSiteUrl()) {
   if (!path) return siteUrl;
-  return `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  // encodeURI giúp mã hóa các ký tự Unicode nhưng giữ lại các ký tự cấu trúc URL như / ? =
+  return `${siteUrl}${encodeURI(normalizedPath)}`;
 }
 
 function normalizeDateValue(input) {
@@ -58,7 +60,9 @@ function normalizeDateValue(input) {
 }
 
 function escapeXml(input) {
+  if (!input) return "";
   return String(input)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -69,31 +73,45 @@ function escapeXml(input) {
 function renderUrlSet(entries) {
   const rows = entries
     .map((entry) => {
-      const parts = [`<loc>${escapeXml(entry.loc)}</loc>`];
-      if (entry.lastmod) {
-        parts.push(`<lastmod>${escapeXml(entry.lastmod)}</lastmod>`);
+      try {
+        if (!entry.loc) return "";
+        const parts = [`<loc>${escapeXml(entry.loc)}</loc>`];
+        if (entry.lastmod) {
+          parts.push(`<lastmod>${escapeXml(entry.lastmod)}</lastmod>`);
+        }
+        return `  <url>${parts.join("")}</url>\n`;
+      } catch (err) {
+        console.error(`[Sitemap Error] Skip entry:`, entry, err.message);
+        return "";
       }
-      return `<url>${parts.join("")}</url>`;
     })
+    .filter(Boolean)
     .join("");
 
-  return `<?xml version="1.0" encoding="UTF-8"?>` +
-    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${rows}</urlset>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n` +
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows}</urlset>`;
 }
 
 function renderSitemapIndex(entries) {
   const rows = entries
     .map((entry) => {
-      const parts = [`<loc>${escapeXml(entry.loc)}</loc>`];
-      if (entry.lastmod) {
-        parts.push(`<lastmod>${escapeXml(entry.lastmod)}</lastmod>`);
+      try {
+        if (!entry.loc) return "";
+        const parts = [`<loc>${escapeXml(entry.loc)}</loc>`];
+        if (entry.lastmod) {
+          parts.push(`<lastmod>${escapeXml(entry.lastmod)}</lastmod>`);
+        }
+        return `  <sitemap>${parts.join("")}</sitemap>\n`;
+      } catch (err) {
+        console.error(`[Sitemap Error] Skip index entry:`, entry, err.message);
+        return "";
       }
-      return `<sitemap>${parts.join("")}</sitemap>`;
     })
+    .filter(Boolean)
     .join("");
 
-  return `<?xml version="1.0" encoding="UTF-8"?>` +
-    `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${rows}</sitemapindex>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n` +
+    `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows}</sitemapindex>`;
 }
 
 async function getStaticEntries(siteUrl) {
