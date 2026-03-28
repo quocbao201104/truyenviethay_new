@@ -352,6 +352,7 @@ import {
   getStoryCoverUrl,
 } from "@/config/constants";
 import { defaultOgImage, stripHtml, toCanonicalUrl, truncateText } from "@/seo/site";
+import { buildBookSchema } from "@/seo/schema";
 
 const route = useRoute();
 const storyStore = useStoryStore();
@@ -565,6 +566,24 @@ useHead(() => ({
     { name: "twitter:description", content: storyMetaDescription.value },
     { name: "twitter:image", content: storyOgImage.value },
   ],
+  script: story.value
+    ? [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            buildBookSchema({
+              name: story.value.ten_truyen || "",
+              slug: story.value.slug || (route.params.slug as string) || "",
+              author: story.value.tac_gia || undefined,
+              description: storyMetaDescription.value,
+              coverUrl: storyOgImage.value || undefined,
+              genres: story.value.genres?.map((g) => g.ten_theloai) || [],
+              chapterCount: story.value.so_luong_chuong || 0,
+            }),
+          ),
+        },
+      ]
+    : [],
 }));
 
 const handleImageError = (e: Event) => {

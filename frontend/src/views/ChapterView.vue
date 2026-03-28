@@ -131,6 +131,7 @@ import { getChapterBySlug, getChapterById, type Chapter } from "@/modules/storyT
 import { buildChapterCdnUrl } from "@/utils/chapterCdn";
 import { formatChapterContent } from "@/utils/chapterFormat";
 import { defaultOgImage, toCanonicalUrl, truncateText } from "@/seo/site";
+import { buildArticleSchema } from "@/seo/schema";
 
 const route = useRoute();
 const router = useRouter();
@@ -246,6 +247,21 @@ useHead(() => ({
     { name: "twitter:description", content: chapterMetaDescription.value },
     { name: "twitter:image", content: defaultOgImage },
   ],
+  script: chapter.value?.slug && chapter.value?.truyen?.slug
+    ? [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            buildArticleSchema({
+              chapterTitle: chapterTitle.value || (route.params.chapterSlug as string) || "Đọc chương",
+              chapterSlug: chapter.value.slug,
+              storyName: chapter.value.truyen?.ten_truyen || "",
+              storySlug: chapter.value.truyen.slug,
+            }),
+          ),
+        },
+      ]
+    : [],
 }));
 
 const isHtml = computed(() => /<\/?[a-z][\s\S]*>/i.test(chapterContent.value || ""));

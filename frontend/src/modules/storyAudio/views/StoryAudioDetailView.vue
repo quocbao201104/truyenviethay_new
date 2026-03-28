@@ -410,6 +410,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import { useHead } from "@unhead/vue";
+import { defaultOgImage, toCanonicalUrl, truncateText } from "@/seo/site";
+import { buildAudioObjectSchema } from "@/seo/schema";
 import {
   DEFAULT_STORY_COVER_URL,
   getStoryCoverSrcSet,
@@ -631,6 +634,58 @@ const copyrightHolder = computed(() => {
   if (!holder?.name) return null;
   return holder;
 });
+
+// ── SEO head ──────────────────────────────────────────────────────────
+const audioCanonicalPath = computed(() => {
+  const slug = audioPayload.value?.story.slug || (route.params.slug as string) || "";
+  return slug ? `/truyen-audio/${slug}` : "/truyen-audio";
+});
+
+const audioCanonicalUrl = computed(() => toCanonicalUrl(audioCanonicalPath.value));
+
+const audioMetaTitle = computed(() => {
+  const name = audioPayload.value?.story.ten_truyen?.trim();
+  if (!name) return "Nghe Truyện Audio | TruyenVietHay";
+  return `${name} Audio - Nghe truyện online | TruyenVietHay`;
+});
+
+const audioMetaDescription = computed(() => {
+  return truncateText(cleanDescription.value, 155) || "Nghe truyện audio chất lượng cao tại TruyenVietHay.";
+});
+
+useHead(() => ({
+  title: audioMetaTitle.value,
+  link: [{ rel: "canonical", href: audioCanonicalUrl.value }],
+  meta: [
+    { name: "description", content: audioMetaDescription.value },
+    { name: "robots", content: "index, follow" },
+    { property: "og:type", content: "website" },
+    { property: "og:title", content: audioMetaTitle.value },
+    { property: "og:description", content: audioMetaDescription.value },
+    { property: "og:url", content: audioCanonicalUrl.value },
+    { property: "og:image", content: coverUrl.value || defaultOgImage },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: audioMetaTitle.value },
+    { name: "twitter:description", content: audioMetaDescription.value },
+    { name: "twitter:image", content: coverUrl.value || defaultOgImage },
+  ],
+  script: audioPayload.value
+    ? [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            buildAudioObjectSchema({
+              name: audioPayload.value.story.ten_truyen,
+              slug: audioPayload.value.story.slug,
+              description: cleanDescription.value,
+              coverUrl: coverUrl.value || undefined,
+              author: audioPayload.value.story.tac_gia || undefined,
+            }),
+          ),
+        },
+      ]
+    : [],
+}));
 
 const handleCopyrightClick = () => {
   if (!copyrightHolder.value?.url) return;
