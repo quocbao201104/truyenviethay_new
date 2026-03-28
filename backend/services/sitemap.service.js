@@ -25,6 +25,16 @@ function parseInteger(value, fallback) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function getChaptersPerPage() {
+  return parseInteger(process.env.SITEMAP_CHAPTERS_PER_FILE, DEFAULT_CHAPTERS_PER_FILE);
+}
+
+async function getChapterPageCount() {
+  const stats = await getChapterStats();
+  const perPage = getChaptersPerPage();
+  return Math.ceil((Number(stats.total) || 0) / perPage);
+}
+
 function resolveSiteUrl() {
   const configured =
     process.env.SITEMAP_SITE_URL ||
@@ -215,10 +225,7 @@ async function getChapterStats() {
 }
 
 async function getChapterEntries(page, siteUrl) {
-  const chaptersPerFile = parseInteger(
-    process.env.SITEMAP_CHAPTERS_PER_FILE,
-    DEFAULT_CHAPTERS_PER_FILE,
-  );
+  const chaptersPerFile = getChaptersPerPage();
   const safePage = Math.max(1, parseInteger(page, 1));
   const offset = (safePage - 1) * chaptersPerFile;
 
@@ -294,11 +301,7 @@ async function getAudioEntries(siteUrl) {
 
 async function getSitemapIndexEntries(siteUrl) {
   const chapterStats = await getChapterStats();
-  const chaptersPerFile = parseInteger(
-    process.env.SITEMAP_CHAPTERS_PER_FILE,
-    DEFAULT_CHAPTERS_PER_FILE,
-  );
-  const chapterPages = Math.ceil((Number(chapterStats.total) || 0) / chaptersPerFile);
+  const chapterPages = await getChapterPageCount();
   const chapterLastmod = normalizeDateValue(chapterStats.latest_lastmod);
 
   const indexEntries = [
@@ -324,6 +327,8 @@ async function getSitemapIndexEntries(siteUrl) {
 module.exports = {
   resolveSiteUrl,
   getChapterStats,
+  getChaptersPerPage,
+  getChapterPageCount,
   getChapterEntries,
   getStoryEntries,
   getCategoryEntries,

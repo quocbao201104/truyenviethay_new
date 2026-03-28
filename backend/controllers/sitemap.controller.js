@@ -57,13 +57,7 @@ const getChapterSitemap = async (req, res) => {
       return res.status(400).json({ message: "Trang sitemap chapter khong hop le." });
     }
 
-    const stats = await sitemapService.getChapterStats();
-    const chaptersPerFile = Number.parseInt(
-      process.env.SITEMAP_CHAPTERS_PER_FILE || "10000",
-      10,
-    );
-    const safePageSize = Number.isFinite(chaptersPerFile) && chaptersPerFile > 0 ? chaptersPerFile : 10000;
-    const totalPages = Math.ceil((Number(stats.total) || 0) / safePageSize);
+    const totalPages = await sitemapService.getChapterPageCount();
 
     if (totalPages === 0 || page > totalPages) {
       // FIX: Trả về sitemap trống (200 OK) thay vì 404 để Google Search Console không báo lỗi "Could not fetch"
