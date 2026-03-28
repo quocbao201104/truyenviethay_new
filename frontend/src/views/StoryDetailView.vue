@@ -40,7 +40,16 @@
       v-else-if="story && story.slug === route.params.slug"
       class="detail-container animate-fadeIn"
     >
-      <section class="story-hero-section cosmic-glass">
+        <Breadcrumb :items="[
+          { name: 'Trang Chủ', path: '/' },
+          { 
+            name: story.genres && story.genres.length ? story.genres[0].ten_theloai : 'Truyện Chữ', 
+            path: story.genres && story.genres.length ? `/the-loai?categories=${story.genres[0].id_theloai}` : '/the-loai' 
+          },
+          { name: story.ten_truyen }
+        ]" />
+
+        <section class="story-hero-section cosmic-glass">
         <div class="hero-content">
           <div class="cover-wrapper">
             <div
@@ -340,6 +349,25 @@
           <CommentList :story-id="story.id" :story-author-id="story.user_id" />
         </div>
       </section>
+
+      <!-- RELATED STORIES -->
+      <section v-if="story" class="related-area animate-fadeIn">
+        <RelatedStoriesSection 
+          v-if="story.author_id || story.tac_gia"
+          title="Truyện Cùng Tác Giả"
+          type="author"
+          :author-id="story.author_id"
+          :exclude-id="story.id"
+        />
+
+        <RelatedStoriesSection 
+          v-if="story.genres && story.genres.length"
+          title="Truyện Tương Tự"
+          type="genre"
+          :genres="story.genres.map(g => g.id_theloai)"
+          :exclude-id="story.id"
+        />
+      </section>
     </main>
   </div>
 </template>
@@ -355,6 +383,8 @@ import { useRatingStore } from "@/modules/rating/rating.store";
 import { useHistoryStore } from "@/modules/history/history.store";
 import CommentList from "@/modules/comment/CommentList.vue";
 import SkeletonLoader from "@/components/common/SkeletonLoader.vue";
+import Breadcrumb from "@/components/common/Breadcrumb.vue";
+import RelatedStoriesSection from "@/modules/storyText/components/RelatedStoriesSection.vue";
 import {
   DEFAULT_STORY_COVER_URL,
   getStoryCoverSrcSet,

@@ -16,6 +16,11 @@
     </button>
 
     <main class="reading-spirit-wrapper">
+      <Breadcrumb :items="[
+        { name: 'Trang Chủ', path: '/' },
+        { name: chapter?.truyen?.ten_truyen || 'Truyện', path: `/truyen-chu/${$route.params.storySlug}` },
+        { name: chapterTitle || 'Đang tải...' }
+      ]" />
       <header class="chapter-spirit-header animate-fadeIn">
         <router-link
           :to="`/truyen-chu/${$route.params.storySlug}?tab=chapters`"
@@ -137,6 +142,7 @@ import { buildChapterCdnUrl } from "@/utils/chapterCdn";
 import { formatChapterContent } from "@/utils/chapterFormat";
 import { defaultOgImage, toCanonicalUrl, truncateText } from "@/seo/site";
 import { buildArticleSchema } from "@/seo/schema";
+import Breadcrumb from "@/components/common/Breadcrumb.vue";
 
 const route = useRoute();
 const router = useRouter();
