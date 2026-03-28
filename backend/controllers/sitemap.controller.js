@@ -66,7 +66,8 @@ const getChapterSitemap = async (req, res) => {
     const totalPages = Math.ceil((Number(stats.total) || 0) / safePageSize);
 
     if (totalPages === 0 || page > totalPages) {
-      return res.status(404).json({ message: "Khong tim thay sitemap chapters." });
+      // FIX: Trả về sitemap trống (200 OK) thay vì 404 để Google Search Console không báo lỗi "Could not fetch"
+      return sendXml(res, sitemapService.renderUrlSet([]));
     }
 
     const siteUrl = sitemapService.resolveSiteUrl();
