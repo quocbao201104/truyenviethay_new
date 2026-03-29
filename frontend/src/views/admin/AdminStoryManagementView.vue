@@ -9,6 +9,16 @@
         <div class="header-divider-spirit admin">
           <div class="dot"></div>
         </div>
+        <div class="header-action-row">
+          <router-link to="/admin/reports" class="header-action-pill report">
+            <i class="fas fa-flag"></i>
+            <span>Vào Trung Tâm Report</span>
+          </router-link>
+          <router-link to="/admin/dashboard" class="header-action-pill">
+            <i class="fas fa-chart-line"></i>
+            <span>Về Dashboard</span>
+          </router-link>
+        </div>
       </div>
 
       <section class="story-mode-tabs-section animate-fadeIn">
@@ -80,7 +90,7 @@
               <div class="cover-glow-container">
                 <img
                   v-if="currentStoryDetails.anh_bia_url"
-                  :src="currentStoryDetails.anh_bia_url"
+                  :src="getStoryCoverUrl(currentStoryDetails.anh_bia)"
                   alt="Linh vật diện mạo"
                   class="story-cover-spirit-large"
                   crossorigin="anonymous"
@@ -449,7 +459,7 @@ import { useStoryStore } from "@/modules/storyText/story.store";
 import { useChapterStore } from "@/modules/storyText/chapter/chapter.store";
 import { useCategoryStore } from "@/modules/category/category.store";
 import { useToast } from "vue-toastification";
-import { getImageUrl } from "@/config/constants";
+import { getStoryCoverUrl } from "@/config/constants";
 
 const storyStore = useStoryStore();
 const categoryStore = useCategoryStore();
@@ -543,7 +553,7 @@ const handleViewDetails = async (storyId: number) => {
     if (story) {
       currentStoryDetails.value = {
         ...story,
-        anh_bia_url: getImageUrl(story.anh_bia),
+        anh_bia_url: getStoryCoverUrl(story.anh_bia),
       };
       // Fetch sample chapter separately
       try {

@@ -84,7 +84,7 @@
                 </span>
                 <UserBadge :badge="comment.author_badge" size="sm" />
               </div>
-              <div v-if="canDelete(comment)" class="comment-actions">
+              <div v-if="canDelete(comment) || canReport(comment)" class="comment-actions">
                 <button
                   class="btn-more"
                   title="Tùy chọn bình luận"
@@ -98,6 +98,15 @@
                   @click.stop
                 >
                   <button
+                    v-if="canReport(comment)"
+                    class="menu-delete-item menu-report-item"
+                    @click="openReportModal(comment)"
+                  >
+                    <i class="fas fa-flag"></i>
+                    <span>Báo cáo</span>
+                  </button>
+                  <button
+                    v-if="canDelete(comment)"
                     class="menu-delete-item"
                     @click="handleDeleteFromMenu(comment.id)"
                   >
@@ -164,7 +173,7 @@
                         </span>
                         <UserBadge :badge="reply.author_badge" size="sm" />
                       </div>
-                      <div v-if="canDelete(reply)" class="comment-actions">
+                      <div v-if="canDelete(reply) || canReport(reply)" class="comment-actions">
                         <button
                           class="btn-more"
                           title="Tùy chọn bình luận"
@@ -178,6 +187,15 @@
                           @click.stop
                         >
                           <button
+                            v-if="canReport(reply)"
+                            class="menu-delete-item menu-report-item"
+                            @click="openReportModal(reply)"
+                          >
+                            <i class="fas fa-flag"></i>
+                            <span>Báo cáo</span>
+                          </button>
+                          <button
+                            v-if="canDelete(reply)"
                             class="menu-delete-item"
                             @click="handleDeleteFromMenu(reply.id)"
                           >
@@ -236,6 +254,15 @@
         </div>
       </div>
     </div>
+
+    <ReportTargetModal
+      :open="isReportModalOpen"
+      :target-id="reportTargetId"
+      target-type="comment"
+      :target-label="reportTargetLabel"
+      @close="closeReportModal"
+      @submitted="closeReportModal"
+    />
   </div>
 </template>
 
@@ -246,6 +273,7 @@ import { useAuthStore } from "@/modules/auth/auth.store";
 import type { Comment } from "./comment.service";
 import UserBadge from "@/components/gamification/UserBadge.vue";
 import { getAvatarUrl, getImageUrl } from "@/config/constants";
+import ReportTargetModal from "@/modules/report/components/ReportTargetModal.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -265,6 +293,9 @@ const replyingTo = ref<number | null>(null);
 const replyContent = ref("");
 const submittingReply = ref(false);
 const openActionMenuId = ref<string | null>(null);
+const isReportModalOpen = ref(false);
+const reportTargetId = ref<number | null>(null);
+const reportTargetLabel = ref("bình luận này");
 
 // Track which comment's replies are expanded
 const expandedReplies = ref(new Set<number>());
@@ -283,6 +314,8 @@ const canDelete = (comment: Comment) =>
   isAdmin.value ||
   isStoryAuthor.value ||
   (!!userId.value && comment.user_id === userId.value);
+const canReport = (comment: Comment) =>
+  !!userId.value && comment.user_id !== userId.value;
 
 onMounted(() => {
   if (props.storyId) store.fetchComments(props.storyId);
@@ -358,6 +391,21 @@ const handleDelete = async (commentId: number) => {
 
 const handleDeleteFromMenu = async (commentId: number) => {
   await handleDelete(commentId);
+};
+
+const openReportModal = (comment: Comment) => {
+  reportTargetId.value = comment.id;
+  reportTargetLabel.value = comment.content
+    ? `bình luận: "${comment.content.slice(0, 60)}${comment.content.length > 60 ? "..." : ""}"`
+    : "bình luận này";
+  isReportModalOpen.value = true;
+  openActionMenuId.value = null;
+};
+
+const closeReportModal = () => {
+  isReportModalOpen.value = false;
+  reportTargetId.value = null;
+  reportTargetLabel.value = "bình luận này";
 };
 
 const formatDate = (dateString: string) => {
@@ -685,6 +733,15 @@ onBeforeUnmount(() => {
 .menu-delete-item:hover {
   background: rgba(244, 63, 94, 0.15);
   color: #fecdd3;
+}
+
+.menu-report-item {
+  color: #fcd34d;
+}
+
+.menu-report-item:hover {
+  background: rgba(245, 158, 11, 0.14);
+  color: #fde68a;
 }
 
 .fb-meta {

@@ -103,10 +103,9 @@ import { getStoryCoverUrl, DEFAULT_STORY_COVER_URL } from "@/config/constants";
 import { useHead } from "@unhead/vue";
 
 useHead({
-  title: "Phong Vân Bảng - Truyện Hot Nhất | TruyenVietHay",
+  title: "Thiên Bảng - Truyện Hot | TruyenVietHay",
   meta: [
     { name: "description", content: "Bảng xếp hạng truyện hot nhất, được xem nhiều nhất tại TruyenVietHay." },
-    { name: "robots", content: "noindex, follow" }
   ]
 });
 

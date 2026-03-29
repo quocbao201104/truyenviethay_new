@@ -86,10 +86,15 @@
       </div>
 
       <div class="header-right-spirit">
+        <!-- Nút Tìm Kiếm Mobile -->
+        <div class="mobile-search-trigger" @click="toggleMobileSearch">
+          <i class="fas fa-magnifying-glass"></i>
+        </div>
+
         <nav class="spirit-nav">
           <router-link to="/the-loai" class="nav-spirit-link">Tàng Kinh Các</router-link>
-          <router-link to="/xep-hang" class="nav-spirit-link">Kỳ Thư</router-link>
-          <router-link to="/truyen-hot" class="nav-spirit-link">Thiên Bảng</router-link>
+          <router-link to="/xep-hang" class="nav-spirit-link">Thiên Bảng</router-link>
+          <router-link to="/truyen-hot" class="nav-spirit-link">Kỳ Thư</router-link>
         </nav>
 
         <div class="aura-separator"></div>
@@ -169,6 +174,67 @@
         </router-link>
       </div>
     </div>
+
+    <!-- Mobile Search Overlay -->
+    <transition name="mobile-search">
+      <div v-if="isMobileSearchOpen" class="mobile-search-overlay-aura">
+        <div class="mobile-search-header-aura">
+          <div class="mobile-search-input-aura">
+            <i class="fas fa-magnifying-glass mobile-search-icon-aura"></i>
+            <input
+              type="text"
+              placeholder="Tỏa thần thức tìm kiếm..."
+              class="mobile-aura-search-input"
+              v-model="searchQuery"
+              @input="handleSearchInput"
+              @keydown.enter="handleSearchSubmit"
+              autofocus
+            />
+            <button @click="closeMobileSearch" class="mobile-search-close-aura">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="mobile-search-results-aura">
+          <div v-if="searchLoading" class="mobile-search-loading">
+            <i class="fas fa-yin-yang fa-spin text-cyan-400"></i>
+            <span>Đang thỉnh thiên cơ...</span>
+          </div>
+
+          <div v-else-if="searchQuery && searchResults.length === 0" class="mobile-search-empty">
+            <span>Vô tung vô ảnh cho "{{ searchQuery }}"</span>
+          </div>
+
+          <div v-else-if="searchResults.length > 0" class="mobile-results-list-aura">
+            <router-link
+              v-for="story in searchResults"
+              :key="story.id"
+              :to="`/truyen-chu/${story.slug}`"
+              class="mobile-suggestion-item-aura"
+              @click="closeMobileSearch"
+            >
+              <img
+                :src="getStoryImageUrl(story.anh_bia, 80)"
+                class="mobile-suggestion-img"
+              />
+              <div class="mobile-suggestion-info">
+                <div class="mobile-suggestion-title">{{ story.ten_truyen }}</div>
+                <div class="mobile-suggestion-author">{{ story.tac_gia || 'Ẩn Danh' }}</div>
+              </div>
+            </router-link>
+            
+            <router-link
+              :to="`/tim-kiem?keyword=${encodeURIComponent(searchQuery)}`"
+              class="mobile-see-all-aura"
+              @click="closeMobileSearch"
+            >
+              Tầm Tiên Lộ <i class="fas fa-arrow-right-long ml-2"></i>
+            </router-link>
+          </div>
+        </div>
+      </div>
+    </transition>
   </header>
 </template>
 
@@ -204,6 +270,7 @@ export default {
     const searchResults = ref([]);
     const searchLoading = ref(false);
     const searchInputRef = ref(null);
+    const isMobileSearchOpen = ref(false);
     let searchTimeout = null;
 
     const notificationStore = useNotificationStore();
@@ -287,7 +354,21 @@ export default {
       if (searchQuery.value.trim()) {
         router.push(`/tim-kiem?keyword=${encodeURIComponent(searchQuery.value.trim())}`);
         showSuggestions.value = false;
+        isMobileSearchOpen.value = false;
       }
+    };
+
+    const toggleMobileSearch = () => {
+      isMobileSearchOpen.value = !isMobileSearchOpen.value;
+      if (isMobileSearchOpen.value) {
+        showSuggestions.value = true;
+        // Wait for next tick to focus if needed, but we'll use autofocus or ref focus
+      }
+    };
+
+    const closeMobileSearch = () => {
+      isMobileSearchOpen.value = false;
+      showSuggestions.value = false;
     };
 
     const getStoryImageUrl = (path, width = 96) => getStoryCoverUrl(path, width);
@@ -319,7 +400,7 @@ export default {
       handleSearchInput, handleSearchFocus, handleSearchBarClick, clearSearch,
       closeSuggestions, handleSearchSubmit, getStoryImageUrl, getStoryImageSrcSet, handleImageError, handleAvatarError,
       toggleNotification, showNotifications, notifications, unreadCount,
-      handleNotificationNavigation
+      handleNotificationNavigation, isMobileSearchOpen, toggleMobileSearch, closeMobileSearch
     };
   },
 };
@@ -527,11 +608,87 @@ export default {
 @keyframes bellSwing { 0%, 100% { transform: rotate(0); } 10%, 30% { transform: rotate(15deg); } 20%, 40% { transform: rotate(-15deg); } }
 
 /* Mobile */
+/* Mobile Navigation Items */
+.mobile-nav-items { display: none; flex-direction: column; }
+
+/* Mobile Search Button */
+.mobile-search-trigger {
+  display: none;
+  width: 40px; height: 40px; color: #cbd5e1;
+  align-items: center; justify-content: center;
+  font-size: 1.2rem; cursor: pointer; transition: all 0.3s;
+  border-radius: 50%; background: rgba(255, 255, 255, 0.05);
+}
+.mobile-search-trigger:hover { color: var(--app-accent); background: rgba(91, 196, 232, 0.1); }
+
+/* Mobile Search Overlay */
+.mobile-search-overlay-aura {
+  position: fixed; inset: 0; z-index: 2000;
+  background: var(--app-bg);
+  display: flex; flex-direction: column;
+}
+
+.mobile-search-header-aura {
+  padding: 15px; border-bottom: 1px solid var(--app-border);
+  background: rgba(13, 20, 31, 0.96); backdrop-filter: blur(10px);
+}
+
+.mobile-search-input-aura {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255, 255, 255, 0.06); border-radius: 12px;
+  padding: 8px 15px; border: 1px solid var(--app-border);
+}
+
+.mobile-search-icon-aura { color: var(--app-accent); font-size: 1rem; }
+.mobile-aura-search-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: #fff; font-size: 1rem; font-weight: 600;
+}
+.mobile-search-close-aura {
+  background: transparent; border: none; color: #64748b; font-size: 1.2rem; cursor: pointer;
+}
+
+.mobile-search-results-aura { flex: 1; overflow-y: auto; padding-bottom: 30px; }
+
+.mobile-search-loading, .mobile-search-empty {
+  padding: 40px; text-align: center; color: #64748b; font-weight: 600;
+  display: flex; flex-direction: column; gap: 10px; align-items: center;
+}
+
+.mobile-suggestion-item-aura {
+  display: flex; gap: 15px; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);
+  text-decoration: none; align-items: center;
+}
+
+.mobile-suggestion-img {
+  width: 50px; height: 70px; object-fit: cover; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.mobile-suggestion-title { color: #f8fafc; font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+.mobile-suggestion-author { font-size: 0.8rem; color: #94a3b8; }
+
+.mobile-see-all-aura {
+  display: block; text-align: center; padding: 18px;
+  color: var(--app-accent); font-weight: 800; text-transform: uppercase;
+  letter-spacing: 1px; font-size: 0.9rem;
+}
+
+/* Animations */
+.mobile-search-enter-active, .mobile-search-leave-active { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); }
+.mobile-search-enter-from, .mobile-search-leave-to { opacity: 0; transform: translateY(-20px); }
+
+/* Custom Scrollbar */
+.mobile-search-results-aura::-webkit-scrollbar { width: 4px; }
+.mobile-search-results-aura::-webkit-scrollbar-thumb { background: rgba(91, 196, 232, 0.2); border-radius: 4px; }
+
 @media (max-width: 768px) {
   .spirit-search-container, .spirit-nav { display: none; }
+  .mobile-search-trigger { display: flex; }
   .header-content-aura { padding: 0 15px; }
   .logo-spirit { height: 32px; }
-  .mobile-nav-items { display: block; }
+  .mobile-nav-items { display: flex; }
+  .avatar-ring-glow { width: 40px; height: 40px; }
 }
 
 @media (min-width: 769px) { .mobile-nav-items { display: none; } }

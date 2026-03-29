@@ -11,6 +11,7 @@ const ProfileSettingsView = () => import("@/views/ProfileSettingsView.vue");
 const AdminUserManagementView = () => import("@/views/admin/AdminUserManagementView.vue");
 const AdminStoryManagementView = () => import("@/views/admin/AdminStoryManagementView.vue");
 const AdminDashboardView = () => import("@/views/admin/AdminDashboardView.vue");
+const AdminReportsView = () => import("@/views/admin/AdminReportsView.vue");
 const SubmitStoryView = () => import("@/views/SubmitStoryView.vue");
 const FavoritesView = () => import("@/views/FavoritesView.vue");
 const HistoryView = () => import("@/views/HistoryView.vue");
@@ -27,6 +28,7 @@ const ChapterView = () => import("@/views/ChapterView.vue");
 const AuthorChapterManagementView = () => import("@/views/Author/AuthorChapterManagementView.vue");
 const AuthorChapterEditor = () => import("@/views/Author/AuthorChapterEditor.vue");
 const AuthorDashboardView = () => import("@/views/Author/AuthorDashboardView.vue");
+const AuthorReportsView = () => import("@/views/Author/AuthorReportsView.vue");
 const AuthorApplyView = () => import("@/views/Author/AuthorApplyView.vue");
 
 // Rules & Legal Views
@@ -171,6 +173,12 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true, requiredRole: ["admin"] },
   },
   {
+    path: "/admin/reports",
+    name: "AdminReports",
+    component: AdminReportsView,
+    meta: { requiresAuth: true, requiredRole: ["admin"] },
+  },
+  {
     path: "/dang-truyen/:id?",
     name: "SubmitStory",
     component: SubmitStoryView,
@@ -199,6 +207,12 @@ const routes: Array<RouteRecordRaw> = [
     name: "AuthorApply",
     component: AuthorApplyView,
     meta: { requiresAuth: true },
+  },
+  {
+    path: "/author/reports",
+    name: "AuthorReports",
+    component: AuthorReportsView,
+    meta: { requiresAuth: true, requiredRole: ["author", "admin"] },
   },
   // Rules & Legal Routes
   {

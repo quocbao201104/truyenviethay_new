@@ -75,7 +75,7 @@
 
             <div class="sort-box-xianxia">
               <label>Thứ tự:</label>
-              <select v-model="sortBy" @change="fetchStories" class="xianxia-select">
+              <select v-model="sortBy" @change="onSortChange" class="xianxia-select">
                 <option value="thoi_gian_cap_nhat">Mới Cập Nhật</option>
                 <option value="luot_xem">Xem Nhiều Nhất</option>
                 <option value="luot_thich">Được Yêu Thích</option>
@@ -173,7 +173,7 @@ const selectedCategoryInfo = computed(() => {
 });
 
 import { useHead } from "@unhead/vue";
-import { toCanonicalUrlWithQuery, defaultOgImage } from "@/seo/site";
+import { defaultOgImage } from "@/seo/site";
 
 const pageTitle = computed(() => {
   if (selectedCategories.value.length === 0) return "Thể Loại Truyện - Tất Cả | TruyenVietHay";
@@ -190,27 +190,13 @@ const pageDesc = computed(() => {
   return "Đọc truyện theo thể loại tiên hiệp, kiếm hiệp, ngôn tình, đô thị... Tổng hợp đầy đủ các thể loại truyện chữ và audio.";
 });
 
-const isNoIndex = computed(() => {
-  return selectedCategories.value.length !== 1 || sortBy.value !== 'thoi_gian_cap_nhat' || currentPage.value > 1;
-});
-
-const canonicalUrl = computed(() => {
-  if (selectedCategories.value.length === 1) {
-    return toCanonicalUrlWithQuery("/the-loai", { categories: selectedCategories.value[0] });
-  }
-  return toCanonicalUrlWithQuery("/the-loai");
-});
-
 useHead({
   title: pageTitle,
-  link: [{ rel: "canonical", href: canonicalUrl }],
   meta: [
     { name: "description", content: pageDesc },
-    { name: "robots", content: computed(() => isNoIndex.value ? "noindex, follow" : "index, follow") },
     { property: "og:type", content: "website" },
     { property: "og:title", content: pageTitle },
     { property: "og:description", content: pageDesc },
-    { property: "og:url", content: canonicalUrl },
     { property: "og:image", content: defaultOgImage },
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: pageTitle },
@@ -276,21 +262,23 @@ const toggleCategory = (categoryId: number) => {
   else selectedCategories.value.push(categoryId);
   currentPage.value = 1;
   updateURL();
-  fetchStories();
 };
 
 const clearSelection = () => {
   selectedCategories.value = [];
   currentPage.value = 1;
   updateURL();
-  fetchStories();
+};
+
+const onSortChange = () => {
+  currentPage.value = 1;
+  updateURL();
 };
 
 const goToPage = (page: number) => {
   if (page < 1 || page > totalPages.value) return;
   currentPage.value = page;
   updateURL();
-  fetchStories();
 };
 
 const getPageUrl = (pageNumber: number) => {
@@ -307,11 +295,31 @@ const updateURL = () => {
 
 const loadFromURL = () => {
   const query = route.query;
+  
+  // Update categories from URL
   if (query.categories) {
-    selectedCategories.value = (query.categories as string).split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+    selectedCategories.value = (query.categories as string)
+      .split(',')
+      .map(id => parseInt(id.trim()))
+      .filter(id => !isNaN(id));
+  } else {
+    selectedCategories.value = [];
   }
-  if (query.sort) sortBy.value = query.sort as string;
-  if (query.page) currentPage.value = parseInt(query.page as string);
+  
+  // Update sort mode from URL
+  if (query.sort) {
+    sortBy.value = query.sort as string;
+  } else {
+    sortBy.value = 'thoi_gian_cap_nhat';
+  }
+  
+  // Update page number from URL
+  if (query.page) {
+    const p = parseInt(query.page as string);
+    currentPage.value = isNaN(p) ? 1 : Math.max(1, p);
+  } else {
+    currentPage.value = 1;
+  }
 };
 
 onMounted(() => {

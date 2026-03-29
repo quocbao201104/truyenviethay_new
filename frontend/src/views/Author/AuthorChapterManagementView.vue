@@ -7,6 +7,17 @@
           <i class="fas fa-arrow-left"></i> Về Động Phủ
         </button>
         <h1 class="page-title-spirit">Quản Lý Tầng Chương</h1>
+        
+        <div class="header-action-row ml-auto">
+          <router-link to="/author/reports" class="header-action-pill report">
+            <i class="fas fa-flag"></i>
+            <span>Vào Report Chapter</span>
+          </router-link>
+          <router-link to="/user/dashboard" class="header-action-pill">
+            <i class="fas fa-chart-line"></i>
+            <span>Về Dashboard</span>
+          </router-link>
+        </div>
       </div>
 
       <div v-if="loadingStory" class="spirit-loading-box animate-fadeIn">
@@ -215,6 +226,44 @@ onMounted(async () => {
     align-items: center;
     gap: 20px;
     margin-bottom: 30px;
+}
+
+.header-action-row {
+  display: flex;
+  gap: 12px;
+}
+
+.header-action-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 999px;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.header-action-pill:hover {
+  background: rgba(51, 65, 85, 0.8);
+  color: #f8fafc;
+  border-color: #475569;
+}
+
+.header-action-pill.report {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.header-action-pill.report:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #34d399;
+  box-shadow: 0 0 15px rgba(52, 211, 153, 0.2);
 }
 
 .back-btn-spirit {

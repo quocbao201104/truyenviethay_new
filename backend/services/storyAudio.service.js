@@ -1,4 +1,5 @@
 const StoryModel = require("../models/story.model");
+const TheLoaiModel = require("../models/category.model");
 const { getOrSet } = require("../utils/cache");
 const { resolveAudioUrl } = require("../utils/audioUrl");
 
@@ -24,9 +25,10 @@ const cloneAudioResponse = (payload) => ({
 
 const buildAudioStoryMeta = async (story) => {
   const partnerId = Number.parseInt(story.source_partner_id, 10);
-  const partner = Number.isFinite(partnerId)
-    ? await StoryModel.getPartnerById(partnerId)
-    : null;
+  const [partner, genres] = await Promise.all([
+    Number.isFinite(partnerId) ? StoryModel.getPartnerById(partnerId) : null,
+    TheLoaiModel.getByStoryId(story.id)
+  ]);
 
   return {
     id: story.id,
@@ -46,6 +48,7 @@ const buildAudioStoryMeta = async (story) => {
           url: partner.youtube_url || null,
         }
       : null,
+    genres: genres || [],
   };
 };
 

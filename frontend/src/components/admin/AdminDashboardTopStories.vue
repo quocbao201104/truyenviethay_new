@@ -34,7 +34,7 @@
               <div class="cover-glow-wrap">
                 <img
                   v-if="story.anh_bia"
-                  :src="getImageUrl(story.anh_bia)"
+                  :src="getStoryCoverUrl(story.anh_bia)"
                   @error="handleImageError"
                   alt="Cover"
                   class="story-cover-img"
@@ -75,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { getImageUrl } from "@/config/constants";
+import { getStoryCoverUrl } from "@/config/constants";
 
 interface TopStory {
   id: number;

@@ -42,6 +42,11 @@ export interface StoryAudioResponse {
     audio_status?: string | null;
     source_type?: string | null;
     source_partner_id?: string | number | null;
+    genres?: Array<{
+      id_theloai: number;
+      ten_theloai: string;
+      slug: string;
+    }> | null;
     copyright_holder?: {
       id: number;
       name: string;

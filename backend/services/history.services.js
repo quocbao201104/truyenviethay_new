@@ -61,7 +61,7 @@ exports.getReadingHistory = async (userId, page = 1, limit = DEFAULT_LIMIT) => {
       ? row.anh_bia 
       : row.anh_bia 
         ? `${BASE_URL}/uploads_img/bia_truyen/${row.anh_bia}`
-        : `${BASE_URL}/uploads_img/bia_truyen/bia_truyen_default.jpg`;
+        : null;
 
     const so_chuong = row.so_chuong || null;
 

@@ -43,9 +43,9 @@ const routeFallbackTitle = computed(() => {
     Home: "Đọc Truyện Chữ & Nghe Truyện Audio Miễn Phí",
     StoryList: "Truyện Chữ Mới Cập Nhật",
     StoryAudioList: "Truyện Audio Mới Cập Nhật",
-    Categories: "Thể Loại Truyện",
-    TopView: "Truyện Hot",
-    Ranking: "Bảng Xếp Hạng Truyện",
+    Categories: "Tàng Kinh Các - Thể Loại",
+    TopView: "Thiên Bảng - Truyện Hot",
+    Ranking: "Kỳ Thư - Bảng Xếp Hạng",
   };
 
   const routeName = String(route.name || "");

@@ -57,7 +57,12 @@ export const buildCloudinarySrcSet = (
 };
 
 export const getImageUrl = (path: string | null | undefined, width: number = 600): string => {
-    if (!path) return '/placeholder.jpg'; // Or a default local asset
+    const isOldDefault = path && (
+        path.includes('bia_truyen_default.jpg') || 
+        path.includes('default_cover.jpg')
+    );
+
+    if (!path || isOldDefault) return '/placeholder.jpg'; // Or a default local asset
     
     // Cloudinary Optimization
     if (path.includes('cloudinary.com')) {
@@ -75,7 +80,12 @@ export const getStoryCoverUrl = (
     path: string | null | undefined,
     width: number = 600,
 ): string => {
-    if (!path) return DEFAULT_STORY_COVER_URL;
+    const isOldDefault = path && (
+        path.includes('bia_truyen_default.jpg') || 
+        path.includes('default_cover.jpg')
+    );
+
+    if (!path || isOldDefault) return DEFAULT_STORY_COVER_URL;
     if (path.includes("cloudinary.com")) {
         return buildCloudinaryImageUrl(path, { width, quality: "auto", format: "auto" });
     }

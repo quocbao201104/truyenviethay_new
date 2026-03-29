@@ -37,6 +37,12 @@
         <div class="header-divider-spirit">
           <div class="dot"></div>
         </div>
+        <div v-if="authStore.isLoggedIn && chapter?.id" class="chapter-report-entry">
+          <button type="button" class="chapter-report-btn" @click="isReportModalOpen = true">
+            <i class="fas fa-bug"></i>
+            Báo lỗi
+          </button>
+        </div>
       </header>
 
       <div 
@@ -85,6 +91,16 @@
           <button @click="toggleTheme" class="aura-toggle" :title="isDarkMode ? 'Hào quang sáng' : 'U minh tối'">
             <i :class="isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
           </button>
+          <button
+            v-if="authStore.isLoggedIn && chapter?.id"
+            type="button"
+            class="chapter-report-btn chapter-report-btn--toolbar"
+            title="Bao loi chuong"
+            @click="isReportModalOpen = true"
+          >
+            <i class="fas fa-bug"></i>
+            <span class="chapter-report-btn__label"></span>
+          </button>
         </div>
       </div>
 
@@ -127,6 +143,14 @@
     <button v-show="isScrolled" class="spirit-fab" @click="scrollToTop">
       <i class="fas fa-yin-yang animate-spin-slow"></i>
     </button>
+    <ReportTargetModal
+      :open="isReportModalOpen"
+      :target-id="chapter?.id || null"
+      target-type="chapter"
+      :target-label="chapterTitle || 'chương này'"
+      @close="isReportModalOpen = false"
+      @submitted="isReportModalOpen = false"
+    />
   </div>
 </template>
 
@@ -143,10 +167,12 @@ import { formatChapterContent } from "@/utils/chapterFormat";
 import { defaultOgImage, toCanonicalUrl, truncateText } from "@/seo/site";
 import { buildArticleSchema } from "@/seo/schema";
 import Breadcrumb from "@/components/common/Breadcrumb.vue";
+import ReportTargetModal from "@/modules/report/components/ReportTargetModal.vue";
 
 const route = useRoute();
 const router = useRouter();
 const store = useChapterStore();
+const authStore = useAuthStore();
 
 const chapterMeta = shallowRef<Chapter | null>(null);
 const chapter = computed(() => chapterMeta.value);
@@ -166,6 +192,7 @@ let activeRequestId = 0;
 
 // Mobile Bubble State
 const isMobileControlOpen = ref(false);
+const isReportModalOpen = ref(false);
 
 const scrollProgress = ref(0);
 const isScrolled = ref(false);
@@ -510,9 +537,7 @@ watch(() => [route.params.chapterSlug, route.params.storySlug], () => {
 .font-mono { font-family: 'JetBrains Mono', monospace; }
 
 .chapter-view-xianxia {
-  background: #111927;
   color: var(--app-text-muted);
-  min-height: 100vh;
   transition: background-color 0.35s ease, color 0.35s ease;
 }
 
@@ -568,6 +593,41 @@ watch(() => [route.params.chapterSlug, route.params.storySlug], () => {
 .header-divider-spirit .dot {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg);
   width: 6px; height: 6px; background: #63deb7; box-shadow: none;
+}
+
+.chapter-report-entry {
+  display: none;
+}
+
+.chapter-report-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(99, 222, 183, 0.22);
+  background: rgba(19, 27, 42, 0.88);
+  color: #d1fae5;
+  padding: 10px 16px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.chapter-report-btn--toolbar {
+  height: 36px;
+  padding: 0 14px;
+  background: rgba(12, 18, 29, 0.92);
+}
+
+.chapter-report-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(99, 222, 183, 0.42);
+  box-shadow: 0 16px 28px rgba(8, 145, 178, 0.14);
+}
+
+.chapter-report-btn__label {
+  white-space: nowrap;
 }
 
 /* CONTROL BAR - DESKTOP FIX */
@@ -690,6 +750,8 @@ watch(() => [route.params.chapterSlug, route.params.storySlug], () => {
 
   .font-tools { width: auto; justify-content: center; }
   .spirit-select-small { width: auto; text-align: center; }
+  .chapter-report-btn--toolbar { padding: 0 12px; }
+  .chapter-report-btn__label { display: none; }
 }
 
 /* Content Body */
@@ -708,6 +770,14 @@ watch(() => [route.params.chapterSlug, route.params.storySlug], () => {
 .spirit-content-body :deep(p) { margin-bottom: 3rem; text-indent: 1.5em; }
 .spirit-content-body :deep(p:first-of-type) { text-indent: 0; }
 .spirit-content-body :deep(br + br) { line-height: 2.4; }
+.spirit-content-body :deep(*) { max-width: 100%; }
+.spirit-content-body :deep([style*="overflow"]) {
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  max-height: none !important;
+  height: auto !important;
+}
 
 .font-serif.spirit-content-body {
   font-size-adjust: 0.52;

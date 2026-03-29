@@ -122,6 +122,12 @@ const getTypeName = (type: number) => {
     case NOTIF_TYPE.COMMENT_REPLY: return 'Phản Hồi Bình Luận';
     case NOTIF_TYPE.NEW_CHAPTER: return 'Chương Mới';
     case NOTIF_TYPE.BOOK_APPROVED: return 'Duyệt Truyện';
+    case NOTIF_TYPE.CHAPTER_REPORT_AUTHOR: return 'Report Chương';
+    case NOTIF_TYPE.CHAPTER_REPORT_ADMIN: return 'Report Chương';
+    case NOTIF_TYPE.COMMENT_REPORT_ADMIN: return 'Report Bình Luận';
+    case NOTIF_TYPE.NOVEL_REPORT_AUTHOR: return 'Report Truyện';
+    case NOTIF_TYPE.NOVEL_REPORT_ADMIN: return 'Report Truyện';
+    case NOTIF_TYPE.AUDIO_REPORT_ADMIN: return 'Report Audio';
     case NOTIF_TYPE.GIFT_LINH_THACH: return 'Tặng Linh Thạch';
     case NOTIF_TYPE.MAINTENANCE: return 'Bảo Trì Hệ Thống';
     default: return 'Tin Nhắn';

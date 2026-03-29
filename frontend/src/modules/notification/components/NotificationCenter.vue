@@ -142,9 +142,9 @@ const formatTime = (date) => {
 };
 
 const getNotifIcon = (type) => {
-  if ([1, 2, 3].includes(type)) return 'fas fa-comments';
-  if ([11, 12].includes(type)) return 'fas fa-book-open';
-  if ([21, 22].includes(type)) return 'fas fa-bolt-lightning';
+  if (CATEGORY_MAP.interaction.includes(type)) return 'fas fa-comments';
+  if (CATEGORY_MAP.story.includes(type)) return 'fas fa-book-open';
+  if (CATEGORY_MAP.system.includes(type)) return 'fas fa-bolt-lightning';
   return 'fas fa-envelope';
 };
 

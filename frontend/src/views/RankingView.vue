@@ -235,10 +235,9 @@ import { useRouter } from "vue-router";
 import { useHead } from "@unhead/vue";
 
 useHead({
-  title: "Bảng Xếp Hạng - Top Truyện Tiên Hiệp, Ngôn Tình | TruyenVietHay",
+  title: "Kỳ Thư - Bảng Xếp Hạng | TruyenVietHay",
   meta: [
     { name: "description", content: "Bảng xếp hạng truyện hot nhất, cập nhật liên tục các bộ truyện chữ và truyện audio đình đám." },
-    { name: "robots", content: "noindex, follow" }
   ]
 });
 

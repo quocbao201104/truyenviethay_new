@@ -9,6 +9,16 @@
         <div class="header-divider-spirit admin">
           <div class="dot"></div>
         </div>
+        <div class="header-action-row">
+          <router-link to="/admin/reports" class="header-action-pill report">
+            <i class="fas fa-flag"></i>
+            <span>Vào Trung Tâm Report</span>
+          </router-link>
+          <router-link to="/admin/quan-ly-truyen" class="header-action-pill">
+            <i class="fas fa-list-check"></i>
+            <span>Quản Lý Truyện</span>
+          </router-link>
+        </div>
       </div>
 
       <!-- PHẦN 1: LINH ĐÀI TỔNG QUAN (3 CARDS) -->
@@ -87,6 +97,14 @@
             <div class="pill-text">
                <span class="main">Khống Chế Chúng Sinh</span>
                <span class="sub">Quản lý đạo hữu & tu vi</span>
+            </div>
+          </router-link>
+
+          <router-link to="/admin/reports" class="quick-link-pill">
+            <div class="pill-icon-box"><i class="fas fa-flag"></i></div>
+            <div class="pill-text">
+               <span class="main">Trung Tâm Report</span>
+               <span class="sub">Duyệt chapter và comment bị báo cáo</span>
             </div>
           </router-link>
         </div>
@@ -206,6 +224,43 @@ onMounted(() => {
 .header-divider-spirit .dot {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg);
   width: 10px; height: 10px; background: #a78bfa; box-shadow: 0 0 12px #a78bfa;
+}
+
+.header-action-row {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+
+.header-action-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  background: rgba(19, 27, 42, 0.92);
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  color: #e2e8f0;
+  font-weight: 800;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.header-action-pill.report {
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #fecaca;
+}
+
+.header-action-pill:hover {
+  transform: translateY(-2px);
+  border-color: rgba(167, 139, 250, 0.45);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.28);
+}
+
+.header-action-pill.report:hover {
+  border-color: rgba(248, 113, 113, 0.55);
 }
 
 /* Section Titles */

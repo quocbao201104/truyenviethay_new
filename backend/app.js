@@ -34,7 +34,9 @@ const corsOptions = {
 app.set("trust proxy", 1);
 
 app.use(cors(corsOptions));
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(compression());
 app.use(xssClean());
 app.use(express.json());
@@ -86,6 +88,7 @@ app.use("/api/admin", require("./routes/admin.cache.routes"));
 app.use("/api/chat", require("./routes/chat.routes"));
 app.use("/api/shop", require("./routes/shop.routes"));
 app.use("/api/mailbox", require("./routes/mailbox.routes"));
+app.use("/api", require("./routes/report.routes"));
 
 app.get("/", (req, res) => res.send("Server is awake!"));
 

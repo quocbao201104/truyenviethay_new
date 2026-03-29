@@ -243,9 +243,31 @@
           v-if="currentTab === 'intro'"
           class="content-panel cosmic-glass intro"
         >
-          <h3 class="panel-title">
-            <i class="fas fa-feather text-cyan-400"></i> Tóm Tắt Bí Tịch
-          </h3>
+          <div class="panel-title-row">
+            <h3 class="panel-title">
+              <i class="fas fa-feather text-cyan-400"></i> Tóm Tắt Bí Tịch
+            </h3>
+            <div
+              v-if="authStore.isLoggedIn && story?.id"
+              ref="novelActionMenuRef"
+              class="panel-action-menu"
+            >
+              <button
+                type="button"
+                class="panel-action-trigger"
+                title="Tùy chọn truyện"
+                @click.stop="toggleNovelActionMenu"
+              >
+                <i class="fas fa-ellipsis-vertical"></i>
+              </button>
+              <div v-if="isNovelActionMenuOpen" class="panel-dropdown" @click.stop>
+                <button type="button" class="panel-dropdown__item" @click="openNovelReportModal">
+                  <i class="fas fa-flag"></i>
+                  <span>Báo cáo</span>
+                </button>
+              </div>
+            </div>
+          </div>
           <div class="description-text">
             {{ story.mo_ta || `Đọc ${story.ten_truyen} tại TruyenVietHay. Xem danh sách chương, tình trạng cập nhật và thông tin truyện mới nhất.` }}
           </div>
@@ -370,6 +392,15 @@
           :exclude-id="story.id"
         />
       </section>
+
+      <ReportTargetModal
+        :open="isNovelReportModalOpen"
+        :target-id="story?.id || null"
+        target-type="novel"
+        :target-label="story?.ten_truyen || 'truyện này'"
+        @close="isNovelReportModalOpen = false"
+        @submitted="isNovelReportModalOpen = false"
+      />
     </main>
   </div>
 </template>
@@ -389,6 +420,7 @@ import CommentList from "@/modules/comment/CommentList.vue";
 import SkeletonLoader from "@/components/common/SkeletonLoader.vue";
 import Breadcrumb from "@/components/common/Breadcrumb.vue";
 import RelatedStoriesSection from "@/modules/storyText/components/RelatedStoriesSection.vue";
+import ReportTargetModal from "@/modules/report/components/ReportTargetModal.vue";
 import {
   DEFAULT_STORY_COVER_URL,
   getStoryCoverSrcSet,
@@ -409,6 +441,9 @@ const authStore = useAuthStore();
 const hoverRating = ref(0);
 const userRating = computed(() => ratingStore.userRating);
 const ratingStats = computed(() => ratingStore.stats);
+const novelActionMenuRef = ref<HTMLElement | null>(null);
+const isNovelActionMenuOpen = ref(false);
+const isNovelReportModalOpen = ref(false);
 
 const currentTab = ref("intro");
 const tabs = [
@@ -538,6 +573,26 @@ const handleToggleLike = async () => {
 
 const handleRating = async (rating: number) => {
   if (story.value) await ratingStore.submitUserRating(story.value.id, rating);
+};
+
+const closeNovelActionMenu = () => {
+  isNovelActionMenuOpen.value = false;
+};
+
+const toggleNovelActionMenu = () => {
+  isNovelActionMenuOpen.value = !isNovelActionMenuOpen.value;
+};
+
+const openNovelReportModal = () => {
+  closeNovelActionMenu();
+  isNovelReportModalOpen.value = true;
+};
+
+const handleNovelActionMenuDocumentClick = (event: MouseEvent) => {
+  const target = event.target as Node | null;
+  if (!target) return;
+  if (novelActionMenuRef.value?.contains(target)) return;
+  closeNovelActionMenu();
 };
 
 const formatDate = (d?: string | null) => {
@@ -692,10 +747,16 @@ const formatNumber = (num: number) => {
 
 onMounted(() => {
   if (route.query.tab) currentTab.value = route.query.tab as string;
+  if (typeof document !== "undefined") {
+    document.addEventListener("click", handleNovelActionMenuDocumentClick);
+  }
   fetchData();
 });
 
 onUnmounted(() => {
+  if (typeof document !== "undefined") {
+    document.removeEventListener("click", handleNovelActionMenuDocumentClick);
+  }
   storyStore.clearData();
   chapterStore.clearChapterList();
 });
@@ -1183,6 +1244,70 @@ watch(
   gap: 10px;
   letter-spacing: -0.01em;
 }
+
+.panel-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.panel-action-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.panel-action-trigger {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  border: 1px solid rgba(120, 144, 168, 0.2);
+  background: rgba(10, 17, 27, 0.72);
+  color: #cbd5e1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.panel-action-trigger:hover {
+  border-color: rgba(97, 220, 196, 0.34);
+  color: #ecfeff;
+  background: rgba(97, 220, 196, 0.12);
+}
+
+.panel-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 156px;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(120, 144, 168, 0.16);
+  background: rgba(8, 14, 22, 0.96);
+  box-shadow: 0 18px 34px rgba(3, 9, 20, 0.4);
+  z-index: 20;
+}
+
+.panel-dropdown__item {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: transparent;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.panel-dropdown__item:hover {
+  background: rgba(97, 220, 196, 0.12);
+  color: #8de7f5;
+}
 .panel-header-row {
   display: flex;
   justify-content: space-between;
@@ -1506,6 +1631,10 @@ watch(
   }
   .panel-title {
     font-size: 1rem;
+  }
+
+  .panel-title-row {
+    align-items: center;
   }
   .description-text {
     font-size: 0.92rem;

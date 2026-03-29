@@ -131,17 +131,24 @@ export interface AudioObjectSchemaOptions {
   description?: string | null;
   coverUrl?: string | null;
   author?: string | null;
+  genreName?: string | null;
+  genreSlug?: string | null;
 }
 
 /**
  * JSON-LD schema for an audio story page.
  * Type: AudioObject + BreadcrumbList
- * BreadcrumbList: Trang chủ → Nghe Truyện Audio → {name}
+ * BreadcrumbList: Trang chủ → {Genre (nếu có) / Nghe Truyện Audio} → {name}
  * Note: contentUrl is intentionally omitted — audio parts are dynamic CDN URLs,
  * not stable permanent URLs suitable for schema embedding.
  */
 export function buildAudioObjectSchema(options: AudioObjectSchemaOptions) {
   const url = `${siteUrl}/truyen-audio/${options.slug}`;
+  
+  const categoryName = options.genreName || "Nghe Truyện Audio";
+  const categoryUrl = options.genreSlug 
+    ? `${siteUrl}/the-loai?genres=${options.genreSlug}` 
+    : `${siteUrl}/truyen-audio`;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const schema: Record<string, any> = {
@@ -152,7 +159,7 @@ export function buildAudioObjectSchema(options: AudioObjectSchemaOptions) {
     inLanguage: "vi",
     breadcrumb: buildBreadcrumbListSchema([
       { name: "Trang chủ", url: siteUrl },
-      { name: "Nghe Truyện Audio", url: `${siteUrl}/truyen-audio` },
+      { name: categoryName, url: categoryUrl },
       { name: options.name, url },
     ]),
   };

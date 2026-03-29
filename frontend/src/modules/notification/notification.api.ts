@@ -8,6 +8,12 @@ export const NOTIF_TYPE = {
   NEW_CHAPTER: 11,
   BOOK_APPROVED: 12,
   CHAPTER_REJECTED: 13,
+  CHAPTER_REPORT_AUTHOR: 14,
+  CHAPTER_REPORT_ADMIN: 15,
+  COMMENT_REPORT_ADMIN: 16,
+  NOVEL_REPORT_AUTHOR: 17,
+  NOVEL_REPORT_ADMIN: 18,
+  AUDIO_REPORT_ADMIN: 19,
   GIFT_LINH_THACH: 21,
   MAINTENANCE: 22
 } as const;
@@ -15,7 +21,7 @@ export const NOTIF_TYPE = {
 export const CATEGORY_MAP = {
   interaction: [1, 2, 3],
   story: [11, 12, 13],
-  system: [21, 22]
+  system: [14, 15, 16, 17, 18, 19, 21, 22]
 } as const;
 
 export interface Notification {

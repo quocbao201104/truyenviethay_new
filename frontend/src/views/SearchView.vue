@@ -190,7 +190,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useHead } from "@unhead/vue";
-import { toCanonicalUrlWithQuery, defaultOgImage } from "@/seo/site";
+import { defaultOgImage } from "@/seo/site";
 import NewStoryCard from '@/modules/storyText/components/NewStoryCard.vue';
 import axios from '@/utils/axios';
 
@@ -240,24 +240,12 @@ const pageDesc = computed(() => {
     : `Khám phá kho tàng truyện online. Phân loại theo thể loại, trạng thái...`;
 });
 
-const canonicalUrl = computed(() => {
-  const query: any = {};
-  if (filters.value.keyword) query.keyword = filters.value.keyword;
-  if (filters.value.status) query.status = filters.value.status;
-  if (filters.value.sortBy !== 'thoi_gian_cap_nhat') query.sort = filters.value.sortBy;
-  if (filters.value.selectedGenres.length > 0) query.genres = filters.value.selectedGenres.join(',');
-  return toCanonicalUrlWithQuery("/tim-kiem", query);
-});
-
 useHead({
   title: pageTitle,
-  link: [{ rel: "canonical", href: canonicalUrl }],
   meta: [
     { name: "description", content: pageDesc },
-    { name: "robots", content: "noindex, follow" },
     { property: "og:title", content: pageTitle },
     { property: "og:description", content: pageDesc },
-    { property: "og:url", content: canonicalUrl },
     { property: "og:image", content: defaultOgImage },
     { name: "twitter:card", content: "summary_large_image" }
   ]
@@ -332,7 +320,7 @@ const getPageUrl = (pageNumber: number) => {
 const goToPage = (page: number) => {
   if (page < 1 || page > totalPages.value) return;
   currentPage.value = page;
-  router.replace(getPageUrl(currentPage.value));
+  updateURL();
 };
 
 const updateURL = () => {
@@ -341,13 +329,33 @@ const updateURL = () => {
 
 const loadFromURL = () => {
   const query = route.query;
+  
+  // Keyword
   filters.value.keyword = (query.keyword as string) || '';
+  
+  // Status
   filters.value.status = (query.status as string) || '';
+  
+  // Sort
   filters.value.sortBy = (query.sort as string) || 'thoi_gian_cap_nhat';
+  
+  // Genres
   if (query.genres) {
-    filters.value.selectedGenres = (query.genres as string).split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
+    filters.value.selectedGenres = (query.genres as string)
+      .split(',')
+      .map(id => parseInt(id))
+      .filter(id => !isNaN(id));
+  } else {
+    filters.value.selectedGenres = [];
   }
-  currentPage.value = parseInt(query.page as string) || 1;
+  
+  // Page
+  if (query.page) {
+    const p = parseInt(query.page as string);
+    currentPage.value = isNaN(p) ? 1 : Math.max(1, p);
+  } else {
+    currentPage.value = 1;
+  }
 };
 
 onMounted(() => {

@@ -1,6 +1,5 @@
 /**
  * Route-specific rate limiters (Phase 2: Anti-spam)
- * �p d?ng ch?t hon global limiter cho c�c endpoint tuong t�c.
  */
 const rateLimit = require("express-rate-limit");
 
@@ -16,14 +15,10 @@ const getClientIp = (req) => {
   return req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress || "unknown";
 };
 
-/**
- * POST /api/comments: 10 req/min per user, burst 2/10s
- * Comment c?n dang nh?p nn key = user id (middleware auth ch?y tru?c)
- */
 const commentLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
-  message: { message: "Quá nhiều bình luận. Vui lòng thử lại sau 1 phút." },
+  message: { message: "Qua nhieu binh luan. Vui long thu lai sau 1 phut." },
   statusCode: 429,
   keyGenerator: (req) => (req.user?.id ? `comment:${req.user.id}` : `comment:ip:${req.ip}`),
   skip: skipInTest,
@@ -31,13 +26,10 @@ const commentLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-/**
- * POST /api/chuong/:id/view: limit to prevent abuse
- */
 const chapterViewLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 30,
-  message: { message: "Qua nhiều lượt xem. Vui lòng thử lại sau." },
+  message: { message: "Qua nhieu luot xem. Vui long thu lai sau." },
   statusCode: 429,
   keyGenerator: (req) => {
     const userId = req.user?.id;
@@ -49,13 +41,10 @@ const chapterViewLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-/**
- * POST /api/ratings: cooldown 15s per (user_id, truyen_id)
- */
 const ratingLimiter = rateLimit({
   windowMs: 15 * 1000,
   max: 1,
-  message: { message: "Vui lòng đợi 15 giây trước khi đổi đánh giá." },
+  message: { message: "Vui long doi 15 giay truoc khi doi danh gia." },
   statusCode: 429,
   keyGenerator: (req) => {
     const userId = req.user?.id ?? req.ip;
@@ -67,13 +56,10 @@ const ratingLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-/**
- * POST /api/follow/:truyenId: debounce 3s per (user_id, truyen_id)
- */
 const followLimiter = rateLimit({
   windowMs: 3 * 1000,
   max: 1,
-  message: { message: "Vui lòng đợi vài giây trước khi thao tác tiếp." },
+  message: { message: "Vui long doi vai giay truoc khi thao tac tiep." },
   statusCode: 429,
   keyGenerator: (req) => {
     const userId = req.user?.id ?? req.ip;
@@ -85,9 +71,25 @@ const followLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+const reportLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  message: { message: "Ban dang gui report qua nhanh. Vui long thu lai sau 1 phut." },
+  statusCode: 429,
+  keyGenerator: (req) => {
+    const userId = req.user?.id;
+    if (userId) return `report:${userId}`;
+    return `report:ip:${getClientIp(req)}`;
+  },
+  skip: skipInTest,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 module.exports = {
   commentLimiter,
   chapterViewLimiter,
   ratingLimiter,
   followLimiter,
+  reportLimiter,
 };

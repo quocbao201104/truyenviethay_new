@@ -36,19 +36,14 @@
         <tbody>
           <tr v-for="(story, index) in stories" :key="story.id" :class="['story-row', { 'even-row': index % 2 === 0, 'odd-row': index % 2 !== 0 }]">
             <td class="text-center">{{ story.id }}</td>
-            <td class="cover-image-cell">
-              <img
-                v-if="story.anh_bia && getImageUrl(story.anh_bia)"
-                :src="getImageUrl(story.anh_bia)"
-                alt="Ảnh bìa"
-                class="story-cover-thumb"
-                crossorigin="anonymous"
+            <td class="cover-cell">
+               <img 
+                :src="getStoryCoverUrl(story.anh_bia)" 
                 @error="handleImageError"
+                alt="Cover" 
+                class="story-cover"
+                crossorigin="anonymous"
               />
-              <div v-else class="no-image-placeholder-small">
-                <i class="fas fa-image"></i>
-                <span>Không ảnh</span>
-              </div>
             </td>
             <td>
               <router-link :to="`/truyen-chu/${story.slug}`" class="story-name-link">
@@ -114,7 +109,7 @@
 <script setup lang="ts">
 import { onMounted, ref, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import { getImageUrl } from "@/config/constants";
+import { getStoryCoverUrl } from "@/config/constants";
 
 const router = useRouter();
 

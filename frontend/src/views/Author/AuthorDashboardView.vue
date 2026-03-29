@@ -9,6 +9,16 @@
         <div class="header-divider-spirit">
           <div class="dot"></div>
         </div>
+        <div class="header-action-row">
+          <router-link to="/author/reports" class="header-action-pill report">
+            <i class="fas fa-flag"></i>
+            <span>Vào Report Chapter</span>
+          </router-link>
+          <router-link to="/dang-truyen" class="header-action-pill">
+            <i class="fas fa-wand-sparkles"></i>
+            <span>Đăng Truyện</span>
+          </router-link>
+        </div>
       </div>
 
       <!-- PHẦN 1: LINH ĐÀI THỐNG KÊ (STAT CARDS) -->
@@ -64,6 +74,9 @@
                   {{ notificationStore.unreadCount }}
                 </span>
               </button>
+              <router-link to="/author/reports" class="tab-aura-btn tab-aura-link">
+                <i class="fas fa-flag mr-2"></i> Reports
+              </router-link>
             </div>
             
             <router-link v-if="currentTab === 'stories'" :to="{ name: 'SubmitStory' }" class="btn-create-spirit">
@@ -350,6 +363,43 @@ const handleDeleteStory = async (storyId: number) => {
 .header-divider-spirit .dot {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg);
   width: 8px; height: 8px; background: #34d399; box-shadow: 0 0 10px #34d399;
+}
+
+.header-action-row {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.header-action-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  background: rgba(19, 27, 42, 0.92);
+  border: 1px solid rgba(52, 211, 153, 0.18);
+  color: #e2e8f0;
+  font-weight: 800;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.header-action-pill.report {
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #fecaca;
+}
+
+.header-action-pill:hover {
+  transform: translateY(-2px);
+  border-color: rgba(52, 211, 153, 0.4);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.28);
+}
+
+.header-action-pill.report:hover {
+  border-color: rgba(248, 113, 113, 0.55);
 }
 
 /* Sections Global */

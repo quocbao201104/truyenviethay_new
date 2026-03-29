@@ -58,6 +58,19 @@
     </main>
 
     <main v-else-if="audioPayload" class="audio-detail-container">
+      <Breadcrumb :items="[
+        { name: 'Trang Chủ', path: '/' },
+        { 
+          name: audioPayload.story.genres && audioPayload.story.genres.length 
+            ? audioPayload.story.genres[0].ten_theloai 
+            : 'Nghe Truyện Audio', 
+          path: audioPayload.story.genres && audioPayload.story.genres.length 
+            ? `/the-loai?categories=${audioPayload.story.genres[0].id_theloai}` 
+            : '/truyen-audio' 
+        },
+        { name: audioPayload.story.ten_truyen }
+      ]" />
+
       <section class="audio-hero-shell">
         <section class="stage-shell">
           <div class="stage-feature">
@@ -215,8 +228,29 @@
 
             <section class="panel-card editorial-notes desktop-notes" :class="{ 'editorial-notes--warming': !deferredPanelsReady }">
               <div class="editorial-notes__header">
-                <span class="panel-label">Ghi chú biên tập</span>
-                <h3>Mở đầu cho người nghe</h3>
+                <div class="editorial-notes__title">
+                  <span class="panel-label">Ghi chú biên tập</span>
+                </div>
+                <div
+                  v-if="authStore.isLoggedIn && audioPayload?.story?.id"
+                  ref="audioActionMenuDesktopRef"
+                  class="report-action-menu"
+                >
+                  <button
+                    type="button"
+                    class="report-action-trigger"
+                    title="Tùy chọn audio"
+                    @click.stop="toggleAudioActionMenu"
+                  >
+                    <i class="fas fa-ellipsis-vertical"></i>
+                  </button>
+                  <div v-if="isAudioActionMenuOpen" class="report-action-dropdown" @click.stop>
+                    <button type="button" class="report-action-dropdown__item" @click="openAudioReportModal">
+                      <i class="fas fa-flag"></i>
+                      <span>Báo cáo</span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <template v-if="deferredPanelsReady">
@@ -356,8 +390,30 @@
 
           <section class="panel-card editorial-notes mobile-notes" :class="{ 'editorial-notes--warming': !deferredPanelsReady }">
             <div class="editorial-notes__header">
-              <span class="panel-label">Ghi chú biên tập</span>
-              <h3>Mở đầu cho người nghe</h3>
+              <div class="editorial-notes__title">
+                <span class="panel-label">Ghi chú biên tập</span>
+                <h3>Mở đầu cho người nghe</h3>
+              </div>
+              <div
+                v-if="authStore.isLoggedIn && audioPayload?.story?.id"
+                ref="audioActionMenuMobileRef"
+                class="report-action-menu"
+              >
+                <button
+                  type="button"
+                  class="report-action-trigger"
+                  title="Tùy chọn audio"
+                  @click.stop="toggleAudioActionMenu"
+                >
+                  <i class="fas fa-ellipsis-vertical"></i>
+                </button>
+                <div v-if="isAudioActionMenuOpen" class="report-action-dropdown" @click.stop>
+                  <button type="button" class="report-action-dropdown__item" @click="openAudioReportModal">
+                    <i class="fas fa-flag"></i>
+                    <span>Báo cáo</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             <template v-if="deferredPanelsReady">
@@ -404,6 +460,15 @@
       </section>
 
     </main>
+
+    <ReportTargetModal
+      :open="isAudioReportModalOpen"
+      :target-id="audioPayload?.story?.id || null"
+      target-type="audio"
+      :target-label="audioPayload?.story?.ten_truyen || 'audio này'"
+      @close="isAudioReportModalOpen = false"
+      @submitted="isAudioReportModalOpen = false"
+    />
   </div>
 </template>
 
@@ -419,6 +484,8 @@ import {
   getStoryCoverUrl,
 } from "@/config/constants";
 import { useAuthStore } from "@/modules/auth/auth.store";
+import ReportTargetModal from "@/modules/report/components/ReportTargetModal.vue";
+import Breadcrumb from "@/components/common/Breadcrumb.vue";
 import {
   getStoryAudioBySlug,
   saveStoryAudioProgress,
@@ -465,6 +532,10 @@ const isRestoringInitialPart = ref(false);
 const fetchRequestId = ref(0);
 const deferredPanelsReady = ref(false);
 const deferredPanelsHandle = ref<IdleCallbackHandle | null>(null);
+const audioActionMenuDesktopRef = ref<HTMLElement | null>(null);
+const audioActionMenuMobileRef = ref<HTMLElement | null>(null);
+const isAudioActionMenuOpen = ref(false);
+const isAudioReportModalOpen = ref(false);
 
 const currentTime = ref(0);
 const duration = ref(0);
@@ -680,6 +751,8 @@ useHead(() => ({
               description: cleanDescription.value,
               coverUrl: coverUrl.value || undefined,
               author: audioPayload.value.story.tac_gia || undefined,
+              genreName: audioPayload.value.story.genres && audioPayload.value.story.genres.length > 0 ? audioPayload.value.story.genres[0].ten_theloai : undefined,
+              genreSlug: audioPayload.value.story.genres && audioPayload.value.story.genres.length > 0 ? audioPayload.value.story.genres[0].id_theloai.toString() : undefined,
             }),
           ),
         },
@@ -690,6 +763,30 @@ useHead(() => ({
 const handleCopyrightClick = () => {
   if (!copyrightHolder.value?.url) return;
   window.open(copyrightHolder.value.url, "_blank", "noopener,noreferrer");
+};
+
+const closeAudioActionMenu = () => {
+  isAudioActionMenuOpen.value = false;
+};
+
+const toggleAudioActionMenu = () => {
+  isAudioActionMenuOpen.value = !isAudioActionMenuOpen.value;
+};
+
+const openAudioReportModal = () => {
+  closeAudioActionMenu();
+  isAudioReportModalOpen.value = true;
+};
+
+const handleAudioActionMenuDocumentClick = (event: MouseEvent) => {
+  const target = event.target as Node | null;
+  if (!target) return;
+
+  const clickedDesktop = audioActionMenuDesktopRef.value?.contains(target);
+  const clickedMobile = audioActionMenuMobileRef.value?.contains(target);
+
+  if (clickedDesktop || clickedMobile) return;
+  closeAudioActionMenu();
 };
 
 const resumeStorageKey = computed(() => {
@@ -1012,6 +1109,7 @@ onMounted(() => {
 
   if (typeof document !== "undefined") {
     document.addEventListener("visibilitychange", visibilityListener);
+    document.addEventListener("click", handleAudioActionMenuDocumentClick);
   }
 });
 
@@ -1023,6 +1121,7 @@ onBeforeUnmount(() => {
   }
   if (typeof document !== "undefined") {
     document.removeEventListener("visibilitychange", visibilityListener);
+    document.removeEventListener("click", handleAudioActionMenuDocumentClick);
   }
 });
 
@@ -1759,6 +1858,74 @@ watch(
 .playlist-header h3 {
   margin: 0;
   color: #f8fbff;
+}
+
+.editorial-notes__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.editorial-notes__title {
+  min-width: 0;
+}
+
+.report-action-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.report-action-trigger {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: #dbe7f2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.report-action-trigger:hover {
+  border-color: rgba(125, 220, 204, 0.34);
+  color: #f8fbff;
+  background: rgba(125, 220, 204, 0.12);
+}
+
+.report-action-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 156px;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(8, 14, 22, 0.96);
+  box-shadow: 0 18px 34px rgba(3, 9, 20, 0.4);
+  z-index: 30;
+}
+
+.report-action-dropdown__item {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: transparent;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.report-action-dropdown__item:hover {
+  background: rgba(125, 220, 204, 0.12);
+  color: #8af0ca;
 }
 
 .now-playing-info h2 {
