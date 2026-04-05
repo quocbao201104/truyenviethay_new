@@ -400,6 +400,7 @@ const StoryModel = {
       max_chapters = null,
       min_days_ago = null,
       has_audio = null,
+      is_hot = null,
       require_text_chapters = null,
     } = opts;
     const safePage = Math.max(1, parseInt(page, 10) || 1);
@@ -415,6 +416,7 @@ const StoryModel = {
       max_chapters != null ||
       min_days_ago != null ||
       has_audio != null ||
+      is_hot != null ||
       require_text_chapters != null
     );
     const cacheable = safePage === 1;
@@ -434,6 +436,7 @@ const StoryModel = {
           `maxChapters=${max_chapters ?? ""}`,
           `minDays=${min_days_ago ?? ""}`,
           `hasAudio=${has_audio ?? ""}`,
+          `isHot=${is_hot ?? ""}`,
           `requireTextChapters=${require_text_chapters ?? ""}`,
           `filtered=${hasFilters ? "1" : "0"}`,
         ].join(":")
@@ -463,6 +466,7 @@ const StoryModel = {
     max_chapters = null,
     min_days_ago = null,
     has_audio = null,
+    is_hot = null,
     require_text_chapters = null,
   }) => {
     const safePage = Math.max(1, parseInt(page, 10) || 1);
@@ -509,6 +513,7 @@ const StoryModel = {
                          tn.source_type,
                          tn.source_partner_id,
                          audio_meta.audio_total_parts,
+                         audio_meta.audio_total_series,
                          audio_meta.audio_total_duration_seconds,
                          audio_meta.audio_latest_part_at,
                          p.name AS source_partner_name,
@@ -518,6 +523,7 @@ const StoryModel = {
                          SELECT
                            ap.truyen_id,
                            COUNT(*) AS audio_total_parts,
+                           COUNT(DISTINCT ap.video_id) AS audio_total_series,
                            COALESCE(SUM(ap.duration_seconds), 0) AS audio_total_duration_seconds,
                            MAX(ap.created_at) AS audio_latest_part_at
                          FROM audio_parts ap
@@ -625,6 +631,14 @@ if (ids.length > 0) {
             whereConditions.push(`tn.has_audio = 1`);
         } else if (["0", "false", "no"].includes(normalizedHasAudio)) {
             whereConditions.push(`(tn.has_audio = 0 OR tn.has_audio IS NULL)`);
+        }
+    }
+    if (is_hot !== null && is_hot !== undefined && is_hot !== "") {
+        const normalizedIsHot = String(is_hot).toLowerCase();
+        if (["1", "true", "yes"].includes(normalizedIsHot)) {
+            whereConditions.push(`tn.is_hot = 1`);
+        } else if (["0", "false", "no"].includes(normalizedIsHot)) {
+            whereConditions.push(`(tn.is_hot = 0 OR tn.is_hot IS NULL)`);
         }
     }
     if (require_text_chapters !== null && require_text_chapters !== undefined && require_text_chapters !== "") {

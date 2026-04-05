@@ -144,6 +144,7 @@ const getPublicStories = async (req, res) => {
       max_chapters,
       min_days_ago,
       has_audio,
+      is_hot,
       require_text_chapters,
     } = req.query;
 
@@ -162,6 +163,7 @@ const getPublicStories = async (req, res) => {
       max_chapters,
       min_days_ago,
       has_audio,
+      is_hot,
       require_text_chapters,
     });
     if (result && result.data) {

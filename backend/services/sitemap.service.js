@@ -299,6 +299,55 @@ async function getAudioEntries(siteUrl) {
     .filter((row) => !!row.loc);
 }
 
+async function getRecentChapterEntries(siteUrl) {
+  return await getOrSet("sitemap:chapters:recent", SITEMAP_CACHE_TTL_SECONDS, async () => {
+    const [rows] = await db.query(
+      `SELECT
+         tn.slug AS story_slug,
+         c.slug AS chapter_slug,
+         c.thoi_gian_dang AS lastmod
+       FROM chuong c
+       INNER JOIN truyen_new tn ON tn.id = c.truyen_id
+       WHERE c.trang_thai = 'da_duyet'
+         AND c.is_chuong_mau = 0
+         AND c.slug IS NOT NULL
+         AND c.slug <> ''
+         AND tn.trang_thai_kiem_duyet = 'duyet'
+         AND ${ACTIVE_STORY_CLAUSE}
+       ORDER BY c.id DESC
+       LIMIT 5000`,
+    );
+    return rows.map((row) => ({
+      loc: toAbsoluteUrl(`/truyen-chu/${row.story_slug}/${row.chapter_slug}`, siteUrl),
+      lastmod: normalizeDateValue(row.lastmod),
+    }));
+  });
+}
+
+async function getPriorityGenreEntries(siteUrl) {
+  const priorityGenres = ["Huyền Huyễn", "Tiên Hiệp", "Ngôn Tình"];
+  return await getOrSet("sitemap:categories:priority", SITEMAP_CACHE_TTL_SECONDS, async () => {
+    const [rows] = await db.query(
+      `SELECT
+         tl.id_theloai,
+         tl.ten_theloai,
+         MAX(COALESCE(tn.thoi_gian_cap_nhat, tn.thoi_gian_tao)) AS lastmod
+       FROM theloai_new tl
+       INNER JOIN truyen_theloai tt ON tt.theloai_id = tl.id_theloai
+       INNER JOIN truyen_new tn ON tn.id = tt.truyen_id
+       WHERE tn.trang_thai_kiem_duyet = 'duyet'
+         AND ${ACTIVE_STORY_CLAUSE}
+         AND tl.ten_theloai IN (?)
+       GROUP BY tl.id_theloai, tl.ten_theloai`,
+      [priorityGenres],
+    );
+    return rows.map((row) => ({
+      loc: toAbsoluteUrl(`/the-loai?categories=${row.id_theloai}`, siteUrl),
+      lastmod: normalizeDateValue(row.lastmod),
+    }));
+  });
+}
+
 async function getSitemapIndexEntries(siteUrl) {
   const chapterStats = await getChapterStats();
   const chapterPages = await getChapterPageCount();
@@ -306,6 +355,8 @@ async function getSitemapIndexEntries(siteUrl) {
 
   const indexEntries = [
     { loc: toAbsoluteUrl("/sitemaps/static.xml", siteUrl) },
+    { loc: toAbsoluteUrl("/sitemaps/priority-genres.xml", siteUrl), lastmod: chapterLastmod },
+    { loc: toAbsoluteUrl("/sitemaps/recent-chapters.xml", siteUrl), lastmod: chapterLastmod },
     { loc: toAbsoluteUrl("/sitemaps/stories.xml", siteUrl) },
     { loc: toAbsoluteUrl("/sitemaps/categories.xml", siteUrl) },
   ];
@@ -330,6 +381,8 @@ module.exports = {
   getChaptersPerPage,
   getChapterPageCount,
   getChapterEntries,
+  getRecentChapterEntries,
+  getPriorityGenreEntries,
   getStoryEntries,
   getCategoryEntries,
   getAudioEntries,

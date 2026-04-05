@@ -88,6 +88,28 @@ const getAudioSitemap = async (req, res) => {
   }
 };
 
+const getRecentChapterSitemap = async (req, res) => {
+  try {
+    const siteUrl = sitemapService.resolveSiteUrl();
+    const entries = await sitemapService.getRecentChapterEntries(siteUrl);
+    return sendXml(res, sitemapService.renderUrlSet(entries));
+  } catch (error) {
+    console.error("recent chapters sitemap error:", error);
+    return res.status(500).json({ message: "Khong the tao sitemap recent chapters." });
+  }
+};
+
+const getPriorityGenreSitemap = async (req, res) => {
+  try {
+    const siteUrl = sitemapService.resolveSiteUrl();
+    const entries = await sitemapService.getPriorityGenreEntries(siteUrl);
+    return sendXml(res, sitemapService.renderUrlSet(entries));
+  } catch (error) {
+    console.error("priority genres sitemap error:", error);
+    return res.status(500).json({ message: "Khong the tao sitemap priority genres." });
+  }
+};
+
 module.exports = {
   getSitemapIndex,
   getStaticSitemap,
@@ -95,4 +117,6 @@ module.exports = {
   getCategorySitemap,
   getChapterSitemap,
   getAudioSitemap,
+  getRecentChapterSitemap,
+  getPriorityGenreSitemap,
 };
