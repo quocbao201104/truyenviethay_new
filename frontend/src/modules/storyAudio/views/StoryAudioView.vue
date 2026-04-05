@@ -65,7 +65,7 @@
           </div>
 
           <div class="audio-hero__feature">
-            <AudioHCard :story="featuredStory" variant="hero" />
+            <AudioHCard :story="featuredStory" variant="hero" :hide-partner="true" />
           </div>
 
           <div class="audio-hero__stats">
@@ -100,9 +100,15 @@
           </div>
         </div>
 
-        <div v-if="loading" class="state-card">
-          <i class="fas fa-circle-notch fa-spin"></i>
-          <p>Đang tải danh sách truyện audio...</p>
+        <div v-if="loading" class="story-grid">
+          <div v-for="i in 8" :key="'sk-'+i" class="hcard-skeleton">
+            <div class="hcard-skeleton-cover shimmer"></div>
+            <div class="hcard-skeleton-body">
+              <div class="shimmer-line title-line"></div>
+              <div class="shimmer-line desc-line w-3/4"></div>
+              <div class="shimmer-line desc-line w-full"></div>
+            </div>
+          </div>
         </div>
 
         <div v-else-if="error" class="state-card state-card--error">
@@ -120,6 +126,8 @@
             v-for="story in displayStories"
             :key="story.id"
             :story="story"
+            :hide-partner="true"
+            v-memo="[story.id]"
           />
         </div>
 
@@ -155,7 +163,9 @@ const route = useRoute();
 const router = useRouter();
 
 const stories = ref<Story[]>([]);
+const hotStory = ref<Story | null>(null);
 const loading = ref(false);
+const initialFetchDone = ref(false);
 const error = ref("");
 const page = ref(1);
 const pagination = ref({ total: 0, total_pages: 1 });
@@ -208,11 +218,16 @@ useHead({
   ]
 });
 
-const featuredStory = computed(() => (page.value === 1 ? stories.value[0] || null : null));
+const featuredStory = computed(() => {
+  if (page.value !== 1) return null;
+  return hotStory.value || stories.value[0] || null;
+});
+
 const showHero = computed(() => !!featuredStory.value);
-const displayStories = computed(() =>
-  showHero.value ? stories.value.slice(1) : stories.value,
-);
+const displayStories = computed(() => {
+  if (!featuredStory.value || !showHero.value) return stories.value;
+  return stories.value.filter(s => s.id !== featuredStory.value?.id);
+});
 
 const resultSummary = computed(() => {
   if (loading.value) return "Đang làm mới kho audio";
@@ -236,11 +251,11 @@ const heroStats = computed(() => [
     tone: "sky",
   },
   {
-    label: "Tổng phần",
+    label: "Tổng tập",
     value: formatNumber(
-      stories.value.reduce((sum, story) => sum + Number(story.audio_total_parts || 0), 0),
+      stories.value.reduce((sum, story) => sum + Number(story.audio_total_series || story.audio_total_parts || 0), 0),
     ),
-    hint: "Tổng phần audio trên trang đang xem",
+    hint: "Tổng tập audio trên trang đang xem",
     tone: "gold",
   },
 ]);
@@ -288,6 +303,18 @@ const updateUrl = () => {
 const loadStories = async () => {
   loading.value = true;
   error.value = "";
+
+  if (!initialFetchDone.value) {
+    try {
+      const hotRes = await getPublicStories({ has_audio: true, is_hot: 1, limit: 1 } as any);
+      if (hotRes?.data?.length > 0) {
+        hotStory.value = hotRes.data[0];
+      }
+    } catch(e) {
+      console.error("Fetch hot story failed:", e);
+    }
+    initialFetchDone.value = true;
+  }
 
   try {
     const res = await getPublicStories({
@@ -361,6 +388,55 @@ watch(
 </script>
 
 <style scoped>
+.hcard-skeleton {
+  display: flex;
+  gap: 18px;
+  min-height: 248px;
+  border-radius: 24px;
+  background: var(--audio-panel);
+  border: 1px solid var(--audio-border);
+}
+.hcard-skeleton-cover {
+  flex: 0 0 168px;
+  border-radius: 24px 0 0 24px;
+}
+.hcard-skeleton-body {
+  flex: 1;
+  padding: 20px 22px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.shimmer-line {
+  height: 16px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+}
+.title-line { height: 28px; width: 60%; margin-bottom: 8px; }
+.desc-line { background: rgba(255, 255, 255, 0.03); }
+.shimmer {
+  background: #0d1724;
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(255, 255, 255, 0.1) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 200% 100%;
+  animation: shimmer-load 1.6s ease-in-out infinite;
+}
+@keyframes shimmer-load {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (max-width: 640px) {
+  .hcard-skeleton { flex-direction: column; }
+  .hcard-skeleton-cover { width: 100%; aspect-ratio: 16/9; border-radius: 24px 24px 0 0; }
+  .hcard-skeleton-body { padding: 18px; }
+}
+
 .audio-home-page {
   --audio-bg-top: #09111b;
   --audio-bg-mid: #0d1724;

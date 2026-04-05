@@ -144,6 +144,12 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import NewStoryCard from '@/modules/storyText/components/NewStoryCard.vue';
 import axios from '@/utils/axios';
+import {
+  buildCategoryPageLocation,
+  isCategoryRoute,
+  parseCategoryQuery,
+  DEFAULT_CATEGORY_SORT,
+} from './categoryViewState';
 
 const route = useRoute();
 const router = useRouter();
@@ -155,7 +161,7 @@ const error = ref<string | null>(null);
 const categories = ref<any[]>([]);
 const stories = ref<any[]>([]);
 const selectedCategories = ref<number[]>([]);
-const sortBy = ref('thoi_gian_cap_nhat');
+const sortBy = ref(DEFAULT_CATEGORY_SORT);
 const currentPage = ref(1);
 const totalResults = ref(0);
 const totalPages = ref(1);
@@ -282,11 +288,11 @@ const goToPage = (page: number) => {
 };
 
 const getPageUrl = (pageNumber: number) => {
-  const query: any = {};
-  if (selectedCategories.value.length > 0) query.categories = selectedCategories.value.join(',');
-  if (sortBy.value !== 'thoi_gian_cap_nhat') query.sort = sortBy.value;
-  if (pageNumber > 1) query.page = pageNumber;
-  return { path: '/the-loai', query };
+  return buildCategoryPageLocation({
+    selectedCategories: selectedCategories.value,
+    sortBy: sortBy.value,
+    currentPage: pageNumber,
+  });
 };
 
 const updateURL = () => {
@@ -294,32 +300,10 @@ const updateURL = () => {
 };
 
 const loadFromURL = () => {
-  const query = route.query;
-  
-  // Update categories from URL
-  if (query.categories) {
-    selectedCategories.value = (query.categories as string)
-      .split(',')
-      .map(id => parseInt(id.trim()))
-      .filter(id => !isNaN(id));
-  } else {
-    selectedCategories.value = [];
-  }
-  
-  // Update sort mode from URL
-  if (query.sort) {
-    sortBy.value = query.sort as string;
-  } else {
-    sortBy.value = 'thoi_gian_cap_nhat';
-  }
-  
-  // Update page number from URL
-  if (query.page) {
-    const p = parseInt(query.page as string);
-    currentPage.value = isNaN(p) ? 1 : Math.max(1, p);
-  } else {
-    currentPage.value = 1;
-  }
+  const parsedState = parseCategoryQuery(route.query);
+  selectedCategories.value = parsedState.selectedCategories;
+  sortBy.value = parsedState.sortBy;
+  currentPage.value = parsedState.currentPage;
 };
 
 onMounted(() => {
@@ -329,7 +313,7 @@ onMounted(() => {
 });
 
 watch(() => route.query, () => {
-  if (route.name === 'CategoryView') {
+  if (isCategoryRoute(route.name)) {
     loadFromURL();
     fetchStories();
   }
@@ -590,6 +574,9 @@ watch(() => route.query, () => {
   color: #fff;
   cursor: pointer;
   transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
@@ -610,6 +597,9 @@ watch(() => route.query, () => {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .num-btn.active {

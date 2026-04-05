@@ -1,6 +1,6 @@
 <template>
   <router-link 
-    :to="`/the-loai?category=${category.id_theloai}`" 
+    :to="{ path: '/the-loai', query: { categories: String(category.id_theloai) } }" 
     class="category-card"
     :class="categoryGradients[(index || 0) % categoryGradients.length]"
   >

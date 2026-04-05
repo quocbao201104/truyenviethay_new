@@ -364,6 +364,7 @@ const timeAgo = (date: string) => {
   width: 45px; height: 45px;
   background: #131b2c; border: 1px solid #1e293b; border-radius: 12px;
   color: #fff; cursor: pointer; transition: all 0.3s;
+  display: flex; align-items: center; justify-content: center;
 }
 .page-nav-btn:hover:not(:disabled) { border-color: #fbbf24; color: #fbbf24; }
 .page-nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }

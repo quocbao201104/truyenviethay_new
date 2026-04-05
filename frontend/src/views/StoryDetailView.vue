@@ -376,15 +376,15 @@
 
       <!-- RELATED STORIES -->
       <section v-if="story" class="related-area animate-fadeIn">
-        <RelatedStoriesSection 
-          v-if="story.author_id || story.tac_gia"
+        <RelatedStoriesSection
+          v-if="story.tac_gia"
           title="Truyện Cùng Tác Giả"
           type="author"
-          :author-id="story.author_id"
+          :author-name="story.tac_gia"
           :exclude-id="story.id"
         />
 
-        <RelatedStoriesSection 
+        <RelatedStoriesSection
           v-if="story.genres && story.genres.length"
           title="Truyện Tương Tự"
           type="genre"

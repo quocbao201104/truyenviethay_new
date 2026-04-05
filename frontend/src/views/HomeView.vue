@@ -79,12 +79,12 @@
     </div>
 
     <!-- ===== AUDIO INTRO ===== -->
-    <section class="audio-intro-sect">
+    <section class="audio-intro-sect reveal-section" ref="audioSectRef">
       <div class="container">
         <div class="audio-intro-inner">
 
           <!-- Left: visual -->
-          <div class="audio-visual">
+          <div class="audio-visual" ref="audioVisualRef">
             <div class="audio-circle-glow"></div>
             <div class="audio-icon-ring">
               <i class="fas fa-headphones audio-icon-big"></i>
@@ -151,7 +151,7 @@
     </div>
 
     <!-- ===== GIỚI THIỆU ===== -->
-    <section class="gioi-thieu-sect">
+    <section class="gioi-thieu-sect reveal-section" ref="introSectRef">
       <div class="container">
         <div class="section-header-spirit">
           <h2 class="tieu-de-phu">GIỚI THIỆU VỀ TRUYỆN VIỆT HAY</h2>
@@ -160,25 +160,25 @@
           </p>
         </div>
 
-        <div class="stats-grid-aura">
-          <div class="stat-card">
+        <div class="stats-grid-aura" ref="statsGridRef">
+          <div class="stat-card reveal-item">
             <i class="fas fa-book-journal-whills stat-icon emerald"></i>
-            <span class="con-so">50.000+</span>
+            <span class="con-so" ref="stat0Ref">50.000+</span>
             <span class="mo-ta">Tựa truyện</span>
           </div>
-          <div class="stat-card">
+          <div class="stat-card reveal-item">
             <i class="fas fa-headphones stat-icon azure"></i>
-            <span class="con-so">5.000+</span>
+            <span class="con-so" ref="stat1Ref">5.000+</span>
             <span class="mo-ta">Truyện Audio</span>
           </div>
-          <div class="stat-card">
+          <div class="stat-card reveal-item">
             <i class="fas fa-users stat-icon purple"></i>
-            <span class="con-so">2.000.000+</span>
+            <span class="con-so" ref="stat2Ref">2.000.000+</span>
             <span class="mo-ta">Độc giả</span>
           </div>
-          <div class="stat-card">
+          <div class="stat-card reveal-item">
             <i class="fas fa-feather-pointed stat-icon gold"></i>
-            <span class="con-so">5.000+</span>
+            <span class="con-so" ref="stat3Ref">5.000+</span>
             <span class="mo-ta">Tác giả</span>
           </div>
         </div>
@@ -186,37 +186,37 @@
         <h3 class="tieu-de-nho">Điểm Khác Biệt Làm Nên Cảnh Giới</h3>
 
         <div class="features-grid-spirit">
-          <div class="feature-card">
+          <div class="feature-card reveal-item">
             <div class="feature-icon"><i class="fas fa-layer-group"></i></div>
             <h4 class="feature-title">Kho Truyện Đồ Sộ</h4>
             <p class="feature-desc">Hơn 50.000+ tựa truyện đa thể loại: Tiên hiệp, kiếm hiệp, ngôn tình, khoa học viễn tưởng và văn học đương đại Việt.</p>
           </div>
 
-          <div class="feature-card feature-card--audio">
+          <div class="feature-card feature-card--audio reveal-item">
             <div class="feature-icon audio"><i class="fas fa-headphones"></i></div>
             <h4 class="feature-title">Truyện Audio Sống Động</h4>
             <p class="feature-desc">5.000+ truyện có bản audio giọng đọc chuyên nghiệp. Thưởng thức văn học bằng tai, trải nghiệm hoàn toàn mới lạ.</p>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card reveal-item">
             <div class="feature-icon"><i class="fas fa-bolt"></i></div>
             <h4 class="feature-title">Cập Nhật Thần Tốc</h4>
             <p class="feature-desc">100+ chương truyện mới mỗi ngày. Đội ngũ biên tập viên chuyên nghiệp đảm bảo nội dung chuẩn mực, sắc nét.</p>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card reveal-item">
             <div class="feature-icon"><i class="fas fa-handshake"></i></div>
             <h4 class="feature-title">Cộng Đồng Sáng Tạo</h4>
             <p class="feature-desc">Kết nối với 5.000+ tác giả tài năng. Tương tác trực tiếp, đóng góp ý tưởng và tham gia các cuộc thi sáng tác.</p>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card reveal-item">
             <div class="feature-icon"><i class="fas fa-mobile-screen"></i></div>
             <h4 class="feature-title">Trải Nghiệm Đỉnh Cao</h4>
             <p class="feature-desc">Giao diện tối ưu mọi thiết bị. Chế độ đọc ban đêm, lưu trang tự động, tùy chỉnh font chữ bảo vệ mắt.</p>
           </div>
 
-          <div class="feature-card">
+          <div class="feature-card reveal-item">
             <div class="feature-icon"><i class="fas fa-brain"></i></div>
             <h4 class="feature-title">Đề Cử Thông Minh</h4>
             <p class="feature-desc">Công nghệ AI phân tích sở thích để gợi ý truyện phù hợp. Đồng bộ bộ sưu tập cá nhân trên mọi thiết bị.</p>
@@ -238,12 +238,13 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, ref, onMounted, onBeforeUnmount } from "vue";
 import { useHead } from "@unhead/vue";
 import { buildCloudinaryImageUrl, buildCloudinarySrcSet } from "@/config/constants";
 import { prefetchAudioListExperience, prefetchStoryListExperience } from "@/router/prefetch";
 import { defaultOgImage, toCanonicalUrl } from "@/seo/site";
 
+// ── Hero banner ──────────────────────────────────────────────────────────
 const HOME_HERO_BANNER =
   "https://res.cloudinary.com/dg9ftuhv4/image/upload/v1772805144/truyenviethay/banners/banner-desktop.jpg";
 const homeHeroImage = buildCloudinaryImageUrl(HOME_HERO_BANNER, {
@@ -257,6 +258,7 @@ const homeHeroSrcSet = buildCloudinarySrcSet(
   { quality: "auto:eco", dprAuto: true },
 );
 
+// ── SEO ──────────────────────────────────────────────────────────────────
 const homeCanonicalUrl = toCanonicalUrl("/");
 const homeTitle = "Đọc Truyện Chữ & Nghe Truyện Audio Miễn Phí | TruyenVietHay";
 const homeDescription =
@@ -265,12 +267,7 @@ const homeOgImage = computed(() => homeHeroImage || defaultOgImage);
 
 useHead(() => ({
   title: homeTitle,
-  link: [
-    {
-      rel: "canonical",
-      href: homeCanonicalUrl,
-    },
-  ],
+  link: [{ rel: "canonical", href: homeCanonicalUrl }],
   meta: [
     { name: "description", content: homeDescription },
     { name: "robots", content: "index, follow" },
@@ -286,23 +283,153 @@ useHead(() => ({
   ],
 }));
 
-/** Random but deterministic particle styles so SSR matches hydration */
+// ── Deterministic particle styles (SSR-safe) ─────────────────────────────
 function particleStyle(n) {
-  const size = 4 + (n % 5) * 3;
-  const left = ((n * 37 + 11) % 97);
-  const top  = ((n * 53 + 7)  % 90);
-  const dur  = 8 + (n % 6) * 2;
+  const size  = 4 + (n % 5) * 3;
+  const left  = (n * 37 + 11) % 97;
+  const top   = (n * 53 + 7)  % 90;
+  const dur   = 8 + (n % 6) * 2;
   const delay = (n % 5) * 1.2;
   return `width:${size}px;height:${size}px;left:${left}%;top:${top}%;animation-duration:${dur}s;animation-delay:-${delay}s`;
 }
 
-function warmStoryList() {
-  prefetchStoryListExperience();
+// ── Prefetch on hover ────────────────────────────────────────────────────
+function warmStoryList() { prefetchStoryListExperience(); }
+function warmAudioList()  { prefetchAudioListExperience(); }
+
+// ── Refs ─────────────────────────────────────────────────────────────────
+const audioSectRef   = ref(null);
+const audioVisualRef = ref(null);
+const introSectRef   = ref(null);
+const statsGridRef   = ref(null);
+const stat0Ref = ref(null);
+const stat1Ref = ref(null);
+const stat2Ref = ref(null);
+const stat3Ref = ref(null);
+
+// ── Counter animation ────────────────────────────────────────────────────
+const STATS = [
+  { ref: stat0Ref, target: 50000,   suffix: '+', locale: true },
+  { ref: stat1Ref, target: 5000,    suffix: '+', locale: true },
+  { ref: stat2Ref, target: 2000000, suffix: '+', locale: true },
+  { ref: stat3Ref, target: 5000,    suffix: '+', locale: true },
+];
+
+function formatNumber(n) {
+  return n.toLocaleString('vi-VN');
 }
 
-function warmAudioList() {
-  prefetchAudioListExperience();
+let statsAnimated = false;
+function animateStats() {
+  if (statsAnimated) return;
+  statsAnimated = true;
+
+  // Respect prefers-reduced-motion
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reducedMotion) return; // already showing final values in HTML
+
+  STATS.forEach(({ ref: elRef, target, suffix }) => {
+    const el = elRef.value;
+    if (!el) return;
+    const duration = 1600; // ms
+    const startTime = performance.now();
+    const startVal = 0;
+
+    function tick(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(startVal + (target - startVal) * eased);
+      el.textContent = formatNumber(current) + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
 }
+
+// ── IntersectionObserver helpers ─────────────────────────────────────────
+const observers = [];
+
+function observeReveal(el, options = {}) {
+  if (!el) return;
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        obs.unobserve(entry.target); // one-shot
+      }
+    });
+  }, { threshold: 0.12, ...options });
+  obs.observe(el);
+  observers.push(obs);
+}
+
+/** Observe all .reveal-item children of a container */
+function observeRevealItems(containerEl, staggerMs = 80) {
+  if (!containerEl) return;
+  const items = containerEl.querySelectorAll('.reveal-item');
+  items.forEach((item, i) => {
+    item.style.transitionDelay = `${i * staggerMs}ms`;
+    observeReveal(item, { threshold: 0.08 });
+  });
+}
+
+/** Observe audio visual — pause/resume its animations */
+function observeAudioVisual(el) {
+  if (!el) return;
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        el.classList.add('is-animating');
+      } else {
+        el.classList.remove('is-animating');
+      }
+    });
+  }, { threshold: 0.1 });
+  obs.observe(el);
+  observers.push(obs);
+}
+
+// ── Lifecycle ─────────────────────────────────────────────────────────────
+onMounted(() => {
+  // Reveal sections
+  observeReveal(audioSectRef.value);
+  observeReveal(introSectRef.value);
+
+  // Reveal staggered items inside sections
+  observeRevealItems(audioSectRef.value);
+  observeRevealItems(statsGridRef.value, 90);
+  observeRevealItems(introSectRef.value?.querySelector('.features-grid-spirit'), 70);
+
+  // Counter on stats
+  if (statsGridRef.value) {
+    const statsObs = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        animateStats();
+        statsObs.disconnect();
+      }
+    }, { threshold: 0.2 });
+    statsObs.observe(statsGridRef.value);
+    observers.push(statsObs);
+  }
+
+  // Pause audio animations when not visible
+  observeAudioVisual(audioVisualRef.value);
+
+  // Idle prefetch for category page
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => {
+      import('@/router/prefetch').then(({ prefetchCategoryExperience }) => {
+        prefetchCategoryExperience?.();
+      }).catch(() => {});
+    }, { timeout: 3000 });
+  }
+});
+
+onBeforeUnmount(() => {
+  observers.forEach((obs) => obs.disconnect());
+});
 </script>
 
 <style scoped>
@@ -1026,7 +1153,97 @@ function warmAudioList() {
   .audio-intro-sect,
   .gioi-thieu-sect {
     content-visibility: auto;
-    contain-intrinsic-size: 900px;
+    contain-intrinsic-size: auto 900px;
+  }
+}
+
+/* =====================
+   SCROLL REVEAL
+   ===================== */
+.reveal-section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-item {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  /* transitionDelay is set dynamically via JS for stagger */
+}
+.reveal-item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =====================
+   AUDIO VISUAL — PAUSE WHEN OFF-SCREEN
+   ===================== */
+.audio-visual .bar,
+.audio-visual .audio-circle-glow,
+.audio-visual .audio-icon-ring {
+  animation-play-state: paused;
+}
+.audio-visual.is-animating .bar,
+.audio-visual.is-animating .audio-circle-glow,
+.audio-visual.is-animating .audio-icon-ring {
+  animation-play-state: running;
+}
+
+/* =====================
+   PARTICLES — ÍT HƠN TRÊN MOBILE
+   ===================== */
+@media (max-width: 768px) {
+  /* Ẩn những particles có index lẻ cao (> 10) */
+  .particle:nth-child(n+11) {
+    display: none;
+  }
+}
+@media (max-width: 480px) {
+  .particle:nth-child(n+7) {
+    display: none;
+  }
+}
+
+/* =====================
+   PREFERS-REDUCED-MOTION
+   ===================== */
+@media (prefers-reduced-motion: reduce) {
+  .particle {
+    animation: none;
+    opacity: 0;
+  }
+  .animate-float {
+    animation: none;
+  }
+  .hero-bg-image {
+    animation: none;
+  }
+  .text-highlight {
+    animation: none;
+    background-position: 0% center;
+  }
+  .audio-visual .bar,
+  .audio-visual .audio-circle-glow,
+  .audio-visual .audio-icon-ring {
+    animation: none;
+  }
+  .scroll-dot {
+    animation: none;
+  }
+  /* Hiển thị ngay không cần reveal */
+  .reveal-section,
+  .reveal-item {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }
 

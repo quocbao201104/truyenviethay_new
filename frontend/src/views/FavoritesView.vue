@@ -303,6 +303,9 @@ const handleUnfollow = async (storyId: number) => {
   color: #fff;
   cursor: pointer;
   transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .page-nav-btn:hover:not(:disabled) {

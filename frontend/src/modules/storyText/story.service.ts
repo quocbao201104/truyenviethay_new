@@ -61,6 +61,7 @@ export interface Story {
   source_type?: string | null;
   source_partner_id?: string | number | null;
   audio_total_parts?: number;
+  audio_total_series?: number;
   audio_total_duration_seconds?: number;
   audio_latest_part_at?: string | null;
   source_partner_name?: string | null;

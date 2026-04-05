@@ -1,10 +1,15 @@
 <template>
   <div class="story-list-page-xianxia">
-    
+
     <main class="main-content-spirit">
+      <!-- ===== HERO ===== -->
       <section class="hero-aura-wrapper animate-fadeIn">
-        <HeroGrid 
-          :stories="hotStories.slice(0, 5)" 
+        <div v-if="!hotStories.length" class="hero-skeleton">
+          <div class="shimmer" />
+        </div>
+        <HeroGrid
+          v-else
+          :stories="hotStories.slice(0, 5)"
           :trendingStories="topMonthlyStories"
         />
       </section>
@@ -16,6 +21,7 @@
       <div class="content-body-grid">
         <div class="main-col-spirit">
           
+          <!-- ===== TÂN TÚ BẢNG (Phase 1 - Above fold) ===== -->
           <section class="spirit-block">
             <div class="spirit-header emerald">
               <h2 class="spirit-title">
@@ -24,36 +30,31 @@
                 <span class="spirit-note">Kỳ tài mới nổi trong tháng</span>
               </h2>
               <div class="header-actions">
-                <div class="spirit-pagination">
-                  <button 
-                    class="pag-btn prev" 
-                    :disabled="newStoriesPage <= 1 || isNewStoriesLoading"
-                    @click="fetchNewStoriesPage(newStoriesPage - 1)"
-                  >
+                <div v-if="newStories.length" class="spirit-pagination">
+                  <button class="pag-btn prev" :disabled="newStoriesPage <= 1 || isNewStoriesLoading" @click="fetchNewStoriesPage(newStoriesPage - 1)">
                     <i class="fas fa-chevron-left"></i>
                   </button>
                   <span class="page-info">{{ newStoriesPage }}</span>
-                  <button 
-                    class="pag-btn next" 
-                    :disabled="newStoriesPage >= newStoriesTotalPages || isNewStoriesLoading"
-                    @click="fetchNewStoriesPage(newStoriesPage + 1)"
-                  >
+                  <button class="pag-btn next" :disabled="newStoriesPage >= newStoriesTotalPages || isNewStoriesLoading" @click="fetchNewStoriesPage(newStoriesPage + 1)">
                     <i class="fas fa-chevron-right"></i>
                   </button>
                 </div>
               </div>
             </div>
-            
-            <div class="spirit-grid-responsive">
-              <NewStoryCard 
-                v-for="(story, index) in newStories" 
-                :key="story.id" 
+
+            <div v-if="!newStories.length" class="spirit-grid-responsive">
+              <StoryCardSkeleton v-for="n in 10" :key="'sk-new-'+n" />
+            </div>
+            <div v-else class="spirit-grid-responsive">
+              <NewStoryCard
+                v-for="(story, index) in newStories"
+                :key="story.id"
                 :story="story"
-                v-memo="[story]"
+                v-memo="[story.id]"
                 :animateStatus="index < 3"
               />
             </div>
-            
+
             <div class="spirit-footer">
               <router-link to="/tim-kiem" class="view-all-spirit emerald">
                 Xem thêm <i class="fas fa-arrow-right-long ml-1"></i>
@@ -61,7 +62,8 @@
             </div>
           </section>
 
-          <section class="spirit-block">  
+          <!-- ===== LỆNH BÀI BẢNG (Phase 2 - lazy) ===== -->
+          <section class="spirit-block" ref="lenhBaiRef">
             <div class="spirit-header gold">
               <h2 class="spirit-title">
                 <i class="fas fa-medal"></i>
@@ -69,34 +71,31 @@
                 <span class="spirit-note">Vạn người tín ngưỡng</span>
               </h2>
               <div class="header-actions">
-                <div class="spirit-pagination">
-                  <button 
-                    class="pag-btn prev" 
-                    :disabled="topRatedStoriesPage <= 1 || isTopRatedStoriesLoading"
-                    @click="fetchTopRatedStoriesPage(topRatedStoriesPage - 1)"
-                  >
+                <div v-if="topRatedStories.length" class="spirit-pagination">
+                  <button class="pag-btn prev" :disabled="topRatedStoriesPage <= 1 || isTopRatedStoriesLoading" @click="fetchTopRatedStoriesPage(topRatedStoriesPage - 1)">
                     <i class="fas fa-chevron-left"></i>
                   </button>
                   <span class="page-info">{{ topRatedStoriesPage }}</span>
-                  <button 
-                    class="pag-btn next" 
-                    :disabled="topRatedStoriesPage >= topRatedStoriesTotalPages || isTopRatedStoriesLoading"
-                    @click="fetchTopRatedStoriesPage(topRatedStoriesPage + 1)"
-                  >
+                  <button class="pag-btn next" :disabled="topRatedStoriesPage >= topRatedStoriesTotalPages || isTopRatedStoriesLoading" @click="fetchTopRatedStoriesPage(topRatedStoriesPage + 1)">
                     <i class="fas fa-chevron-right"></i>
                   </button>
                 </div>
               </div>
             </div>
-            
+
             <div class="spirit-grid-responsive">
-              <NewStoryCard 
-                v-for="(story, index) in topRatedStories.slice(0, 8)" 
-                :key="story.id" 
-                :story="story"
-                v-memo="[story]"
-                :animateStatus="index < 3"
-              />
+              <template v-if="!topRatedStories.length">
+                <StoryCardSkeleton v-for="n in 8" :key="'sk-rated-'+n" />
+              </template>
+              <template v-else>
+                <NewStoryCard
+                  v-for="(story, index) in topRatedStories.slice(0, 8)"
+                  :key="story.id"
+                  :story="story"
+                  v-memo="[story.id]"
+                  :animateStatus="index < 3"
+                />
+              </template>
             </div>
 
             <div class="spirit-footer">
@@ -106,7 +105,8 @@
             </div>
           </section>
 
-          <section class="spirit-block">
+          <!-- ===== ĐẠI VIÊN MÃN (Phase 2 - lazy) ===== -->
+          <section class="spirit-block" ref="daiVienManRef">
             <div class="spirit-header purple">
               <h2 class="spirit-title">
                 <i class="fas fa-yin-yang"></i>
@@ -114,20 +114,12 @@
                 <span class="spirit-note">Công đức tròn đầy</span>
               </h2>
               <div class="header-actions">
-                <div class="spirit-pagination">
-                  <button 
-                    class="pag-btn prev" 
-                    :disabled="completedStoriesPage <= 1 || isCompletedStoriesLoading"
-                    @click="fetchCompletedStoriesPage(completedStoriesPage - 1)"
-                  >
+                <div v-if="completedStories.length" class="spirit-pagination">
+                  <button class="pag-btn prev" :disabled="completedStoriesPage <= 1 || isCompletedStoriesLoading" @click="fetchCompletedStoriesPage(completedStoriesPage - 1)">
                     <i class="fas fa-chevron-left"></i>
                   </button>
                   <span class="page-info">{{ completedStoriesPage }}</span>
-                  <button 
-                    class="pag-btn next" 
-                    :disabled="completedStoriesPage >= completedStoriesTotalPages || isCompletedStoriesLoading"
-                    @click="fetchCompletedStoriesPage(completedStoriesPage + 1)"
-                  >
+                  <button class="pag-btn next" :disabled="completedStoriesPage >= completedStoriesTotalPages || isCompletedStoriesLoading" @click="fetchCompletedStoriesPage(completedStoriesPage + 1)">
                     <i class="fas fa-chevron-right"></i>
                   </button>
                 </div>
@@ -135,13 +127,18 @@
             </div>
 
             <div class="spirit-grid-responsive">
-              <NewStoryCard 
-                v-for="(story, index) in completedStories.slice(0, 8)" 
-                :key="story.id" 
-                :story="story"
-                v-memo="[story]"
-                :animateStatus="index < 3"
-              />
+              <template v-if="!completedStories.length">
+                <StoryCardSkeleton v-for="n in 8" :key="'sk-done-'+n" />
+              </template>
+              <template v-else>
+                <NewStoryCard
+                  v-for="(story, index) in completedStories.slice(0, 8)"
+                  :key="story.id"
+                  :story="story"
+                  v-memo="[story.id]"
+                  :animateStatus="index < 3"
+                />
+              </template>
             </div>
 
             <div class="spirit-footer">
@@ -225,9 +222,10 @@
           </div>
         </div>
 
-        <aside class="sidebar-col-spirit">
+        <!-- Sidebar chỉ render trên desktop (v-if bỏ DOM hoàn toàn trên mobile) -->
+        <aside v-if="!isMobile" class="sidebar-col-spirit">
           <div class="sticky-spirit-box">
-            
+
             <div class="sidebar-card-aura ranking moon-board">
               <div class="spirit-header moon mb-4">
                 <h3 class="sidebar-title-xianxia">
@@ -236,37 +234,25 @@
               </div>
               <p class="moon-subtitle">{{ moonSubtitle }}</p>
               <div class="moon-tabs">
-                <button
-                  type="button"
-                  class="moon-tab"
-                  :class="{ active: moonTab === 'thang' }"
-                  @click="moonTab = 'thang'"
-                >
-                  Tháng
-                </button>
-                <button
-                  type="button"
-                  class="moon-tab"
-                  :class="{ active: moonTab === 'tuan' }"
-                  @click="moonTab = 'tuan'"
-                >
-                  Tuần
-                </button>
-                <button
-                  type="button"
-                  class="moon-tab"
-                  :class="{ active: moonTab === 'ngay' }"
-                  @click="moonTab = 'ngay'"
-                >
-                  Ngày
-                </button>
+                <button type="button" class="moon-tab" :class="{ active: moonTab === 'thang' }" @click="moonTab = 'thang'">Tháng</button>
+                <button type="button" class="moon-tab" :class="{ active: moonTab === 'tuan' }" @click="moonTab = 'tuan'">Tuần</button>
+                <button type="button" class="moon-tab" :class="{ active: moonTab === 'ngay' }" @click="moonTab = 'ngay'">Ngày</button>
               </div>
-              
-              <div class="ranking-spirit-list">
-                <div 
-                  v-for="(story, index) in moonStories.slice(0, 5)" 
-                  :key="story.id" 
-                  v-memo="[story, moonTab]"
+
+              <div v-if="!moonStories.length" class="ranking-spirit-list">
+                <div v-for="n in 5" :key="'sk-moon-'+n" class="ranking-skeleton">
+                  <div class="sk-orb shimmer" />
+                  <div class="sk-info">
+                    <div class="sk-line lg shimmer" />
+                    <div class="sk-line sm shimmer" />
+                  </div>
+                </div>
+              </div>
+              <div v-else class="ranking-spirit-list">
+                <div
+                  v-for="(story, index) in moonStories.slice(0, 5)"
+                  :key="story.id"
+                  v-memo="[story.id, moonTab]"
                   @click="navigateToStory(story.slug)"
                   class="ranking-spirit-item moon-item"
                 >
@@ -287,11 +273,14 @@
                   <i class="fas fa-scroll"></i> Linh Anh
                 </h3>
               </div>
-              <div class="tag-cloud-spirit">
-                <router-link 
-                  v-for="cat in categories" 
+              <div v-if="!categories.length" class="tag-cloud-spirit">
+                <div v-for="n in 14" :key="'sk-cat-'+n" class="tag-pill-skeleton shimmer" />
+              </div>
+              <div v-else class="tag-cloud-spirit">
+                <router-link
+                  v-for="cat in categories"
                   :key="cat.id_theloai"
-                  v-memo="[cat]"
+                  v-memo="[cat.id_theloai]"
                   :to="`/the-loai?categories=${cat.id_theloai}`"
                   class="tag-pill-spirit fire-pill"
                 >
@@ -309,11 +298,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, shallowRef, onMounted, onBeforeUnmount, computed } from "vue";
+import { ref, shallowRef, onMounted, onBeforeUnmount, computed, nextTick } from "vue";
 import { Story, getHotStories, prefetchPublicStories } from "@/modules/storyText/story.service";
 import type { Category } from "@/types/category";
 import NewStoryCard from "@/modules/storyText/components/NewStoryCard.vue";
-import HeroGrid from "@/components/home/HeroGrid.vue"; 
+import StoryCardSkeleton from "@/modules/storyText/components/StoryCardSkeleton.vue";
+import HeroGrid from "@/components/home/HeroGrid.vue";
 import ContinueReadingStrip from "@/components/home/ContinueReadingStrip.vue";
 import { useStoryStore } from "@/modules/storyText/story.store";
 import { useRouter } from "vue-router";
@@ -337,6 +327,11 @@ useHead({
     { name: "twitter:image", content: defaultOgImage },
   ]
 });
+
+// Mobile detection — v-if sidebar dọn DOM hoàn toàn trên mobile
+const isMobile = ref(
+  typeof window !== 'undefined' ? window.innerWidth <= 1024 : false
+);
 
 const storyStore = useStoryStore();
 const router = useRouter();
@@ -388,40 +383,62 @@ const moonSubtitle = computed(() => {
   return "Kỳ lân xuất thế - Quần hùng tranh bá trong tháng.";
 });
 
-const fetchAllData = async () => {
+// ── Section refs cho lazy loading
+const lenhBaiRef    = ref<HTMLElement | null>(null);
+const daiVienManRef = ref<HTMLElement | null>(null);
+
+// ── 2-Phase fetch
+const fetchPhase1 = async () => {
   try {
-    const results = await Promise.all([
-      storyStore.fetchCategories(),
-      storyStore.fetchNewStories(1, 10),
+    // Phase 1: Above-the-fold — load ngay
+    const [hotResult, newResult, monthlyResult] = await Promise.all([
       getHotStories(5),
+      storyStore.fetchNewStories(1, 10),
       storyStore.fetchTopMonthlyStories(5),
+    ]);
+    hotStories.value         = freezeList(hotResult || []);
+    const nd = newResult as any;
+    newStories.value         = freezeList(nd?.data || []);
+    newStoriesTotalPages.value = nd?.pagination?.total_pages || 1;
+    topMonthlyStories.value  = freezeList(monthlyResult || []);
+  } catch (err) {
+    if ((err as any)?.code === 'ERR_CANCELED') return;
+    console.error('Phase 1 error:', err);
+  }
+};
+
+const fetchPhase2 = async () => {
+  try {
+    // Phase 2: Below-the-fold — defer sau khi frame 1 render xong
+    const [ratedResult, completedResult, weeklyResult, dailyResult, catResult] = await Promise.all([
+      storyStore.fetchTopRatedStories(1, 8),
+      storyStore.fetchCompletedStories(1, 8),
       storyStore.fetchTopWeeklyStories(5),
       storyStore.fetchTopDailyStories(5),
-      storyStore.fetchTopRatedStories(1, 8),
-      storyStore.fetchCompletedStories(1, 8)
+      storyStore.fetchCategories(),
     ]);
-
-    categories.value = freezeList(results[0] || []);
-    
-    const newStoriesResult = results[1];
-    newStories.value = freezeList(newStoriesResult?.data || []);
-    newStoriesTotalPages.value = newStoriesResult?.pagination?.total_pages || 1;
-
-    hotStories.value = freezeList(results[2] || []);
-    topMonthlyStories.value = freezeList(results[3] || []);
-    topWeeklyStories.value = freezeList(results[4] || []);
-    topDailyStories.value = freezeList(results[5] || []);
-    
-    const topRatedResult = results[6];
-    topRatedStories.value = freezeList(topRatedResult?.data || []);
-    topRatedStoriesTotalPages.value = topRatedResult?.pagination?.total_pages || 1;
-
-    const completedResult = results[7];
-    completedStories.value = freezeList(completedResult?.data || []);
-    completedStoriesTotalPages.value = completedResult?.pagination?.total_pages || 1;
+    const rd = ratedResult as any;
+    topRatedStories.value          = freezeList(rd?.data || []);
+    topRatedStoriesTotalPages.value = rd?.pagination?.total_pages || 1;
+    const cd = completedResult as any;
+    completedStories.value          = freezeList(cd?.data || []);
+    completedStoriesTotalPages.value = cd?.pagination?.total_pages || 1;
+    topWeeklyStories.value = freezeList(weeklyResult || []);
+    topDailyStories.value  = freezeList(dailyResult  || []);
+    categories.value       = freezeList(catResult    || []);
   } catch (err) {
-    if ((err as any)?.code === "ERR_CANCELED") return;
-    console.error("Thiên cơ bị nhiễu loạn:", err);
+    if ((err as any)?.code === 'ERR_CANCELED') return;
+    console.error('Phase 2 error:', err);
+  }
+};
+
+const fetchAllData = async () => {
+  await fetchPhase1();
+  await nextTick();
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(fetchPhase2, { timeout: 2000 });
+  } else {
+    setTimeout(fetchPhase2, 200);
   }
 };
 
@@ -473,39 +490,49 @@ const getMoonViews = (story: Story) => {
   return story.luot_xem_thang ?? story.luot_xem ?? 0;
 };
 
+// ── Prefetch sentinel + observers
 const prefetchSentinel = ref<HTMLElement | null>(null);
-let prefetchObserver: IntersectionObserver | null = null;
+const observers: IntersectionObserver[] = [];
 let prefetchPage = 2;
-let prefetching = false;
+let prefetching  = false;
 
 const setupPrefetchObserver = () => {
   if (!prefetchSentinel.value) return;
-  prefetchObserver = new IntersectionObserver(
+  const obs = new IntersectionObserver(
     ([entry]) => {
       if (!entry.isIntersecting || prefetching) return;
       prefetching = true;
       prefetchPublicStories({
         page: prefetchPage,
         limit: 20,
-        sort_by: "thoi_gian_cap_nhat",
-        order: "DESC",
-      }).finally(() => {
-        prefetchPage += 1;
-        prefetching = false;
-      });
+        sort_by: 'thoi_gian_cap_nhat',
+        order: 'DESC',
+      }).finally(() => { prefetchPage += 1; prefetching = false; });
     },
-    { root: null, rootMargin: "0px 0px 40% 0px", threshold: 0 },
+    { root: null, rootMargin: '0px 0px 40% 0px', threshold: 0 },
   );
-  prefetchObserver.observe(prefetchSentinel.value);
+  obs.observe(prefetchSentinel.value);
+  observers.push(obs);
 };
 
-onMounted(() => {
+// Resize handler — cập nhật isMobile
+let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+const handleResize = () => {
+  if (resizeTimer) clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { isMobile.value = window.innerWidth <= 1024; }, 150);
+};
+
+onMounted(async () => {
+  window.addEventListener('resize', handleResize, { passive: true });
   fetchAllData();
+  await nextTick();
   setupPrefetchObserver();
 });
 
 onBeforeUnmount(() => {
-  if (prefetchObserver) prefetchObserver.disconnect();
+  window.removeEventListener('resize', handleResize);
+  if (resizeTimer) clearTimeout(resizeTimer);
+  observers.forEach((obs) => obs.disconnect());
 });
 </script>
 
@@ -870,10 +897,55 @@ onBeforeUnmount(() => {
   width: 100%;
 }
 
+/* ===== SKELETON STYLES ===== */
+.hero-skeleton {
+  width: 100%;
+  height: 500px;
+  border-radius: var(--app-radius-lg);
+  overflow: hidden;
+  position: relative;
+  background: rgba(14, 22, 34, 0.9);
+}
+.hero-skeleton .shimmer { position: absolute; inset: 0; }
+
+.ranking-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.sk-orb  { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; }
+.sk-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.sk-line { border-radius: 4px; height: 11px; }
+.sk-line.lg { width: 72%; }
+.sk-line.sm { width: 42%; height: 9px; }
+
+.tag-pill-skeleton { width: 80px; height: 34px; border-radius: 8px; }
+
+/* Shimmer keyframe */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.03) 0%,
+    rgba(255,255,255,0.08) 45%,
+    rgba(255,255,255,0.03) 80%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.6s infinite linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shimmer { animation: none; background: rgba(255,255,255,0.05); }
+}
+
 /* ===== MOBILE OPTIMIZATION ===== */
 @media (max-width: 1024px) {
   .content-body-grid { grid-template-columns: 1fr; }
-  .sidebar-col-spirit { display: none; }
+  /* sidebar-col-spirit không cần display:none vì dùng v-if="!isMobile" */
   .mobile-extra-aura { display: block; margin-top: 30px; }
 }
 

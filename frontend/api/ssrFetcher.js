@@ -47,9 +47,9 @@ export async function getChapterDetail(storySlug, chapterSlug) {
  * @param {number|string} truyenId 
  * @returns {Promise<Array>}
  */
-export async function getStoryComments(truyenId) {
+export async function getStoryComments(truyen_id) {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/comments?truyen_id=${truyenId}&page=1`, {
+    const res = await fetch(`${API_BASE_URL}/api/comments?truyen_id=${truyen_id}&page=1`, {
       headers: { "Content-Type": "application/json" }
     });
     if (!res.ok) return [];
@@ -58,5 +58,48 @@ export async function getStoryComments(truyenId) {
   } catch (error) {
     console.error("SSR Fetch Comments Error:", error);
     return [];
+  }
+}
+
+export async function getGenreDetail(genreId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/the-loai/${genreId}`, {
+      headers: { "Content-Type": "application/json" }
+    });
+    if (!res.ok) return null;
+    const body = await res.json();
+    return body?.data || body;
+  } catch (error) {
+    console.error("SSR Fetch Genre Error:", error);
+    return null;
+  }
+}
+
+export async function getAuthorDetail(authorSlug) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/tac-gia/${authorSlug}`, {
+      headers: { "Content-Type": "application/json" }
+    });
+    if (!res.ok) return null;
+    const body = await res.json();
+    return body?.data || body;
+  } catch (error) {
+    console.error("SSR Fetch Author Error:", error);
+    return null;
+  }
+}
+
+export async function getAudioDetail(slug) {
+  try {
+    // Assuming backend has a similar endpoint for audio detail by slug
+    const res = await fetch(`${API_BASE_URL}/api/truyen-audio/slug/${slug}`, {
+      headers: { "Content-Type": "application/json" }
+    });
+    if (!res.ok) return null;
+    const body = await res.json();
+    return body?.data || body;
+  } catch (error) {
+    console.error("SSR Fetch Audio Error:", error);
+    return null;
   }
 }

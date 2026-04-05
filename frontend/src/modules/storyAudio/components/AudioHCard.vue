@@ -60,14 +60,14 @@
       <div class="hcard__audio-meta">
         <span v-if="audioParts">
           <i class="fas fa-list-ul"></i>
-          {{ audioParts }} phần
+          {{ audioSeries }} tập
         </span>
         <span v-if="audioDurationLabel">
           <i class="far fa-clock"></i>
           {{ audioDurationLabel }}
         </span>
         <a
-          v-if="partnerUrl && partnerName"
+          v-if="partnerUrl && partnerName && !hidePartner"
           :href="partnerUrl"
           class="hcard__partner"
           target="_blank"
@@ -82,10 +82,6 @@
         <router-link :to="`/truyen-audio/${story.slug}`" class="listen-btn">
           <i class="fas fa-play-circle"></i>
           Nghe ngay
-        </router-link>
-
-        <router-link :to="`/truyen-audio/${story.slug}`" class="detail-btn">
-          Chi tiết
         </router-link>
       </div>
     </div>
@@ -102,6 +98,7 @@ const props = withDefaults(
   defineProps<{
     story: Story;
     variant?: "default" | "hero";
+    hidePartner?: boolean;
   }>(),
   {
     variant: "default",
@@ -162,6 +159,7 @@ const descriptionText = computed(() => {
 });
 
 const audioParts = computed(() => Number(props.story.audio_total_parts || 0));
+const audioSeries = computed(() => Number(props.story.audio_total_series || props.story.audio_total_parts || 0));
 const audioDurationLabel = computed(() => formatDuration(props.story.audio_total_duration_seconds));
 const partnerName = computed(() => String(props.story.source_partner_name || "").trim());
 const partnerUrl = computed(() => String(props.story.source_partner_url || "").trim());
@@ -319,14 +317,17 @@ function warmDetailExperience() {
 
 .status--dang-ra {
   color: #61dcc4;
+  background: rgba(97, 220, 196, 0.1);
 }
 
 .status--hoan-thanh {
-  color: #d6e6f6;
+  color: #7bc7e8;
+  background: rgba(123, 199, 232, 0.1);
 }
 
 .status--ready {
   color: #f6dfaa;
+  background: rgba(246, 223, 170, 0.1);
 }
 
 .hcard__title {
@@ -442,9 +443,9 @@ function warmDetailExperience() {
   flex-wrap: wrap;
 }
 
-.listen-btn,
-.detail-btn {
+.listen-btn {
   display: inline-flex;
+  flex: 1;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -466,18 +467,6 @@ function warmDetailExperience() {
 .listen-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 14px 28px rgba(98, 214, 194, 0.24);
-}
-
-.detail-btn {
-  padding: 0 18px;
-  border: 1px solid rgba(216, 179, 106, 0.22);
-  background: rgba(216, 179, 106, 0.06);
-  color: #f4ddb0;
-}
-
-.detail-btn:hover {
-  transform: translateY(-1px);
-  background: rgba(216, 179, 106, 0.12);
 }
 
 @media (max-width: 900px) {
@@ -542,8 +531,7 @@ function warmDetailExperience() {
     align-items: stretch;
   }
 
-  .listen-btn,
-  .detail-btn {
+  .listen-btn {
     width: 100%;
   }
 }
