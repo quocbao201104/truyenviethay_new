@@ -33,6 +33,54 @@ function escapeHtml(input) {
     .replace(/'/g, "&#39;");
 }
 
+function toNonEmptyString(value, fallback = "") {
+  if (typeof value !== "string") return fallback;
+  const trimmed = value.trim();
+  return trimmed || fallback;
+}
+
+function resolveChapterTitle(chapter = {}, chapterContent = null) {
+  return (
+    toNonEmptyString(chapter.ten_chuong) ||
+    toNonEmptyString(chapter.tieu_de) ||
+    toNonEmptyString(chapterContent?.title) ||
+    "Chương truyện"
+  );
+}
+
+function resolveChapterStoryName(chapter = {}) {
+  return (
+    toNonEmptyString(chapter.story_name) ||
+    toNonEmptyString(chapter.ten_truyen) ||
+    toNonEmptyString(chapter?.truyen?.ten_truyen) ||
+    "Truyện"
+  );
+}
+
+function formatChapterContentHtml(content) {
+  const normalized = toNonEmptyString(content);
+  if (!normalized) return "";
+
+  return normalized
+    .split(/\n{2,}/)
+    .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, "<br />")}</p>`)
+    .join("");
+}
+
+async function fetchChapterContentPayload(contentUrl) {
+  const safeContentUrl = toNonEmptyString(contentUrl);
+  if (!safeContentUrl) return null;
+
+  try {
+    const response = await fetch(safeContentUrl);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.error("chapter content fetch error:", error);
+    return null;
+  }
+}
+
 function resolveSiteUrl(req) {
   const configured = process.env.VITE_SITE_URL || DEFAULT_SITE_URL;
   const configuredClean = String(configured).trim().replace(/\/+$/, "");
@@ -290,6 +338,15 @@ export default async function handler(req, res) {
          const [_, storySlug, chapterSlug] = chapterMatch;
          const chapter = await getChapterDetail(storySlug, chapterSlug);
          if (chapter) {
+             const chapterContent = await fetchChapterContentPayload(chapter.content_url);
+             const chapterTitle = resolveChapterTitle(chapter, chapterContent);
+             const storyName = resolveChapterStoryName(chapter);
+             const chapterBodyHtml = formatChapterContentHtml(
+               chapter.noi_dung || chapter.content || chapterContent?.content || chapterContent?.noi_dung,
+             );
+             chapter.story_name = storyName;
+             chapter.ten_chuong = chapterTitle;
+             chapter.noi_dung = chapterBodyHtml;
              const bc = buildBreadcrumbSchema(siteUrl, [
                  { name: "Trang chủ", url: "/" },
                  { name: chapter.story_name || "Truyện", url: `/truyen-chu/${storySlug}` },

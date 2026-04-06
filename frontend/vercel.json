@@ -1,9 +1,20 @@
 {
+  "redirects": [
+    { "source": "/the_loai/:id", "destination": "/the-loai?categories=:id", "permanent": true },
+    { "source": "/truyen-tranh", "destination": "/truyen-audio", "permanent": true },
+    { "source": "/truyen-tranh/:slug", "destination": "/truyen-audio/:slug", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "https://api.truyenviethay.id.vn/sitemap.xml" },
     { "source": "/sitemaps/:path*", "destination": "https://api.truyenviethay.id.vn/sitemaps/:path*" },
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/index.html", "destination": "/index.html" },
+    {
+      "source": "/",
+      "has": [{ "type": "header", "key": "accept", "value": ".*text/html.*" }],
+      "missing": [{ "type": "header", "key": "x-seo-head-render" }],
+      "destination": "/api/render?path=/"
+    },
     {
       "source": "/(.*)",
       "has": [{ "type": "header", "key": "accept", "value": ".*text/html.*" }],
