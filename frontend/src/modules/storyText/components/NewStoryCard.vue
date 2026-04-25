@@ -21,7 +21,7 @@
         loading="lazy"
         decoding="async"
       />
-      
+
       <div v-if="variant === 'rich'" class="bottom-vignette"></div>
 
       <div v-if="variant === 'rich'" class="aura-overlay">
@@ -34,7 +34,7 @@
       <div class="jade-chapter-badge">
         <i class="fas fa-scroll text-[10px] text-sky-400"></i>
         <span>{{ story.chuong_moi || `Chương ${story.so_chuong || story.so_luong_chuong || 0}` }}</span>
-      </div>  
+      </div>
 
       <div :class="['sigil-status', getStatusClass(story.trang_thai)]">
         <i v-if="getStatusClass(story.trang_thai) === 'status-completed'" class="fas fa-circle-check"></i>
@@ -48,17 +48,17 @@
       <h3 class="story-title-main" :title="story.ten_truyen">
         {{ story.ten_truyen }}
       </h3>
-      
+
       <div class="meta-spirit-row">
         <span class="author-spirit">
-          <i class="fas fa-feather-pointed"></i> 
+          <i class="fas fa-feather-pointed"></i>
           {{ story.tac_gia || 'Ẩn Danh' }}
         </span>
       </div>
 
       <div class="stats-spirit-footer">
         <div class="stat-spirit">
-          <i class="fas fa-eye stat-icon-blue"></i> 
+          <i class="fas fa-eye stat-icon-blue"></i>
           <span>{{ formatNumber(story.luot_xem) }}</span>
         </div>
 
@@ -168,18 +168,16 @@ const getStatusClass = (status) => {
 
 @media (hover: hover) {
   .xianxia-story-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     border-color: var(--app-border-accent);
-    will-change: transform;
   }
 
   .xianxia-story-card:hover .story-cover-img {
-    transform: scale(1.03);
-    will-change: transform;
+    transform: scale(1.015);
   }
 
   .xianxia-story-card--rich:hover .aura-overlay { opacity: 1; }
-  .xianxia-story-card--rich:hover .read-btn-spirit { transform: translateY(0); will-change: transform; }
+  .xianxia-story-card--rich:hover .read-btn-spirit { transform: translateY(0); }
   .xianxia-story-card:hover .story-title-main { color: var(--app-accent); }
 }
 
@@ -196,21 +194,21 @@ const getStatusClass = (status) => {
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  
+
   /* Lấp đầy 100% khung không để lại khoảng trống */
-  object-fit: cover; 
-  
+  object-fit: cover;
+
   /* QUAN TRỌNG: Neo ảnh từ đỉnh trên cùng, giữ trọn vẹn khuôn mặt/đầu nhân vật */
-  object-position: top center; 
-  
-  transition: transform 0.3s ease-out;
+  object-position: top center;
+
+  transition: transform 0.22s ease-out;
   z-index: 1;
 }
 
 /* Lưu ý: Nếu đạo hữu có hover zoom ảnh thì phải giữ nguyên z-index */
 @media (hover: hover) {
   .xianxia-story-card:hover .story-cover-img {
-    transform: scale(1.03); 
+    transform: scale(1.015);
   }
 }
 
@@ -247,7 +245,7 @@ const getStatusClass = (status) => {
   letter-spacing: 1px;
   box-shadow: 0 8px 18px rgba(4, 10, 20, 0.2);
   transform: translateY(10px);
-  transition: transform 0.2s ease;
+  transition: transform 0.18s ease;
 }
 
 /* NGỌC PHIẾN CHƯƠNG (Chapter Badge) */
@@ -290,21 +288,21 @@ const getStatusClass = (status) => {
 }
 
 /* Viên Mãn - Ngọc Bích (Giữ nguyên màu xanh lá cho trạng thái hoàn thành) */
-.status-completed { 
+.status-completed {
   background: rgba(72, 207, 165, 0.14);
   border: 1px solid rgba(72, 207, 165, 0.26);
   color: #63deb7;
 }
 
 /* Đang Ra - Băng Lam */
-.status-on-going { 
+.status-on-going {
   background: rgba(91, 196, 232, 0.14);
   border: 1px solid rgba(91, 196, 232, 0.28);
   color: #74d7ef;
 }
 
 /* Đề Cử - Xích Kim */
-.status-suggested { 
+.status-suggested {
   background: rgba(243, 201, 107, 0.14);
   border: 1px solid rgba(243, 201, 107, 0.28);
   color: #f3c96b;
@@ -332,7 +330,7 @@ const getStatusClass = (status) => {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  transition: color 0.3s;
+  transition: color 0.2s ease;
   text-shadow: none;
 }
 
@@ -374,6 +372,20 @@ const getStatusClass = (status) => {
 .xianxia-story-card--rich .aura-overlay { backdrop-filter: none; }
 .xianxia-story-card--rich .jade-chapter-badge { backdrop-filter: none; }
 .xianxia-story-card--rich .sigil-status { backdrop-filter: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .xianxia-story-card,
+  .story-cover-img,
+  .aura-overlay,
+  .read-btn-spirit,
+  .story-title-main {
+    transition: none !important;
+  }
+
+  .animate-spin-slow {
+    animation: none !important;
+  }
+}
 
 @media (max-width: 640px) {
   .xianxia-story-card {

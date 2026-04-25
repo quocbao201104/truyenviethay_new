@@ -10,6 +10,10 @@ export default defineConfig(({ mode }) => {
 
   const target = env.VITE_API_URL || "http://localhost:3000";
   const manualChunks = (id: string) => {
+    if (id.includes("vite/preload-helper")) {
+      return "vendor";
+    }
+
     if (!id.includes("node_modules")) return undefined;
 
     if (id.includes("apexcharts") || id.includes("vue3-apexcharts")) {

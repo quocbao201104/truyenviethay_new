@@ -22,7 +22,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { useHead } from "@unhead/vue";
 import { useAppToast } from '@/composables/useAppToast';
 import { useAuthStore } from '@/modules/auth/auth.store';
-import { useSocket } from '@/composables/useSocket';
 import {
   defaultOgImage,
   toCanonicalUrlWithQuery,
@@ -32,8 +31,9 @@ import { resolveSeoPolicyForRoute } from "@/seo/routePolicy";
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
-const { connect, disconnect } = useSocket();
 const { showSuccessToast, showErrorToast, showWarningToast } = useAppToast();
+let socketControls = null;
+let socketLoadTicket = 0;
 
 const baseTitle = "TruyenVietHay";
 const defaultDescription =
@@ -135,11 +135,16 @@ useHead(() => ({
 }));
 
 // Initialize socket when user is logged in
-watch(() => authStore.isLoggedIn, (isLoggedIn) => {
+watch(() => authStore.isLoggedIn, async (isLoggedIn) => {
+  const ticket = ++socketLoadTicket;
   if (isLoggedIn) {
-    connect();
+    const { useSocket } = await import('@/composables/useSocket');
+    if (ticket !== socketLoadTicket || !authStore.isLoggedIn) return;
+    socketControls = useSocket();
+    socketControls.connect();
   } else {
-    disconnect();
+    socketControls?.disconnect();
+    socketControls = null;
   }
 }, { immediate: true });
 

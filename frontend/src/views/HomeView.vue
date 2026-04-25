@@ -3,7 +3,7 @@
 
     <!-- ===== PARTICLES ===== -->
     <div class="particles-bg" aria-hidden="true">
-      <span v-for="n in 18" :key="n" class="particle" :style="particleStyle(n)"></span>
+      <span v-for="n in 10" :key="n" class="particle" :style="particleStyle(n)"></span>
     </div>
 
     <!-- ===== HERO ===== -->
@@ -91,7 +91,7 @@
             </div>
             <!-- sound wave bars -->
             <div class="sound-wave" aria-hidden="true">
-              <span v-for="b in 12" :key="b" class="bar" :style="`--i:${b}`"></span>
+              <span v-for="b in 8" :key="b" class="bar" :style="`--i:${b}`"></span>
             </div>
           </div>
 
@@ -474,7 +474,7 @@ onBeforeUnmount(() => {
 .particle {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(91,196,232,0.55) 0%, rgba(91,196,232,0) 70%);
+  background: radial-gradient(circle, rgba(91,196,232,0.42) 0%, rgba(91,196,232,0) 70%);
   animation: particleDrift linear infinite;
   opacity: 0;
 }
@@ -510,9 +510,8 @@ onBeforeUnmount(() => {
   height: 100%;
   object-fit: cover;
   object-position: center 30%;
-  filter: blur(1px) brightness(0.72) saturate(1.04);
+  opacity: 0.72;
   transform: scale(1.02);
-  animation: spiritMove 30s ease-in-out infinite alternate;
 }
 
 .hero-vignette {
@@ -584,7 +583,7 @@ onBeforeUnmount(() => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-size: 200% auto;
-  animation: shimmerGrad 4s linear infinite;
+  background-position: 20% center;
 }
 @keyframes shimmerGrad {
   0%   { background-position: 0% center; }
@@ -607,11 +606,10 @@ onBeforeUnmount(() => {
   padding: 16px 28px;
   border-radius: 20px;
   text-decoration: none;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
   position: relative;
   overflow: hidden;
   min-width: 210px;
-  backdrop-filter: blur(12px);
 }
 
 .btn-hero-card::before {
@@ -672,9 +670,9 @@ onBeforeUnmount(() => {
 }
 .btn-hero-card.emerald .btn-hero-main { color: #6ee7b7; }
 .btn-hero-card.emerald:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: rgba(52,211,153,0.7);
-  box-shadow: 0 12px 32px rgba(16,185,129,0.28);
+  box-shadow: 0 10px 24px rgba(16,185,129,0.22);
 }
 
 /* Azure variant */
@@ -691,9 +689,9 @@ onBeforeUnmount(() => {
 }
 .btn-hero-card.azure .btn-hero-main { color: #93c5fd; }
 .btn-hero-card.azure:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: rgba(91,196,232,0.6);
-  box-shadow: 0 12px 32px rgba(91,196,232,0.25);
+  box-shadow: 0 10px 24px rgba(91,196,232,0.2);
 }
 
 /* Scroll hint */
@@ -831,8 +829,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   position: relative;
   z-index: 2;
-  box-shadow: 0 0 40px rgba(91,196,232,0.15), inset 0 0 30px rgba(91,196,232,0.06);
-  animation: rotate-ring 12s linear infinite;
+  box-shadow: 0 0 30px rgba(91,196,232,0.12), inset 0 0 22px rgba(91,196,232,0.05);
 }
 @keyframes rotate-ring {
   0%   { box-shadow: 0 0 40px rgba(91,196,232,0.15), inset 0 0 30px rgba(91,196,232,0.06); border-color: rgba(91,196,232,0.35); }
@@ -856,14 +853,17 @@ onBeforeUnmount(() => {
 }
 .bar {
   width: 6px;
+  height: 44px;
   border-radius: 3px;
   background: linear-gradient(to top, #5bc4e8, #a78bfa);
+  transform: scaleY(0.25);
+  transform-origin: bottom;
   animation: barDance 1.2s ease-in-out infinite alternate;
   animation-delay: calc(var(--i) * 0.09s);
 }
 @keyframes barDance {
-  0%   { height: 8px;  opacity: 0.5; }
-  100% { height: 44px; opacity: 1; }
+  0%   { transform: scaleY(0.22); opacity: 0.5; }
+  100% { transform: scaleY(1); opacity: 1; }
 }
 
 /* ---- Text side ---- */
@@ -1039,12 +1039,11 @@ onBeforeUnmount(() => {
   width: 80px; height: 80px;
   border-radius: 50%;
   background: rgba(91,196,232,0.06);
-  filter: blur(16px);
-  transition: width 0.3s, height 0.3s, opacity 0.3s;
+  transition: opacity 0.2s ease;
   opacity: 0;
 }
-.stat-card:hover { transform: translateY(-4px); border-color: rgba(91,196,232,0.22); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
-.stat-card:hover::before { opacity: 1; width: 120px; height: 120px; }
+.stat-card:hover { transform: translateY(-2px); border-color: rgba(91,196,232,0.22); box-shadow: 0 10px 22px rgba(0,0,0,0.24); }
+.stat-card:hover::before { opacity: 1; }
 
 .stat-icon { font-size: 2.4rem; margin-bottom: 14px; display: block; }
 .stat-icon.emerald { color: #34d399; }
@@ -1091,15 +1090,14 @@ onBeforeUnmount(() => {
   width: 100px; height: 100px;
   border-radius: 50%;
   background: rgba(91,196,232,0.06);
-  filter: blur(20px);
   opacity: 0;
   transition: opacity 0.3s;
 }
 .feature-card:hover {
   background: rgba(91, 196, 232, 0.05);
   border-color: rgba(91, 196, 232, 0.2);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.22);
 }
 .feature-card:hover::after { opacity: 1; }
 
@@ -1110,7 +1108,7 @@ onBeforeUnmount(() => {
 }
 .feature-card--audio:hover {
   border-color: rgba(91,196,232,0.35);
-  box-shadow: 0 12px 32px rgba(91,196,232,0.12);
+  box-shadow: 0 10px 24px rgba(91,196,232,0.1);
 }
 
 .feature-icon {
@@ -1256,6 +1254,7 @@ onBeforeUnmount(() => {
   100% { transform: translateY(0px); }
 }
 .animate-float { animation: float 6s ease-in-out infinite; }
+.logo-wrapper.animate-float { animation: none; }
 
 /* =====================
    RESPONSIVE

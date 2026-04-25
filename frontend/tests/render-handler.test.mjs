@@ -97,3 +97,41 @@ test("chapter render uses backend chapter fields and chapter content url for SEO
   assert.match(res.body, /Hello from chapter content/);
   assert.doesNotMatch(res.body, /undefined/);
 });
+
+test("missing chapter render returns a real 404 instead of a generic 200 html fallback", async () => {
+  const originalFetch = global.fetch;
+
+  global.fetch = async (url) => {
+    const requestUrl = String(url);
+
+    if (requestUrl.includes("/api/chuong/slug/story-slug/missing-chapter")) {
+      return createJsonResponse(
+        { message: "Khong tim thay chuong" },
+        { ok: false, status: 404 },
+      );
+    }
+
+    throw new Error(`Unexpected fetch: ${requestUrl}`);
+  };
+
+  const req = {
+    method: "GET",
+    url: "/api/render?path=/truyen-chu/story-slug/missing-chapter",
+    query: {
+      path: "/truyen-chu/story-slug/missing-chapter",
+    },
+    headers: {
+      accept: "text/html",
+    },
+  };
+  const res = createMockResponse();
+
+  try {
+    await handler(req, res);
+  } finally {
+    global.fetch = originalFetch;
+  }
+
+  assert.equal(res.statusCode, 404);
+  assert.match(res.body, /Not Found/i);
+});

@@ -334,7 +334,6 @@ onBeforeUnmount(() => {
 
 .chat-msg-item:hover {
   transform: translateX(2px);
-  will-change: transform;
 }
 
 .chat-msg-item.is-megaphone {
@@ -366,7 +365,6 @@ onBeforeUnmount(() => {
   inset: -3px; 
   border-radius: 50%;
   border: 1.5px dashed rgba(var(--aura-primary), 0.4);
-  animation: spinArray 20s linear infinite; 
   pointer-events: none;
   z-index: 0;
   filter: none;
@@ -374,7 +372,6 @@ onBeforeUnmount(() => {
 .magic-circle-reverse {
   inset: -6px; 
   border: 1px dotted rgba(var(--aura-primary), 0.6);
-  animation: spinArrayReverse 15s linear infinite;
 }
 
 .avatar-wrapper {
@@ -681,7 +678,9 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
   box-shadow: none;
 }
 
@@ -714,9 +713,6 @@ onBeforeUnmount(() => {
   color: #64748b;
   font-size: 0.9rem;
 }
-
-@keyframes spinArray { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes spinArrayReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
 
 @keyframes fadeInMsg {
   from { opacity: 0; transform: translateY(10px); }

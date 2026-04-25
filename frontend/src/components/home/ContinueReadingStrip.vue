@@ -111,9 +111,7 @@ const getChapterLink = (item: HistoryItem) => {
   border: 1px solid rgba(52, 211, 153, 0.15); /* Viền linh khí mờ */
   border-radius: 20px;
   padding: 20px 24px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
   font-family: 'Be Vietnam Pro', sans-serif;
 }
 
@@ -136,9 +134,7 @@ const getChapterLink = (item: HistoryItem) => {
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
-.strip-title i {
-  filter: drop-shadow(0 0 8px rgba(234, 179, 8, 0.5));
-}
+.strip-title i { color: #facc15; }
 
 /* ===== DANH SÁCH CUỘN ===== */
 .reading-list {
@@ -168,17 +164,17 @@ const getChapterLink = (item: HistoryItem) => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.2s ease;
   cursor: pointer;
 }
 
 @media (hover: hover) {
   .reading-spirit-item:hover {
-    transform: translateY(-5px);
+    transform: translateY(-2px);
   }
 
   .reading-spirit-item:hover .item-cover-img {
-    transform: scale(1.1);
+    transform: scale(1.025);
   }
 
   .reading-spirit-item:hover .item-title {
@@ -193,7 +189,7 @@ const getChapterLink = (item: HistoryItem) => {
   aspect-ratio: 2/3;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.34);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -202,7 +198,7 @@ const getChapterLink = (item: HistoryItem) => {
   height: 100%;
   object-fit: cover;
   object-position: top center;
-  transition: transform 0.5s ease;
+  transition: transform 0.22s ease;
 }
 
 
@@ -244,7 +240,6 @@ const getChapterLink = (item: HistoryItem) => {
 .spirit-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #10b981, #fbbf24); /* Chuyển màu từ lục sang vàng */
-  box-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
   border-radius: 0 2px 2px 0;
 }
 
@@ -264,7 +259,7 @@ const getChapterLink = (item: HistoryItem) => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  transition: color 0.3s;
+  transition: color 0.2s ease;
 }
 
 
@@ -281,6 +276,7 @@ const getChapterLink = (item: HistoryItem) => {
     border-radius: 0;
     border-left: none; 
     border-right: none;
+    box-shadow: none;
   }
 
   .strip-title {
@@ -289,6 +285,14 @@ const getChapterLink = (item: HistoryItem) => {
 
   .item-title {
     font-size: 0.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reading-spirit-item,
+  .item-cover-img,
+  .item-title {
+    transition: none !important;
   }
 }
 </style>

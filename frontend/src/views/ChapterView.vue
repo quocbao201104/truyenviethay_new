@@ -329,11 +329,37 @@ const scheduleTitleReady = () => {
 };
 
 let scrollRafId = 0;
+let scrollTarget: HTMLElement | Window = window;
+
+const getReaderScrollElement = () =>
+  document.querySelector<HTMLElement>(".main-content--reader");
+
+const isWindowScrollTarget = (target: HTMLElement | Window): target is Window =>
+  target === window;
+
+const getScrollTop = () => {
+  const target = scrollTarget;
+  if (isWindowScrollTarget(target)) {
+    return document.documentElement.scrollTop || document.body.scrollTop;
+  }
+
+  return target.scrollTop;
+};
+
+const getScrollableHeight = () => {
+  const target = scrollTarget;
+  if (isWindowScrollTarget(target)) {
+    return document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  }
+
+  return target.scrollHeight - target.clientHeight;
+};
+
 const handleScroll = () => {
   if (scrollRafId) return;
   scrollRafId = requestAnimationFrame(() => {
-    const winScroll = document.documentElement.scrollTop;
-    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const winScroll = getScrollTop();
+    const height = getScrollableHeight();
     scrollProgress.value = height > 0 ? (winScroll / height) * 100 : 0;
     isScrolled.value = winScroll > 600;
 
@@ -353,8 +379,18 @@ const handleScroll = () => {
   });
 };
 
-const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+const scrollToTop = () => {
+  const target = getReaderScrollElement();
+  if (target) {
+    target.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
 const resetScrollPosition = () => {
+  const target = getReaderScrollElement();
+  if (target) target.scrollTo({ top: 0, behavior: "auto" });
   window.scrollTo({ top: 0, behavior: "auto" });
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
@@ -364,6 +400,15 @@ const resetScrollPosition = () => {
   isScrolled.value = false;
   isScrollingDown.value = false;
   lastScrollTop.value = 0;
+};
+
+const bindScrollListener = () => {
+  scrollTarget = getReaderScrollElement() || window;
+  scrollTarget.addEventListener("scroll", handleScroll, { passive: true });
+};
+
+const unbindScrollListener = () => {
+  scrollTarget.removeEventListener("scroll", handleScroll);
 };
 
 const currentIndex = computed(() => {
@@ -516,11 +561,11 @@ const loadData = async () => {
 
 onMounted(() => {
   loadData();
-  window.addEventListener('scroll', handleScroll, { passive: true });
+  bindScrollListener();
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('scroll', handleScroll);
+  unbindScrollListener();
   if (viewTimer) clearTimeout(viewTimer);
   if (scrollRafId) cancelAnimationFrame(scrollRafId);
 });

@@ -20,7 +20,7 @@
 
       <div class="content-body-grid">
         <div class="main-col-spirit">
-          
+
           <!-- ===== TÂN TÚ BẢNG (Phase 1 - Above fold) ===== -->
           <section class="spirit-block">
             <div class="spirit-header emerald">
@@ -51,7 +51,7 @@
                 :key="story.id"
                 :story="story"
                 v-memo="[story.id]"
-                :animateStatus="index < 3"
+                :animateStatus="false"
               />
             </div>
 
@@ -93,7 +93,7 @@
                   :key="story.id"
                   :story="story"
                   v-memo="[story.id]"
-                  :animateStatus="index < 3"
+                  :animateStatus="false"
                 />
               </template>
             </div>
@@ -136,7 +136,7 @@
                   :key="story.id"
                   :story="story"
                   v-memo="[story.id]"
-                  :animateStatus="index < 3"
+                  :animateStatus="false"
                 />
               </template>
             </div>
@@ -152,7 +152,7 @@
             <section class="spirit-block">
               <div class="spirit-header moon">
                 <h2 class="spirit-title">
-                  <i class="fas fa-moon"></i> Nguyệt Bảng 
+                  <i class="fas fa-moon"></i> Nguyệt Bảng
                   <span class="spirit-note">Tranh hùng tuế nguyệt</span>
                 </h2>
               </div>
@@ -183,9 +183,9 @@
                 </button>
               </div>
               <div class="ranking-spirit-list-mobile moon-board">
-                <div 
-                  v-for="(story, index) in moonStories.slice(0, 5)" 
-                  :key="'mb-'+story.id" 
+                <div
+                  v-for="(story, index) in moonStories.slice(0, 5)"
+                  :key="'mb-'+story.id"
                   v-memo="[story, moonTab]"
                   @click="navigateToStory(story.slug)"
                   class="ranking-spirit-item moon-item"
@@ -208,8 +208,8 @@
                 </h2>
               </div>
               <div class="tag-cloud-spirit">
-                <router-link 
-                  v-for="cat in categories" 
+                <router-link
+                  v-for="cat in categories"
                   :key="cat.id_theloai"
                   v-memo="[cat]"
                   :to="`/the-loai?categories=${cat.id_theloai}`"
@@ -542,15 +542,15 @@ onBeforeUnmount(() => {
   --app-radius-lg: 24px;
   --app-radius-md: 18px;
   --app-border: rgba(120, 144, 168, 0.22);
-  --app-shadow-1: 0 20px 40px rgba(3, 8, 18, 0.3);
-  --app-shadow-2: 0 24px 46px rgba(3, 8, 18, 0.34);
+  --app-shadow-1: 0 12px 28px rgba(3, 8, 18, 0.24);
+  --app-shadow-2: 0 16px 34px rgba(3, 8, 18, 0.28);
   --list-premium-surface: rgba(14, 24, 38, 0.8);
   --list-premium-jade: #72e2cd;
   --list-premium-gold: #d7b679;
   --list-premium-ice: #dbe7f4;
   min-height: 100vh;
   background-color: #0b111b;
-  background-image: 
+  background-image:
     radial-gradient(circle at 15% 50%, rgba(114, 226, 205, 0.08) 0%, transparent 48%),
     radial-gradient(circle at 85% 30%, rgba(215, 182, 121, 0.08) 0%, transparent 42%),
     linear-gradient(180deg, rgba(11, 21, 34, 0.96), rgba(9, 16, 27, 0.98));
@@ -631,9 +631,11 @@ onBeforeUnmount(() => {
   letter-spacing: 1px;
   padding: 9px 16px;
   border-radius: 50px;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 /* ===== TONE MÀU CÁC BẢNG ===== */
@@ -646,7 +648,7 @@ onBeforeUnmount(() => {
 }
 .spirit-header.emerald .spirit-title i { color: var(--list-premium-jade); filter: none; }
 .view-all-spirit.emerald { color: #a4f0df; background: rgba(114, 226, 205, 0.14); border: 1px solid rgba(114, 226, 205, 0.28); }
-.view-all-spirit.emerald:hover { background: rgba(114, 226, 205, 0.22); color: #e8fffa; transform: translateY(-1px); box-shadow: 0 10px 20px rgba(7, 17, 27, 0.28); }
+.view-all-spirit.emerald:hover { background: rgba(114, 226, 205, 0.22); color: #e8fffa; transform: translateY(-1px); }
 
 .spirit-footer {
   display: flex;
@@ -682,7 +684,9 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: all 0.2s;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .pag-btn:hover:not(:disabled) {
@@ -711,7 +715,7 @@ onBeforeUnmount(() => {
 }
 .spirit-header.gold .spirit-title i { color: var(--list-premium-gold); filter: none; }
 .view-all-spirit.gold { color: #f2d8aa; background: rgba(215, 182, 121, 0.14); border: 1px solid rgba(215, 182, 121, 0.28); }
-.view-all-spirit.gold:hover { background: rgba(215, 182, 121, 0.22); color: #fff0d2; transform: translateY(-1px); box-shadow: 0 10px 20px rgba(7, 17, 27, 0.28); }
+.view-all-spirit.gold:hover { background: rgba(215, 182, 121, 0.22); color: #fff0d2; transform: translateY(-1px); }
 
 /* 3. PURPLE (Đại Viên Mãn - Tử Khí) */
 .spirit-header.purple { border-bottom: 1px solid rgba(166, 197, 228, 0.22); }
@@ -721,7 +725,7 @@ onBeforeUnmount(() => {
 }
 .spirit-header.purple .spirit-title i { color: #a6c5e4; filter: none; }
 .view-all-spirit.purple { color: #c8def3; background: rgba(166, 197, 228, 0.14); border: 1px solid rgba(166, 197, 228, 0.28); }
-.view-all-spirit.purple:hover { background: rgba(166, 197, 228, 0.22); color: #e9f3ff; transform: translateY(-1px); box-shadow: 0 10px 20px rgba(7, 17, 27, 0.28); }
+.view-all-spirit.purple:hover { background: rgba(166, 197, 228, 0.22); color: #e9f3ff; transform: translateY(-1px); }
 
 /* 4. FIRE (Linh Anh - Đỏ Cam) */
 .spirit-header.fire { border-bottom: 1px solid rgba(215, 182, 121, 0.25); padding-bottom: 8px;}
@@ -799,17 +803,15 @@ onBeforeUnmount(() => {
 }
 
 /* ===== SIDEBAR - GLASSMORPHISM ===== */
-.sticky-spirit-box { 
-  position: sticky; top: 90px; display: flex; flex-direction: column; gap: 24px; 
+.sticky-spirit-box {
+  position: sticky; top: 90px; display: flex; flex-direction: column; gap: 24px;
 }
 
-.sidebar-card-aura { 
+.sidebar-card-aura {
   background: var(--list-premium-surface);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius-md);
-  padding: 22px; 
+  padding: 22px;
   box-shadow: var(--app-shadow-1);
 }
 
@@ -819,7 +821,7 @@ onBeforeUnmount(() => {
 .ranking-spirit-item {
   display: flex; align-items: center; gap: 15px; padding: 12px 14px;
   background: rgba(8, 14, 22, 0.45);
-  border: 1px solid rgba(120, 144, 168, 0.2); 
+  border: 1px solid rgba(120, 144, 168, 0.2);
   border-radius: 12px; cursor: pointer;
   transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
   position: relative;
@@ -828,14 +830,13 @@ onBeforeUnmount(() => {
 .ranking-spirit-item:hover {
   background: rgba(114, 226, 205, 0.12);
   border-color: rgba(114, 226, 205, 0.32);
-  transform: translateX(4px);
-  box-shadow: 0 10px 20px rgba(3, 9, 20, 0.24);
+  transform: translateX(2px);
 }
 
 .rank-orb {
   width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-weight: 900; font-size: 1rem; color: #94a3b8; 
+  font-weight: 900; font-size: 1rem; color: #94a3b8;
   background: rgba(7, 14, 24, 0.76);
   border: 1px solid rgba(120, 144, 168, 0.28);
   box-shadow: none;
@@ -850,24 +851,27 @@ onBeforeUnmount(() => {
   flex-grow: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 6px;
 }
 
-.rank-name { 
-  margin: 0; padding: 0; font-size: 0.95rem; font-weight: 800; color: #f1f5f9; 
+.rank-name {
+  margin: 0; padding: 0; font-size: 0.95rem; font-weight: 800; color: #f1f5f9;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
-  transition: color 0.3s;
+  transition: color 0.2s ease;
 }
 
 .ranking-spirit-item:hover .rank-name { color: #f5f8fc; }
 
-.rank-val { 
-  margin: 0; font-size: 0.75rem; color: #9ab2c8; font-weight: 600; 
-  display: flex; align-items: center; gap: 6px; 
+.rank-val {
+  margin: 0; font-size: 0.75rem; color: #9ab2c8; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
 }
 .rank-val::before { content: '\f06e'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: #9ab2c8; font-size: 0.75rem; }
 
 .spirit-more-link, .spirit-more-link-mobile {
   display: block; text-align: center; margin-top: 20px;
   font-size: 0.8rem; font-weight: 800; text-transform: uppercase;
-  transition: all 0.3s; text-decoration: none; padding: 10px; border-radius: 10px;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease; text-decoration: none; padding: 10px; border-radius: 10px;
   border: 1px solid rgba(120, 144, 168, 0.2);
 }
 .spirit-more-link.moon-text { color: #d4e3f2; background: rgba(12, 20, 33, 0.6); }
@@ -877,9 +881,9 @@ onBeforeUnmount(() => {
 .tag-cloud-spirit { display: flex; flex-wrap: wrap; gap: 12px; }
 
 .tag-pill-spirit {
-  padding: 8px 16px; 
-  background: rgba(10, 17, 27, 0.7); 
-  border: 1px solid rgba(120, 144, 168, 0.22); 
+  padding: 8px 16px;
+  background: rgba(10, 17, 27, 0.7);
+  border: 1px solid rgba(120, 144, 168, 0.22);
   border-radius: 8px; /* Đổi sang bo góc nhẹ thay vì pill tròn */
   color: #cbd5e1; font-size: 0.85rem; font-weight: 600; text-decoration: none;
   transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
@@ -954,7 +958,7 @@ onBeforeUnmount(() => {
   .hero-aura-wrapper { margin-bottom: 12px; border-radius: 16px; }
   .continue-cultivation-area { margin-bottom: 24px; }
   .spirit-block { margin-bottom: 34px; }
-  
+
   .spirit-title { font-size: 1.3rem; }
   .spirit-note { display: none; /* Ẩn note phụ trên mobile cho gọn */ }
 
@@ -967,5 +971,5 @@ onBeforeUnmount(() => {
 }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-.animate-fadeIn { animation: fadeIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.animate-fadeIn { animation: fadeIn 0.45s ease-out forwards; }
 </style>

@@ -324,6 +324,7 @@ export default async function handler(req, res) {
     let renderedHtml = templateHtml;
     let renderStatus = "injected";
     let seoDataList = [];
+    let shouldReturnNotFound = false;
 
     try {
       renderedHtml = injectHeadSignals(templateHtml, canonicalHref, robotsPolicy);
@@ -358,6 +359,8 @@ export default async function handler(req, res) {
                  jsonLd: bc,
                  bodyHtml: `<article><h1>${escapeHtml(chapter.ten_chuong)}</h1><div class="chapter-content">${chapter.noi_dung}</div></article>`
              });
+         } else {
+             shouldReturnNotFound = true;
          }
       } else if (storyMatch) {
          const [_, storySlug] = storyMatch;
@@ -449,10 +452,17 @@ export default async function handler(req, res) {
       console.error("seo head inject error:", injectError);
     }
 
+    if (shouldReturnNotFound) {
+      renderStatus = "not-found";
+    }
+
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Cache-Control", HEAD_CACHE_CONTROL);
     res.setHeader("x-seo-render", `${RENDER_VERSION}:${renderStatus}`);
     res.setHeader("x-seo-path", normalizedPath);
+    if (shouldReturnNotFound) {
+      return res.status(404).send("Not Found");
+    }
     return res.status(200).send(renderedHtml);
   } catch (error) {
     console.error("seo render error:", error);

@@ -115,13 +115,22 @@
     </div>
 
     <div v-if="!isMobileViewport" class="side-trending">
-      <HomeChatBoard />
+      <LazyHomeChatBoard v-if="isChatBoardReady" />
+      <div v-else class="chat-board-placeholder" aria-hidden="true">
+        <div class="placeholder-header">
+          <span class="placeholder-icon"></span>
+          <span class="placeholder-title"></span>
+        </div>
+        <div class="placeholder-line long"></div>
+        <div class="placeholder-line"></div>
+        <div class="placeholder-line short"></div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { computed, defineAsyncComponent, ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import {
   DEFAULT_STORY_COVER_URL,
@@ -135,9 +144,13 @@ import {
   prefetchStoryDetailExperience,
   prefetchStoryListExperience,
 } from "@/router/prefetch";
-import HomeChatBoard from "./HomeChatBoard.vue";
 
 const router = useRouter();
+const LazyHomeChatBoard = defineAsyncComponent({
+  loader: () => import("./HomeChatBoard.vue"),
+  delay: 300,
+  suspensible: false,
+});
 const isMobileViewport = ref(
   typeof window !== "undefined"
     ? window.matchMedia("(max-width: 1024px)").matches
@@ -157,6 +170,9 @@ const mobileBannerSrcSet = buildCloudinarySrcSet(
 );
 let viewportMediaQuery: MediaQueryList | null = null;
 let viewportListener: ((event: MediaQueryListEvent) => void) | null = null;
+const isChatBoardReady = ref(false);
+let chatIdleHandle: number | null = null;
+let chatTimerHandle: ReturnType<typeof setTimeout> | null = null;
 
 const navigateToStory = (slug: string) => {
   if (document.activeElement instanceof HTMLElement) {
@@ -189,11 +205,28 @@ const props = defineProps({
 const currentIndex = ref(0);
 let intervalId: any = null;
 
+const scheduleChatBoard = () => {
+  if (isChatBoardReady.value || isMobileViewport.value) return;
+  if (chatIdleHandle !== null || chatTimerHandle) return;
+  const reveal = () => {
+    isChatBoardReady.value = true;
+    chatIdleHandle = null;
+    chatTimerHandle = null;
+  };
+
+  if ("requestIdleCallback" in window) {
+    chatIdleHandle = (window as any).requestIdleCallback(reveal, { timeout: 1800 });
+  } else {
+    chatTimerHandle = window.setTimeout(reveal, 1200);
+  }
+};
+
 onMounted(() => {
   viewportMediaQuery = window.matchMedia("(max-width: 1024px)");
   isMobileViewport.value = viewportMediaQuery.matches;
   viewportListener = (event: MediaQueryListEvent) => {
     isMobileViewport.value = event.matches;
+    scheduleChatBoard();
   };
   if (viewportMediaQuery.addEventListener) {
     viewportMediaQuery.addEventListener("change", viewportListener);
@@ -207,10 +240,15 @@ onMounted(() => {
       currentIndex.value = (currentIndex.value + 1) % maxItems;
     }
   }, 6000); // Kéo dài thời gian xem banner một chút cho người dùng kịp đọc
+  scheduleChatBoard();
 });
 
 onUnmounted(() => {
   if (intervalId) clearInterval(intervalId);
+  if (chatIdleHandle !== null && "cancelIdleCallback" in window) {
+    (window as any).cancelIdleCallback(chatIdleHandle);
+  }
+  if (chatTimerHandle) clearTimeout(chatTimerHandle);
   if (viewportMediaQuery && viewportListener) {
     if (viewportMediaQuery.removeEventListener) {
       viewportMediaQuery.removeEventListener("change", viewportListener);
@@ -264,7 +302,7 @@ const truncateText = (text: string, length: number) => {
 .cosmic-glass {
   background: var(--hero-premium-surface);
   border: 1px solid var(--hero-premium-border);
-  box-shadow: 0 24px 48px rgba(3, 8, 18, 0.32);
+  box-shadow: 0 16px 34px rgba(3, 8, 18, 0.26);
 }
 
 .main-highlight {
@@ -280,19 +318,19 @@ const truncateText = (text: string, length: number) => {
 
 @media (hover: hover) {
   .main-highlight:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     border-color: rgba(99, 220, 197, 0.36);
-    box-shadow: 0 28px 60px rgba(3, 8, 18, 0.4);
+    box-shadow: 0 18px 40px rgba(3, 8, 18, 0.34);
   }
 
   .main-highlight:hover .book-cover-3d {
-    transform: perspective(1000px) rotateY(-5deg) scale(1.03);
-    box-shadow: -18px 18px 34px rgba(3, 8, 18, 0.45);
+    transform: perspective(1000px) rotateY(-8deg) scale(1.015);
+    box-shadow: -14px 14px 28px rgba(3, 8, 18, 0.38);
   }
 
   .main-highlight:hover .book-glow-aura {
-    opacity: 0.5;
-    transform: scale(1.03);
+    opacity: 0.38;
+    transform: scale(1.01);
   }
 }
 
@@ -316,9 +354,9 @@ const truncateText = (text: string, length: number) => {
   height: 100%;
   object-fit: cover;
   object-position: top center;
-  filter: blur(18px) brightness(0.42) saturate(1.05);
+  opacity: 0.34;
   z-index: 1;
-  transform: scale(1.1);
+  transform: scale(1.02);
 }
 
 .overlay-gradient {
@@ -424,7 +462,10 @@ const truncateText = (text: string, length: number) => {
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.3s;
+  transition:
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
   cursor: pointer;
   box-shadow: 0 10px 24px rgba(4, 10, 20, 0.28);
   border: 1px solid rgba(143, 232, 247, 0.34);
@@ -443,8 +484,11 @@ const truncateText = (text: string, length: number) => {
   padding: 12px 22px;
   border-radius: 16px;
   font-weight: 700;
-  backdrop-filter: blur(8px);
-  transition: all 0.3s;
+  transition:
+    background-color 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease,
+    transform 0.22s ease;
   cursor: pointer;
 }
 
@@ -472,9 +516,11 @@ const truncateText = (text: string, length: number) => {
   object-fit: cover;
   object-position: top center;
   border-radius: 18px;
-  box-shadow: -15px 15px 30px rgba(3, 8, 18, 0.45);
-  transform: perspective(1000px) rotateY(-15deg);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -12px 12px 24px rgba(3, 8, 18, 0.38);
+  transform: perspective(1000px) rotateY(-10deg);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
   position: relative;
   z-index: 2;
 }
@@ -487,9 +533,11 @@ const truncateText = (text: string, length: number) => {
     rgba(99, 220, 197, 0.18) 0%,
     transparent 72%
   );
-  filter: blur(12px);
+  filter: none;
   opacity: 0;
-  transition: all 0.35s ease;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
   z-index: 1;
 }
 
@@ -512,6 +560,53 @@ const truncateText = (text: string, length: number) => {
   box-sizing: border-box;
   min-height: 0;
   overflow: hidden;
+}
+
+.chat-board-placeholder {
+  height: 100%;
+  border-radius: var(--app-radius-md);
+  background: rgba(18, 26, 39, 0.72);
+  border: 1px solid var(--app-border);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.placeholder-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.placeholder-icon,
+.placeholder-title,
+.placeholder-line {
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.placeholder-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.placeholder-title {
+  width: 112px;
+  height: 14px;
+}
+
+.placeholder-line {
+  height: 12px;
+  width: 72%;
+}
+
+.placeholder-line.long {
+  width: 94%;
+}
+
+.placeholder-line.short {
+  width: 48%;
 }
 
 .fade-enter-active,
@@ -565,7 +660,6 @@ const truncateText = (text: string, length: number) => {
     height: 100%;
     object-fit: cover;
     object-position: center top;
-    animation: slow-pan 20s ease-in-out infinite alternate;
   }
 
   .mobile-vignette {
@@ -635,7 +729,6 @@ const truncateText = (text: string, length: number) => {
     background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: 0.07em;
-    animation: aura-pulse-cyan 3s infinite ease-in-out;
     text-shadow:
       0 0 6px rgba(99, 220, 197, 0.72),
       0 0 26px rgba(30, 200, 231, 0.5),
@@ -677,7 +770,9 @@ const truncateText = (text: string, length: number) => {
     text-decoration: none;
     border-radius: 14px;
     overflow: hidden;
-    transition: all 0.25s ease;
+    transition:
+      filter 0.2s ease,
+      transform 0.2s ease;
     border: 1px solid rgba(124, 147, 170, 0.28);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
   }
@@ -723,7 +818,6 @@ const truncateText = (text: string, length: number) => {
   }
   .spirit-btn-sm.dark-glass .btn-aura-sm {
     background: transparent;
-    backdrop-filter: blur(8px);
   }
 }
 

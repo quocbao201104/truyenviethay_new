@@ -838,7 +838,11 @@ watch(
   text-decoration: none;
   font-size: 0.92rem;
   font-weight: 700;
-  transition: all 0.25s ease;
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
   padding: 10px 16px;
   background: rgba(12, 20, 33, 0.7);
   border-radius: 999px;
@@ -855,9 +859,9 @@ watch(
 .cosmic-glass {
   background: var(--text-premium-surface);
   border: 1px solid var(--text-premium-border);
-  box-shadow: 0 24px 52px rgba(3, 9, 20, 0.3);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    0 14px 32px rgba(3, 9, 20, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 /* ===== HERO SECTION ===== */
@@ -885,17 +889,12 @@ watch(
   border-radius: 20px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 20px 42px rgba(3, 8, 18, 0.34);
+  box-shadow: 0 14px 28px rgba(3, 8, 18, 0.28);
   border: 1px solid rgba(215, 182, 121, 0.24);
 }
 
 .cover-blur-bg {
-  position: absolute;
-  inset: -16px;
-  background-size: cover;
-  background-position: center;
-  filter: blur(12px) brightness(0.5);
-  z-index: 0;
+  display: none;
 }
 
 .story-cover-main {
@@ -933,7 +932,7 @@ watch(
   align-items: center;
   gap: 6px;
   z-index: 3;
-  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .status-completed {
@@ -1210,7 +1209,10 @@ watch(
   font-weight: 800;
   color: #9bb2c6;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease,
+    border-color 0.25s ease;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   display: inline-flex;
@@ -1367,7 +1369,10 @@ watch(
   background: rgba(10, 17, 27, 0.58);
   border-radius: 14px;
   text-decoration: none;
-  transition: all 0.25s ease;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
   border: 1px solid rgba(120, 144, 168, 0.16);
 }
 .chapter-item:hover {
@@ -1383,7 +1388,7 @@ watch(
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: 0.3s;
+  transition: color 0.25s ease;
 }
 .chapter-item:hover .chap-name {
   color: #dff8ff;
