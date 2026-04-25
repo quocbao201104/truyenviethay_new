@@ -147,18 +147,18 @@ const handleBadgeClick = (badge) => {
 .kicker-wrap { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; }
 .kicker-gold { margin: 0; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.25em; color: #fbbf24; text-transform: uppercase; }
 
-.majestic-title-gold { margin: 0; font-size: 1.6rem; font-weight: 900; background: linear-gradient(135deg, #fff 30%, #fbbf24 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.4)); letter-spacing: 1px; }
+.majestic-title-gold { margin: 0; font-size: 1.6rem; font-weight: 900; background: linear-gradient(135deg, #fff 30%, #fbbf24 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
 .majestic-title-sm { margin: 0; font-size: 1.3rem; font-weight: 800; color: #fff; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
 
 /* Stats Badge */
 .stat-badge-gold {
   border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 14px;
-  background: rgba(10, 15, 30, 0.8); box-shadow: inset 0 0 15px rgba(251, 191, 36, 0.1);
+  background: rgba(10, 15, 30, 0.8); box-shadow: inset 0 0 10px rgba(251, 191, 36, 0.06);
   padding: 0.5rem 1.2rem; text-align: right; min-width: 140px;
 }
 .stat-badge-gold.outline { background: transparent; border-style: dashed; box-shadow: none; }
 .stat-badge-gold .label { display: block; font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-.stat-badge-gold .value { color: #fbbf24; font-size: 1.2rem; font-weight: 900; text-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
+.stat-badge-gold .value { color: #fbbf24; font-size: 1.2rem; font-weight: 900; }
 .stat-badge-gold .value small { font-size: 0.7rem; color: #fff; }
 
 .empty-state-cosmic { border: 1px dashed rgba(251, 191, 36, 0.3); border-radius: 16px; padding: 3rem; text-align: center; color: #fbbf24; background: rgba(251, 191, 36, 0.05); margin-top: 1rem; }
@@ -170,7 +170,12 @@ const handleBadgeClick = (badge) => {
   position: relative; width: 100%; aspect-ratio: 1; border-radius: 16px;
   border: 1px solid rgba(251, 191, 36, 0.2); background: radial-gradient(circle at 50% 50%, rgba(10, 15, 30, 0.4), rgba(5, 5, 16, 0.95));
   display: flex; align-items: center; justify-content: center; overflow: hidden;
-  cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.34);
 }
 
 /* Hiệu ứng Trận pháp xoay dưới đáy item */
@@ -178,23 +183,23 @@ const handleBadgeClick = (badge) => {
   position: absolute; inset: -10px; border-radius: 50%;
   border: 1px dashed rgba(251, 191, 36, 0.15);
   background-image: repeating-conic-gradient(rgba(251, 191, 36, 0.05) 0% 5%, transparent 5% 10%);
-  animation: spinArray 15s linear infinite; pointer-events: none; opacity: 0; transition: 0.3s;
+  pointer-events: none; opacity: 0; transition: opacity 0.2s ease, border-color 0.2s ease;
 }
 .inventory-slot-cosmic:hover:not(:disabled) .magic-array-bg { opacity: 1; border-color: rgba(251, 191, 36, 0.4); }
 
 .inventory-slot-cosmic:hover:not(:disabled) {
-  transform: translateY(-4px); border-color: rgba(251, 191, 36, 0.6);
-  box-shadow: 0 10px 25px rgba(251, 191, 36, 0.25), inset 0 0 20px rgba(251, 191, 36, 0.1);
+  transform: translateY(-2px); border-color: rgba(251, 191, 36, 0.6);
+  box-shadow: 0 9px 18px rgba(251, 191, 36, 0.14), inset 0 0 14px rgba(251, 191, 36, 0.07);
 }
-.inventory-slot-cosmic:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(30%); }
+.inventory-slot-cosmic:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Rune viền */
 .star-rune { position: absolute; width: 15px; height: 15px; border: 1px solid rgba(251, 191, 36, 0.3); transform: rotate(45deg); opacity: 0.3; transition: 0.3s; }
-.inventory-slot-cosmic:hover .star-rune { opacity: 1; border-color: #fbbf24; transform: rotate(135deg) scale(1.2); box-shadow: 0 0 10px #fbbf24; }
+.inventory-slot-cosmic:hover .star-rune { opacity: 1; border-color: #fbbf24; transform: rotate(95deg) scale(1.08); }
 .rune-a { top: 8px; left: 8px; } .rune-b { right: 8px; bottom: 8px; }
 
-.slot-image { width: 75%; height: 75%; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.8)); z-index: 2; transition: 0.3s; }
-.inventory-slot-cosmic:hover:not(:disabled) .slot-image { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.4)); }
+.slot-image { width: 75%; height: 75%; object-fit: contain; z-index: 2; transition: transform 0.2s ease; }
+.inventory-slot-cosmic:hover:not(:disabled) .slot-image { transform: scale(1.035); }
 
 .slot-fallback { font-size: 2rem; color: #94a3b8; z-index: 2; }
 
@@ -213,7 +218,7 @@ const handleBadgeClick = (badge) => {
 .inventory-slot-cosmic:hover:not(:disabled) .use-text { opacity: 1; transform: translateY(0); }
 
 .inventory-slot-cosmic.equipped { border-color: rgba(16, 185, 129, 0.6); box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.2); }
-.slot-loading { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(5, 5, 16, 0.8); z-index: 10; backdrop-filter: blur(2px); }
+.slot-loading { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(5, 5, 16, 0.8); z-index: 10; }
 .inventory-slot-cosmic.pulse { animation: divinePulse 0.8s ease-out; }
 
 /* Grid Lệnh Bài */
@@ -221,15 +226,19 @@ const handleBadgeClick = (badge) => {
 .badge-slot-rune {
   position: relative; width: 100%; aspect-ratio: 1; border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(10, 15, 30, 0.6);
-  display: grid; place-items: center; cursor: pointer; transition: all 0.3s; overflow: visible;
+  display: grid; place-items: center; cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+  overflow: visible;
 }
 
 .badge-glow-bg {
   position: absolute; inset: 0; border-radius: 50%; background: var(--badge-color);
-  opacity: 0; filter: blur(15px); transition: 0.3s; z-index: 0; pointer-events: none;
+  opacity: 0; transition: opacity 0.2s ease; z-index: 0; pointer-events: none;
 }
-.badge-slot-rune:hover .badge-glow-bg, .badge-slot-rune.active .badge-glow-bg, .badge-slot-rune.equipped .badge-glow-bg { opacity: 0.3; }
-.badge-slot-rune:hover, .badge-slot-rune.active, .badge-slot-rune.equipped { border-color: var(--badge-color); transform: scale(1.05); }
+.badge-slot-rune:hover .badge-glow-bg, .badge-slot-rune.active .badge-glow-bg, .badge-slot-rune.equipped .badge-glow-bg { opacity: 0.16; }
+.badge-slot-rune:hover, .badge-slot-rune.active, .badge-slot-rune.equipped { border-color: var(--badge-color); transform: scale(1.025); }
 
 .badge-slot-rune.empty { opacity: 0.5; background: rgba(0,0,0,0.5); cursor: default; }
 .badge-slot-rune.empty:hover { transform: none; border-color: rgba(255,255,255,0.1); }
@@ -240,7 +249,7 @@ const handleBadgeClick = (badge) => {
   position: absolute; left: 50%; bottom: calc(100% + 15px); transform: translateX(-50%);
   background: rgba(10, 15, 30, 0.95); border: 1px solid #fbbf24; border-radius: 8px; color: #fff;
   padding: 0.5rem 0.8rem; text-align: center; white-space: nowrap; opacity: 0; pointer-events: none; font-size: 0.75rem;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.8); transition: 0.3s; z-index: 20;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.42); transition: opacity 0.2s ease, bottom 0.2s ease; z-index: 20;
 }
 .badge-tip-gold::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border-width: 6px; border-style: solid; border-color: #fbbf24 transparent transparent transparent; }
 .badge-tip-gold strong { display: block; color: #fbbf24; margin-bottom: 0.2rem; font-size: 0.85rem; }
@@ -248,8 +257,22 @@ const handleBadgeClick = (badge) => {
 
 .badge-tip-mobile { position: absolute; left: 50%; bottom: -2rem; transform: translateX(-50%); font-size: 0.7rem; background: #fbbf24; color: #000; border-radius: 4px; padding: 0.2rem 0.5rem; white-space: nowrap; font-weight: 800; z-index: 20; }
 
-@keyframes spinArray { 100% { transform: rotate(360deg); } }
 @keyframes divinePulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 rgba(251, 191, 36, 0.4); } 50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(251, 191, 36, 0.6); } 100% { transform: scale(1); box-shadow: 0 0 0 transparent; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .inventory-slot-cosmic,
+  .magic-array-bg,
+  .star-rune,
+  .slot-image,
+  .use-text,
+  .badge-slot-rune,
+  .badge-glow-bg,
+  .badge-tip-gold,
+  .inventory-slot-cosmic.pulse {
+    animation: none !important;
+    transition: none !important;
+  }
+}
 
 @media (max-width: 768px) {
   .panel-header-divine { flex-direction: column; align-items: stretch; padding: 1rem; }

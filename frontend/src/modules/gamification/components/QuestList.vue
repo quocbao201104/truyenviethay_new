@@ -79,15 +79,19 @@ const getStatusLabel = (status) => {
 .list-card-cosmic {
   display: flex; justify-content: space-between; align-items: center; gap: 1.5rem;
   background: rgba(10, 15, 30, 0.6); border: 1px solid rgba(255,255,255,0.05);
-  padding: 1.5rem; border-radius: 20px; transition: all 0.3s;
+  padding: 1.5rem; border-radius: 20px;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
-.list-card-cosmic:hover { border-color: rgba(251, 191, 36, 0.2); background: rgba(15, 20, 40, 0.8); transform: translateX(5px); }
-.list-card-cosmic.is-completed { opacity: 0.5; filter: grayscale(50%); }
+.list-card-cosmic:hover { border-color: rgba(251, 191, 36, 0.2); background: rgba(15, 20, 40, 0.8); transform: translateX(2px); }
+.list-card-cosmic.is-completed { opacity: 0.56; }
 .list-card-cosmic.is-claimable {
   border-color: rgba(251, 191, 36, 0.6);
   background: linear-gradient(90deg, rgba(251, 191, 36, 0.1), rgba(10, 15, 30, 0.8));
-  box-shadow: 0 0 20px rgba(251, 191, 36, 0.15), inset 0 0 10px rgba(251, 191, 36, 0.1);
+  box-shadow: inset 0 0 10px rgba(251, 191, 36, 0.08);
 }
 
 .kicker-gold { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em; color: #fbbf24; margin-bottom: 0.5rem; }
@@ -97,7 +101,7 @@ const getStatusLabel = (status) => {
 .progress-bar-wrap { width: 100%; max-width: 300px; }
 .progress-info { display: flex; justify-content: space-between; font-size: 0.8rem; color: #fbbf24; font-weight: 700; margin-bottom: 0.3rem; }
 .progress-track { height: 6px; background: rgba(0,0,0,0.5); border-radius: 10px; overflow: hidden; border: 1px solid rgba(251, 191, 36, 0.2); }
-.progress-fill { height: 100%; background: linear-gradient(90deg, #d97706, #fbbf24); transition: width 0.5s ease; box-shadow: 0 0 10px #fbbf24; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #d97706, #fbbf24); transition: width 0.35s ease; }
 
 .card-actions-array { display: flex; flex-direction: column; align-items: flex-end; gap: 0.8rem; min-width: 150px; }
 .reward-text-gold { color: #fbbf24; font-weight: 900; font-size: 1.1rem; text-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
@@ -110,10 +114,21 @@ const getStatusLabel = (status) => {
 .claim-btn-divine {
   border: 1px solid #fbbf24;
   background: linear-gradient(135deg, #d97706, #fbbf24); color: #050510; cursor: pointer; min-width: 140px;
-  box-shadow: 0 0 15px rgba(251, 191, 36, 0.4); transition: all 0.3s;
+  box-shadow: 0 7px 16px rgba(251, 191, 36, 0.16);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
-.claim-btn-divine:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 0 25px rgba(251, 191, 36, 0.6); }
+.claim-btn-divine:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 9px 20px rgba(251, 191, 36, 0.24); }
 .claim-btn-divine:disabled { opacity: 0.6; cursor: wait; }
+
+@media (prefers-reduced-motion: reduce) {
+  .list-card-cosmic,
+  .progress-fill,
+  .claim-btn-divine {
+    transition: none !important;
+  }
+}
 
 @media (max-width: 768px) {
   .list-card-cosmic { flex-direction: column; align-items: flex-start; gap: 1rem; }

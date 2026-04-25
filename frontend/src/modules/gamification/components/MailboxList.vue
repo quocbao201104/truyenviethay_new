@@ -74,7 +74,6 @@ const getSourceLabel = (type) => {
   text-align: center;
   color: #fbbf24;
   background: rgba(251, 191, 36, 0.05);
-  box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
 }
 
 .list-layout-divine { 
@@ -92,15 +91,19 @@ const getSourceLabel = (type) => {
   border: 1px solid rgba(251, 191, 36, 0.3);
   padding: 1.5rem 1.8rem;
   border-radius: 20px;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.4), inset 0 0 15px rgba(251, 191, 36, 0.05);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.28), inset 0 0 12px rgba(251, 191, 36, 0.035);
 }
 
 .list-card-cosmic:hover { 
   border-color: rgba(251, 191, 36, 0.8); 
   background: rgba(15, 20, 40, 0.9);
-  transform: translateX(5px);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.6), inset 0 0 25px rgba(251, 191, 36, 0.1); 
+  transform: translateX(2px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.4), inset 0 0 18px rgba(251, 191, 36, 0.06);
 }
 
 /* Thư đã đọc */
@@ -113,7 +116,6 @@ const getSourceLabel = (type) => {
 /* Thư đã nhận quà */
 .list-card-cosmic.is-claimed { 
   opacity: 0.6; 
-  filter: grayscale(40%); 
 }
 
 .card-content-aura { flex: 1; }
@@ -159,7 +161,6 @@ const getSourceLabel = (type) => {
   font-weight: 700;
   display: flex;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.15);
 }
 
 .qty-highlight {
@@ -183,7 +184,9 @@ const getSourceLabel = (type) => {
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   display: inline-flex; 
   align-items: center; 
   justify-content: center; 
@@ -191,18 +194,17 @@ const getSourceLabel = (type) => {
   padding: 0.85rem 1.6rem;
   background: linear-gradient(135deg, #fbbf24, #d97706); 
   color: #050510;
-  box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3);
+  box-shadow: 0 7px 16px rgba(251, 191, 36, 0.16);
 }
 
 .claim-btn-divine:hover:not(:disabled) { 
-  box-shadow: 0 0 25px rgba(251, 191, 36, 0.6); 
-  transform: translateY(-2px) scale(1.05); 
+  box-shadow: 0 9px 20px rgba(251, 191, 36, 0.24);
+  transform: translateY(-2px) scale(1.02);
 }
 
 .claim-btn-divine:disabled { 
   opacity: 0.6; 
   cursor: not-allowed; 
-  filter: grayscale(50%);
   box-shadow: none;
 }
 
@@ -230,6 +232,13 @@ const getSourceLabel = (type) => {
   }
   .claim-btn-divine {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .list-card-cosmic,
+  .claim-btn-divine {
+    transition: none !important;
   }
 }
 </style>

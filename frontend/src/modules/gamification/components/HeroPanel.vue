@@ -143,7 +143,7 @@ const frameEffectClass = computed(() => {
   border: 1px solid rgba(251, 191, 36, 0.3); 
   padding: 3rem;
   background: radial-gradient(circle at 50% 100%, rgba(251, 191, 36, 0.08) 0%, rgba(5, 5, 16, 0.95) 80%);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), inset 0 0 50px rgba(251, 191, 36, 0.05);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.62), inset 0 0 34px rgba(251, 191, 36, 0.04);
   overflow: hidden;
   z-index: 10;
 }
@@ -170,23 +170,22 @@ const frameEffectClass = computed(() => {
 .magic-circle-spin, .magic-circle-reverse {
   position: absolute; inset: -15px; border-radius: 50%;
   border: 2px dashed rgba(var(--aura-gold), 0.4);
-  animation: spinArray 20s linear infinite; pointer-events: none;
+  pointer-events: none;
 }
 .magic-circle-reverse {
   inset: -25px; border: 1px dotted rgba(var(--aura-gold), 0.6);
-  animation: spinArrayReverse 15s linear infinite;
 }
 
 .hero-avatar {
   position: relative; z-index: 2; width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
   border: 4px solid rgba(var(--aura-gold), 0.8); background: #000;
-  box-shadow: 0 0 30px rgba(var(--aura-gold), 0.5), inset 0 0 20px rgba(var(--aura-gold), 0.8);
+  box-shadow: 0 0 18px rgba(var(--aura-gold), 0.34), inset 0 0 14px rgba(var(--aura-gold), 0.55);
   transform: scale(0.80);
 }
  
 .hero-frame {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
-  transform: scale(1.45 ); z-index: 3; pointer-events: none; filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.4));
+  transform: scale(1.45 ); z-index: 3; pointer-events: none;
 }
 
 /* Identity Content */
@@ -200,7 +199,7 @@ const frameEffectClass = computed(() => {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: goldShine 3s linear infinite; text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.28);
 }
 
 .hero-name-plate {
@@ -213,10 +212,10 @@ const frameEffectClass = computed(() => {
 .plate-magic-wrapper {
   position: relative; display: inline-flex; padding: 2px; border-radius: 50px;
   background: linear-gradient(135deg, var(--badge-color), transparent, var(--badge-color));
-  background-size: 200% 200%; animation: spiritual-flow 6s ease infinite; z-index: 1;
+  background-size: 200% 200%; z-index: 1;
 }
 .plate-magic-wrapper::after {
-  content: ""; position: absolute; inset: -2px; background: inherit; filter: blur(3px); opacity: 0.3; z-index: -1; border-radius: 50px; animation: spiritual-flow 6s ease infinite;
+  content: ""; position: absolute; inset: -2px; background: inherit; opacity: 0.22; z-index: -1; border-radius: 50px;
 }
 .plate-inner {
   display: inline-flex; align-items: center; justify-content: center; gap: 15px; padding: 6px 25px;
@@ -225,8 +224,7 @@ const frameEffectClass = computed(() => {
 }
 
 .realm-name { font-size: 1.3rem; font-weight: 900; color: #fbbf24; text-transform: uppercase; letter-spacing: 2px; }
-.aura-spin { font-size: 1.4rem; color: #fbbf24; animation: spinArray 4s linear infinite; }
-/* .magic-badge-glow { animation: badge-pulse 2s infinite ease-in-out alternate; } */
+.aura-spin { font-size: 1.4rem; color: #fbbf24; }
 
 /* Nút Đột Phá Thiên Kiếp */
 .tribulation-breakthrough-btn {
@@ -237,15 +235,17 @@ const frameEffectClass = computed(() => {
   background: linear-gradient(135deg, #ef4444, #991b1b); padding: 1rem 2.5rem; border-radius: 50px;
   color: #fff; font-weight: 900; font-size: 1rem; letter-spacing: 2px; position: relative; z-index: 2;
   box-shadow: inset 0 2px 0 rgba(255,255,255,0.3); display: flex; align-items: center; gap: 10px;
-  transition: all 0.3s;
+  transition:
+    background 0.22s ease,
+    transform 0.22s ease;
 }
 
 .btn-lightning-glow {
   position: absolute; inset: -5px; border-radius: 60px; background: linear-gradient(90deg, #ef4444, #fbbf24, #ef4444);
-  background-size: 200%; filter: blur(15px); opacity: 0.8; z-index: 1; animation: lightningFlash 2s infinite;
+  background-size: 200%; opacity: 0.36; z-index: 1;
 }
 
-.tribulation-breakthrough-btn:hover .btn-inner { transform: scale(1.05); background: linear-gradient(135deg, #f87171, #dc2626); }
+.tribulation-breakthrough-btn:hover .btn-inner { transform: scale(1.02); background: linear-gradient(135deg, #f87171, #dc2626); }
 .tribulation-breakthrough-btn:active .btn-inner { transform: scale(0.95); }
 
 /* Progress Area (Dòng chảy linh khí) */
@@ -259,13 +259,13 @@ const frameEffectClass = computed(() => {
 
 .qi-fill-gold {
   height: 100%; background: linear-gradient(90deg, #d97706, #fbbf24, #fef3c7);
-  background-size: 200% 100%; animation: energyFlow 2s linear infinite; position: relative;
-  transition: width 1s ease-in-out; box-shadow: 0 0 15px rgba(251, 191, 36, 0.8);
+  background-size: 200% 100%; position: relative;
+  transition: width 0.6s ease; box-shadow: 0 0 10px rgba(251, 191, 36, 0.42);
 }
 
 .qi-sparkles {
   position: absolute; right: 0; top: 0; width: 40px; height: 100%;
-  background: radial-gradient(circle, #fff, transparent); filter: blur(3px); opacity: 0.9;
+  background: radial-gradient(circle, #fff, transparent); opacity: 0.44;
 }
 
 .qi-stats-plate { margin-top: 1rem; font-size: 1.1rem; font-weight: 800; color: #94a3b8; }
@@ -277,41 +277,50 @@ const frameEffectClass = computed(() => {
 
 .cosmic-pillar {
   position: relative; background: rgba(10, 15, 30, 0.8); border: 1px solid rgba(251, 191, 36, 0.15);
-  border-radius: 20px; padding: 2rem; backdrop-filter: blur(10px); transition: all 0.4s;
+  border-radius: 20px; padding: 2rem;
+  transition:
+    background-color 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
   overflow: hidden; cursor: default;
 }
 
 .pillar-glow {
   position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 80%; height: 2px;
-  background: radial-gradient(circle, rgba(251, 191, 36, 0.8), transparent); opacity: 0; transition: 0.4s;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.8), transparent); opacity: 0; transition: opacity 0.22s ease;
 }
 
-.cosmic-pillar:hover { transform: translateY(-10px); background: rgba(15, 20, 40, 0.9); border-color: rgba(251, 191, 36, 0.5); box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(251, 191, 36, 0.1); }
-.cosmic-pillar:hover .pillar-glow { opacity: 1; box-shadow: 0 5px 20px rgba(251, 191, 36, 0.6); }
+.cosmic-pillar:hover { transform: translateY(-3px); background: rgba(15, 20, 40, 0.9); border-color: rgba(251, 191, 36, 0.42); box-shadow: 0 10px 24px rgba(0,0,0,0.52); }
+.cosmic-pillar:hover .pillar-glow { opacity: 1; }
 
 .pillar-inner { display: flex; align-items: center; justify-content: flex-start; gap: 1.5rem; position: relative; z-index: 2;}
 
 .stat-icon {
   width: 65px; height: 65px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
   font-size: 2rem; background: rgba(251, 191, 36, 0.05); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2);
-  transition: 0.4s;
+  transition:
+    background-color 0.22s ease,
+    color 0.22s ease,
+    transform 0.22s ease;
 }
 
-.cosmic-pillar:hover .stat-icon { background: #fbbf24; color: #050510; transform: scale(1.1) rotate(5deg); box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
+.cosmic-pillar:hover .stat-icon { background: #fbbf24; color: #050510; transform: scale(1.04) rotate(3deg); }
 
 .stat-content { display: flex; flex-direction: column; }
 .stat-content label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: #94a3b8; font-weight: 800; margin-bottom: 0.5rem; }
 .stat-content strong { font-size: 1.8rem; font-weight: 900; color: #fff; line-height: 1; }
-.cosmic-pillar:hover .stat-content strong { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.3); }
+.cosmic-pillar:hover .stat-content strong { color: #fbbf24; }
 
-/* ===== ANIMATIONS ===== */
-@keyframes spinArray { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes spinArrayReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-@keyframes energyFlow { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
-@keyframes goldShine { to { background-position: 200% center; } }
-@keyframes lightningFlash { 0%, 100% { filter: blur(10px); opacity: 0.6; } 50% { filter: blur(20px); opacity: 1; } }
-@keyframes spiritual-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-@keyframes badge-pulse { from { filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 8px var(--badge-color, rgba(16, 185, 129, 0.3))); } to { filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 15px var(--badge-color, rgba(16, 185, 129, 0.8))); transform: scale(1.05); } }
+@media (prefers-reduced-motion: reduce) {
+  .btn-inner,
+  .qi-fill-gold,
+  .cosmic-pillar,
+  .pillar-glow,
+  .stat-icon {
+    transition: none !important;
+  }
+}
 
 /* ===== MOBILE ADAPTATION ===== */
 @media (max-width: 1024px) {

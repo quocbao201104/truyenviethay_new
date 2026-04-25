@@ -88,7 +88,6 @@ import { computed, ref, onMounted } from 'vue';
 import { useGamification } from '@/composables/useGamification';
 import { useAuthStore } from '@/modules/auth/auth.store';
 import { useUserStore } from '@/modules/user/user.store';
-import { useChatStore } from '@/modules/chat/chat.store';
 import { getAvatarUrl } from '@/config/constants';
 
 import HeroPanel from '@/modules/gamification/components/HeroPanel.vue';
@@ -106,7 +105,6 @@ export default {
   setup() {
     const authStore = useAuthStore();
     const userStore = useUserStore();
-    const chatStore = useChatStore();
 
     const {
       userPoints, currentLevel, tasks, mailbox, badges, shopItems, inventoryItems, userCurrency,
@@ -254,7 +252,11 @@ export default {
     const handleUseInventoryItem = async (item) => {
       if (!item || !canEquipItem(item.item_type)) return;
       try {
-        if (Number(item.item_id) === 3) { chatStore.openWithMegaphone(); return; }
+        if (Number(item.item_id) === 3) {
+          const { useChatStore } = await import('@/modules/chat/chat.store');
+          useChatStore().openWithMegaphone();
+          return;
+        }
         processingInventoryItem.value = item.inventory_id;
         await equipInventoryItem(item.inventory_id);
       } catch (e) { console.error(e); } finally { processingInventoryItem.value = null; }
@@ -300,7 +302,7 @@ export default {
   color: #e8f2ff;
   font-family: 'Be Vietnam Pro', sans-serif;
   background-color: #050510;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 /* Hiệu ứng bụi sao lấp lánh vũ trụ */
@@ -313,15 +315,8 @@ export default {
     radial-gradient(circle at 50% 80%, rgba(251, 191, 36, 0.1) 1.5px, transparent 1.5px),
     radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 150px 150px, 200px 200px, 120px 120px, 90px 90px;
-  animation: cosmicDrift 40s linear infinite;
   z-index: 0;
   pointer-events: none;
-}
-
-@keyframes cosmicDrift {
-  0% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-20px) scale(1.05); }
-  100% { transform: translateY(0) scale(1); }
 }
 
 .game-tabs-divine,
@@ -354,7 +349,11 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
   position: relative;
   overflow: hidden;
 }
@@ -362,15 +361,15 @@ export default {
 .divine-tab-btn::before {
   content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
   background: linear-gradient(90deg, transparent, #fbbf24, transparent);
-  transform: scaleX(0); transition: 0.3s;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
 }
 
 .divine-tab-btn:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   color: #fbbf24;
   background: rgba(251, 191, 36, 0.05);
   border-color: rgba(251, 191, 36, 0.4);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
 }
 
 .divine-tab-btn:hover::before { transform: scaleX(1); }
@@ -379,7 +378,7 @@ export default {
   color: #050510;
   border-color: #fbbf24;
   background: linear-gradient(135deg, #fbbf24, #d97706);
-  box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+  box-shadow: 0 8px 18px rgba(251, 191, 36, 0.18);
 }
 
 .divine-tab-btn.active i { color: #050510; }
@@ -388,9 +387,8 @@ export default {
   border-radius: 20px;
   border: 1px solid rgba(251, 191, 36, 0.2);
   background: rgba(8, 12, 22, 0.75);
-  backdrop-filter: blur(15px);
   padding: 30px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(251, 191, 36, 0.03);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), inset 0 0 18px rgba(251, 191, 36, 0.025);
 }
 
 .animate-fadeIn { animation: fadeIn 0.4s ease-out; }
@@ -409,5 +407,14 @@ export default {
 @media (max-width: 720px) {
   .game-tabs-divine { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .divine-tab-btn { height: 48px; font-size: 0.85rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeIn,
+  .divine-tab-btn,
+  .divine-tab-btn::before {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 </style>
